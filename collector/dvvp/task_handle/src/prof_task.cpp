@@ -8,11 +8,11 @@
 #include <algorithm>
 #include "common/config/feature_manager.h"
 #include "config/config.h"
+#include "message/data_define.h"
 #include "errno/error_code.h"
 #include "msprof_dlog.h"
 #include "prof_acl_mgr.h"
 #include "prof_manager.h"
-#include "proto/msprofiler.pb.h"
 #include "securec.h"
 #include "transport/transport.h"
 #include "transport/file_transport.h"
@@ -26,7 +26,6 @@
 namespace analysis {
 namespace dvvp {
 namespace host {
-using namespace analysis::dvvp::proto;
 using namespace analysis::dvvp::driver;
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::utils;
@@ -117,19 +116,20 @@ int ProfTask::CreateCollectionTimeInfo(std::string collectionTime, bool isStartT
 {
     MSPROF_LOGI("[CreateCollectionTimeInfo]collectionTime:%s us, isStartTime:%d", collectionTime.c_str(), isStartTime);
     // time to unix
-    SHARED_PTR_ALIA<analysis::dvvp::proto::CollectionStartEndTime> timeInfo = nullptr;
-    MSVP_MAKE_SHARED0_RET(timeInfo, analysis::dvvp::proto::CollectionStartEndTime, PROFILING_FAILED);
+    analysis::dvvp::message::CollectionStartEndTime timeInfo;
     static const int TIME_US = 1000000;
     if (!isStartTime) {
-        timeInfo->set_collectiontimeend(collectionTime);
-        timeInfo->set_collectiondateend(Utils::TimestampToTime(collectionTime, TIME_US));
+        timeInfo.collectionTimeEnd = collectionTime;
+        timeInfo.collectionDateEnd = Utils::TimestampToTime(collectionTime, TIME_US);
     } else {
-        timeInfo->set_collectiontimebegin(collectionTime);
-        timeInfo->set_collectiondatebegin(Utils::TimestampToTime(collectionTime, TIME_US));
+        timeInfo.collectionTimeBegin = collectionTime;
+        timeInfo.collectionDateBegin = Utils::TimestampToTime(collectionTime, TIME_US);
     }
 
-    timeInfo->set_clockmonotonicraw(std::to_string(Utils::GetClockMonotonicRaw()));
-    std::string content =  analysis::dvvp::message::EncodeJson(timeInfo, false, false);
+    timeInfo.clockMonotonicRaw = std::to_string(Utils::GetClockMonotonicRaw());
+    nlohmann::json root;
+    timeInfo.ToObject(root);
+    std::string content = root.dump();
     MSPROF_LOGI("[CreateCollectionTimeInfo]content:%s", content.c_str());
     SHARED_PTR_ALIA<analysis::dvvp::message::JobContext> jobCtx = nullptr;
     MSVP_MAKE_SHARED0_RET(jobCtx, analysis::dvvp::message::JobContext, PROFILING_FAILED);

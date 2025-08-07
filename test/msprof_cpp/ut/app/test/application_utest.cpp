@@ -8,7 +8,7 @@
 #include "app/env_manager.h"
 #include "message/prof_params.h"
 #include "config/config_manager.h"
-#include "message/codec.h"
+
 #include "uploader_mgr.h"
 #include "transport.h"
 #include "mmpa_api.h"

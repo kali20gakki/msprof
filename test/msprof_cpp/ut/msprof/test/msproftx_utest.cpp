@@ -15,12 +15,11 @@
 #include "mmpa_api.h"
 #include "errno/error_code.h"
 #include "securec.h"
-#include "message/codec.h"
+
 #include "utils/utils.h"
 #include "prof_reporter.h"
 #include "prof_callback.h"
 #include "config/config_manager.h"
-#include "proto/msprofiler.pb.h"
 #include "uploader_mgr.h"
 #include "msprof_stamp_pool.h"
 #include "msprof_tx_manager.h"
@@ -30,7 +29,6 @@
 using namespace analysis::dvvp::common::error;
 using namespace Msprof::Engine;
 using namespace Msprof::MsprofTx;
-using namespace analysis::dvvp::proto;
 using namespace Collector::Dvvp::Mmpa;
 
 int32_t MsprofAddiInfoReporterCallbackStub(uint32_t agingFlag, CONST_VOID_PTR data, uint32_t len)

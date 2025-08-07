@@ -3,8 +3,7 @@
 #include <string>
 #include <memory>
 #include "message/prof_params.h"
-#include "proto/msprofiler.pb.h"
-#include "message/codec.h"
+
 #include "param_validation.h"
 #include "platform/platform.h"
 #include "devdrv_runtime_api_stub.h"
@@ -250,17 +249,6 @@ TEST_F(ParamValidationUtest, CheckAppNameIsValid) {
 
     const std::string invalidAppName = "$SD";
     EXPECT_EQ(false, entry->CheckAppNameIsValid(invalidAppName));
-}
-
-TEST_F(ParamValidationUtest, CheckProfilingParams1) {
-    std::shared_ptr<analysis::dvvp::message::ProfileParams> params(new analysis::dvvp::message::ProfileParams());
-    std::shared_ptr<analysis::dvvp::proto::JobStartReq> start(new analysis::dvvp::proto::JobStartReq);
-    auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
-    //profiling_mode is illegal
-    std::string sampleConfig = "{\"result_dir\":\"/tmp/\", \"job_id\":\"aaaZZZZ000-\", \"profiling_mode\":\"system-wide\", \"devices\":\"1\"}";
-    params->FromString(sampleConfig);
-    EXPECT_EQ(true, entry->CheckProfilingParams(params));
-
 }
 
 TEST_F(ParamValidationUtest, Init) {

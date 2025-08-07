@@ -4,8 +4,8 @@
  * Author: zcj
  * Create: 2020-07-18
  */
+#include <unordered_set>
 #include "prof_ge_core.h"
-#include <google/protobuf/util/json_util.h>
 #include "ge/ge_prof.h"
 
 #include "ai_drv_dev_api.h"
@@ -161,10 +161,10 @@ size_t aclprofGetGraphId(CONST_VOID_PTR opInfo, size_t opInfoLen, uint32_t index
     if (ret != ACL_SUCCESS) {
         MSPROF_LOGE("Failed execute aclprofGetGraphId");
         MSPROF_INNER_ERROR("EK9999", "Failed execute aclprofGetGraphId");
-        return (size_t)ret;
+        return static_cast<size_t>(ret);
     }
     MSPROF_LOGD("Successfully  execute aclprofGetGraphId");
-    return (size_t)result;
+    return static_cast<size_t>(ret);
 }
 
 namespace ge {

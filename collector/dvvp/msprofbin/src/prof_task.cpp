@@ -10,7 +10,6 @@
 #include "errno/error_code.h"
 #include "config/config.h"
 #include "job_factory.h"
-#include "job_device_rpc.h"
 #include "transport/uploader_mgr.h"
 #include "task_relationship_mgr.h"
 #include "info_json.h"
@@ -141,17 +140,18 @@ int ProfTask::CreateCollectionTimeInfo(std::string collectionTime, bool isStartT
     MSPROF_LOGI("collectionTime:%s us, isStartTime:%d", collectionTime.c_str(), isStartTime);
     // time to unix
     static const int TIME_US = 1000000;
-    SHARED_PTR_ALIA<analysis::dvvp::proto::CollectionStartEndTime> timeInfo = nullptr;
-    MSVP_MAKE_SHARED0_RET(timeInfo, analysis::dvvp::proto::CollectionStartEndTime, PROFILING_FAILED);
+    analysis::dvvp::message::CollectionStartEndTime timeInfo;
     if (!isStartTime) {
-        timeInfo->set_collectiontimeend(collectionTime);
-        timeInfo->set_collectiondateend(Utils::TimestampToTime(collectionTime, TIME_US));
+        timeInfo.collectionTimeEnd = collectionTime;
+        timeInfo.collectionDateEnd = Utils::TimestampToTime(collectionTime, TIME_US);
     } else {
-        timeInfo->set_collectiontimebegin(collectionTime);
-        timeInfo->set_collectiondatebegin(Utils::TimestampToTime(collectionTime, TIME_US));
+        timeInfo.collectionTimeBegin = collectionTime;
+        timeInfo.collectionDateBegin = Utils::TimestampToTime(collectionTime, TIME_US);
     }
-    timeInfo->set_clockmonotonicraw(std::to_string(Utils::GetClockMonotonicRaw()));
-    std::string content =  analysis::dvvp::message::EncodeJson(timeInfo, false, false);
+    timeInfo.clockMonotonicRaw = std::to_string(Utils::GetClockMonotonicRaw());
+    nlohmann::json root;
+    timeInfo.ToObject(root);
+    std::string content = root.dump();
     MSPROF_LOGI("CreateCollectionTimeInfo, content:%s", content.c_str());
     SHARED_PTR_ALIA<analysis::dvvp::message::JobContext> jobCtx = nullptr;
     MSVP_MAKE_SHARED0_RET(jobCtx, analysis::dvvp::message::JobContext, PROFILING_FAILED);
@@ -264,71 +264,6 @@ int ProfSocTask::UnInit()
     return PROFILING_SUCCESS;
 }
 
-ProfRpcTask::ProfRpcTask(const int deviceId, SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> param)
-    : ProfTask(deviceId, param), isDataChannelEnd_(false)
-{
-}
-
-ProfRpcTask::~ProfRpcTask() {}
-
-int ProfRpcTask::Init()
-{
-    analysis::dvvp::transport::LoadDevMgrAPI(devMgrAPI_);
-    if (devMgrAPI_.pfDevMgrInit == nullptr) {
-        MSPROF_LOGE("pfDevMgrInit is null");
-        return PROFILING_FAILED;
-    }
-    int ret = devMgrAPI_.pfDevMgrInit(params_->job_id, deviceId_, params_->profiling_mode);
-    if (ret != PROFILING_SUCCESS) {
-        MSPROF_LOGE("Failed to connect device %d", deviceId_);
-        return ret;
-    }
-    MSPROF_LOGI("Init Rpc JobAdapter");
-    MSVP_MAKE_SHARED1_RET(jobAdapter_, JobDeviceRpc, deviceId_, PROFILING_FAILED);
-    isInit_ = true;
-    return PROFILING_SUCCESS;
-}
-
-int ProfRpcTask::UnInit()
-{
-    if (devMgrAPI_.pfDevMgrUnInit != nullptr) {
-        (void)devMgrAPI_.pfDevMgrUnInit();
-    }
-    jobAdapter_.reset();
-    isInit_ = false;
-    return PROFILING_SUCCESS;
-}
-
-int ProfRpcTask::Stop()
-{
-    PostStopReplay();
-    MSPROF_LOGI("Device(%d) WaitSyncDataCtrl begin", deviceId_);
-    WaitSyncDataCtrl();
-    MSPROF_LOGI("Device(%d) WaitSyncDataCtrl end", deviceId_);
-    return PROFILING_SUCCESS;
-}
-
-
-/**
- * @brief Send data sync signal
- */
-void ProfRpcTask::PostSyncDataCtrl()
-{
-    MSPROF_LOGI("Device(%d) jobId(%s) post data channel.", deviceId_, params_->job_id.c_str());
-    std::unique_lock<std::mutex> lk(dataSyncMtx_);
-    isDataChannelEnd_ = true;
-    cvSyncDataCtrl_.notify_one();
-}
-
-/**
- * @brief Wait data sync signal
- */
-void ProfRpcTask::WaitSyncDataCtrl()
-{
-    std::unique_lock<std::mutex> lk(dataSyncMtx_);
-    cvSyncDataCtrl_.wait(lk, [=] { return (isDataChannelEnd_ || !isExited_); });
-    isDataChannelEnd_ = false;
-}
 }
 }
 }

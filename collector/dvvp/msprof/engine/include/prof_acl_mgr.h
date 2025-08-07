@@ -19,7 +19,6 @@
 #include "common/singleton/singleton.h"
 #include "common/thread/thread.h"
 #include "message/prof_params.h"
-#include "aicpu_plugin.h"
 #include "utils/utils.h"
 #include "prof_api_common.h"
 #include "prof_params_adapter.h"
@@ -210,7 +209,6 @@ private:
     std::mutex mtxUploader_; // mutex for uploader
     std::mutex mtxDevResponse_; // mutex for device response
     std::mutex mtxSubscribe_;
-    std::map<int32_t, SHARED_PTR_ALIA<Msprof::Engine::AicpuPlugin>> enginMap_;
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params_;
     PROF_CONF_CONST_PTR profStratCfg_;
     uint64_t dataTypeConfig_;

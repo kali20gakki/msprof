@@ -1053,39 +1053,6 @@ int SystemMode::StartHostTask(const std::string resultDir, uint32_t devId)
     return PROFILING_SUCCESS;
 }
 
-int SystemMode::StartDeviceTask(const std::string resultDir, const std::string device)
-{
-    auto params = GenerateDeviceParam(params_);
-    if (params == nullptr) {
-        MSPROF_LOGE("GenerateDeviceParam failed");
-        return PROFILING_FAILED;
-    }
-    params->devices = device;
-    int ret = CreateUploader(params->job_id, resultDir);
-    if (ret != PROFILING_SUCCESS) {
-        MSPROF_LOGE("CreateUploader failed");
-        return PROFILING_FAILED;
-    }
-    SHARED_PTR_ALIA<ProfRpcTask> task = nullptr;
-    int devId;
-    if (Utils::StrToInt(devId, device) == PROFILING_FAILED) {
-        return PROFILING_FAILED;
-    }
-    MSVP_MAKE_SHARED2_RET(task, ProfRpcTask, devId, params, PROFILING_FAILED);
-    ret = task->Init();
-    if (ret != PROFILING_SUCCESS) {
-        MSPROF_LOGE("[StartDeviceTask]DeviceTask init failed, deviceId:%s", device.c_str());
-        return ret;
-    }
-    ret = task->Start();
-    if (ret != PROFILING_SUCCESS) {
-        MSPROF_LOGE("[StartDeviceTask]DeviceTask start failed, deviceId:%s", device.c_str());
-        return PROFILING_FAILED;
-    }
-    taskMap_[params->job_id] = task;
-    return PROFILING_SUCCESS;
-}
-
 void SystemMode::StopTask()
 {
     for (auto task : taskMap_) {
@@ -1302,12 +1269,11 @@ int SystemMode::StartDeviceJobs(const std::string& device)
         StopTask();
         return PROFILING_FAILED;
     }
-    if (IsDeviceJob() && (!Platform::instance()->PlatformIsSocSide()) && (!DrvIsSupportAdprof(devId))) {
-        ret = StartDeviceTask(resultDir, device);
-        if (ret != PROFILING_SUCCESS) {
-            MSPROF_LOGE("StartDeviceTask failed");
-            StopTask();
-            return ret;
+    if (IsDeviceJob() && (!Platform::instance()->PlatformIsSocSide())) {
+        if (!DrvIsSupportAdprof(devId)) {
+            MSPROF_LOGW("Current driver version is too low to support adprof, please update driver version");
+        } else {
+            MSPROF_LOGI("Current driver version is able to support adprof");
         }
     }
     return PROFILING_SUCCESS;

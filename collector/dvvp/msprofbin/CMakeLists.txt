@@ -1,9 +1,3 @@
-protobuf_generate(profiler
-    CppPath
-    HeaderPath
-    ${CMAKE_CURRENT_SOURCE_DIR}/../proto/msprofiler.proto
-)
-
 set(msprofBinHeader
     include
     ../
@@ -43,13 +37,7 @@ set(msprofBinHeader
     ../task_handle/include
     ../transport
     ../adx/inc
-    ${CMAKE_BINARY_DIR}/proto/profiler/
-)
-
-set(hdcCpp
-    ../adx/stub/adx_prof_api.cpp
-    ../adx/wrapper/hdc_api.cpp
-    ../adx/wrapper/memory_utils.cpp
+    # ${CMAKE_BINARY_DIR}/proto/profiler/
 )
 
 add_executable(msprofbin
@@ -62,7 +50,6 @@ add_executable(msprofbin
     src/msprof_manager.cpp
     src/msopprof_manager.cpp
     src/prof_task.cpp
-    src/data_handle.cpp
     src/input_parser.cpp
     src/running_mode.cpp
     ../app/application.cpp
@@ -101,7 +88,6 @@ add_executable(msprofbin
     ../driver/channel/ai_drv_prof_api.cpp
     ../job_wrapper/src/collection_register.cpp
     ../job_wrapper/src/job_factory.cpp
-    ../job_wrapper/src/job_device_rpc.cpp
     ../job_wrapper/src/prof_job.cpp
     ../job_wrapper/src/prof_adprof_job.cpp
     ../job_wrapper/src/prof_peripheral_job.cpp
@@ -110,7 +96,6 @@ add_executable(msprofbin
     ../job_wrapper/src/prof_channel_manager.cpp
     ../job_wrapper/src/job_device_soc.cpp
     ../job_wrapper/src/prof_drv_event.cpp
-    ../message/codec.cpp
     ../transport/transport.cpp
     ../transport/file_transport.cpp
     ../transport/prof_channel.cpp
@@ -121,10 +106,6 @@ add_executable(msprofbin
     ../transport/file_slice.cpp
     ../task_handle/src/info_json.cpp
     ../task_handle/src/task_relationship_mgr.cpp
-    ../transport/hdc/hdc_transport.cpp
-    ../transport/hdc/device_transport.cpp
-    ../transport/hdc/platform/rpc/dev_mgr_api.cpp
-    ${hdcCpp}
     ${CppPath}
 )
 
@@ -166,7 +147,6 @@ target_link_directories(msprofbin PRIVATE
 
 target_link_libraries(msprofbin PRIVATE
     c_sec
-    ascend_protobuf_static
     -lpthread
     dl
 )

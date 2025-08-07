@@ -1,9 +1,3 @@
-protobuf_generate(profiler
-	CppPath
-	HeaderPath
-	${MSPROF_SOURCE_DIR}/dvvp/proto/msprofiler.proto
-)
-
 set(common_src_file
     ${CppPath}
     ${MSPROF_SOURCE_DIR}/dvvp/common/utils/utils.cpp
@@ -45,13 +39,11 @@ set(src_file
 set(include_path
     ${GTEST_INCLUDE_DIR}
     ${MOCKCPP_INCLUDE_DIR}
-    ${CMAKE_BINARY_DIR}/proto/profiler
     ${TOP_DIR}/opensource/json/include
     ${TOP_DIR}/platform/securec/include
     ${TOP_DIR}/test/msprof_cpp/ut/stub/common/log/
     
     ${MSPROF_SOURCE_DIR}/dvvp
-    ${MSPROF_SOURCE_DIR}/dvvp/adx/inc
     ${MSPROF_SOURCE_DIR}/dvvp/common
     ${MSPROF_SOURCE_DIR}/dvvp/common/config
     ${MSPROF_SOURCE_DIR}/dvvp/common/mmpa
@@ -116,7 +108,6 @@ target_compile_definitions(params_adapter_utest PRIVATE
 )
 
 target_link_libraries(params_adapter_utest PRIVATE
-    ascend_protobuf_static
     c_sec_static
     pthread
     ${GTEST_STATIC_LIBRARY}

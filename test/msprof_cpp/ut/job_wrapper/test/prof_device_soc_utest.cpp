@@ -7,7 +7,6 @@
 #include "job_device_soc.h"
 #include "config/config.h"
 #include "prof_manager.h"
-#include "hdc/device_transport.h"
 #include "param_validation.h"
 #include "prof_channel_manager.h"
 #include "mmpa_api.h"

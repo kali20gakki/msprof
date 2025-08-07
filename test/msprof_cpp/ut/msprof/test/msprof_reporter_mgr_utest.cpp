@@ -16,7 +16,6 @@
 #include "msprof_reporter_mgr.h"
 #include "prof_acl_mgr.h"
 
-using namespace analysis::dvvp::proto;
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::utils;
 using namespace analysis::dvvp::transport;

@@ -4,12 +4,9 @@
  * Author: zcj
  * Create: 2020-07-18
  */
+#include <unordered_set>
 #include "prof_acl_core.h"
-
-#include <google/protobuf/util/json_util.h>
-
 #include "acl/acl_prof.h"
-
 #include "ai_drv_dev_api.h"
 #include "command_handle.h"
 #include "common/config/feature_manager.h"
@@ -80,7 +77,7 @@ aclError aclprofInit(CONST_CHAR_PTR profilerResultPath, size_t length)
     if (length > aclProfPathMaxLen || length == 0) {
         MSPROF_LOGE("length of profilerResultPath is illegal, the value is %zu, it should be in (0, %zu)",
                     length, aclProfPathMaxLen);
-        std::string ErrorReason = "it should be in (0, " + std::to_string(aclProfPathMaxLen)+ ")";
+        std::string ErrorReason = "it should be in (0, " + std::to_string(aclProfPathMaxLen) + ")";
         MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
             std::vector<std::string>({std::to_string(length), "profilerResultPath length", ErrorReason}));
         return ACL_ERROR_INVALID_PARAM;
@@ -611,10 +608,10 @@ size_t aclprofGetModelId(CONST_VOID_PTR opInfo, size_t opInfoLen, uint32_t index
     if (ret != ACL_SUCCESS) {
         MSPROF_LOGE("Failed execute aclprofGetModelId");
         MSPROF_INNER_ERROR("EK9999", "Failed execute aclprofGetModelId");
-        return (size_t)ret;
+        return static_cast<size_t>(ret);
     }
     MSPROF_LOGD("Successfully execute aclprofGetModelId");
-    return (size_t)result;
+    return static_cast<size_t>(ret);
 }
 
 struct aclprofStepInfo {

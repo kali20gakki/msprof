@@ -11,19 +11,16 @@
 #include <sys/stat.h>
 #include "config/config.h"
 #include "errno/error_code.h"
-#include "message/codec.h"
+
 #include "message/prof_params.h"
 #include "mmpa_api.h"
 #include "msprof_dlog.h"
 #include "securec.h"
 #include "param_validation.h"
-#include "adx_prof_api.h"
-#include "proto/msprofiler.pb.h"
 
 namespace analysis {
 namespace dvvp {
 namespace transport {
-using namespace analysis::dvvp::proto;
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::common::validation;
@@ -110,54 +107,9 @@ int ITransport::SendFiles(const std::string &jobId,
 
 int ITransport::SendFileChunk(const std::string &jobCtx, FileChunk &chunk)
 {
-    SHARED_PTR_ALIA<FileChunkReq> fileChunkReq = nullptr;
-    MSVP_MAKE_SHARED0_RET(fileChunkReq, FileChunkReq, PROFILING_FAILED);
-
-    fileChunkReq->mutable_hdr()->set_job_ctx(jobCtx);
-    fileChunkReq->set_filename(chunk.relativeFileName);
-    fileChunkReq->set_offset(chunk.offset);
-    fileChunkReq->set_chunk(chunk.dataBuf, chunk.bufLen);
-    fileChunkReq->set_chunksizeinbytes(chunk.bufLen);
-    fileChunkReq->set_islastchunk(chunk.isLastChunk);
-    fileChunkReq->set_needack(false);
-    fileChunkReq->set_datamodule(FileChunkDataModule::PROFILING_IS_CTRL_DATA);
-    std::string encoded = analysis::dvvp::message::EncodeMessage(fileChunkReq);
-
-    int len = SendBuffer(encoded.c_str(), static_cast<int>(encoded.size()));
-    if (len != static_cast<int>(encoded.size())) {
-        MSPROF_LOGE("sent size:%d, encoded size:%d", len, static_cast<int>(encoded.size()));
-        return PROFILING_FAILED;
-    }
-
     return PROFILING_SUCCESS;
 }
 
-int SendBufferWithFixedLength(AdxTransport &transport, CONST_VOID_PTR buffer, int length)
-{
-    int retLengthError = -1;
-    if (buffer == nullptr) {
-        MSPROF_LOGE("buffer is null");
-        return retLengthError;
-    }
-    IdeBuffT out = nullptr;
-    int outLen = 0;
-    uint64_t startRawTime = analysis::dvvp::common::utils::Utils::GetClockMonotonicRaw();
-    int ret = Analysis::Dvvp::Adx::AdxIdeCreatePacket(buffer, length, out, outLen);
-    if (ret != IDE_DAEMON_OK) {
-        MSPROF_LOGE("Failed to AdxIdeCreatePacket, err=%d.", ret);
-        return retLengthError;
-    }
-    ret = transport.SendAdxBuffer(out, outLen);
-    Analysis::Dvvp::Adx::AdxIdeFreePacket(out);
-    if (ret != PROFILING_SUCCESS) {
-        return retLengthError;
-    }
-    uint64_t endRawTime = analysis::dvvp::common::utils::Utils::GetClockMonotonicRaw();
-    if (transport.perfCount_ != nullptr) {
-        transport.perfCount_->UpdatePerfInfo(startRawTime, endRawTime, length);
-    }
-    return length;
-}
 }  // namespace transport
 }  // namespace dvvp
 }  // namespace analysis

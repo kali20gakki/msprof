@@ -9,8 +9,7 @@
 #include "utils/utils.h"
 #include "transport/transport.h"
 #include "prof_manager.h"
-#include "proto/msprofiler.pb.h"
-#include "message/codec.h"
+
 #include "ai_drv_dev_api.h"
 #include "errno/error_code.h"
 #include "collect_io_server.h"
@@ -415,10 +414,6 @@ TEST_F(HOST_PROF_TASK_TEST, ProcessRemote) {
     MOCKER_CPP(&analysis::dvvp::host::ProfTask::IsQuit)
         .stubs()
         .will(returnValue(true));
-
-    MOCKER_CPP(&analysis::dvvp::host::ProfTask::SendMsgAndHandleResponse)
-        .stubs()
-        .will(returnValue(PROFILING_SUCCESS));
 
     task->ProcessRemote();
     currDevicesV.push_back("1");

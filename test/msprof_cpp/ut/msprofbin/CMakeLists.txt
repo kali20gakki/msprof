@@ -1,9 +1,3 @@
-protobuf_generate(profiler
-	CppPath
-	HeaderPath
-	${MSPROF_SOURCE_DIR}/dvvp/proto/msprofiler.proto
-)
-
 set(common_file
     ${MSPROF_SOURCE_DIR}/dvvp/app/application.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/app/env_manager.cpp
@@ -34,7 +28,6 @@ set(common_file
     ${MSPROF_SOURCE_DIR}/dvvp/driver/channel/ai_drv_prof_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/collection_register.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/job_factory.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/job_device_rpc.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/prof_job.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/prof_adprof_job.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/prof_peripheral_job.cpp
@@ -43,7 +36,6 @@ set(common_file
     ${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/prof_channel_manager.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/job_device_soc.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/prof_drv_event.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/message/codec.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/transport/transport.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/transport/file_transport.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/transport/prof_channel.cpp
@@ -54,10 +46,6 @@ set(common_file
     ${MSPROF_SOURCE_DIR}/dvvp/transport/hash_data.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/task_handle/src/info_json.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/task_handle/src/task_relationship_mgr.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/transport/hdc/hdc_transport.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/transport/hdc/device_transport.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/transport/hdc/platform/rpc/dev_mgr_api.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/adx/stub/adx_prof_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/slog_plugin.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/dcmi_plugin.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/tsdclient_plugin.cpp
@@ -86,7 +74,6 @@ set(src_file
     ${MSPROF_SOURCE_DIR}/dvvp/msprofbin/src/msprof_bin.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/logger/cmd_log.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprofbin/src/msprof_manager.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/msprofbin/src/data_handle.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprofbin/src/input_parser.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprofbin/src/prof_task.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprofbin/src/running_mode.cpp
@@ -99,15 +86,11 @@ add_executable(msprof_bin_utest
     test/main.cpp
     test/msprof_bin_utest.cpp
     test/input_parser_utest.cpp
-    test/data_handle_utest.cpp
     test/msprof_manager_utest.cpp
     test/prof_task_utest.cpp
-    test/prof_device_transport_utest.cpp
     test/running_mode_utest.cpp
     test/msopprof_manager_utest.cpp
     ../stub/profile_drv_user_stub.cpp
-    ../stub/hdc-api-stub.cpp
-    ../stub/hdc-log-stub.cpp
     ../stub/ide-cmd-stub.cpp
     ../stub/devdrv_runtime_api_stub.cpp
     ../../stub/driver_plugin_stub.cpp
@@ -151,13 +134,10 @@ target_include_directories(msprof_bin_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/common/utils
     ${MSPROF_SOURCE_DIR}/inc/toolchain
     ${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/include
-    ${MSPROF_SOURCE_DIR}/dvvp/adx/inc
     ${MSPROF_SOURCE_DIR}/dvvp/driver/inc
     ${MSPROF_SOURCE_DIR}/dvvp/task_handle/include
     ${MSPROF_SOURCE_DIR}/dvvp/transport
-    ${CMAKE_BINARY_DIR}/proto/profiler/
     ${MSPROF_SOURCE_DIR}/dvvp/stub/
-    ${CMAKE_BINARY_DIR}/proto/profiler/
     ${MSPROF_SOURCE_DIR}/dvvp/depend/include/stub
     ${MSPROF_SOURCE_DIR}/dvvp
     ${MSPROF_SOURCE_DIR}/dvvp/message
@@ -187,7 +167,6 @@ target_compile_definitions(msprof_bin_utest PRIVATE
 )
 
 target_link_libraries(msprof_bin_utest PRIVATE
-    ascend_protobuf_static
     c_sec_static
     pthread
     ${GTEST_STATIC_LIBRARY}

@@ -1,8 +1,3 @@
-protobuf_generate(profiler
-	CppPath
-	HeaderPath
-	${MSPROF_SOURCE_DIR}/dvvp/proto/msprofiler.proto
-)
 set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/common/memory/chunk_pool.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/thread/thread.cpp
@@ -29,7 +24,6 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/driver/channel/ai_drv_prof_api.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/message/codec.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/stub/error_manager/msprof_error_manager_stub.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_handle.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/transport/uploader.cpp
@@ -40,7 +34,6 @@ set(profilerSrcFiles
 set(localSrcFiles
     ../stub/devdrv_runtime_api_stub.cpp
     ../stub/profile_drv_user_stub.cpp
-    ../stub/hdc-log-stub.cpp
     ../../stub/driver_plugin_stub.cpp
     test/main.cpp
     test/config_manager_utest.cpp
@@ -97,7 +90,6 @@ target_include_directories(common_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/common/platform/
     ${MSPROF_SOURCE_DIR}/dvvp/params_adapter
     ${MSPROF_SOURCE_DIR}/dvvp/transport
-    ${CMAKE_BINARY_DIR}/proto/profiler/
     ${MSPROF_SOURCE_DIR}/dvvp/depend/include/stub
 )
 
@@ -126,7 +118,6 @@ target_link_options(common_utest PRIVATE
 )
 
 target_link_libraries(common_utest PRIVATE
-    ascend_protobuf_static
     c_sec_static
     pthread
     ${GTEST_STATIC_LIBRARY}

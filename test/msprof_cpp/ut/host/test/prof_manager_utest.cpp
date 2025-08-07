@@ -2,9 +2,8 @@
 #include "mockcpp/mockcpp.hpp"
 #include "hdc-log-stub.h"
 #include "hdc-api-stub.h"
-#include "proto/msprofiler.pb.h"
 #include "errno/error_code.h"
-#include "message/codec.h"
+
 #include "prof_host_core.h"
 #include "prof_manager.h"
 #include "collect_io_server.h"
@@ -825,8 +824,5 @@ TEST_F(HOST_PROF_MANAGER_TEST,SendCancelMessageToRemoteApp)
         .stubs()
         .will(returnValue(mockTask))
         .then(returnValue(task));
-    MOCKER_CPP(&analysis::dvvp::host::ProfTask::SendMsgAndHandleResponse)
-        .stubs()
-        .will(returnValue(PROFILING_FAILED));
     entry->SendCancelMessageToRemoteApp(params);
 }

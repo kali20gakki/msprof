@@ -10,7 +10,7 @@
  */
 #include "analyzer_rt.h"
 #include "acl_prof.h"
-#include "message/codec.h"
+
 #include "msprof_dlog.h"
 #include "prof_common.h"
 #include "prof_api.h"

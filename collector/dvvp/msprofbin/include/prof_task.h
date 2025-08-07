@@ -10,13 +10,12 @@
 #include <condition_variable>
 #include <memory>
 #include <mutex>
-#include "proto/msprofiler.pb.h"
 #include "thread/thread.h"
 #include "message/prof_params.h"
+#include "message/data_define.h"
 #include "utils/utils.h"
 #include "job_adapter.h"
 #include "transport/transport.h"
-#include "transport/hdc/dev_mgr_api.h"
 namespace Analysis {
 namespace Dvvp {
 namespace Msprof {
@@ -69,27 +68,6 @@ public:
     int UnInit() override;
 };
 
-class ProfRpcTask : public ProfTask {
-public:
-    ProfRpcTask(const int devId,
-             SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> param);
-    ~ProfRpcTask() override;
-
-public:
-    int Init() override;
-    int UnInit() override;
-    int Stop() override;
-private:
-    void PostSyncDataCtrl() override;
-    void WaitSyncDataCtrl();
-
-private:
-    // data sync
-    std::mutex dataSyncMtx_;
-    bool isDataChannelEnd_;
-    std::condition_variable cvSyncDataCtrl_;
-    analysis::dvvp::transport::DevMgrAPI devMgrAPI_;
-};
 }
 }
 }

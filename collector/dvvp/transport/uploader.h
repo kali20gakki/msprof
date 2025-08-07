@@ -9,7 +9,7 @@
 
 #include <cstddef>
 #include "config/config.h"
-#include "message/codec.h"
+
 #include "queue/bound_queue.h"
 #include "thread/thread.h"
 #include "transport/transport.h"

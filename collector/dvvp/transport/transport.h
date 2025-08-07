@@ -9,8 +9,6 @@
 
 #include <condition_variable>
 #include <memory>
-#include <google/protobuf/message.h>
-#include "hdc_api.h"
 #include "statistics/perf_count.h"
 #include "utils/utils.h"
 
@@ -56,19 +54,6 @@ public:
 public:
     SHARED_PTR_ALIA<PerfCount> perfCount_; // calculate statistics
 };
-
-class AdxTransport : public ITransport {
-public:
-    int SendBuffer(CONST_VOID_PTR buffer, int length) override = 0;
-    int SendBuffer(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq) override = 0;
-    int CloseSession() override = 0;
-    void WriteDone() override {}
-    virtual int SendAdxBuffer(IdeBuffT out, int outLen) = 0;
-    virtual int RecvPacket(TLV_REQ_2PTR packet) = 0;
-    virtual void DestroyPacket(TLV_REQ_PTR packet) = 0;
-};
-
-int SendBufferWithFixedLength(AdxTransport &transport, CONST_VOID_PTR buffer, int length);
 
 class TransportFactory {
 public:

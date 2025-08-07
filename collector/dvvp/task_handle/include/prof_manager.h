@@ -36,8 +36,6 @@ public:
         const std::string &sampleConfig);
     int IdeCloudProfileProcess(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
     bool CheckIfDevicesOnline(const std::string paramsDevices, std::string &statusInfo) const;
-    void SendFailedStatusInfo(const analysis::dvvp::message::StatusInfo &statusInfo,
-        const std::string &jobId);
 
 protected:
     ProfManager() : isInited_(false)

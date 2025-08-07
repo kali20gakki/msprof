@@ -14,8 +14,8 @@
 #include "transport/transport.h"
 #include "mmpa_api.h"
 #include "transport/uploader_mgr.h"
-#include "message/codec.h"
-#include "proto/msprofiler.pb.h"
+
+#include "message/data_define.h"
 #include "config/config.h"
 
 namespace analysis {
@@ -30,7 +30,6 @@ using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::utils;
 using namespace Collector::Dvvp::Mmpa;
-using namespace analysis::dvvp::proto;
 
 CtrlFilesDumper::CtrlFilesDumper() {}
 CtrlFilesDumper::~CtrlFilesDumper() {}
@@ -41,18 +40,18 @@ int CtrlFilesDumper::DumpCollectionTimeInfo(uint32_t devId, bool isHostProfiling
     auto collectionTime = GetHostTime();
     MSPROF_LOGI("[DumpCollectionTimeInfo]collectionTime:%s us, isStartTime:%d", collectionTime.c_str(), isStartTime);
     // time to unix
-    SHARED_PTR_ALIA <analysis::dvvp::proto::CollectionStartEndTime> timeInfo = nullptr;
-    MSVP_MAKE_SHARED0_RET(timeInfo, analysis::dvvp::proto::CollectionStartEndTime, PROFILING_FAILED);
+    analysis::dvvp::message::CollectionStartEndTime timeInfo;
     if (!isStartTime) {
-        timeInfo->set_collectiontimeend(collectionTime);
-        timeInfo->set_collectiondateend(Utils::TimestampToTime(collectionTime, TIME_US));
+        timeInfo.collectionTimeEnd = collectionTime;
+        timeInfo.collectionDateEnd = Utils::TimestampToTime(collectionTime, TIME_US);
     } else {
-        timeInfo->set_collectiontimebegin(collectionTime);
-        timeInfo->set_collectiondatebegin(Utils::TimestampToTime(collectionTime, TIME_US));
+        timeInfo.collectionTimeBegin = collectionTime;
+        timeInfo.collectionDateBegin = Utils::TimestampToTime(collectionTime, TIME_US);
     }
-
-    timeInfo->set_clockmonotonicraw(std::to_string(Utils::GetClockMonotonicRaw()));
-    std::string content = analysis::dvvp::message::EncodeJson(timeInfo, false, false);
+    timeInfo.clockMonotonicRaw = std::to_string(Utils::GetClockMonotonicRaw());
+    nlohmann::json root;
+    timeInfo.ToObject(root);
+    std::string content = root.dump();
     MSPROF_LOGI("[DumpCollectionTimeInfo]content:%s", content.c_str());
     SHARED_PTR_ALIA <analysis::dvvp::message::JobContext> jobCtx = nullptr;
     MSVP_MAKE_SHARED0_RET(jobCtx, analysis::dvvp::message::JobContext, PROFILING_FAILED);

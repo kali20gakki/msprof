@@ -1,20 +1,18 @@
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
 #include <string.h>
-#include <google/protobuf/util/json_util.h>
 #include "config/config_manager.h"
 #include "config/feature_manager.h"
 #include "data_struct.h"
 #include "errno/error_code.h"
 #include "ge/ge_prof.h"
-#include "message/codec.h"
+
 #include "msprof_callback_handler.h"
 #include "msprof_callback_impl.h"
 #include "op_desc_parser.h"
 #include "prof_api_common.h"
 #include "prof_acl_mgr.h"
 #include "profiling/ge_profiling.h"
-#include "proto/msprofiler.pb.h"
 #include "uploader_dumper.h"
 #include "uploader_mgr.h"
 #include "utils/utils.h"
@@ -45,7 +43,6 @@
 #include "params_adapter_geopt.h"
 #include "params_adapter_aclsubscribe.h"
 #include "uploader.h"
-#include "transport/hdc/hdc_transport.h"
 #include "msprof_reporter_mgr.h"
 #include "dyn_prof_mgr.h"
 
@@ -1910,10 +1907,6 @@ TEST_F(MSPROF_ACL_CORE_UTEST, ProfAclStop) {
         .will(returnValue(ACL_SUCCESS));
 
     MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::ProfStartAiCpuTrace)
-        .stubs()
-        .will(returnValue(PROFILING_SUCCESS));
-
-    MOCKER_CPP(&Analysis::Dvvp::Host::Adapter::ProfParamsAdapter::UpdateSampleConfig)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
 

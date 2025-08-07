@@ -22,12 +22,12 @@
 #include "prof_job.h"
 #include "uploader_mgr.h"
 #include "platform/platform.h"
-#include "transport/hdc/hdc_transport.h"
 #include "prof_task.h"
 #include "mmpa_api.h"
 #include "config_manager.h"
 #include "prof_drv_event.h"
 #include "dcmi_plugin.h"
+#include "file_transport.h"
 
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::message;
@@ -1140,9 +1140,8 @@ TEST_F(JOB_WRAPPER_PROF_SYSSTAT_JOB_TEST, Init) {
 
     collectionJobCfg_->comParams->params->sys_profiling = "off";
     EXPECT_EQ(PROFILING_FAILED, profSysStatJob->Init(collectionJobCfg_));
-    HDC_SESSION session = (HDC_SESSION)0x12345678;
-    auto transport = std::shared_ptr<analysis::dvvp::transport::HDCTransport>(
-            new analysis::dvvp::transport::HDCTransport(session));
+    auto transport = std::shared_ptr<analysis::dvvp::transport::FILETransport>(
+            new analysis::dvvp::transport::FILETransport("./", "200MB"));
     auto uploader = std::make_shared<analysis::dvvp::transport::Uploader>(transport);
     MOCKER_CPP(&analysis::dvvp::transport::UploaderMgr::GetUploader)
         .stubs()
@@ -1177,9 +1176,8 @@ TEST_F(JOB_WRAPPER_PROF_SYSSTAT_JOB_TEST, Process) {
             new analysis::dvvp::message::ProfileParams());
     std::shared_ptr<analysis::dvvp::message::JobContext> jobCtx(
             new analysis::dvvp::message::JobContext());
-    HDC_SESSION session = (HDC_SESSION)0x12345678;
-    auto transport = std::shared_ptr<analysis::dvvp::transport::HDCTransport>(
-            new analysis::dvvp::transport::HDCTransport(session));
+    auto transport = std::shared_ptr<analysis::dvvp::transport::FILETransport>(
+            new analysis::dvvp::transport::FILETransport("./", "200MB"));
     auto uploader = std::make_shared<analysis::dvvp::transport::Uploader>(transport);
 
 
@@ -1263,9 +1261,8 @@ TEST_F(JOB_WRAPPER_PROF_ALLPIDS_JOB_TEST, Process) {
             new analysis::dvvp::message::ProfileParams());
     std::shared_ptr<analysis::dvvp::message::JobContext> jobCtx(
             new analysis::dvvp::message::JobContext());
-    HDC_SESSION session = (HDC_SESSION)0x12345678;
-    auto transport = std::shared_ptr<analysis::dvvp::transport::HDCTransport>(
-            new analysis::dvvp::transport::HDCTransport(session));
+    auto transport = std::shared_ptr<analysis::dvvp::transport::FILETransport>(
+            new analysis::dvvp::transport::FILETransport("./", "200MB"));
     auto uploader = std::make_shared<analysis::dvvp::transport::Uploader>(transport);
 
     Analysis::Dvvp::JobWrapper::ProcAllPidsFileHandler allPidsHandler(PROF_SYS_ALL_PID, devId,
@@ -1292,9 +1289,8 @@ TEST_F(JOB_WRAPPER_PROF_ALLPIDS_JOB_TEST, ProfTimerJobCommonInit) {
             new analysis::dvvp::message::ProfileParams());
     std::shared_ptr<analysis::dvvp::message::JobContext> jobCtx(
             new analysis::dvvp::message::JobContext());
-    HDC_SESSION session = (HDC_SESSION)0x12345678;
-    auto transport = std::shared_ptr<analysis::dvvp::transport::HDCTransport>(
-            new analysis::dvvp::transport::HDCTransport(session));
+    auto transport = std::shared_ptr<analysis::dvvp::transport::FILETransport>(
+            new analysis::dvvp::transport::FILETransport("./", "200MB"));
     auto uploader = std::make_shared<analysis::dvvp::transport::Uploader>(transport);
 
     Analysis::Dvvp::JobWrapper::ProcAllPidsFileHandler allPidsHandler(PROF_SYS_ALL_PID, devId,
@@ -1388,9 +1384,8 @@ TEST_F(JOB_WRAPPER_PROF_SYSMEM_JOB_TEST, Process) {
             new analysis::dvvp::message::ProfileParams());
     std::shared_ptr<analysis::dvvp::message::JobContext> jobCtx(
             new analysis::dvvp::message::JobContext());
-    HDC_SESSION session = (HDC_SESSION)0x12345678;
-    auto transport = std::shared_ptr<analysis::dvvp::transport::HDCTransport>(
-            new analysis::dvvp::transport::HDCTransport(session));
+    auto transport = std::shared_ptr<analysis::dvvp::transport::FILETransport>(
+            new analysis::dvvp::transport::FILETransport("./", "200MB"));
     auto uploader = std::make_shared<analysis::dvvp::transport::Uploader>(transport);
 
 

@@ -1,8 +1,8 @@
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
 #include "uploader.h"
-#include "transport/hdc/hdc_transport.h"
 #include "errno/error_code.h"
+#include "file_transport.h"
 
 using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::Common::Statistics;
@@ -11,16 +11,15 @@ using namespace Analysis::Dvvp::MsprofErrMgr;
 class UPLOADER_TEST: public testing::Test {
 protected:
     virtual void SetUp() {
-        HDC_SESSION session = (HDC_SESSION)0x12345678;
-        _transport = std::shared_ptr<analysis::dvvp::transport::HDCTransport>(
-            new analysis::dvvp::transport::HDCTransport(session));
+        _transport = std::shared_ptr<analysis::dvvp::transport::FILETransport>(
+            new analysis::dvvp::transport::FILETransport("./", "100MB"));
         _transport->perfCount_ = std::shared_ptr<PerfCount> (new PerfCount("test"));
     }
     virtual void TearDown() {
         _transport.reset();
     }
 public:
-    std::shared_ptr<analysis::dvvp::transport::HDCTransport> _transport;
+    std::shared_ptr<analysis::dvvp::transport::FILETransport> _transport;
 };
 
 TEST_F(UPLOADER_TEST, Uploader_destructor) {
@@ -83,8 +82,8 @@ TEST_F(UPLOADER_TEST, run_no_data) {
     std::shared_ptr<analysis::dvvp::transport::Uploader> uploader(
         new analysis::dvvp::transport::Uploader(_transport));
 
-    MOCKER_CPP_VIRTUAL(*_transport.get(), &analysis::dvvp::transport::HDCTransport::SendBuffer,
-    int(analysis::dvvp::transport::HDCTransport::*)(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk>))
+    MOCKER_CPP_VIRTUAL(*_transport.get(), &analysis::dvvp::transport::FILETransport::SendBuffer,
+    int(analysis::dvvp::transport::FILETransport::*)(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk>))
         .stubs()
         .will(returnValue(PROFILING_FAILED));
 
@@ -103,8 +102,8 @@ TEST_F(UPLOADER_TEST, run) {
     std::shared_ptr<analysis::dvvp::transport::Uploader> uploader(
         new analysis::dvvp::transport::Uploader(_transport));
 
-    MOCKER_CPP_VIRTUAL(*_transport.get(), &analysis::dvvp::transport::HDCTransport::SendBuffer,
-    int(analysis::dvvp::transport::HDCTransport::*)(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk>))
+    MOCKER_CPP_VIRTUAL(*_transport.get(), &analysis::dvvp::transport::FILETransport::SendBuffer,
+    int(analysis::dvvp::transport::FILETransport::*)(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk>))
         .stubs()
         .will(returnValue(PROFILING_FAILED));
     std::shared_ptr<analysis::dvvp::ProfileFileChunk> buffer_p(

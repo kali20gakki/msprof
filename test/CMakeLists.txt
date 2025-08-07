@@ -8,10 +8,7 @@ if (CMAKE_INSTALL_PREFIX STREQUAL /usr/local)
     set(CMAKE_INSTALL_PREFIX ${TOP_DIR}/test/output CACHE STRING "path for install()" FORCE)
     message(STATUS "No install prefix selected, default to ${CMAKE_INSTALL_PREFIX}.")
 endif()
-
-include(${TOP_DIR}/cmake/superbuild/external/ascend_protobuf_shared.cmake)
-include(${TOP_DIR}/cmake/superbuild/external/ascend_protobuf_static.cmake)
-include(${TOP_DIR}/cmake/superbuild/external/protoc.cmake)
+ 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/opensource/googletest.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/opensource/mockcpp.cmake)
 
@@ -27,7 +24,7 @@ ExternalProject_Add(collector_llt
     BUILD_COMMAND $(MAKE)
     INSTALL_COMMAND "" # llt install
     BUILD_ALWAYS TRUE
-    DEPENDS protoc_build ascend_protobuf_shared_build ascend_protobuf_static_build gtest_build mockcpp_build
+    DEPENDS gtest_build mockcpp_build
 )
 endif()
 

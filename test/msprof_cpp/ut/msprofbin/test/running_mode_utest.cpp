@@ -840,38 +840,6 @@ TEST_F(RUNNING_MODE_UTEST, SystemModeStartHostTask){
     EXPECT_EQ(PROFILING_SUCCESS, rMode.StartHostTask(result_dir, 1));
 }
 
-TEST_F(RUNNING_MODE_UTEST, SystemModeStartDeviceTask){
-    GlobalMockObject::verify();
-    std::shared_ptr<analysis::dvvp::message::ProfileParams> params(
-    new analysis::dvvp::message::ProfileParams);
-    std::shared_ptr<analysis::dvvp::message::ProfileParams> params2(
-    new analysis::dvvp::message::ProfileParams);
-    Collector::Dvvp::Msprofbin::SystemMode rMode("system", params);
-    std::string result_dir = "/tmp/running_mode_utest";
-    MOCKER_CPP(&SystemMode::GenerateDeviceParam)
-        .stubs()
-        .will(returnValue(params2));
-    MOCKER_CPP(&SystemMode::CreateUploader)
-        .stubs()
-        .will(returnValue(PROFILING_FAILED))
-        .then(returnValue(PROFILING_SUCCESS));
-    EXPECT_EQ(PROFILING_FAILED, rMode.StartDeviceTask(result_dir, "1"));
-    SHARED_PTR_ALIA<ProfRpcTask> task(new ProfRpcTask(1, params));
-    MOCKER_CPP_VIRTUAL(task.get(), &ProfRpcTask::Init)
-        .stubs()
-        .will(returnValue(PROFILING_FAILED))
-        .then(returnValue(PROFILING_SUCCESS));
-    EXPECT_EQ(PROFILING_FAILED, rMode.StartDeviceTask(result_dir, "1"));
-    MOCKER_CPP_VIRTUAL((analysis::dvvp::common::thread::Thread*)task.get(), &ProfRpcTask::Start)
-        .stubs()
-        .will(returnValue(PROFILING_FAILED))
-        .then(returnValue(PROFILING_SUCCESS));
-    EXPECT_EQ(PROFILING_FAILED, rMode.StartDeviceTask(result_dir, "1"));
-    params->job_id = "1";
-    
-    EXPECT_EQ(PROFILING_SUCCESS, rMode.StartDeviceTask(result_dir, "1"));
-}
-
 TEST_F(RUNNING_MODE_UTEST, SystemModeStopTask){
     GlobalMockObject::verify();
     std::shared_ptr<analysis::dvvp::message::ProfileParams> params(
@@ -1058,10 +1026,7 @@ TEST_F(RUNNING_MODE_UTEST, StartSysTask) {
     MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::PlatformIsSocSide)
         .stubs()
         .will(returnValue(false));
-    MOCKER_CPP(&SystemMode::StartDeviceTask)
-        .stubs()
-        .will(returnValue(PROFILING_FAILED));
-    EXPECT_EQ(PROFILING_FAILED, rMode.StartSysTask());
+    EXPECT_EQ(PROFILING_SUCCESS, rMode.StartSysTask());
 
     GlobalMockObject::verify();
     params->devices = "";

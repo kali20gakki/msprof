@@ -1,8 +1,3 @@
-protobuf_generate(profiler
-	CppPath
-	HeaderPath
-	${MSPROF_SOURCE_DIR}/dvvp/proto/msprofiler.proto
-)
 set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/common/memory/chunk_pool.cpp 
     ${MSPROF_SOURCE_DIR}/dvvp/transport/file_slice.cpp
@@ -37,7 +32,6 @@ set(localSrcFiles
 	test/main.cpp 
 	test/file_slice_test.cpp 
 	test/file_ageing_test.cpp
-	../../stub/hdc-log-stub.cpp
     ../../stub/devdrv_runtime_api_stub.cpp
     ../../../stub/driver_plugin_stub.cpp
 )
@@ -78,8 +72,6 @@ target_include_directories(streamio_common_utest PRIVATE
 	${MSPROF_SOURCE_DIR}/dvvp/aging 
 	${MSPROF_SOURCE_DIR}/dvvp/transport 
 	${MSPROF_SOURCE_DIR}/dvvp/common/statistics
-	${MSPROF_SOURCE_DIR}/dvvp/adx/inc
-    ${CMAKE_BINARY_DIR}/proto/profiler/
     ${MSPROF_SOURCE_DIR}/dvvp/driver/inc
     ${TOP_DIR}/abl/libc_sec/include 
     ${TOP_DIR}/inc/driver
@@ -111,7 +103,6 @@ target_link_options(streamio_common_utest PRIVATE
 )
 
 target_link_libraries(streamio_common_utest PRIVATE
-    ascend_protobuf_static
     c_sec_static
     pthread
     ${GTEST_STATIC_LIBRARY}

@@ -3,7 +3,7 @@
 #include <iostream>
 #include "errno/error_code.h"
 #include "msprof_manager.h"
-#include "message/codec.h"
+
 #include "config/config.h"
 #include "config/config_manager.h"
 #include "param_validation.h"
