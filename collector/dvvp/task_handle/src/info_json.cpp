@@ -273,7 +273,7 @@ int InfoJson::AddHostInfo()
     infoMain_.hostname = hostName;
     std::string macStr = analysis::dvvp::common::utils::Utils::GetHostMacStr();
     uint64_t macStrHashId = analysis::dvvp::transport::HashData::instance()->GenHashId(macStr);
-    infoMain_.hostUid = macStrHashId;
+    infoMain_.hostUid = std::to_string(macStrHashId);
 
     // fetch and set memory, clock freq, uptime, netcard info, logical cpu nums
     AddMemTotal();
@@ -324,67 +324,70 @@ int InfoJson::GetCtrlCpuInfo(uint32_t devId, struct InfoDeviceInfo &devInfo)
         return PROFILING_FAILED;
     }
     SetCtrlCpuId(devInfo, ctrlCpuId);
-    ret = analysis::dvvp::driver::DrvGetCtrlCpuCoreNum(devId, devInfo.ctrl_cpu_core_num);
+    int64_t val = 0;
+    ret = analysis::dvvp::driver::DrvGetCtrlCpuCoreNum(devId, val);
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("Failed to DrvGetCtrlCpuCoreNum, deviceId=%d", devId);
         return PROFILING_FAILED;
     }
-    ret = analysis::dvvp::driver::DrvGetCtrlCpuEndianLittle(devId, devInfo.ctrl_cpu_endian_little);
+    devInfo.ctrl_cpu_core_num = static_cast<uint32_t>(val);
+    ret = analysis::dvvp::driver::DrvGetCtrlCpuEndianLittle(devId, val);
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("Failed to DrvGetCtrlCpuEndianLittle, deviceId=%d", devId);
         return PROFILING_FAILED;
     }
+    devInfo.ctrl_cpu_endian_little = static_cast<uint32_t>(val);
     return PROFILING_SUCCESS;
 }
 
 int InfoJson::GetDevInfo(int deviceId, struct InfoDeviceInfo &deviceInfo)
 {
     uint32_t devId = static_cast<uint32_t>(deviceId);
-    int ret = analysis::dvvp::driver::DrvGetEnvType(devId, deviceInfo.env_type);
-    if (ret != PROFILING_SUCCESS) {
+    int64_t val = 0;
+    if (analysis::dvvp::driver::DrvGetEnvType(devId, val) != PROFILING_SUCCESS) {
         MSPROF_LOGE("Failed to DrvGetEnvType, deviceId=%d", deviceId);
         return PROFILING_FAILED;
     }
-    ret = GetCtrlCpuInfo(devId, deviceInfo);
-    if (ret != PROFILING_SUCCESS) {
+    deviceInfo.env_type = static_cast<uint32_t>(val);
+    if (GetCtrlCpuInfo(devId, deviceInfo) != PROFILING_SUCCESS) {
         MSPROF_LOGE("Failed to GetCtrlCpuInfo, deviceId=%d", deviceId);
         return PROFILING_FAILED;
     }
-    ret = analysis::dvvp::driver::DrvGetAiCpuCoreNum(devId, deviceInfo.ai_cpu_core_num);
-    if (ret != PROFILING_SUCCESS) {
+    if (analysis::dvvp::driver::DrvGetAiCpuCoreNum(devId, val) != PROFILING_SUCCESS) {
         MSPROF_LOGE("Failed to DrvGetAiCpuCoreNum, deviceId=%d", deviceId);
         return PROFILING_FAILED;
     }
-    ret = analysis::dvvp::driver::DrvGetAivNum(devId, deviceInfo.aiv_num);
-    if (ret != PROFILING_SUCCESS) {
+    deviceInfo.ai_cpu_core_num = static_cast<uint32_t>(val);
+    if (analysis::dvvp::driver::DrvGetAivNum(devId, val) != PROFILING_SUCCESS) {
         MSPROF_LOGE("Failed to DrvGetAivNum, deviceId=%d", deviceId);
         return PROFILING_FAILED;
     }
-    if (deviceInfo.ai_cpu_core_num != 0 &&
-        analysis::dvvp::driver::DrvGetAiCpuCoreId(devId, deviceInfo.ai_cpu_core_id) != PROFILING_SUCCESS) {
+    deviceInfo.aiv_num = static_cast<uint32_t>(val);
+    if (deviceInfo.ai_cpu_core_num != 0 && analysis::dvvp::driver::DrvGetAiCpuCoreId(devId, val) != PROFILING_SUCCESS) {
         MSPROF_LOGE("Failed to DrvGetAiCpuCoreId, deviceId=%d", deviceId);
         return PROFILING_FAILED;
     }
-    ret = analysis::dvvp::driver::DrvGetAiCpuOccupyBitmap(devId, deviceInfo.aicpu_occupy_bitmap);
-    if (ret != PROFILING_SUCCESS) {
+    deviceInfo.ai_cpu_core_id = static_cast<uint32_t>(val);
+    if (analysis::dvvp::driver::DrvGetAiCpuOccupyBitmap(devId, val) != PROFILING_SUCCESS) {
         MSPROF_LOGE("Failed to DrvGetAiCpuOccupyBitmap, deviceId=%d", deviceId);
         return PROFILING_FAILED;
     }
-    ret = analysis::dvvp::driver::DrvGetTsCpuCoreNum(devId, deviceInfo.ts_cpu_core_num);
-    if (ret != PROFILING_SUCCESS) {
+    deviceInfo.aicpu_occupy_bitmap = static_cast<uint32_t>(val);
+    if (analysis::dvvp::driver::DrvGetTsCpuCoreNum(devId, val) != PROFILING_SUCCESS) {
         MSPROF_LOGE("Failed to DrvGetTsCpuCoreNum, deviceId=%d", deviceId);
         return PROFILING_FAILED;
     }
-    ret = analysis::dvvp::driver::DrvGetAiCoreId(devId, deviceInfo.ai_core_id);
-    if (ret != PROFILING_SUCCESS) {
+    deviceInfo.ts_cpu_core_num = static_cast<uint32_t>(val);
+    if (analysis::dvvp::driver::DrvGetAiCoreId(devId, val) != PROFILING_SUCCESS) {
         MSPROF_LOGE("Failed to DrvGetAiCoreId, deviceId=%d", deviceId);
         return PROFILING_FAILED;
     }
-    ret = analysis::dvvp::driver::DrvGetAiCoreNum(devId, deviceInfo.ai_core_num);
-    if (ret != PROFILING_SUCCESS) {
+    deviceInfo.ai_core_id = static_cast<uint32_t>(val);
+    if (analysis::dvvp::driver::DrvGetAiCoreNum(devId, val) != PROFILING_SUCCESS) {
         MSPROF_LOGE("Failed to DrvGetAiCoreNum, deviceId=%d", deviceId);
         return PROFILING_FAILED;
     }
+    deviceInfo.ai_core_num = static_cast<uint32_t>(val);
     MSPROF_LOGI("Succeeded to drvGetDevInfo, deviceId=%d", deviceId);
     return PROFILING_SUCCESS;
 }

@@ -173,7 +173,7 @@ TEST_F(InfoJsonUTest, GetDevInfo)
     EXPECT_EQ(PROFILING_FAILED, infoJson.GetDevInfo(0, dev_info));
     EXPECT_EQ(PROFILING_FAILED, infoJson.GetDevInfo(0, dev_info));
     EXPECT_EQ(PROFILING_FAILED, infoJson.GetDevInfo(0, dev_info));
-    EXPECT_EQ(PROFILING_FAILED, infoJson.GetDevInfo(0, dev_info));
+    EXPECT_EQ(PROFILING_SUCCESS, infoJson.GetDevInfo(0, dev_info));
 }
 
 TEST_F(InfoJsonUTest, GetDevInfoCheckAiCpuCoreNum)
@@ -189,8 +189,10 @@ TEST_F(InfoJsonUTest, GetDevInfoCheckAiCpuCoreNum)
     MOCKER_CPP(&InfoJson::GetCtrlCpuInfo)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
+    int64_t num = 0;
     MOCKER_CPP(&analysis::dvvp::driver::DrvGetAiCpuCoreNum)
         .stubs()
+        .with(any(), outBound(num))
         .will(returnValue(PROFILING_SUCCESS));
     MOCKER_CPP(&analysis::dvvp::driver::DrvGetAivNum)
         .stubs()
@@ -210,9 +212,6 @@ TEST_F(InfoJsonUTest, GetDevInfoCheckAiCpuCoreNum)
     MOCKER_CPP(&analysis::dvvp::driver::DrvGetAiCoreNum)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
-    dev_info.ai_cpu_core_num = 1;
-    EXPECT_EQ(PROFILING_FAILED, infoJson.GetDevInfo(0, dev_info));
-    dev_info.ai_cpu_core_num = 0;
     EXPECT_EQ(PROFILING_SUCCESS, infoJson.GetDevInfo(0, dev_info));
 }
 

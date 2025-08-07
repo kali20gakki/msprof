@@ -42,19 +42,19 @@ struct InfoCpu : analysis::dvvp::message::BaseInfo {
 
 struct InfoDeviceInfo : analysis::dvvp::message::BaseInfo {
     uint32_t id;
-    int64_t env_type;
+    uint32_t env_type;
     std::string ctrl_cpu_id;
-    int64_t ctrl_cpu_core_num;
-    int64_t ctrl_cpu_endian_little;
-    int64_t ts_cpu_core_num;
-    int64_t ai_cpu_core_num;
-    int64_t ai_core_num;
-    int64_t ai_cpu_core_id;
-    int64_t ai_core_id;
-    int64_t aicpu_occupy_bitmap;
+    uint32_t ctrl_cpu_core_num;
+    uint32_t ctrl_cpu_endian_little;
+    uint32_t ts_cpu_core_num;
+    uint32_t ai_cpu_core_num;
+    uint32_t ai_core_num;
+    uint32_t ai_cpu_core_id;
+    uint32_t ai_core_id;
+    uint32_t aicpu_occupy_bitmap;
     std::string ctrl_cpu;
     std::string ai_cpu;
-    int64_t aiv_num;
+    uint32_t aiv_num;
     std::string hwts_frequency;
     std::string aic_frequency;
     std::string aiv_frequency;
@@ -119,7 +119,7 @@ struct InfoMain : analysis::dvvp::message::BaseInfo {
     int32_t rank_id;
     std::string pid_name;
     uint32_t drvVersion;
-    uint64_t hostUid;
+    std::string hostUid;
 
     void ToObject(nlohmann::json &object) override
     {
