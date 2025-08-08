@@ -82,6 +82,7 @@ ExternalProject_Add(msprof
                 -DHITEST=${HITEST}
                 <SOURCE_DIR>
     BUILD_COMMAND $(MAKE)
+    DEPENDS c_sec
 )
 endif()
 
