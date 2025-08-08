@@ -53,8 +53,6 @@ function bep_env_init() {
 
 bep_env_init
 
-bash ${TOP_DIR}/scripts/thirdparty_patch.sh
-
 # Hi Test
 HI_TEST="off"
 if [ ! -z "${TOOLKIT_HITEST}" ] && [ "${TOOLKIT_HITEST}" == "on" ]; then
