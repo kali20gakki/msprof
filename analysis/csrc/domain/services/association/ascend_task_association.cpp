@@ -200,7 +200,7 @@ uint32_t AscendTaskAssociation::ProcessEntry(DataInventory &dataInventory, const
         return ANALYSIS_OK;
     }
     if (hostTasks->empty() || deviceTasks->empty()) {
-        ERROR("There is no HostTask or DeviceTask, can't generate AscendTask!");
+        WARN("There is no HostTask or DeviceTask, can't generate AscendTask!");
         return ANALYSIS_ERROR;
     }
     res = GenerateTopDownTask(*hostTasks, *deviceTasks, params);
