@@ -108,7 +108,7 @@ private:
             bool dfxStop = false;
             auto ret = GetStatistician(std::move(stat), dfxStop);
             if (!ret) {
-                ERROR("mandatory process failed!");
+                WARN("mandatory process failed!");
                 return false;
             }
             if (dfxStop) {
