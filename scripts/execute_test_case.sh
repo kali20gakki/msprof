@@ -6,8 +6,6 @@ set -e
 CUR_DIR=$(dirname $(readlink -f $0))
 TOP_DIR=${CUR_DIR}/..
 
-bash ${TOP_DIR}/scripts/thirdparty_patch.sh
-
 function add_gcov_excl_line_for_analysis() {
     find ${TOP_DIR}/analysis/csrc -name "*.cpp" -type f -exec sed -i -e 's/^[[:blank:]]*INFO.*;/& \/\/ LCOV_EXCL_LINE/g' -e '/^[[:blank:]]*INFO.*[,"]$/,/.*;$/ s/;$/& \/\/ LCOV_EXCL_LINE/g' {} \;
     find ${TOP_DIR}/analysis/csrc -name "*.cpp" -type f -exec sed -i -e 's/^[[:blank:]]*ERROR.*;/& \/\/ LCOV_EXCL_LINE/g' -e '/^[[:blank:]]*ERROR.*[,"]$/,/.*;$/ s/;$/& \/\/ LCOV_EXCL_LINE/g' {} \;

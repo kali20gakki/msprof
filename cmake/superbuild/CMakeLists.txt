@@ -10,10 +10,6 @@ if (CMAKE_INSTALL_PREFIX STREQUAL /usr/local)
     message(STATUS "No install prefix selected, default to ${CMAKE_INSTALL_PREFIX}.")
 endif()
 
-# include(${CMAKE_CURRENT_LIST_DIR}/external/ascend_protobuf_shared.cmake)
-# include(${CMAKE_CURRENT_LIST_DIR}/external/ascend_protobuf_static.cmake)
-# include(${CMAKE_CURRENT_LIST_DIR}/external/protoc.cmake)
-
 ########################## securec ###################################
 set(SECUREC_DIR ${TOP_DIR}/platform/securec)
 file(GLOB_RECURSE SECUREC_SRC ${SECUREC_DIR}/src/*.c)
