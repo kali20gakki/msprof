@@ -2,9 +2,9 @@
 
 本目录包含有mstx各种接口的使用用例，各个文件夹对应不同用例，供用户理解使用mstx接口。目录以及用例具体说明如下：
 
-| 样例                                                      | 说明                                                   | 支持产品型号                                                 |
-| --------------------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------ |
-| [mstx_with_domain](https://codehub-y.huawei.com/codehub/) | 展示mstx接口在默认domain与自定义domain中打点的使用方式 | Atlas A3 训练系列产品/Atlas A3 推理系列产品<br/>Atlas A2 训练系列产品/Atlas 800I A2 推理产品/A200I A2 Box 异构组件<br/>Atlas 200I/500 A2 推理产品<br/>Atlas 推理系列产品<br/>Atlas 训练系列产品 |
+| 样例                                   | 说明                                                | 支持产品型号                                                  |
+| -------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------ |
+| [mstx_with_domain](./mstx_with_domain) | 展示mstx接口在默认domain与自定义domain中打点的使用方式 | Atlas A3 训练系列产品/Atlas A3 推理系列产品<br/>Atlas A2 训练系列产品/Atlas 800I A2 推理产品/A200I A2 Box 异构组件<br/>Atlas 200I/500 A2 推理产品<br/>Atlas 推理系列产品<br/>Atlas 训练系列产品 |
 
 ## 使用前准备
 
@@ -14,7 +14,7 @@
 
 1. 请在使用前执行source \${install_path}/set_env.sh以保证用例正常执行，\${install_path}为CANN的安装路径，以root安装为例，默认路径为/usr/local/Ascend/ascend-tookit。
 
-2. 切换目录至用例所在位置，例如Ascend/ascend-toolkit/8.x.x/tools/mstx/samples。
+2. 切换目录至用例所在位置，例如/usr/local/Ascend/ascend-toolkit/8.x.x/tools/mstx/samples。
 
 3. 执行用例目录下的sample_run.sh脚本。如下三种场景：
 
