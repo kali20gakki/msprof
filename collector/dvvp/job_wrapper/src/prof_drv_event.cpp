@@ -55,11 +55,13 @@ void *ProfDrvEvent::EventThreadHandle(void *attr)
     MSPROF_EVENT("Start drv event thread, device id:%u, channel id:%d", eventAttr->deviceId, eventAttr->channelId);
  
     if (QueryDevPid(eventAttr) != PROFILING_SUCCESS) {    // make sure aicpu bind pid before attach
+        eventAttr->isThreadStart = false;
         MSPROF_LOGE("Query devPid failed, devId:%u.", eventAttr->deviceId);
         return nullptr;
     }
     drvError_t ret = DriverPlugin::instance()->MsprofHalEschedAttachDevice(eventAttr->deviceId);
     if (ret != DRV_ERROR_NONE) {
+        eventAttr->isThreadStart = false;
         MSPROF_LOGE("Call halEschedAttachDevice failed, devId=%u, ret=%d", eventAttr->deviceId, ret);
         return nullptr;
     }
@@ -70,12 +72,14 @@ void *ProfDrvEvent::EventThreadHandle(void *attr)
         /* multiple start and stop profiling, create grpId and subscribe event only need once */
         struct esched_grp_para grpPara = {GRP_TYPE_BIND_CP_CPU, 1, {0}, {0}};
         if (strcpy_s(grpPara.grp_name, EVENT_MAX_GRP_NAME_LEN, eventAttr->grpName.c_str()) != EOK) {
+            eventAttr->isThreadStart = false;
             MSPROF_LOGE("Call strcpy for grp name: %s failed", eventAttr->grpName.c_str());
             return nullptr;
         }
         ret = DriverPlugin::instance()->MsprofHalEschedCreateGrpEx(eventAttr->deviceId, &grpPara, &grpId);
         if (ret != DRV_ERROR_NONE) {
             (void)DriverPlugin::instance()->MsprofHalEschedDettachDevice(eventAttr->deviceId);
+            eventAttr->isThreadStart = false;
             MSPROF_LOGE("Call halEschedCreateGrpEx failed. (devId=%u, ret=%d)\n", eventAttr->deviceId, ret);
             return nullptr;
         }
@@ -85,6 +89,7 @@ void *ProfDrvEvent::EventThreadHandle(void *attr)
         ret = DriverPlugin::instance()->MsprofHalEschedSubscribeEvent(eventAttr->deviceId, grpId, 0, eventBitmap);
         if (ret != DRV_ERROR_NONE) {
             (void)DriverPlugin::instance()->MsprofHalEschedDettachDevice(eventAttr->deviceId);
+            eventAttr->isThreadStart = false;
             MSPROF_LOGE("Call halEschedSubscribeEvent failed, devId=%u, ret=%d", eventAttr->deviceId, ret);
             return nullptr;
         }
