@@ -86,7 +86,7 @@ PyObject *WrapExportUnifiedDB(PyObject *self, PyObject *args)
     }
     Log::GetInstance().Init(Utils::File::PathJoin({parseFilePath, "mindstudio_profiler_log"}));
     auto exportManager = Analysis::Application::ExportManager(parseFilePath);
-    if (!exportManager.Run(Analysis::Application::ExportMode::DB)) {
+    if (!exportManager.Run({Analysis::Application::ExportMode::DB})) {
         ERROR("UnifiedDB run failed.");
         return Py_BuildValue("i", ANALYSIS_ERROR);
     }
@@ -112,7 +112,8 @@ PyObject *WrapExportTimeline(PyObject *self, PyObject *args)
     }
     Log::GetInstance().Init(Utils::File::PathJoin({parseFilePath, "mindstudio_profiler_log"}));
     auto exportManager = Analysis::Application::ExportManager(parseFilePath, reportJsonPath);
-    if (!exportManager.Run(Analysis::Application::ExportMode::TIMELINE)) {
+    if (!exportManager.Run({Analysis::Application::ExportMode::TIMELINE,
+                            Analysis::Application::ExportMode::DB})) {
         ERROR("Timeline run failed.");
         return Py_BuildValue("i", ANALYSIS_ERROR);
     }
@@ -133,7 +134,8 @@ PyObject *WrapExportSummary(PyObject *self, PyObject *args)
     }
     Log::GetInstance().Init(Utils::File::PathJoin({parseFilePath, "mindstudio_profiler_log"}));
     auto exportManager = Analysis::Application::ExportManager(parseFilePath, "");
-    if (!exportManager.Run(Analysis::Application::ExportMode::SUMMARY)) {
+    if (!exportManager.Run({Analysis::Application::ExportMode::SUMMARY,
+                            Analysis::Application::ExportMode::DB})) {
         ERROR("Summary run failed.");
         return Py_BuildValue("i", ANALYSIS_ERROR);
     }

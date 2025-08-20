@@ -173,7 +173,7 @@ TEST_F(SocBandwidthProcessorUTest, TestRunShouldReturnFalseWhenProcessSingleDevi
         auto processor = SocBandwidthProcessor(path);
         auto dataInventory = DataInventory();
 
-        MOCKER_CPP(&Utils::GetDeviceIdByDevicePath).stubs().will(returnValue(UINT16_MAX));
+        MOCKER_CPP(&Utils::GetDeviceIdByDevicePath).stubs().will(returnValue(static_cast<uint16_t>(UINT16_MAX)));
         EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_SOC));
         MOCKER_CPP(&Utils::GetDeviceIdByDevicePath).reset();
     }

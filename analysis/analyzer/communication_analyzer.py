@@ -101,12 +101,11 @@ class CommunicationAnalyzer:
 
     def _generate_output(self, rank_path):
         communication_parser = self._generate_parser(rank_path)
-        op_info = communication_parser.run()
+        process_data = self._process_dict(communication_parser.run())
 
         if self.export_type == 'text':
-            self._dump_dict_to_json(self._process_dict(op_info))
-        elif self.export_type == 'db':
-            self._dump_dict_to_db(self._process_dict(op_info))
+            self._dump_dict_to_json(process_data)
+        self._dump_dict_to_db(process_data)
 
     def _dump_dict_to_db(self, output_result: dict):
         output_file_path = PathManager.get_analyze_dir(self.collection_path)

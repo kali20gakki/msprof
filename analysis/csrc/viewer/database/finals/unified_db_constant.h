@@ -173,6 +173,7 @@ const std::string TABLE_NAME_OSRT_API = "OSRT_API";
 
 const std::string PROCESSOR_NAME_HASH = "HASH_INIT";
 const std::string PROCESSOR_NAME_QOS = "QOS";
+const std::string TABLE_NAME_QOS = "QOS";
 const std::string PROCESSOR_MC2_COMM_INFO = "MC2_COMM_INFO";
 const std::string PROCESSOR_NAME_NIC_TIMELINE = "NIC_TIMELINE";
 const std::string PROCESSOR_NAME_ROCE_TIMELINE = "ROCE_TIMELINE";

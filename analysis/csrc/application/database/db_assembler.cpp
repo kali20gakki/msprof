@@ -12,11 +12,13 @@
 
 
 #include "analysis/csrc/application/database/db_assembler.h"
+#include <atomic>
 #include <functional>
 #include "analysis/csrc/application/database/db_constant.h"
 #include "analysis/csrc/application/credential/id_pool.h"
 #include "analysis/csrc/domain/services/environment/context.h"
 #include "analysis/csrc/infrastructure/dfx/error_code.h"
+#include "analysis/csrc/infrastructure/utils/thread_pool.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/api_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/ascend_task_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/communication_info_data.h"
@@ -40,6 +42,7 @@
 #include "analysis/csrc/domain/entities/viewer_data/system/include/sys_io_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/host_usage_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/netdev_stats_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/system/include/qos_data.h"
 
 
 namespace Analysis {
@@ -50,6 +53,7 @@ using namespace Analysis::Domain::Environment;
 using IdPool = Analysis::Application::Credential::IdPool;
 
 namespace {
+const size_t EXPECT_TIME_LEN = 14;
 const std::string TASK_INDEX_NAME = "TaskIndex";
 const std::vector<std::string> TASK_INDEX_COL_NAMES = {"startNs", "globalTaskId"};
 const std::string COMM_INDEX_NAME = "CommunicationTaskIndex";
@@ -63,9 +67,9 @@ using CommunicationOpDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uin
         uint32_t, int32_t, int32_t, uint64_t, uint64_t, uint64_t, uint64_t>>;
 // 小算子数据
 // name, globalTaskId, taskType, planeId, groupName, notifyId, rdmaType, srcRank, dstRank, transportType,
-// size, dataType, linkType, opId, isMaster
+// size, dataType, linkType, opId, isMaster, bandwidth
 using CommunicationTaskDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint32_t, uint64_t,
-        uint64_t, uint64_t, uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint64_t, uint32_t, uint16_t>>;
+        uint64_t, uint64_t, uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint64_t, uint32_t, uint16_t, double>>;
 
 struct ComputeTaskInfoData {
     uint64_t opName;
@@ -222,7 +226,8 @@ void ConvertTaskData(CommunicationTaskDataFormat &processedTaskData, const std::
         processedTaskData.emplace_back(opName, globalTaskId, taskType, item.planeId,
                                        groupName, notifyId, item.rdmaType, item.srcRank,
                                        item.dstRank, item.transportType, item.size, item.dataType,
-                                       item.linkType, opId, item.isMaster);
+                                       item.linkType, opId, item.isMaster,
+                                       item.bandwidth * BYTE_SIZE * BYTE_SIZE * BYTE_SIZE);
     }
 }
 
@@ -1031,6 +1036,46 @@ bool SaveOSRuntimeApiData(DataInventory& dataInventory, DBInfo& msprofDB, const 
     return SaveData(res, TABLE_NAME_OSRT_API, msprofDB);
 }
 
+bool SaveQosData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
+{
+    const std::string QOS = "QoS ";
+    auto qosData = dataInventory.GetPtr<std::vector<QosData>>();
+    if (qosData == nullptr) {
+        WARN("QOS data not exist.");
+        return true;
+    }
+    std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint64_t>> res;
+    if (!Reserve(res, qosData->size())) {
+        ERROR("Reserved for QOS data failed.");
+        return false;
+    }
+
+    std::unordered_map<uint16_t, std::vector<uint64_t>> qosEventsMap;
+    auto deviceList = File::GetFilesWithPrefix(profPath, DEVICE_PREFIX);
+    for (const auto& devicePath: deviceList) {
+        auto deviceId = GetDeviceIdByDevicePath(devicePath);
+        auto qosEnents = Context::GetInstance().GetQosEvents(deviceId, profPath);
+        std::vector<uint64_t> qosEventsIds;
+        for (const auto &event : qosEnents) {
+            qosEventsIds.push_back(IdPool::GetInstance().GetUint64Id(QOS + event));
+        }
+        qosEventsMap[deviceId] = qosEventsIds;
+    }
+
+    for (const auto &data : *qosData) {
+        auto it = qosEventsMap.find(data.deviceId);
+        if (it == qosEventsMap.end()) {
+            continue;
+        }
+        std::vector<uint32_t> bandwidth {data.bw1, data.bw2, data.bw3, data.bw4, data.bw5, data.bw6, data.bw7,
+                                         data.bw8, data.bw9, data.bw10};
+        for (size_t i = 0; i < it->second.size(); i++) {
+            res.emplace_back(data.deviceId, it->second[i], bandwidth[i] * BYTE_SIZE * BYTE_SIZE, data.timestamp);
+        }
+    }
+    return SaveData(res, TABLE_NAME_QOS, msprofDB);
+}
+
 // 创建 SaveData 的函数类型
 using SaveDataFunc = std::function<bool(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)>;
 const std::unordered_map<std::string, SaveDataFunc> DATA_SAVER = {
@@ -1067,9 +1112,64 @@ const std::unordered_map<std::string, SaveDataFunc> DATA_SAVER = {
     {Viewer::Database::PROCESSOR_NAME_DISK_USAGE,          SaveHostDiskUsageData},
     {Viewer::Database::PROCESSOR_NAME_NETWORK_USAGE,       SaveHostNetworkUsageData},
     {Viewer::Database::PROCESSOR_NAME_OSRT_API,            SaveOSRuntimeApiData},
+    {Viewer::Database::PROCESSOR_NAME_QOS,                 SaveQosData},
 };
 
-const std::vector<std::string> DB_DATA_PROCESS_LIST{
+bool CheckMsprofDb(const std::string &outputPath)
+{
+    std::vector<std::string> files = File::GetOriginData(outputPath, {DB_NAME_MSPROF_DB}, {".json", ".csv"});
+    if (files.empty()) {
+        return false;
+    }
+    std::string timestampMax;
+    std::string latestFile;
+    for (const auto& file : files) {
+        auto dbName = Split(file, "/").back();
+        size_t start = dbName.find(DB_NAME_MSPROF_DB) + DB_NAME_MSPROF_DB.length() + 1;
+        size_t end = dbName.find(".db");
+        if (start == std::string::npos || end == std::string::npos) continue;
+
+        std::string timestampStr = dbName.substr(start, end - start);
+        if (!IsNumber(timestampStr) || timestampStr.size() != EXPECT_TIME_LEN) {
+            ERROR("Invalid msprof db name %.", dbName);
+            continue;
+        }
+        if (timestampStr > timestampMax) {
+            timestampMax = timestampStr;
+            latestFile = file;
+        }
+    }
+
+    DBInfo msprofDB(latestFile, TABLE_NAME_STRING_IDS);
+    if (!msprofDB.ConstructDBRunner(latestFile)) {
+        ERROR("Construct for msprof db runner failed.");
+        return false;
+    }
+
+    if (!Utils::FileReader::Check(latestFile, MAX_DB_BYTES)) {
+        ERROR("Check % failed.", latestFile);
+        return false;
+    }
+    if (msprofDB.dbRunner->CheckTableExists(msprofDB.tableName)) {
+        INFO("Find completed msprof db, %.", latestFile);
+        return true;
+    }
+
+    INFO("The % database is incomplete and will be deleted.", latestFile);
+    PRINT_INFO("The % database is incomplete and will be deleted.", latestFile);
+    if (!Utils::File::DeleteFile(latestFile)) {
+        ERROR("Failed to delete file, %.", latestFile);
+    }
+    return false;
+}
+
+std::string GetDBPath(const std::string& outputDir)
+{
+    return Utils::File::PathJoin(
+        {outputDir, DB_NAME_MSPROF_DB + "_" + Analysis::Utils::GetFormatLocalTime() + ".db"});
+}
+
+const std::set<std::string> DB_DATA_PROCESS_LIST{
     PROCESSOR_NAME_API,
     PROCESSOR_NAME_COMMUNICATION,
     PROCESSOR_NAME_COMPUTE_TASK_INFO,
@@ -1107,33 +1207,48 @@ const std::vector<std::string> DB_DATA_PROCESS_LIST{
 }
 
 
-DBAssembler::DBAssembler(const std::string& msprofDBPath, const std::string& profPath)
-    : msprofDBPath_(msprofDBPath), profPath_(profPath)
+DBAssembler::DBAssembler(const std::string &profPath, const std::string &outputPath)
+    : profPath_(profPath), outputPath_(outputPath)
 {
     MAKE_SHARED0_NO_OPERATION(msprofDB_.database, MsprofDB);
-    msprofDB_.ConstructDBRunner(msprofDBPath_);
+    auto msprofDBPath = GetDBPath(outputPath);
+    msprofDB_.ConstructDBRunner(msprofDBPath);
 }
 
 bool DBAssembler::Run(DataInventory& dataInventory)
 {
     INFO("Start exporting db!");
     PRINT_INFO("Start exporting the db!");
-    bool retFlag = true;
-    for (const auto& saveFunc : DATA_SAVER) {
-        INFO("Begin to save % data.", saveFunc.first);
-        auto flag = saveFunc.second(dataInventory, msprofDB_, profPath_);
-        if (!flag) {
-            ERROR("Save % data failed.", saveFunc.first);
-        }
-        retFlag = flag && retFlag;
+    if (CheckMsprofDb(outputPath_)) {
+        PRINT_INFO("Find completed msprof db. End exporting db output_file.");
+        return true;
     }
+
+    std::atomic<bool> retFlag(true);
+    const uint16_t processorsLimit = 10; // 最多有10个线程
+    Analysis::Utils::ThreadPool pool(processorsLimit);
+    pool.Start();
+
+    for (const auto& saveFunc : DATA_SAVER) {
+        pool.AddTask([saveFunc, &retFlag, &dataInventory, this]() {
+            INFO("Begin to save % data.", saveFunc.first);
+            auto flag = saveFunc.second(dataInventory, msprofDB_, profPath_);
+            if (!flag) {
+                ERROR("Save % data failed.", saveFunc.first);
+            }
+            retFlag = flag && retFlag;
+        });
+    }
+    pool.WaitAllTasks();
+    pool.Stop();
+
     // StringIds为id到name映射表，需要最后落盘
     retFlag = SaveStringIdsData(dataInventory, msprofDB_, profPath_) && retFlag;
     PRINT_INFO("End exporting db output_file. The file is stored in the PROF file.");
     return retFlag;
 }
 
-std::vector<std::string> DBAssembler::GetProcessList()
+const std::set<std::string>& DBAssembler::GetProcessList()
 {
     return DB_DATA_PROCESS_LIST;
 }

@@ -27,7 +27,7 @@ public:
     explicit TimelineManager(const std::string &profPath, const std::string &outputPath)
         : profPath_(profPath), outputPath_(outputPath) {};
     bool Run(DataInventory &dataInventory, const std::vector<JsonProcess>& jsonProcess);
-    static std::vector<std::string> GetProcessList();
+    const static std::set<std::string>& GetProcessList();
 private:
     bool ProcessTimeLine(DataInventory &dataInventory, const std::vector<JsonProcess> &jsonEnum);
     bool PreDumpJson(DataInventory &dataInventory);

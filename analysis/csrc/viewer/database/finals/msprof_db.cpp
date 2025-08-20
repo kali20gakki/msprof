@@ -92,7 +92,8 @@ namespace {
         {"dataType", SQL_INTEGER_TYPE},
         {"linkType", SQL_INTEGER_TYPE},
         {"opId", SQL_INTEGER_TYPE},
-        {"isMaster", SQL_INTEGER_TYPE}
+        {"isMaster", SQL_INTEGER_TYPE},
+        {"bandwidth", SQL_NUMERIC_TYPE},
     };
 
     const TableColumns COMMUNICATION_OP = {
@@ -353,6 +354,13 @@ namespace {
         {"startNs", SQL_NUMERIC_TYPE},
         {"endNs", SQL_NUMERIC_TYPE}
     };
+
+    const TableColumns QOS = {
+        {"deviceId", SQL_INTEGER_TYPE},
+        {"eventName", SQL_NUMERIC_TYPE},
+        {"bandwidth", SQL_NUMERIC_TYPE},
+        {"timestampNs", SQL_NUMERIC_TYPE}
+    };
 }
 
 MsprofDB::MsprofDB()
@@ -394,6 +402,7 @@ MsprofDB::MsprofDB()
         {TABLE_NAME_HOST_DISK_USAGE,                    HOST_DISK_USAGE},
         {TABLE_NAME_HOST_NETWORK_USAGE,                 HOST_NETWORK_USAGE},
         {TABLE_NAME_OSRT_API,                           OSRT_API},
+        {TABLE_NAME_QOS,                                QOS},
         // ENUM
         {TABLE_NAME_ENUM_API_TYPE,                      ENUM_TABLE},
         {TABLE_NAME_ENUM_MODULE,                        ENUM_TABLE},
