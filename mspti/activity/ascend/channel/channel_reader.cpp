@@ -134,8 +134,6 @@ size_t ChannelReader::TransStarsLog(char buffer[], size_t valid_size, uint32_t d
 {
     size_t pos = 0;
     while (valid_size - pos >= sizeof(StarsSocLog)) {
-        Mspti::Parser::ParserManager::GetInstance()->ReportStarsSocLog(deviceId,
-            reinterpret_cast<StarsSocLog *>(buffer + pos));
         Mspti::Parser::DeviceTaskCalculator::GetInstance().ReportStarsSocLog(deviceId,
             reinterpret_cast<StarsSocHeader *>(buffer + pos));
         pos += sizeof(StarsSocLog);

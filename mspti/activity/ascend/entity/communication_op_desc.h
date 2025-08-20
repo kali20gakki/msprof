@@ -30,19 +30,22 @@ struct CommunicationTask {
     uint16_t streamId;
     uint16_t taskId;
     uint16_t deviceId;
+    bool agingFlag = true;
     CommunicationTask(uint64_t start, uint64_t end, uint64_t hostStartTime, uint64_t hostEndTime, uint16_t streamId,
-        uint16_t taskId, uint16_t deviceId)
+        uint16_t taskId, uint16_t deviceId, bool agingFlag = true)
         : start(start),
           end(end),
           hostStartTime(hostStartTime),
           hostEndTime(hostEndTime),
           streamId(streamId),
           taskId(taskId),
-          deviceId(deviceId)
+          deviceId(deviceId),
+          agingFlag(agingFlag)
     {}
 };
 
 struct CommunicationOpDesc {
+    bool agingFlag = true;
     uint64_t threadId;
     uint64_t hostStartTime;
     uint64_t hostEndTime;

@@ -51,7 +51,7 @@ msptiResult DeviceTaskCalculator::ReportStarsSocLog(uint32_t deviceId, StarsSocH
     return MSPTI_SUCCESS;
 }
 
-msptiResult DeviceTaskCalculator::AssembleTasksTimeWithSocLog(uint32_t deviceId, StarsSocLog *socLog)
+msptiResult DeviceTaskCalculator::AssembleTasksTimeWithSocLog(uint32_t deviceId, StarsSocLog* socLog)
 {
     uint16_t streamId = StarsCommon::GetStreamId(socLog->streamId, socLog->taskId);
     uint16_t taskId = StarsCommon::GetTaskId(socLog->streamId, socLog->taskId);
@@ -66,14 +66,38 @@ msptiResult DeviceTaskCalculator::AssembleTasksTimeWithSocLog(uint32_t deviceId,
         }
         deviceTask = iter->second.front();
         if (socLog->funcType == STARS_FUNC_TYPE_BEGIN) {
-            deviceTask->start =
-                Mspti::Common::ContextManager::GetInstance()->GetRealTimeFromSysCnt(deviceId, socLog->timestamp);
+            deviceTask->start = socLog->timestamp;
         } else if (socLog->funcType == STARS_FUNC_TYPE_END) {
-            deviceTask->end =
-                Mspti::Common::ContextManager::GetInstance()->GetRealTimeFromSysCnt(deviceId, socLog->timestamp);
-            ans = completeFunc_[dstKey].front()(deviceTask);
-            completeFunc_[dstKey].pop_front();
-            assembleTasks_[dstKey].pop_front();
+            std::vector<uint64_t> timeFromSysCnt =
+                Mspti::Common::ContextManager::GetInstance()->GetRealTimeFromSysCnt(
+                    deviceId, {deviceTask->start, socLog->timestamp});
+            deviceTask->start = timeFromSysCnt[0];
+            deviceTask->end = timeFromSysCnt[1];
+
+            auto& funcList = completeFunc_[dstKey];
+            for (auto it = funcList.begin(); it != funcList.end();) {
+                auto callback = *it;
+                ans = callback(deviceTask);
+                if (deviceTask->agingFlag) {
+                    it = funcList.erase(it);
+                } else {
+                    it++;
+                }
+            }
+            if (funcList.empty()) {
+                completeFunc_.erase(dstKey);
+            }
+            auto& tasks_ = assembleTasks_[dstKey];
+            if (!tasks_.empty()) {
+                if (deviceTask->agingFlag) {
+                    tasks_.pop_front();
+                } else {
+                    tasks_.front()->subTasks.clear();
+                }
+            }
+            if (tasks_.empty()) {
+                assembleTasks_.erase(dstKey);
+            }
         }
     }
     return ans;
@@ -120,7 +144,11 @@ msptiResult DeviceTaskCalculator::AssembleSubTasksTimeWithFftsLog(uint32_t devic
                 assembleTasks_[dstKey].front()->isFfts = true;
                 assembleTasks_[dstKey].front()->subTasks.emplace_back(subTask);
             }
-            assembleSubTasks_[dstsKey].pop_front();
+            auto& subTaskList = assembleSubTasks_[dstsKey];
+            subTaskList.pop_front();
+            if (subTaskList.empty()) {
+                assembleSubTasks_.erase(dstsKey);
+            }
         }
     }
     return MSPTI_SUCCESS;

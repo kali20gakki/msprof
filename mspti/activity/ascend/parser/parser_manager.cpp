@@ -14,10 +14,6 @@
 
 #include "activity/activity_manager.h"
 #include "activity/ascend/reporter/external_correlation_reporter.h"
-#include "common/config.h"
-#include "common/context_manager.h"
-#include "common/plog_manager.h"
-#include "common/utils.h"
 #include "common/thread_local.h"
 #include "hccl_reporter.h"
 #include "stars_common.h"
@@ -49,43 +45,10 @@ inline Mspti::Common::ThreadLocal<msptiActivityApi> GetDefaultApiActivity()
 }
 }
 
-std::unordered_map<uint16_t, std::unordered_map<uint32_t, std::string>> ParserManager::typeInfo_map_;
-std::mutex ParserManager::typeInfoMutex_;
-
 ParserManager *ParserManager::GetInstance()
 {
     static ParserManager instance;
     return &instance;
-}
-
-void ParserManager::RegReportTypeInfo(uint16_t level, uint32_t typeId, const std::string& typeName)
-{
-    std::lock_guard<std::mutex> lock(typeInfoMutex_);
-    auto level_iter = typeInfo_map_.find(level);
-    if (level_iter == typeInfo_map_.end()) {
-        std::unordered_map<uint32_t, std::string> type_entry {{typeId, typeName}};
-        typeInfo_map_.insert({level, type_entry});
-        return;
-    }
-    auto type_iter = level_iter->second.find(typeId);
-    if (type_iter == level_iter->second.end()) {
-        level_iter->second.insert({typeId, typeName});
-        return;
-    }
-}
-
-std::string& ParserManager::GetTypeName(uint16_t level, uint32_t typeId)
-{
-    static std::string nullInfo = "";
-    std::lock_guard<std::mutex> lock(typeInfoMutex_);
-    auto level_iter = typeInfo_map_.find(level);
-    if (level_iter != typeInfo_map_.end()) {
-        auto type_iter = level_iter->second.find(typeId);
-        if (type_iter != level_iter->second.end()) {
-            return type_iter->second;
-        }
-    }
-    return nullInfo;
 }
 
 bool IsCommunicationNodeLaunch(const std::string& nodeLaunchName)
@@ -109,10 +72,6 @@ msptiResult ParserManager::ReportApi(const MsprofApi* const data)
         MSPTI_LOGW("Get HashInfo failed. HashId: %lu", data->itemId);
         return MSPTI_SUCCESS;
     }
-    // 通信算子不走rtKernellaunch下发，会导致correlationId未+1， 此处手动+1
-    if (IsCommunicationNodeLaunch(name)) {
-        Mspti::Common::ContextManager::GetInstance()->UpdateAndReportCorrelationId(data->threadId);
-    }
 
     if (!Mspti::Activity::ActivityManager::GetInstance()->IsActivityKindEnable(MSPTI_ACTIVITY_KIND_API)) {
         return MSPTI_SUCCESS;
@@ -134,105 +93,6 @@ msptiResult ParserManager::ReportApi(const MsprofApi* const data)
     if (Mspti::Activity::ActivityManager::GetInstance()->Record(
         Common::ReinterpretConvert<msptiActivity*>(api), sizeof(msptiActivityApi)) != MSPTI_SUCCESS) {
         return MSPTI_ERROR_INNER;
-    }
-    return MSPTI_SUCCESS;
-}
-
-msptiResult ParserManager::ReportCommunicationApi(const MsprofApi *const data)
-{
-    return CannTrackCache::GetInstance().AppendCommunication(data);
-}
-
-msptiResult ParserManager::ReportHcclCompactData(const MsprofCompactInfo* compact)
-{
-    return CommunicationCalculator::GetInstance().AppendCompactInfo(compact);
-}
-
-msptiResult ParserManager::ReportRtTaskTrack(const MsprofCompactInfo* data)
-{
-    CannTrackCache::GetInstance().AppendTsTrack(data);
-
-    auto &track = data->data.runtimeTrack;
-    auto taskId = static_cast<uint16_t>(track.taskInfo & 0xffff);
-    uint16_t streamId = track.streamId;
-    uint16_t deviceId = track.deviceId;
-    DstType dstKey = std::make_tuple(deviceId, streamId, taskId);
-    const static std::map<TsTaskType, std::string> KERNEL_TYPE = {
-        {TS_TASK_TYPE_KERNEL_AICORE, "KERNEL_AICORE"},
-        {TS_TASK_TYPE_KERNEL_AICPU, "KERNEL_AICPU"},
-        {TS_TASK_TYPE_KERNEL_AIVEC, "KERNEL_AIVEC"},
-        {TS_TASK_TYPE_KERNEL_MIX_AIC, "KERNEL_MIX_AIC"},
-        {TS_TASK_TYPE_KERNEL_MIX_AIV, "KERNEL_MIX_AIV"},
-    };
-    auto typeIter = KERNEL_TYPE.find(static_cast<TsTaskType>(track.taskType));
-    if (typeIter != KERNEL_TYPE.end()) {
-        std::shared_ptr<msptiActivityKernel> kernel{nullptr};
-        Mspti::Common::MsptiMakeSharedPtr(kernel);
-        if (!kernel) {
-            MSPTI_LOGE("Mallod memory failed.");
-            return MSPTI_ERROR_INNER;
-        }
-        kernel->kind = MSPTI_ACTIVITY_KIND_KERNEL;
-        kernel->correlationId = Mspti::Common::ContextManager::GetInstance()->GetCorrelationId();
-        kernel->name = CannHashCache::GetInstance().GetHashInfo(track.kernelName).c_str();
-        kernel->type = typeIter->second.c_str();
-        {
-            std::lock_guard<std::mutex> lk(kernel_mtx_);
-            auto iter = kernel_map_.find(dstKey);
-            if (iter == kernel_map_.end()) {
-                std::list<std::shared_ptr<msptiActivityKernel>> kernelList{kernel};
-                kernel_map_.insert({dstKey, kernelList});
-            } else {
-                iter->second.emplace_back(std::move(kernel));
-            }
-        }
-    }
-    return MSPTI_SUCCESS;
-}
-
-msptiResult ParserManager::ReportStarsSocLog(uint32_t deviceId, const StarsSocLog* socLog)
-{
-    if (!socLog) {
-        return MSPTI_ERROR_INNER;
-    }
-    constexpr int32_t BIT_OFFSET = 32;
-    uint16_t streamId = StarsCommon::GetStreamId(static_cast<uint16_t>(socLog->streamId),
-                                                 static_cast<uint16_t>(socLog->taskId));
-    uint16_t taskId = StarsCommon::GetTaskId(static_cast<uint16_t>(socLog->streamId),
-                                             static_cast<uint16_t>(socLog->taskId));
-    auto dstKey = std::make_tuple(static_cast<uint16_t>(deviceId), streamId, taskId);
-    std::lock_guard<std::mutex> lk(kernel_mtx_);
-    auto iter = kernel_map_.find(dstKey);
-    if (iter != kernel_map_.end()) {
-        auto& kernelList = iter->second;
-        if (kernelList.empty()) {
-            MSPTI_LOGE("The cache kernel list data is empty.");
-            kernel_map_.erase(iter);
-            return MSPTI_ERROR_INNER;
-        }
-        auto& kernel = kernelList.front();
-        if (!kernel) {
-            MSPTI_LOGE("The cache kernel data is nullptr.");
-            return MSPTI_ERROR_INNER;
-        }
-        if (socLog->funcType == STARS_FUNC_TYPE_BEGIN) {
-            kernel->ds.deviceId = deviceId;
-            kernel->ds.streamId = streamId;
-            kernel->start = Common::ContextManager::GetInstance()->GetRealTimeFromSysCnt(deviceId, socLog->timestamp);
-        } else if (socLog->funcType == STARS_FUNC_TYPE_END) {
-            kernel->end = Common::ContextManager::GetInstance()->GetRealTimeFromSysCnt(deviceId, socLog->timestamp);
-            if (Mspti::Activity::ActivityManager::GetInstance()->Record(
-                Common::ReinterpretConvert<msptiActivity*>(kernel.get()),
-                sizeof(msptiActivityKernel)) != MSPTI_SUCCESS) {
-                return MSPTI_ERROR_INNER;
-            }
-            kernelList.pop_front();
-            if (kernelList.empty()) {
-                kernel_map_.erase(iter);
-            }
-        }
-    } else {
-        MSPTI_LOGW("The kernel is not found for deviceId: %u, streamId: %u, taskId: %u", deviceId, streamId, taskId);
     }
     return MSPTI_SUCCESS;
 }
@@ -298,6 +158,5 @@ Mspti::Parser::ProfTask* ParserManager::GetAnalysisTask(msptiActivityKind kind)
             return &Mspti::Parser::NullProfTask::GetInstance();
     }
 }
-
 }  // Parser
 }  // Mspti

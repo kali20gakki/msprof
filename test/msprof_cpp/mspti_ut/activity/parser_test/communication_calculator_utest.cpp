@@ -61,6 +61,7 @@ TEST_F(CommunicationCalculatorUtest, ShouldReturnSuccess)
 
 TEST_F(CommunicationCalculatorUtest, ShouldReturnSuccessAppendCompactInfo)
 {
+    bool agingFlag = 1;
     uint8_t dataType = 1;
     uint64_t dataCount = 1;
     MsprofCompactInfo data;
@@ -70,9 +71,9 @@ TEST_F(CommunicationCalculatorUtest, ShouldReturnSuccessAppendCompactInfo)
     data.data.hcclopInfo.algType = Mspti::Parser::CannHashCache::GetInstance().GenHashId("mesh");
     data.data.hcclopInfo.algType = dataCount;
     auto &instance = Mspti::Parser::CommunicationCalculator::GetInstance();
-    EXPECT_EQ(MSPTI_SUCCESS, instance.AppendCompactInfo(&data));
+    EXPECT_EQ(MSPTI_SUCCESS, instance.AppendCompactInfo(agingFlag, &data));
     EXPECT_EQ(MSPTI_SUCCESS,
         Mspti::Activity::ActivityManager::GetInstance()->Register(MSPTI_ACTIVITY_KIND_COMMUNICATION));
-    EXPECT_EQ(MSPTI_SUCCESS, instance.AppendCompactInfo(&data));
+    EXPECT_EQ(MSPTI_SUCCESS, instance.AppendCompactInfo(agingFlag, &data));
 }
 }

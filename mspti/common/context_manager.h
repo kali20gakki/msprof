@@ -17,6 +17,10 @@
 #include <memory>
 #include <mutex>
 #include <unordered_map>
+#include <condition_variable>
+#include <thread>
+#include <external/mspti_result.h>
+#include <vector>
 
 namespace Mspti {
 namespace Common {
@@ -40,29 +44,45 @@ public:
     void InitHostTimeInfo();
     bool HostFreqIsEnable();
     uint64_t GetRealTimeFromSysCnt(uint32_t deviceId, uint64_t sysCnt);
+    std::vector<uint64_t> GetRealTimeFromSysCnt(uint32_t deviceId, const std::vector<uint64_t>& sysCnts);
     // Host
     uint64_t GetRealTimeFromSysCnt(uint64_t sysCnt);
     uint64_t GetHostTimeStampNs();
     PlatformType GetChipType(uint32_t deviceId);
     uint64_t GetCorrelationId(uint32_t threadId = 0);
-    void UpdateAndReportCorrelationId();
-    void UpdateAndReportCorrelationId(uint32_t tid);
+    uint64_t UpdateAndReportCorrelationId();
+    uint64_t UpdateAndReportCorrelationId(uint32_t tid);
+
+    msptiResult StartSyncTime();
+    msptiResult StopSyncTime();
 
 private:
     ContextManager() = default;
+    ~ContextManager();
     explicit ContextManager(const ContextManager &obj) = delete;
     ContextManager& operator=(const ContextManager &obj) = delete;
     explicit ContextManager(ContextManager &&obj) = delete;
     ContextManager& operator=(ContextManager &&obj) = delete;
 
-    uint64_t CalcuateRealTime(uint64_t sysCnt, DevTimeInfo& devTimeInfo);
+    void Run();
+    static uint64_t CalculateRealTime(uint64_t sysCnt, DevTimeInfo& devTimeInfo);
+
 private:
     std::unordered_map<uint32_t, std::unique_ptr<DevTimeInfo>> devTimeInfo_;
     std::mutex devTimeMtx_;
+
+    std::mutex hostTimeMtx_;
     std::unique_ptr<DevTimeInfo> hostTimeInfo_;
+
+    std::atomic<bool> isQuit_{false};
+    std::thread t_;
 
     std::mutex correlationIdMtx_;
     uint64_t correlationId_{0};
+
+    std::mutex cv_mutex_;
+    std::condition_variable cv_;
+
     std::unordered_map<uint32_t, uint64_t> threadCorrelationIdInfo_;
 };
 }  // Common

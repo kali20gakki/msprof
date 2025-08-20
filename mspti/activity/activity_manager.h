@@ -63,6 +63,8 @@ public:
     msptiResult UnRegister(msptiActivityKind kind);
     bool IsActivityKindEnable(msptiActivityKind kind);
 
+    const std::unordered_set<uint32_t> GetAllValidDevice();    // 仅返回当前device快照
+
 private:
     ActivityManager();
     ~ActivityManager();
@@ -78,7 +80,6 @@ private:
     // Replace map with bitest
     ActivitySwitchType activity_switch_;
     ActivitySwitchType append_only_activity_switch_;
-    std::mutex activity_mtx_;
     std::unordered_set<uint32_t> devices_;
     std::mutex devices_mtx_;
     

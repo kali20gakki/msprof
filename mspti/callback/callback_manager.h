@@ -42,7 +42,9 @@ public:
     msptiResult EnableDomain(uint32_t enable, msptiSubscriberHandle subscriber, msptiCallbackDomain domain);
     void ExecuteCallback(msptiCallbackDomain domain,
         msptiCallbackId cbid, msptiApiCallbackSite site, const char* funcName);
-
+public:
+    using BitMap = uint64_t;
+    using AtomicBitMap = std::atomic<BitMap>;
 private:
     CallbackManager() = default;
     explicit CallbackManager(const CallbackManager &obj) = delete;
@@ -51,13 +53,14 @@ private:
     CallbackManager& operator=(CallbackManager &&obj) = delete;
     msptiResult Register(msptiCallbackDomain domain, msptiCallbackId c);
     msptiResult UnRegister(msptiCallbackDomain domain, msptiCallbackId c);
+    bool IsCallbackIdEnable(msptiCallbackDomain domain, msptiCallbackId cbid);
 
 private:
     static std::unordered_map<msptiCallbackDomain, std::unordered_set<msptiCallbackId>> domain_cbid_map_;
     std::atomic<bool> init_{false};
     std::unique_ptr<msptiSubscriber_st> subscriber_ptr_{nullptr};
-    std::unordered_map<msptiCallbackDomain, std::unordered_set<msptiCallbackId>> cbid_map_;
-    std::mutex cbid_mtx_;
+    // 采用bitmap存储cbid开关情况，目前cbid均小于64，后续cbid超长之后采用拓展bitmap存储
+    std::array<AtomicBitMap, MSPTI_CB_DOMAIN_SIZE> cbid_map_;
 };
 
 class CallbackScope {

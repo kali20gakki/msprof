@@ -16,10 +16,23 @@
 #include "activity/activity_manager.h"
 #include "activity/ascend/dev_task_manager.h"
 #include "common/plog_manager.h"
+#include "common/context_manager.h"
 #include "common/utils.h"
 
 namespace Mspti {
 namespace Callback {
+
+namespace {
+inline bool IsValidCBDomain(msptiCallbackDomain domain)
+{
+    return domain > MSPTI_CB_DOMAIN_INVALID && domain < MSPTI_CB_DOMAIN_SIZE;
+}
+
+inline bool IsValidCBId(msptiCallbackId cbid)
+{
+    return cbid < sizeof(CallbackManager::BitMap) * 8;
+}
+}
 
 std::unordered_map<msptiCallbackDomain, std::unordered_set<msptiCallbackId>> CallbackManager::domain_cbid_map_ = {
     {MSPTI_CB_DOMAIN_RUNTIME, {
@@ -69,12 +82,16 @@ msptiResult CallbackManager::Init(msptiSubscriberHandle *subscriber, msptiCallba
         MSPTI_LOGE("Failed to init subscriber.");
         return MSPTI_ERROR_INNER;
     }
+    for (auto& bitmap : cbid_map_) {
+        bitmap.store(0, std::memory_order_relaxed);
+    }
     subscriber_ptr_->handle = callback;
     subscriber_ptr_->userdata = userdata;
     *subscriber = subscriber_ptr_.get();
     init_.store(true);
-    MSPTI_LOGI("CallbackManager Init success.");
     Mspti::Ascend::DevTaskManager::GetInstance()->RegisterReportCallback();
+    Mspti::Common::ContextManager::GetInstance()->StartSyncTime();
+    MSPTI_LOGI("CallbackManager Init success.");
     return MSPTI_SUCCESS;
 }
 
@@ -88,34 +105,35 @@ msptiResult CallbackManager::UnInit(msptiSubscriberHandle subscriber)
         return MSPTI_ERROR_INVALID_PARAMETER;
     }
     subscriber_ptr_.reset(nullptr);
-    cbid_map_.clear();
+    for (auto& bitmap : cbid_map_) {
+        bitmap.store(0, std::memory_order_relaxed);
+    }
     init_.store(false);
+    Mspti::Common::ContextManager::GetInstance()->StopSyncTime();
     MSPTI_LOGI("CallbackManager UnInit success.");
     return MSPTI_SUCCESS;
 }
 
 msptiResult CallbackManager::Register(msptiCallbackDomain domain, msptiCallbackId cbid)
 {
-    std::lock_guard<std::mutex> lk(cbid_mtx_);
-    auto domain_entry = cbid_map_.find(domain);
-    if (domain_entry == cbid_map_.end()) {
-        cbid_map_.emplace(domain, std::unordered_set<msptiCallbackId>({cbid}));
-    } else {
-        domain_entry->second.insert(cbid);
+    if (!IsValidCBDomain(domain) || !IsValidCBId(cbid)) {
+        return MSPTI_ERROR_INVALID_PARAMETER;
     }
+    auto idx = static_cast<size_t>(domain);
+    uint64_t mask = 1ULL << static_cast<int>(cbid);
+    cbid_map_[idx].fetch_or(mask, std::memory_order_relaxed);
     MSPTI_LOGI("CallbackManager Register domain: %d, cbid: %d.", domain, cbid);
     return MSPTI_SUCCESS;
 }
 
 msptiResult CallbackManager::UnRegister(msptiCallbackDomain domain, msptiCallbackId cbid)
 {
-    std::lock_guard<std::mutex> lk(cbid_mtx_);
-    auto domain_entry = cbid_map_.find(domain);
-    if (domain_entry == cbid_map_.end()) {
-        return MSPTI_SUCCESS;
-    } else {
-        domain_entry->second.erase(cbid);
+    if (!IsValidCBDomain(domain) || !IsValidCBId(cbid)) {
+        return MSPTI_ERROR_INVALID_PARAMETER;
     }
+    auto idx = static_cast<size_t>(domain);
+    uint64_t mask = ~(1ULL << static_cast<int>(cbid));
+    cbid_map_[idx].fetch_and(mask, std::memory_order_relaxed);
     MSPTI_LOGI("CallbackManager UnRegister domain: %d, cbid: %d.", domain, cbid);
     return MSPTI_SUCCESS;
 }
@@ -131,7 +149,7 @@ msptiResult CallbackManager::EnableCallback(uint32_t enable,
         MSPTI_LOGE("subscriber was not subscribe.");
         return MSPTI_ERROR_INVALID_PARAMETER;
     }
-    if (domain <= MSPTI_CB_DOMAIN_INVALID || domain >= MSPTI_CB_DOMAIN_SIZE) {
+    if (!IsValidCBDomain(domain)) {
         MSPTI_LOGE("domain: %d was invalid.", domain);
         return MSPTI_ERROR_INVALID_PARAMETER;
     }
@@ -149,7 +167,7 @@ msptiResult CallbackManager::EnableDomain(uint32_t enable,
         MSPTI_LOGE("subscriber was not subscribe.");
         return MSPTI_ERROR_INVALID_PARAMETER;
     }
-    if (domain <= MSPTI_CB_DOMAIN_INVALID || domain >= MSPTI_CB_DOMAIN_SIZE) {
+    if (!IsValidCBDomain(domain)) {
         MSPTI_LOGE("domain: %d was invalid.", domain);
         return MSPTI_ERROR_INVALID_PARAMETER;
     }
@@ -171,21 +189,26 @@ void CallbackManager::ExecuteCallback(msptiCallbackDomain domain,
     if (!init_.load()) {
         return;
     }
-    auto iter = cbid_map_.end();
-    {
-        std::lock_guard<std::mutex> lk(cbid_mtx_);
-        iter = cbid_map_.find(domain);
-    }
-    if (iter == cbid_map_.end()) {
+    if (!IsCallbackIdEnable(domain, cbid)) {
         return;
     }
-    if (iter->second.find(cbid) != iter->second.end() && subscriber_ptr_->handle) {
+    if (subscriber_ptr_->handle) {
         MSPTI_LOGD("CallbackManager execute Callbackfunc, funcName is %s", funcName);
         msptiCallbackData callbackData;
         callbackData.callbackSite = site;
         callbackData.functionName = funcName;
         subscriber_ptr_->handle(subscriber_ptr_->userdata, domain, cbid, &callbackData);
     }
+}
+
+bool CallbackManager::IsCallbackIdEnable(msptiCallbackDomain domain, msptiCallbackId cbid)
+{
+    if (!IsValidCBDomain(domain) || !IsValidCBId(cbid)) {
+        return false;
+    }
+    auto idx = static_cast<size_t>(domain);
+    uint64_t bits = cbid_map_[idx].load(std::memory_order_relaxed);
+    return (bits >> static_cast<int>(cbid)) & 1;
 }
 
 }  // Callback

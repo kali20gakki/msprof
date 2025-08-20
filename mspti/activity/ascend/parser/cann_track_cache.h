@@ -8,21 +8,21 @@
  * Author             : msprof team
  * Creation Date      : 2025/05/14
  * *****************************************************************************
-*/
+ */
 
 #ifndef MSPTI_PARSER_CANN_TRACK_CACHE_H
 #define MSPTI_PARSER_CANN_TRACK_CACHE_H
 
 #include <thread>
 #include <atomic>
+#include <vector>
+#include <memory>
 #include "common/inject/profapi_inject.h"
-#include "common/task.h"
-#include "common/bound_queue.h"
-#include "unordered_map"
 
 namespace Mspti {
 namespace Parser {
 struct ApiEvent {
+    bool agingFlag = true;
     uint64_t threadId;
     uint16_t level;
     MsprofApi api;
@@ -60,61 +60,24 @@ private:
     explicit NullProfTask() = default;
 };
 
-struct CannThreadCache {
-    uint32_t threadId;
-    Mspti::Common::MPSCQueue<std::shared_ptr<MsprofCompactInfo>, Mspti::Common::DEFAULT_CAPCAITY> taskQueue;
-    Mspti::Common::MPSCQueue<std::shared_ptr<MsprofApi>, Mspti::Common::DEFAULT_CAPCAITY> nodeLaunchQueue;
-    Mspti::Common::MPSCQueue<std::shared_ptr<MsprofApi>, Mspti::Common::DEFAULT_CAPCAITY> communicationQueue;
-};
-
-using CannThreadCachePtr = std::shared_ptr<CannThreadCache>;
-
 class CannTrackCache final : public ProfTask {
 public:
-    msptiResult AppendTsTrack(const MsprofCompactInfo* data);
+    static CannTrackCache& GetInstance();
 
-    msptiResult AppendNodeLunch(const MsprofApi* data);
+    msptiResult AppendTsTrack(bool aging, const MsprofCompactInfo* data);
 
-    msptiResult AppendCommunication(const MsprofApi* data);
+    msptiResult AppendNodeLunch(bool aging, const MsprofApi* data);
 
-    ~CannTrackCache() override;
-
-    static CannTrackCache& GetInstance()
-    {
-        static CannTrackCache instance;
-        return instance;
-    }
-
-private:
-    explicit CannTrackCache() = default;
-
-    msptiResult Run();
+    msptiResult AppendCommunication(bool aging, const MsprofApi* data);
 
     msptiResult StartTask() override;
 
     msptiResult StopTask() override;
-
-    msptiResult Analysis(const CannThreadCachePtr& cache);
-
-    CannThreadCachePtr GetOrCreateCache(uint64_t threadId);
-
-    void MountCompactInfo(ApiEvent& apiEvent, const CannThreadCachePtr& cache);
-
-    bool IsCommunicationNode(const MsprofApi &nodeLaunchApi, const CannThreadCachePtr& cache);
-
-    void MountCommunicationNode(ApiEvent &apiEvent, const CannThreadCachePtr& cache);
-
 private:
-    std::mutex threadCachesMutex_;
-    std::unordered_map<std::uint64_t, CannThreadCachePtr> threadCaches_;
-
-    std::mutex targetThreadMutex_;
-    std::vector<uint64_t> targetThreadId_;
-
-    std::mutex cvMutex_;
-    std::condition_variable cv;
-    std::atomic<bool> threadRun_{false};
-    std::thread t_;
+    CannTrackCache();
+    ~CannTrackCache() override;
+    class CannTrackCacheImpl;
+    std::unique_ptr<CannTrackCacheImpl> pImpl;
 };
 }
 }

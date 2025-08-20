@@ -48,7 +48,7 @@ private:
     MstxParser& operator=(const MstxParser &obj) = delete;
     explicit MstxParser(MstxParser &&obj) = delete;
     MstxParser& operator=(MstxParser &&obj) = delete;
-    std::shared_ptr<std::string> TryCacheMarkMsg(const char* msg);
+    const std::string* TryCacheMarkMsg(const char* msg);
 
 private:
     // Marker
@@ -56,7 +56,7 @@ private:
     static constexpr uint32_t MARK_TAG_ID{11};
     std::mutex rangeInfoMtx_;
     std::unordered_map<uint64_t, RtStreamT> markId2Stream_;
-    static std::unordered_map<std::uint64_t, std::shared_ptr<std::string>> markId2MarkMsg_;
+    static std::unordered_map<std::uint64_t, std::string> hashMarkMsg_;
     static std::mutex markMsgMtx_;
 
     // Inner Marker
