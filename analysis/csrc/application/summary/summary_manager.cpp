@@ -32,7 +32,7 @@ const std::vector<std::string> DATA_ASSEMBLE_LIST{
     PROCESSOR_NAME_STEP_TRACE
 };
 
-const std::vector<std::string> SUMMARY_DATA_PROCESS_LIST{
+const std::set<std::string> SUMMARY_DATA_PROCESS_LIST{
     PROCESSOR_NAME_COMMUNICATION,
     PROCESSOR_NAME_COMPUTE_TASK_INFO,
     PROCESSOR_NAME_TASK,
@@ -90,7 +90,7 @@ bool SummaryManager::ProcessSummary(Analysis::Infra::DataInventory& dataInventor
     return true;
 }
 
-std::vector<std::string> SummaryManager::GetProcessList()
+const std::set<std::string>& SummaryManager::GetProcessList()
 {
     return SUMMARY_DATA_PROCESS_LIST;
 }

@@ -27,11 +27,11 @@ public:
     ExportManager(const std::string& profPath, const std::string& jsonPath) : profPath_(profPath),
         jsonPath_(jsonPath)
     {}
-    bool Run(ExportMode exportMode);
+    bool Run(const std::set<ExportMode>& exportModeSet);
 private:
     bool Init();
     bool CheckProfDirsValid();
-    bool ProcessData(DataInventory &dataInventory, ExportMode exportMode);
+    bool ProcessData(DataInventory &dataInventory, const std::set<ExportMode>& exportModeSet);
     std::vector<JsonProcess> GetProcessEnum();
 
 private:

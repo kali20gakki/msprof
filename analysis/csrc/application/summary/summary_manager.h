@@ -26,7 +26,7 @@ public:
     explicit SummaryManager(const std::string& profPath, const std::string& outputPath)
         : profPath_(profPath), outputPath_(outputPath) {};
     bool Run(DataInventory& dataInventory);
-    static std::vector<std::string> GetProcessList();
+    const static std::set<std::string>& GetProcessList();
 private:
     bool ProcessSummary(DataInventory& dataInventory);
 private:

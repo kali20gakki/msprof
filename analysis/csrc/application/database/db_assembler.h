@@ -24,13 +24,13 @@ using namespace Analysis::Infra;
 class DBAssembler {
 public:
     DBAssembler() = default;
-    DBAssembler(const std::string &msprofDBPath, const std::string &profPath);
+    DBAssembler(const std::string &profPath, const std::string &outputPath);
     virtual ~DBAssembler() = default;
     bool Run(DataInventory &dataInventory);
-    static std::vector<std::string> GetProcessList();
+    const static std::set<std::string>& GetProcessList();
 private:
     std::string profPath_;
-    std::string msprofDBPath_;
+    std::string outputPath_;
     DBInfo msprofDB_;
 };
 

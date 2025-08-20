@@ -55,7 +55,7 @@ const std::unordered_map<JsonProcess, std::string> JSON_TO_ASSEMBLER_TABLE{
     {JsonProcess::DEVICE_TX,        PROCESS_DEVICE_TX},
 };
 
-std::vector<std::string> TIMELINE_DATA_PROCESS_LIST{
+std::set<std::string> TIMELINE_DATA_PROCESS_LIST{
     PROCESSOR_NAME_API,
     PROCESSOR_NAME_COMMUNICATION,
     PROCESSOR_NAME_COMPUTE_TASK_INFO,
@@ -185,7 +185,7 @@ std::vector<std::string> TimelineManager::GetAssemblerList(const std::vector<Jso
     return assemblerList;
 }
 
-std::vector<std::string> TimelineManager::GetProcessList()
+const std::set<std::string>& TimelineManager::GetProcessList()
 {
     return TIMELINE_DATA_PROCESS_LIST;
 }

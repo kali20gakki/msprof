@@ -27,12 +27,6 @@ namespace Analysis {
 namespace Application {
 using namespace Analysis::Domain;
 namespace {
-std::string GetDBPath(const std::string& outputDir)
-{
-    return Utils::File::PathJoin(
-        {outputDir, DB_NAME_MSPROF_DB + "_" + Analysis::Utils::GetFormatLocalTime() + ".db"});
-}
-
 std::string CreateOutputPath(const std::string& profPath)
 {
     std::string outputPath = File::PathJoin({profPath, OUTPUT_PATH});
@@ -45,7 +39,7 @@ std::string CreateOutputPath(const std::string& profPath)
 }
 }
 
-bool ExportManager::ProcessData(DataInventory &dataInventory, ExportMode exportMode)
+bool ExportManager::ProcessData(DataInventory &dataInventory, const std::set<ExportMode>& exportModeSet)
 {
     // hash数据作为其他流程的依赖数据，需要优先加载
     HashInitProcessor hashProcessor(profPath_);
@@ -54,18 +48,24 @@ bool ExportManager::ProcessData(DataInventory &dataInventory, ExportMode exportM
     Analysis::Utils::ThreadPool pool(tableProcessors);
     pool.Start();
     std::atomic<bool> retFlag(true);
-    static const std::unordered_map<ExportMode, std::vector<std::string>(*)()>
+    static const std::unordered_map<ExportMode, const std::set<std::string>&(*)()>
         processListFactory = {
         {ExportMode::DB,       &DBAssembler::GetProcessList},
         {ExportMode::TIMELINE, &TimelineManager::GetProcessList},
         {ExportMode::SUMMARY,  &SummaryManager::GetProcessList}
     };
-    auto it = processListFactory.find(exportMode);
-    if (it == processListFactory.end()) {
-        ERROR("Unsupported ExportMode: %d", static_cast<int>(exportMode));
-        return false;
+
+    std::set<std::string> dataProcessList;
+    for (auto exportMode : exportModeSet) {
+        auto it = processListFactory.find(exportMode);
+        if (it == processListFactory.end()) {
+            ERROR("Unsupported ExportMode: %.", static_cast<int>(exportMode));
+            return false;
+        }
+        auto tmpSet = it->second();
+        dataProcessList.insert(tmpSet.begin(), tmpSet.end());
     }
-    std::vector<std::string> dataProcessList = it->second();
+
     for (const auto& name : dataProcessList) {
         pool.AddTask([this, &name, &retFlag, &dataInventory]() {
             auto processor = DataProcessorFactory::GetDataProcessByName(profPath_, name);
@@ -114,43 +114,49 @@ bool ExportManager::Init()
     return true;
 }
 
-bool ExportManager::Run(ExportMode exportMode)
+bool ExportManager::Run(const std::set<ExportMode>& exportModeSet)
 {
     INFO("Start to load data!");
     PRINT_INFO("Start to load data!");
     if (!Init()) {
         return false;
     }
+    std::string outputPath = CreateOutputPath(profPath_);
+    if (outputPath.empty()) {
+        return false;
+    }
     DataInventory dataInventory;
-    bool runFlag = ProcessData(dataInventory, exportMode);
+    std::atomic<bool> runFlag(true);
+    runFlag = ProcessData(dataInventory, exportModeSet);
     const std::map<ExportMode, std::function<bool(DataInventory&)>> operationMap = {
-        {ExportMode::DB,       [this](DataInventory& dataInventory) -> bool {
-            auto dbPath = GetDBPath(profPath_);
-            DBAssembler dbAssembler(dbPath, profPath_);
+        {ExportMode::DB,       [this, outputPath](DataInventory& dataInventory) -> bool {
+            DBAssembler dbAssembler(profPath_, outputPath);
             return dbAssembler.Run(dataInventory);
         }},
-        {ExportMode::TIMELINE, [this](DataInventory& dataInventory) -> bool {
-            std::string outputPath = CreateOutputPath(profPath_);
-            if (outputPath.empty()) {
-                return false;
-            }
+        {ExportMode::TIMELINE, [this, outputPath](DataInventory& dataInventory) -> bool {
             TimelineManager timelineManager(profPath_, outputPath);
             std::vector<JsonProcess> jsonProcesses = GetProcessEnum();
             return timelineManager.Run(dataInventory, jsonProcesses);
         }},
-        {ExportMode::SUMMARY, [this](DataInventory& dataInventory) -> bool {
-            std::string outputPath = CreateOutputPath(profPath_);
-            if (outputPath.empty()) {
-                return false;
-            }
+        {ExportMode::SUMMARY, [this, outputPath](DataInventory& dataInventory) -> bool {
             SummaryManager summaryManager(profPath_, outputPath);
             return summaryManager.Run(dataInventory);
         }},
     };
-    auto iter = operationMap.find(exportMode);
-    if (iter != operationMap.end()) {
-        runFlag = iter->second(dataInventory) && runFlag;
+
+    const uint16_t processorsLimit = 3; // 最多有3个线程
+    Analysis::Utils::ThreadPool pool(processorsLimit);
+    pool.Start();
+    for (const auto& exportMode : exportModeSet) {
+        auto iter = operationMap.find(exportMode);
+        if (iter != operationMap.end()) {
+            pool.AddTask([iter, &runFlag, &dataInventory]() {
+                runFlag = iter->second(dataInventory) && runFlag;
+            });
+        }
     }
+    pool.WaitAllTasks();
+    pool.Stop();
     return runFlag;
 }
 

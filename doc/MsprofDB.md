@@ -469,6 +469,7 @@ db命名：msprof_{时间戳}.db
 | linkType      | INTEGER |                        | 链路类型，包含：HCCS、PCIe、RoCE，ENUM_HCCL_LINK_TYPE(linkType)                   |
 | opId          | INTEGER |                        | 对应的大算子Id，用于关联COMMUNICATION_OP表                                         |
 | isMaster      | INTEGER |                        | 标记主流通信算子，以主流算子为准（0：从流，1：主流）                                            |
+| bandwidth     | NUMERIC |                        | 该通信小算子的带宽数据，单位 B / s                                                   |
 
 
 变更记录：
@@ -479,6 +480,7 @@ db命名：msprof_{时间戳}.db
 | 2024/3/26 | globalTaskId修改为索引，命名为CommunicationTaskIndex                            |
 | 2024/5/19 | dataType，linkType，transportType，rdmaType字段不再从StringIds里取，而从对应的enum表中获取 |
 | 2025/1/21 | 新增isMaster字段区分主从流算子                                                    |
+| 2025/8/19 | 新增bandwidth字段，用于对标json数据呈现                                             |
 
 ### COMMUNICATION_OP
 
@@ -1144,6 +1146,44 @@ timeline计算公式：
 |------------|----------------------------|
 | 2025/5/20  | 630首次上线 |
 
+### COMMUNICATION_SCHEDULE_TASK_INFO
+保存通信调度的task info
+
+格式:
+
+| 字段名             | 类型      | 索引  | 含义                                                  |
+|-----------------|---------|-----|-----------------------------------------------------|
+| name            | INTEGER |     | 算子名，STRING_IDS(name)                                |
+| globalTaskId    | INTEGER | 主键  | 全局算子任务id，用于关联TASK表                                  |
+| taskType        | INTEGER |     | host执行该算子的加速器类型，STRING_IDS(taskType)                |
+| opType          | INTEGER |     | 算子类型，STRING_IDS(opType)                             |
+
+
+变更记录:
+
+| 日期         | 内容       |
+|------------|----------|
+| 2024/12/16 | 1230首次上线 |
+
+### QOS
+保存QOS的数据
+
+格式:
+
+| 字段名         | 类型      | 索引  | 含义                            |
+|-------------|---------|-----|-------------------------------|
+| deviceId    | INTEGER |     | deviceId                      |
+| eventName   | NUMERIC |   | qos时间名称，STRING_IDS(eventName) |
+| bandwidth   | NUMERIC |     | qos对应时间的带宽，单位B / s            |
+| timestampNs | NUMERIC |     | 本地时间，单位 ns                    |
+
+
+变更记录:
+
+| 日期        | 内容      |
+|-----------|---------|
+| 2025/8/19 | 930首次上线 |
+
 
 ## 2. pytorch框架数据db格式表结构
 db命名：ascend_pytorch_profiler_{rankId}.db
@@ -1325,22 +1365,3 @@ db命名：ascend_pytorch_profiler_{rankId}.db
 | 日期        | 内容              |
 |-----------|-----------------|
 | 2024/7/23  | 930首次上线 |
-
-### COMMUNICATION_SCHEDULE_TASK_INFO
-保存通信调度的task info
-
-格式:
-
-| 字段名             | 类型      | 索引  | 含义                                                  |
-|-----------------|---------|-----|-----------------------------------------------------|
-| name            | INTEGER |     | 算子名，STRING_IDS(name)                                |
-| globalTaskId    | INTEGER | 主键  | 全局算子任务id，用于关联TASK表                                  |
-| taskType        | INTEGER |     | host执行该算子的加速器类型，STRING_IDS(taskType)                |
-| opType          | INTEGER |     | 算子类型，STRING_IDS(opType)                             |
-
-
-变更记录:
-
-| 日期         | 内容       |
-|------------|----------|
-| 2024/12/16 | 1230首次上线 |

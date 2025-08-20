@@ -39,7 +39,7 @@ public:
             WARN("No need to Export % data", processorName_);
             return true;
         } else {
-            ERROR("Export % data failed");
+            ERROR("Export % data failed", processorName_);
             return false;
         }
     }
