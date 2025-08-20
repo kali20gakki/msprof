@@ -49,7 +49,7 @@ public:
     {
         if (CheckLogLevelForC(type_, level) == 1) {
             char buf[MAX_LOG_BUF_SIZE] = {0};
-            if (sprintf_s(buf, MAX_LOG_BUF_SIZE, "[%s:%d] >>> (tid:%u) %s\n", fileName, linNo,
+            if (sprintf_s(buf, MAX_LOG_BUF_SIZE, "(mspti)[%s:%d] >>> (tid:%u) %s\n", fileName, linNo,
                 Utils::GetTid(), fmt) < 0) {
                 return;
             }

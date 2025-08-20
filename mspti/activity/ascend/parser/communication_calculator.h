@@ -28,17 +28,17 @@ class CommunicationCalculator {
     // <deviceId, streamId, taskId>
     using DstType = std::tuple<uint16_t, uint16_t, uint16_t>;
 public:
-    msptiResult AppendCompactInfo(const MsprofCompactInfo *data);
+    msptiResult AppendCompactInfo(bool agingFlag, const MsprofCompactInfo *data);
 
-    msptiResult AppendApi2TaskInfo(const std::shared_ptr<ApiEvent> ApiEvent);
+    msptiResult AppendApi2TaskInfo(const std::shared_ptr<ApiEvent>& ApiEvent);
 
     static CommunicationCalculator &GetInstance();
 
-    msptiResult ReportCommunication(std::shared_ptr<CommunicationOpDesc> hcclOp);
+private:
+    msptiResult ReportCommunication(const DstType& dstKey, const std::shared_ptr<CommunicationOpDesc>& hcclOp);
 
     msptiResult Record(std::shared_ptr<DeviceTask> taskTime);
 
-private:
     CommunicationCalculator() = default;
 
 private:
@@ -47,8 +47,9 @@ private:
     std::map<DstType, std::shared_ptr<CommunicationOpDesc>> lastTask2CommunicationOp_;
 
     std::mutex communicationOpInfoMutex_;
-    std::unordered_map<std::uint64_t, std::queue<std::shared_ptr<msptiActivityCommunication>>>
+    std::unordered_map<std::uint64_t, std::queue<std::shared_ptr<CommunicationOpDesc>>>
         communicationOpInfoQueue_;
+    std::unordered_map<DstType, std::shared_ptr<CommunicationOpDesc>, Common::TupleHash> taskId2AddationInfo;
 };
 }
 }

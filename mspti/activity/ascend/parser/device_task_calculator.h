@@ -36,15 +36,23 @@ struct SubTask {
 };
 
 struct DeviceTask {
-    bool isFfts;
     uint64_t start;
     uint64_t end;
     uint32_t streamId;
     uint32_t taskId;
     uint32_t deviceId;
+    bool isFfts;
+    bool agingFlag;
     std::vector<std::shared_ptr<SubTask>> subTasks;
-    DeviceTask(uint64_t start, uint64_t end, uint32_t streamId, uint32_t taskId, uint32_t deviceId)
-        : start(start), end(end), streamId(streamId), taskId(taskId), deviceId(deviceId), isFfts(false)
+    DeviceTask(uint64_t start, uint64_t end, uint32_t streamId, uint32_t taskId, uint32_t deviceId, bool isFfts = false,
+        bool agingFlag = true)
+        : start(start),
+          end(end),
+          streamId(streamId),
+          taskId(taskId),
+          deviceId(deviceId),
+          isFfts(isFfts),
+          agingFlag(agingFlag)
     {}
 };
 

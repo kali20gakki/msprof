@@ -21,6 +21,7 @@
 
 namespace Mspti {
 namespace Common {
+const int64_t SYNC_HOST_TERM_SECONDS = 7;
 
 ContextManager *ContextManager::GetInstance()
 {
@@ -103,21 +104,19 @@ static uint64_t GetDevStartSysCnt(uint32_t device)
 void ContextManager::InitDevTimeInfo(uint32_t deviceId)
 {
     static constexpr uint32_t AVE_NUM = 2;
-    std::lock_guard<std::mutex> lk(devTimeMtx_);
-    auto iter = devTimeInfo_.find(deviceId);
-    if (iter == devTimeInfo_.end()) {
-        std::unique_ptr<DevTimeInfo> dev_ptr = nullptr;
-        Mspti::Common::MsptiMakeUniquePtr(dev_ptr);
-        if (!dev_ptr) {
-            return;
-        }
-        dev_ptr->freq = GetDevFreq(deviceId);
-        auto t1 = Mspti::Common::Utils::GetClockRealTimeNs();
-        dev_ptr->startSysCnt = GetDevStartSysCnt(deviceId);
-        auto t2 = Mspti::Common::Utils::GetClockRealTimeNs();
-        dev_ptr->startRealTime = (t2 + t1) / AVE_NUM;
-        devTimeInfo_.insert({deviceId, std::move(dev_ptr)});
+    std::unique_ptr<DevTimeInfo> dev_ptr = nullptr;
+    Mspti::Common::MsptiMakeUniquePtr(dev_ptr);
+    if (!dev_ptr) {
+        return;
     }
+    dev_ptr->freq = GetDevFreq(deviceId);
+    auto t1 = Mspti::Common::Utils::GetClockRealTimeNs();
+    dev_ptr->startSysCnt = GetDevStartSysCnt(deviceId);
+    auto t2 = Mspti::Common::Utils::GetClockRealTimeNs();
+    dev_ptr->startRealTime = (t2 + t1) / AVE_NUM;
+
+    std::lock_guard<std::mutex> lk(devTimeMtx_);
+    devTimeInfo_[deviceId] = std::move(dev_ptr);
 }
 
 bool ContextManager::HostFreqIsEnable()
@@ -128,45 +127,79 @@ bool ContextManager::HostFreqIsEnable()
 
 void ContextManager::InitHostTimeInfo()
 {
-    hostTimeInfo_ = nullptr;
     static constexpr uint32_t AVE_NUM = 2;
     if (!HostFreqIsEnable()) {
         return;
     }
-    Mspti::Common::MsptiMakeUniquePtr(hostTimeInfo_);
-    if (!hostTimeInfo_) {
+    std::unique_ptr<DevTimeInfo> curHostTimeInfo_;
+    Mspti::Common::MsptiMakeUniquePtr(curHostTimeInfo_);
+    if (!curHostTimeInfo_) {
         return;
     }
-    hostTimeInfo_->freq = GetHostFreq();
+    curHostTimeInfo_->freq = GetHostFreq();
     auto t1 = Mspti::Common::Utils::GetClockRealTimeNs();
-    hostTimeInfo_->startSysCnt = Mspti::Common::Utils::GetHostSysCnt();
+    curHostTimeInfo_->startSysCnt = Mspti::Common::Utils::GetHostSysCnt();
     auto t2 = Mspti::Common::Utils::GetClockRealTimeNs();
-    hostTimeInfo_->startRealTime = (t2 + t1) / AVE_NUM;
+    curHostTimeInfo_->startRealTime = (t2 + t1) / AVE_NUM;
+
+    std::lock_guard<std::mutex> lk(hostTimeMtx_);
+    hostTimeInfo_ = std::move(curHostTimeInfo_);
 }
 
 uint64_t ContextManager::GetRealTimeFromSysCnt(uint32_t deviceId, uint64_t sysCnt)
 {
-    std::lock_guard<std::mutex> lk(devTimeMtx_);
-    auto iter = devTimeInfo_.find(deviceId);
-    if (iter == devTimeInfo_.end() || iter->second->freq == 0) {
-        return sysCnt;
+    DevTimeInfo devTimeInfo{};
+    {
+        std::lock_guard<std::mutex> lk(devTimeMtx_);
+        auto iter = devTimeInfo_.find(deviceId);
+        if (iter == devTimeInfo_.end() || iter->second->freq == 0) {
+            return sysCnt;
+        }
+        devTimeInfo = *iter->second;
     }
-    return CalcuateRealTime(sysCnt, *iter->second);
+    return CalculateRealTime(sysCnt, devTimeInfo);
+}
+
+std::vector<uint64_t> ContextManager::GetRealTimeFromSysCnt(uint32_t deviceId, const std::vector<uint64_t>& sysCnts)
+{
+    DevTimeInfo devTimeInfo{};
+    {
+        std::lock_guard<std::mutex> lk(devTimeMtx_);
+        auto iter = devTimeInfo_.find(deviceId);
+        if (iter == devTimeInfo_.end() || iter->second->freq == 0) {
+            return sysCnts;
+        }
+        devTimeInfo = *iter->second;
+    }
+    std::vector<uint64_t> ans(sysCnts.size());
+    for (int i = 0; i < sysCnts.size(); i++) {
+        ans[i] = CalculateRealTime(sysCnts[i], devTimeInfo);
+    }
+    return ans;
 }
 
 uint64_t ContextManager::GetRealTimeFromSysCnt(uint64_t sysCnt)
 {
-    if (!hostTimeInfo_ || hostTimeInfo_->freq == 0) {
+    DevTimeInfo hostTime{};
+    {
+        std::lock_guard<std::mutex> lk(hostTimeMtx_);
+        if (!hostTimeInfo_) {
+            return sysCnt;
+        }
+        hostTime = *hostTimeInfo_;
+    }
+    if (hostTime.freq == 0) {
         return sysCnt;
     }
-    return CalcuateRealTime(sysCnt, *hostTimeInfo_);
+    return CalculateRealTime(sysCnt, hostTime);
 }
 
-inline uint64_t ContextManager::CalcuateRealTime(uint64_t sysCnt, DevTimeInfo &devTimeInfo)
+inline uint64_t ContextManager::CalculateRealTime(uint64_t sysCnt, DevTimeInfo &devTimeInfo)
 {
-    return (sysCnt - devTimeInfo.startSysCnt) / devTimeInfo.freq * MSTONS +
-           ((sysCnt - devTimeInfo.startSysCnt) % devTimeInfo.freq * MSTONS) / devTimeInfo.freq +
-           devTimeInfo.startRealTime;
+    int64_t delta = static_cast<int64_t>(sysCnt) - static_cast<int64_t>(devTimeInfo.startSysCnt);
+    return (delta / static_cast<int64_t>(devTimeInfo.freq)) * MSTONS +
+           (delta % static_cast<int64_t>(devTimeInfo.freq) * MSTONS) / static_cast<int64_t>(devTimeInfo.freq) +
+           static_cast<int64_t>(devTimeInfo.startRealTime);
 }
 
 uint64_t ContextManager::GetHostTimeStampNs()
@@ -193,7 +226,7 @@ uint64_t ContextManager::GetCorrelationId(uint32_t threadId)
     }
 }
 
-void ContextManager::UpdateAndReportCorrelationId(uint32_t tid)
+uint64_t ContextManager::UpdateAndReportCorrelationId(uint32_t tid)
 {
     std::lock_guard<std::mutex> lk(correlationIdMtx_);
     correlationId_++;
@@ -204,12 +237,60 @@ void ContextManager::UpdateAndReportCorrelationId(uint32_t tid)
     } else {
         iter->second = correlationId_;
     }
+    return correlationId_;
 }
 
-void ContextManager::UpdateAndReportCorrelationId()
+uint64_t ContextManager::UpdateAndReportCorrelationId()
 {
     uint32_t tid = Common::Utils::GetTid();
-    UpdateAndReportCorrelationId(tid);
+    return UpdateAndReportCorrelationId(tid);
+}
+
+void ContextManager::Run()
+{
+    while (true) {
+        std::unique_lock<std::mutex> lock(cv_mutex_);
+        cv_.wait_for(lock, std::chrono::seconds(SYNC_HOST_TERM_SECONDS), [this] {
+            return isQuit_.load();
+        });
+        if (isQuit_) {
+            break;
+        }
+        const auto devices = Mspti::Activity::ActivityManager::GetInstance()->GetAllValidDevice();
+        for (auto device : devices) {
+            InitDevTimeInfo(device);
+        }
+        InitHostTimeInfo();
+    }
+}
+
+msptiResult ContextManager::StartSyncTime()
+{
+    MSPTI_LOGI("ContextManager thread StartSyncTime");
+    if (!t_.joinable()) {
+        isQuit_ = false;
+        t_ = std::thread(&ContextManager::Run, this);
+    }
+    return MSPTI_SUCCESS;
+}
+
+msptiResult ContextManager::StopSyncTime()
+{
+    MSPTI_LOGI("ContextManager thread StopSyncTime");
+    if (t_.joinable()) {
+        {
+            std::unique_lock<std::mutex> lck(cv_mutex_);
+            isQuit_.store(true);
+            cv_.notify_one();
+        }
+        t_.join();
+    }
+    return MSPTI_SUCCESS;
+}
+
+ContextManager::~ContextManager()
+{
+    StopSyncTime();
 }
 
 }  // Common

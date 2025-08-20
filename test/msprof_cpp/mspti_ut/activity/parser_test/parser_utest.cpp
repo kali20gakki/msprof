@@ -12,6 +12,8 @@
 #include "activity/ascend/parser/parser_manager.h"
 #include "activity/ascend/parser/cann_hash_cache.h"
 #include "activity/ascend/parser/mstx_parser.h"
+#include "activity/ascend/parser/device_task_calculator.h"
+#include "activity/ascend/parser/kernel_parser.h"
 #include "common/inject/runtime_inject.h"
 #include "common/utils.h"
 #include "securec.h"
@@ -35,8 +37,6 @@ TEST_F(ParserUtest, ShouldRetSuccessWhenReportApiSuccess)
     constexpr uint16_t level = 20000;
     constexpr uint32_t typeId = 1;
     const std::string typeName = "acl_api";
-    instance->RegReportTypeInfo(level, typeId, typeName);
-    EXPECT_STREQ(typeName.c_str(), instance->GetTypeName(level, typeId).c_str());
     MsprofApi data;
     (void)memset_s(&data, sizeof(data), 0, sizeof(data));
     data.level = level;
@@ -50,7 +50,7 @@ TEST_F(ParserUtest, ShouldRetSuccessWhenReportApiSuccess)
 
 TEST_F(ParserUtest, ShouldRetSccessWhenReportKernelInfo)
 {
-    auto instance = Mspti::Parser::ParserManager::GetInstance();
+    auto& instance = Mspti::Parser::KernelParser::GetInstance();
     constexpr uint16_t flipId = 0;
     constexpr uint16_t taskId = 1;
     constexpr uint32_t deviceId = 0;
@@ -62,8 +62,8 @@ TEST_F(ParserUtest, ShouldRetSccessWhenReportKernelInfo)
     compactInfo.data.runtimeTrack.streamId = streamId;
     compactInfo.data.runtimeTrack.taskInfo = static_cast<uint32_t>(flipId) << BIT_NUM | static_cast<uint32_t>(taskId);
     compactInfo.data.runtimeTrack.taskType = TS_TASK_TYPE_KERNEL_AIVEC;
-    EXPECT_EQ(MSPTI_SUCCESS, instance->ReportRtTaskTrack(&compactInfo));
-    EXPECT_EQ(MSPTI_SUCCESS, instance->ReportRtTaskTrack(&compactInfo));
+    EXPECT_EQ(MSPTI_SUCCESS, instance.ReportRtTaskTrack(1, &compactInfo));
+    EXPECT_EQ(MSPTI_SUCCESS, instance.ReportRtTaskTrack(1, &compactInfo));
 
     StarsSocLog socLogStart;
     (void)memset_s(&socLogStart, sizeof(socLogStart), 0, sizeof(socLogStart));
@@ -77,10 +77,14 @@ TEST_F(ParserUtest, ShouldRetSccessWhenReportKernelInfo)
     socLogEnd.streamId = streamId;
     socLogEnd.taskId = taskId;
 
-    EXPECT_EQ(MSPTI_SUCCESS, instance->ReportStarsSocLog(deviceId, &socLogStart));
-    EXPECT_EQ(MSPTI_SUCCESS, instance->ReportStarsSocLog(deviceId, &socLogEnd));
-    EXPECT_EQ(MSPTI_SUCCESS, instance->ReportStarsSocLog(deviceId, &socLogStart));
-    EXPECT_EQ(MSPTI_SUCCESS, instance->ReportStarsSocLog(deviceId, &socLogEnd));
+    EXPECT_EQ(MSPTI_SUCCESS, Mspti::Parser::DeviceTaskCalculator::GetInstance().ReportStarsSocLog(deviceId,
+        reinterpret_cast<StarsSocHeader*>(&socLogStart)));
+    EXPECT_EQ(MSPTI_SUCCESS, Mspti::Parser::DeviceTaskCalculator::GetInstance().ReportStarsSocLog(deviceId,
+        reinterpret_cast<StarsSocHeader*>(&socLogEnd)));
+    EXPECT_EQ(MSPTI_SUCCESS, Mspti::Parser::DeviceTaskCalculator::GetInstance().ReportStarsSocLog(deviceId,
+        reinterpret_cast<StarsSocHeader*>(&socLogStart)));
+    EXPECT_EQ(MSPTI_SUCCESS, Mspti::Parser::DeviceTaskCalculator::GetInstance().ReportStarsSocLog(deviceId,
+        reinterpret_cast<StarsSocHeader*>(&socLogEnd)));
 }
 
 TEST_F(ParserUtest, ShouldRetSccessWhenReportMstxData)
@@ -104,7 +108,7 @@ TEST_F(ParserUtest, ShouldRetSccessWhenReportMstxData)
 TEST_F(ParserUtest, ShouldRetErrorWhenTryCacheMarkmsgFailed)
 {
     GlobalMockObject::verify();
-    std::shared_ptr<std::string> nullPtr{nullptr};
+    const std::string* nullPtr = nullptr;
     MOCKER_CPP(&Mspti::Parser::MstxParser::TryCacheMarkMsg)
         .stubs()
         .will(returnValue(nullPtr));
@@ -118,7 +122,7 @@ TEST_F(ParserUtest, ShouldRetErrorWhenTryCacheMarkmsgFailed)
 
 TEST_F(ParserUtest, ShouldRecordKernelNameWhenReportRtTaskTrack)
 {
-    auto instance = Mspti::Parser::ParserManager::GetInstance();
+    auto& instance = Mspti::Parser::KernelParser::GetInstance();
     constexpr uint16_t flipId = 0;
     constexpr uint16_t taskId = 1;
     constexpr uint32_t deviceId = 0;
@@ -133,7 +137,7 @@ TEST_F(ParserUtest, ShouldRecordKernelNameWhenReportRtTaskTrack)
     compactInfo.data.runtimeTrack.taskInfo = static_cast<uint32_t>(flipId) << BIT_NUM | static_cast<uint32_t>(taskId);
     compactInfo.data.runtimeTrack.taskType = TS_TASK_TYPE_KERNEL_AIVEC;
     compactInfo.data.runtimeTrack.kernelName = kernelNameHash;
-    EXPECT_EQ(MSPTI_SUCCESS, instance->ReportRtTaskTrack(&compactInfo));
+    EXPECT_EQ(MSPTI_SUCCESS, instance.ReportRtTaskTrack(1, &compactInfo));
 }
 
 TEST_F(ParserUtest, ShouldRetErrorWhenMarkFail)

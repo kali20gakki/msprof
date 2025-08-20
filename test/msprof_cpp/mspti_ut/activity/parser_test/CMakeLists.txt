@@ -12,6 +12,7 @@ add_executable(mspti_parser_utest
     ${TOP_DIR}/mspti/activity/ascend/parser/communication_calculator.cpp
     ${TOP_DIR}/mspti/activity/ascend/parser/cann_track_cache.cpp
     ${TOP_DIR}/mspti/activity/ascend/parser/device_task_calculator.cpp
+    ${TOP_DIR}/mspti/activity/ascend/parser/kernel_parser.cpp
     ${TOP_DIR}/mspti/activity/ascend/parser/mstx_parser.cpp
     ${TOP_DIR}/mspti/activity/ascend/parser/hccl_calculator.cpp
     ${TOP_DIR}/mspti/activity/ascend/parser/hccl_reporter.cpp

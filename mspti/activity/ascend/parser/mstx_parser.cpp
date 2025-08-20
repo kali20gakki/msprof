@@ -42,7 +42,7 @@ inline Mspti::Common::ThreadLocal<msptiActivityMarker> GetDefaultMarkActivity()
 }
 }
 
-std::unordered_map<uint64_t, std::shared_ptr<std::string>> MstxParser::markId2MarkMsg_;
+std::unordered_map<uint64_t, std::string> MstxParser::hashMarkMsg_;
 std::mutex MstxParser::markMsgMtx_;
 
 // InnerDeviceMarker
@@ -55,27 +55,20 @@ MstxParser *MstxParser::GetInstance()
     return &instance;
 }
 
-std::shared_ptr<std::string> MstxParser::TryCacheMarkMsg(const char* msg)
+const std::string* MstxParser::TryCacheMarkMsg(const char* msg)
 {
     // msg字符串已在对外接口进行判空和长度判断操作
     std::lock_guard<std::mutex> lk(markMsgMtx_);
-    if (markId2MarkMsg_.size() > MARK_MAX_CACHE_NUM) {
-        MSPTI_LOGE("Cache mark msg failed, current size: %u, limit size: %u",
-                   markId2MarkMsg_.size(), MARK_MAX_CACHE_NUM);
-        return nullptr;
-    }
-    std::shared_ptr<std::string> msgPtr{nullptr};
-    Mspti::Common::MsptiMakeSharedPtr(msgPtr, msg);
-    if (msgPtr == nullptr) {
-        MSPTI_LOGE("Failed to malloc memory for mark msg.");
+    if (hashMarkMsg_.size() > MARK_MAX_CACHE_NUM) {
+        MSPTI_LOGE("Cache mark msg failed, current size: %u, limit size: %u", hashMarkMsg_.size(), MARK_MAX_CACHE_NUM);
         return nullptr;
     }
     uint64_t hashId = Common::GetHashIdImple(msg);
-    auto iter = markId2MarkMsg_.find(hashId);
-    if (iter == markId2MarkMsg_.end()) {
-        iter = markId2MarkMsg_.insert({hashId, msgPtr}).first;
+    auto iter = hashMarkMsg_.find(hashId);
+    if (iter == hashMarkMsg_.end()) {
+        iter = hashMarkMsg_.emplace(hashId, std::string(msg)).first;
     }
-    return iter->second;
+    return &iter->second;
 }
 
 msptiResult MstxParser::ReportMark(const char* msg, RtStreamT stream, const char* domain)

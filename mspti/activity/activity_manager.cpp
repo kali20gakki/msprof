@@ -366,6 +366,11 @@ ActivityManager::ActivityManager()
     }
 }
 
+const std::unordered_set<uint32_t> ActivityManager::GetAllValidDevice()
+{
+    std::lock_guard<std::mutex> lk(devices_mtx_);
+    return devices_;
+}
 }  // Activity
 }  // Mspti
 
