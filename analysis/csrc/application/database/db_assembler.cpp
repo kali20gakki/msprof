@@ -1210,6 +1210,7 @@ const std::set<std::string> DB_DATA_PROCESS_LIST{
 DBAssembler::DBAssembler(const std::string &profPath, const std::string &outputPath)
     : profPath_(profPath), outputPath_(outputPath)
 {
+    // 当前outputPath_路径依然传递PROF路径，即db落盘路径依然是PROF目录下
     MAKE_SHARED0_NO_OPERATION(msprofDB_.database, MsprofDB);
     auto msprofDBPath = GetDBPath(outputPath);
     msprofDB_.ConstructDBRunner(msprofDBPath);

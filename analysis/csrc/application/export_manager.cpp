@@ -121,24 +121,28 @@ bool ExportManager::Run(const std::set<ExportMode>& exportModeSet)
     if (!Init()) {
         return false;
     }
-    std::string outputPath = CreateOutputPath(profPath_);
-    if (outputPath.empty()) {
-        return false;
-    }
     DataInventory dataInventory;
     std::atomic<bool> runFlag(true);
     runFlag = ProcessData(dataInventory, exportModeSet);
     const std::map<ExportMode, std::function<bool(DataInventory&)>> operationMap = {
-        {ExportMode::DB,       [this, outputPath](DataInventory& dataInventory) -> bool {
-            DBAssembler dbAssembler(profPath_, outputPath);
+        {ExportMode::DB,       [this](DataInventory& dataInventory) -> bool {
+            DBAssembler dbAssembler(profPath_, profPath_);
             return dbAssembler.Run(dataInventory);
         }},
-        {ExportMode::TIMELINE, [this, outputPath](DataInventory& dataInventory) -> bool {
+        {ExportMode::TIMELINE, [this](DataInventory& dataInventory) -> bool {
+            std::string outputPath = CreateOutputPath(profPath_);
+            if (outputPath.empty()) {
+                return false;
+            }
             TimelineManager timelineManager(profPath_, outputPath);
             std::vector<JsonProcess> jsonProcesses = GetProcessEnum();
             return timelineManager.Run(dataInventory, jsonProcesses);
         }},
-        {ExportMode::SUMMARY, [this, outputPath](DataInventory& dataInventory) -> bool {
+        {ExportMode::SUMMARY, [this](DataInventory& dataInventory) -> bool {
+            std::string outputPath = CreateOutputPath(profPath_);
+            if (outputPath.empty()) {
+                return false;
+            }
             SummaryManager summaryManager(profPath_, outputPath);
             return summaryManager.Run(dataInventory);
         }},
