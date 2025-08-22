@@ -90,7 +90,6 @@ msptiResult CallbackManager::Init(msptiSubscriberHandle *subscriber, msptiCallba
     *subscriber = subscriber_ptr_.get();
     init_.store(true);
     Mspti::Ascend::DevTaskManager::GetInstance()->RegisterReportCallback();
-    Mspti::Common::ContextManager::GetInstance()->StartSyncTime();
     MSPTI_LOGI("CallbackManager Init success.");
     return MSPTI_SUCCESS;
 }
@@ -109,7 +108,6 @@ msptiResult CallbackManager::UnInit(msptiSubscriberHandle subscriber)
         bitmap.store(0, std::memory_order_relaxed);
     }
     init_.store(false);
-    Mspti::Common::ContextManager::GetInstance()->StopSyncTime();
     MSPTI_LOGI("CallbackManager UnInit success.");
     return MSPTI_SUCCESS;
 }
