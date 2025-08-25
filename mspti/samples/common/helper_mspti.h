@@ -177,12 +177,12 @@ static void ShowMarkerInfo(msptiActivityMarker* marker)
         return;
     }
     if (marker->sourceKind == MSPTI_ACTIVITY_SOURCE_KIND_HOST) {
-        LOG_PRINT("[%s] flag: %lu, sourceKind: %s, timestamp: %lu, processId: %u, threadId: %u, name: %s, domain: %s\n",
+        LOG_PRINT("[%s] flag: %d, sourceKind: %s, timestamp: %lu, processId: %u, threadId: %u, name: %s, domain: %s\n",
             GetActivityKindString(marker->kind), marker->flag, GetActivitySourceKindString(marker->sourceKind),
             marker->timestamp, marker->objectId.pt.processId, marker->objectId.pt.threadId, marker->name,
             marker->domain);
     } else if (marker->sourceKind == MSPTI_ACTIVITY_SOURCE_KIND_DEVICE) {
-        LOG_PRINT("[%s] flag: %lu, sourceKind: %s, timestamp: %lu, deviceId: %u, streamId: %u, name: %s, domain: %s\n",
+        LOG_PRINT("[%s] flag: %d, sourceKind: %s, timestamp: %lu, deviceId: %u, streamId: %u, name: %s, domain: %s\n",
             GetActivityKindString(marker->kind), marker->flag, GetActivitySourceKindString(marker->sourceKind),
             marker->timestamp, marker->objectId.ds.deviceId, marker->objectId.ds.streamId, marker->name,
             marker->domain);
@@ -217,7 +217,7 @@ static void ShowMemSetInfo(msptiActivityMemset* data)
     if (!data) {
         return;
     }
-    LOG_PRINT("[%s] value: %s, bytes: %lu, start: %lu, end: %lu, deviceId: %u, streamId: %u, correlationId: %lu, "
+    LOG_PRINT("[%s] value: %u, bytes: %lu, start: %lu, end: %lu, deviceId: %u, streamId: %u, correlationId: %lu, "
               "isAsync: %d\n",
         GetActivityKindString(data->kind), data->value, data->bytes, data->start, data->end, data->deviceId,
         data->streamId, data->correlationId, data->isAsync);

@@ -48,6 +48,9 @@ target_compile_options(
     -fPIC
     -fstack-protector-all
     -ftrapv
+    -Werror=uninitialized
+    -Werror=return-type
+    -Wall
 )
 
 target_link_options(

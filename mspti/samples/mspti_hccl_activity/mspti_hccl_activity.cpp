@@ -91,7 +91,7 @@ int main(int argc, char*argv[])
     uint32_t ndev = 8;
     int32_t devices[8] = {0, 1, 2, 3, 4, 5, 6, 7};
     HcclComm comms[ndev];
-    for (int32_t i = 0; i < ndev; i++) {
+    for (uint32_t i = 0; i < ndev; i++) {
         ACL_CALL(aclrtSetDevice(devices[i]));
     }
     HCCL_CHECK(HcclCommInitAll(ndev, devices, comms));

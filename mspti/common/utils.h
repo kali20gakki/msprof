@@ -79,7 +79,7 @@ inline T ReinterpretConvert(V ptr)
     return reinterpret_cast<T>(ptr);
 }
 
-static uint64_t GetHashIdImple(const std::string &hashInfo)
+inline uint64_t GetHashIdImple(const std::string &hashInfo)
 {
     static const uint32_t UINT32_BITS = 32;
     uint32_t prime[2] = {29, 131};

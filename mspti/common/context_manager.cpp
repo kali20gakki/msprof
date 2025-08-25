@@ -172,7 +172,7 @@ std::vector<uint64_t> ContextManager::GetRealTimeFromSysCnt(uint32_t deviceId, c
         devTimeInfo = *iter->second;
     }
     std::vector<uint64_t> ans(sysCnts.size());
-    for (int i = 0; i < sysCnts.size(); i++) {
+    for (size_t i = 0; i < sysCnts.size(); i++) {
         ans[i] = CalculateRealTime(sysCnts[i], devTimeInfo);
     }
     return ans;

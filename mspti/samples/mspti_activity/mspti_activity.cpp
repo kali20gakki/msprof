@@ -110,6 +110,7 @@ int DoAclAdd(aclrtContext context, aclrtStream stream)
     if (workspaceSize > 0) {
         aclrtFree(workspaceAddr);
     }
+    return 0;
 }
 
 void SetUpMspti()
@@ -132,7 +133,7 @@ int main()
     int32_t deviceId = 0;
     aclrtContext context;
     aclrtStream stream;
-    auto ret = Init(deviceId, &context, &stream);
+    Init(deviceId, &context, &stream);
     DoAclAdd(context, stream);
     DeInit(deviceId, &context, &stream);
 

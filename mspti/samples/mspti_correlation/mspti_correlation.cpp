@@ -114,9 +114,10 @@ int DoAclAdd(aclrtContext context, aclrtStream stream)
     if (workspaceSize > 0) {
         aclrtFree(workspaceAddr);
     }
+    return 0;
 }
 
-int PrintCorrelationTrace()
+void PrintCorrelationTrace()
 {
     LOG_PRINT("========== PrintCorrelation ============\n");
     for (const auto& apiIter: g_ApiConnectionMap) {
@@ -125,7 +126,7 @@ int PrintCorrelationTrace()
         if (it == g_CorrelationMap.end()) {
             break;
         }
-        LOG_PRINT("API and Activity correlation: correlation: %u\n", apiIter.second->correlationId);
+        LOG_PRINT("API and Activity correlation: correlation: %lu\n", apiIter.second->correlationId);
         PrintActivity(reinterpret_cast<msptiActivity*>(apiIter.second));
         PrintActivity(it->second);
     }
