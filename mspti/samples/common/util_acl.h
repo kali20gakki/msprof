@@ -31,6 +31,7 @@ int DeInit(int32_t deviceId, aclrtContext* context, aclrtStream* stream)
     ACL_CALL(aclrtDestroyContext(*context));
     ACL_CALL(aclrtResetDevice(deviceId));
     ACL_CALL(aclFinalize());
+    return 0;
 }
 
 # endif // UTIL_ACL_H_

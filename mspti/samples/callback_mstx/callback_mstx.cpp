@@ -112,6 +112,7 @@ int DoAclAdd(aclrtContext context, aclrtStream stream)
     if (workspaceSize > 0) {
         aclrtFree(workspaceAddr);
     }
+    return 0;
 }
 
 void MstxCallback(void *pUserData, msptiCallbackDomain domain, msptiCallbackId callbackId,

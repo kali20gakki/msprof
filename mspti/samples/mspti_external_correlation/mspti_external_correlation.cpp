@@ -133,9 +133,10 @@ int DoAclAdd(aclrtContext context, aclrtStream stream)
         aclrtFree(workspaceAddr);
     }
     msptiActivityPopExternalCorrelationId(MSPTI_EXTERNAL_CORRELATION_KIND_CUSTOM0, &id);
+    return 0;
 }
 
-int PrintExternalCorrelationTrace()
+void PrintExternalCorrelationTrace()
 {
     LOG_PRINT("========== PrintCorrelation ============\n");
     for (auto externalIdIt : s_externalCorrelationMap) {
@@ -156,7 +157,7 @@ int PrintExternalCorrelationTrace()
         }
         auto correlationIds = externalIdIt.second;
         for (auto correlationId : correlationIds) {
-            LOG_PRINT("%u, ", correlationId);
+            LOG_PRINT("%lu, ", correlationId);
         }
         LOG_PRINT("\n");
     }
