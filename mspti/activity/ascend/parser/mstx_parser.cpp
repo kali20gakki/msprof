@@ -214,7 +214,7 @@ bool MstxParser::IsInnerMarker(uint64_t markId)
     return innerMarkIds.count(markId);
 }
 
-msptiResult MstxParser::InnerDeviceStartA(const char *msg, RtStreamT stream, uint64_t& markId)
+msptiResult MstxParser::InnerDeviceStartA(RtStreamT stream, uint64_t& markId)
 {
     markId = gMarkId_++;
     if (stream != nullptr && rtProfilerTraceEx(markId,

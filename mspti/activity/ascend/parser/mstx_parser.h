@@ -38,7 +38,7 @@ public:
 
     bool IsInnerMarker(uint64_t markId);
 
-    msptiResult InnerDeviceStartA(const char *msg, RtStreamT stream, uint64_t& markId);
+    msptiResult InnerDeviceStartA(RtStreamT stream, uint64_t& markId);
 
     msptiResult InnerDeviceEndA(uint64_t rangeId);
 
