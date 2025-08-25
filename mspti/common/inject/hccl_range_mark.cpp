@@ -20,11 +20,10 @@ namespace Parser {
 using namespace Mspti::Activity;
 HcclInnerMark::HcclInnerMark(aclrtStream stream, HcclComm comm, std::shared_ptr<HcclOpDesc> opDesc)
 {
-    char markMsg[] = "msptiInnerMark";
     char commName[COMM_NAME_MAX_LENGTH];
     HcclGetCommName(comm, commName);
     opDesc->commName.assign(commName);
-    Mspti::Parser::MstxParser::GetInstance()->InnerDeviceStartA(markMsg, stream, markId);
+    Mspti::Parser::MstxParser::GetInstance()->InnerDeviceStartA(stream, markId);
     Mspti::Parser::HcclReporter::GetInstance()->RecordHcclOp(markId, opDesc);
 };
 

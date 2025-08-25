@@ -397,6 +397,7 @@ msptiResult msptiActivityGetNextRecord(uint8_t *buffer, size_t validBufferSizeBy
 
 msptiResult msptiActivityFlushAll(uint32_t flag)
 {
+    UNUSED(flag);
     return Mspti::Activity::ActivityManager::GetInstance()->FlushAll();
 }
 

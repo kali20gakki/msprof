@@ -147,11 +147,10 @@ TEST_F(ParserUtest, ShouldRetErrorWhenMarkFail)
     MOCKER_CPP(rtProfilerTraceEx)
         .stubs()
         .will(returnValue(static_cast<RtErrorT>(MSPTI_ERROR_INNER)));
-    const char* message = "UserMark";
     uint64_t markId = 0;
     RtStreamT stream = (void*)0x1234567;
     auto instance = Mspti::Parser::MstxParser::GetInstance();
-    EXPECT_EQ(MSPTI_ERROR_INNER, instance->InnerDeviceStartA(message, stream, markId));
+    EXPECT_EQ(MSPTI_ERROR_INNER, instance->InnerDeviceStartA(stream, markId));
     EXPECT_EQ(MSPTI_SUCCESS, instance->InnerDeviceEndA(markId));
 }
 
@@ -159,11 +158,10 @@ TEST_F(ParserUtest, ShouldRetErrorWhenStreamNull)
 {
     GlobalMockObject::verify();
     std::shared_ptr<std::string> nullPtr{nullptr};
-    const char* message = "UserMark";
     uint64_t markId = 0;
     RtStreamT stream = (void*)0x1234567;
     auto instance = Mspti::Parser::MstxParser::GetInstance();
-    EXPECT_EQ(MSPTI_SUCCESS, instance->InnerDeviceStartA(message, stream, markId));
+    EXPECT_EQ(MSPTI_SUCCESS, instance->InnerDeviceStartA(stream, markId));
     MOCKER_CPP(rtProfilerTraceEx)
     .stubs()
     .will(returnValue(static_cast<RtErrorT>(MSPTI_ERROR_INNER)));
@@ -177,11 +175,10 @@ TEST_F(ParserUtest, ShouldRetSuccessWhenInnerMark)
     MOCKER_CPP(rtProfilerTraceEx)
         .stubs()
         .will(returnValue(static_cast<RtErrorT>(MSPTI_SUCCESS)));
-    const char* message = "InnerMark";
     RtStreamT stream = (void*)0x1234567;
     uint64_t markId = 0;
     auto instance = Mspti::Parser::MstxParser::GetInstance();
-    EXPECT_EQ(MSPTI_SUCCESS, instance->InnerDeviceStartA(message, stream, markId));
+    EXPECT_EQ(MSPTI_SUCCESS, instance->InnerDeviceStartA(stream, markId));
     EXPECT_EQ(MSPTI_SUCCESS, instance->InnerDeviceEndA(markId));
     MOCKER_CPP(rtProfilerTraceEx)
     .stubs()
