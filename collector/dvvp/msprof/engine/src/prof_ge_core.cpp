@@ -511,7 +511,7 @@ int32_t GeOpenDeviceHandle(const uint32_t devId)
         return PROFILING_SUCCESS;
     }
     int32_t ret = ProfAclMgr::instance()->MsprofSetDeviceImpl(devId);
-    if (ret == PROFILING_IN_RUNNING) {
+    if (ret == PROFILING_DOING_NOTHING) {
         MSPROF_LOGI("MsprofSetDeviceImpl devId %u is running.", devId);
         return PROFILING_SUCCESS;
     } else if (ret != PROFILING_SUCCESS) {
