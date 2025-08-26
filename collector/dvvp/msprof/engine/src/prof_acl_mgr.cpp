@@ -79,7 +79,10 @@ uint64_t ProfGetOpExecutionTime(CONST_VOID_PTR data, uint32_t len, uint32_t inde
 }
 
 ProfAclMgr::ProfAclMgr() : isReady_(false), mode_(WORK_MODE_OFF), params_(nullptr), dataTypeConfig_(0),
-                           profStratCfg_(nullptr), startIndex_(0), isWarmuped_(false), isStarted_(false) {}
+                           profStratCfg_(nullptr), startIndex_(0)
+{
+    apiStatus_.store(ApiStatus::DEFAULT);
+}
 
 ProfAclMgr::~ProfAclMgr()
 {
@@ -303,6 +306,7 @@ int32_t ProfAclMgr::ProfAclInit(const std::string &profResultPath)
     devUuid_.clear();
 
     mode_ = WORK_MODE_API_CTRL;
+    apiStatus_.store(ApiStatus::INIT);
     return ACL_SUCCESS;
 }
 
@@ -316,7 +320,7 @@ bool ProfAclMgr::IsInited()
  */
 int ProfAclMgr::ProfAclWarmup(PROF_CONF_CONST_PTR profStartCfg)
 {
-    if (isWarmuped_) {
+    if (IsApiProfOn()) {
         MSPROF_LOGE("Profiling has been inited");
         return ACL_SUCCESS;
     }
@@ -365,29 +369,30 @@ int ProfAclMgr::ProfAclWarmup(PROF_CONF_CONST_PTR profStartCfg)
         return ret;
     }
     WaitAllDeviceResponse();
-    isWarmuped_ = true;
+    apiStatus_.store(ApiStatus::WARMUP);
     return ACL_SUCCESS;
 }
 
 int ProfAclMgr::ProfAclStart(PROF_CONF_CONST_PTR profStartCfg)
 {
-    if (!isWarmuped_) {
+    if (!IsApiProfOn()) {
         if (ProfAclWarmup(profStartCfg) != ACL_SUCCESS) {
             MSPROF_LOGE("ProfAclWarmup failed.");
             return ACL_ERROR_PROFILING_FAILURE;
         }
     }
 
-    if (isStarted_) {
+    if (static_cast<int>(apiStatus_.load()) == static_cast<int>(ApiStatus::START)) {
         MSPROF_LOGE("ProfAclStart has been start.");
         return PROFILING_SUCCESS;
     }
+    MSPROF_EVENT("Received ProfAclStart request from acl");
     // json dump
     for (uint32_t i = 0; i < profStartCfg->devNums; i++) {
         uint32_t devId = profStartCfg->devIdList[i];
         MsprofDumpStartInfoFile(devId);
     }
-    isStarted_ = true;
+    apiStatus_.store(ApiStatus::START);
     analysis::dvvp::transport::UploaderMgr::instance()->SetUploaderStatus(true);
     return PROFILING_SUCCESS;
 }
@@ -430,8 +435,9 @@ int ProfAclMgr::LaunchHostAndDevTasks(const uint32_t devNums, CONST_UINT32_T_PTR
  */
 int ProfAclMgr::ProfAclStop(PROF_CONF_CONST_PTR profStopCfg)
 {
-    MSPROF_EVENT("Received ProfAclStop request from acl");
     std::lock_guard<std::mutex> lk(mtx_);
+    std::lock_guard<std::mutex> lkDevResponse(mtxDevResponse_);
+    MSPROF_EVENT("Received ProfAclStop request from acl");
     if (profStopCfg == nullptr) {
         MSPROF_LOGE("Stopcfg is nullptr");
         MSPROF_INNER_ERROR("EK9999", "Stopcfg is nullptr");
@@ -459,12 +465,11 @@ int ProfAclMgr::ProfAclStop(PROF_CONF_CONST_PTR profStopCfg)
     // stop devices
     int ret = CancelHostAndDevTasks();
     if (ret != ACL_SUCCESS) {
-        MSPROF_LOGE("[ProfAclStop]Cancle host and device tasks failed.");
+        MSPROF_LOGE("[ProfAclStop]Cancel host and device tasks failed.");
         return ret;
     }
 
-    isWarmuped_ = false;
-    isStarted_ = false;
+    apiStatus_.store(ApiStatus::STOP);
 
     params_->profMode = "";
     return ACL_SUCCESS;
@@ -511,8 +516,9 @@ int ProfAclMgr::CancelHostAndDevTasks()
  */
 int ProfAclMgr::ProfAclFinalize()
 {
-    MSPROF_EVENT("Received ProfAclFinalize request from acl");
     std::lock_guard<std::mutex> lk(mtx_);
+    std::lock_guard<std::mutex> lkDevResponse(mtxDevResponse_);
+    MSPROF_EVENT("Received ProfAclFinalize request from acl");
     if (mode_ != WORK_MODE_API_CTRL) {
         MSPROF_LOGE("Profiling has not been inited");
         return ACL_ERROR_PROF_NOT_RUN;
@@ -536,6 +542,7 @@ int ProfAclMgr::ProfAclFinalize()
             MSPROF_LOGW("Can't Analyze Data on Cloud. Path: %s, Please do it by yourself.", jobDir.c_str());
         }
     }
+    apiStatus_.store(ApiStatus::FINALIZE);
     return ACL_SUCCESS;
 }
 
@@ -724,8 +731,9 @@ int ProfAclMgr::CancleSubScribeDevTask(const uint32_t devId, const uint32_t mode
 
 int ProfAclMgr::ProfAclModelUnSubscribe(const uint32_t modelId)
 {
-    MSPROF_EVENT("Received ProfAclModelUnSubscribe request from acl, model: %u", modelId);
     std::lock_guard<std::mutex> lk(mtx_);
+    std::lock_guard<std::mutex> lkDevResponse(mtxDevResponse_);
+    MSPROF_EVENT("Received ProfAclModelUnSubscribe request from acl, model: %u", modelId);
     if (!isReady_) {
         MSPROF_LOGE("Model %u has not been subscribed", modelId);
         return ACL_ERROR_INVALID_MODEL_ID;
@@ -1533,8 +1541,9 @@ int32_t ProfAclMgr::MsprofFinalizeHandle(void)
 
     ge::GeFinalizeHandle();
 
-    MSPROF_EVENT("Finalize profiling");
     std::lock_guard<std::mutex> lk(mtx_);
+    std::lock_guard<std::mutex> lkDevResponse(mtxDevResponse_);
+    MSPROF_EVENT("Finalize profiling");
     if (!IsCmdMode()) {
         MSPROF_LOGI("MsprofFinalizeHandle, not on cmd mode, mode:%d", mode_);
         return MSPROF_ERROR_NONE;
@@ -1565,11 +1574,18 @@ int32_t ProfAclMgr::MsprofFinalizeHandle(void)
 
 int32_t ProfAclMgr::MsprofSetDeviceImpl(uint32_t devId)
 {
-    MSPROF_EVENT("MsprofSetDeviceImpl, devId:%u", devId);
+    std::lock_guard<std::mutex> lkDevResponse(mtxDevResponse_);
+    int apiStatus = static_cast<int>(apiStatus_.load());
+    MSPROF_EVENT("MsprofSetDeviceImpl, devId:%u, prof status is %d", devId, apiStatus);
+    if (apiStatus >= static_cast<int>(ApiStatus::STOP)) {
+        MSPROF_LOGW("Profiling is in the stop or finalize phase, cannot execute setDevice, status is %d.", apiStatus);
+        return PROFILING_DOING_NOTHING;
+    }
     auto iterDev = devTasks_.find(devId);
-    if (iterDev != devTasks_.end() && !iterDev->second.params->is_cancel) {
-        MSPROF_LOGI("MsprofSetDeviceImpl, devId:%u task is running", devId);
-        return PROFILING_IN_RUNNING;
+    if (iterDev != devTasks_.end()) {
+        MSPROF_LOGI("MsprofSetDeviceImpl, devId:%u task is running, task status is %d.",
+                    devId, iterDev->second.params->is_cancel);
+        return PROFILING_DOING_NOTHING;
     }
     MSPROF_LOGI("MsprofSetDeviceImpl, Process ProfStart of devId:%u", devId);
     int ret = StartDeviceTask(devId, params_);
@@ -1659,9 +1675,10 @@ int32_t ProfAclMgr::MsprofSetConfig(aclprofConfigType cfgType, std::string confi
     return PROFILING_SUCCESS;
 }
 
-bool ProfAclMgr::IsWarmuped()
+bool ProfAclMgr::IsApiProfOn()
 {
-    return isWarmuped_;
+    int apiStatus = static_cast<int>(apiStatus_.load());
+    return (apiStatus == static_cast<int>(ApiStatus::WARMUP) || apiStatus == static_cast<int>(ApiStatus::START));
 }
 
 }   // namespace Api

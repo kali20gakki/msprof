@@ -478,7 +478,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, GeOpenDeviceHandle)
     MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::MsprofSetDeviceImpl)
     .stubs()
     .will(returnValue(PROFILING_FAILED))
-    .then(returnValue(PROFILING_IN_RUNNING))
+    .then(returnValue(PROFILING_DOING_NOTHING))
     .then(returnValue(PROFILING_SUCCESS));
     EXPECT_EQ(PROFILING_FAILED, ge::GeOpenDeviceHandle(1));
     EXPECT_EQ(PROFILING_SUCCESS, ge::GeOpenDeviceHandle(1));
@@ -2001,8 +2001,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, IsSubscribeMode)
 
 TEST_F(MSPROF_ACL_CORE_UTEST, ProfAclStart_failed)
 {
-    Msprofiler::Api::ProfAclMgr::instance()->isWarmuped_  = false;
-    Msprofiler::Api::ProfAclMgr::instance()->isStarted_  = false;
+    Msprofiler::Api::ProfAclMgr::instance()->apiStatus_.store(Msprofiler::Api::ApiStatus::INIT);
     EXPECT_EQ(ACL_ERROR_INVALID_PARAM, Msprofiler::Api::ProfAclMgr::instance()->ProfAclWarmup(nullptr));
     ProfConfig config;
     config.devNums = 1;

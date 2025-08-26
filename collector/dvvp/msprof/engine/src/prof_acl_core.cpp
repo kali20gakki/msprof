@@ -408,7 +408,7 @@ aclError aclprofStart(ACL_PROF_CONFIG_CONST_PTR profilerConfig)
 {
     MSPROF_LOGI("Start to execute aclprofStartProfiling");
     int32_t ret = ACL_SUCCESS;
-    if (!ProfAclMgr::instance()->IsWarmuped()) {
+    if (!ProfAclMgr::instance()->IsApiProfOn()) {
         ret = aclprofWarmup(profilerConfig);
     }
     if (ret != ACL_SUCCESS) {

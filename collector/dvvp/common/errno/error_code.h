@@ -17,7 +17,7 @@ const int PROFILING_FAILED = -1;
 const int PROFILING_NOTSUPPORT = -2;
 const int PROFILING_INVALID_PARAM = -3;
 const int PROFILING_IN_WARMUP = -4;
-const int PROFILING_IN_RUNNING = -5;
+const int PROFILING_DOING_NOTHING = -5;
 }  // namespace error
 }  // namespace common
 }  // namespace dvvp

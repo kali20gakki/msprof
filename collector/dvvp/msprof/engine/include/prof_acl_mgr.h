@@ -45,7 +45,21 @@ enum WorkMode {
     WORK_MODE_SUBSCRIBE,    // profiling work on subscribe mode
 };
 
+/**
+ * @name  apiStatus
+ * @brief profiling api status
+ */
+enum class ApiStatus {
+    DEFAULT = 0,        // default prof status
+    INIT,               // prof acl api init
+    WARMUP,             // prof acl api warmup
+    START,              // prof acl api start
+    STOP,               // prof acl api stop
+    FINALIZE,           // prof acl api finalize
+};
+
 void DeviceResponse(int devId);
+int32_t EmptyCallbackForDeviceNotify(VOID_PTR data, uint32_t len);
 
 class ProfAclMgr : public analysis::dvvp::common::singleton::Singleton<ProfAclMgr> {
 public:
@@ -80,7 +94,7 @@ public:
     bool IsModeOff();
     bool IsSubscribeMode() const;
     bool IsApiCtrlMode() const;
-    bool IsWarmuped();
+    bool IsApiProfOn();
 
     // api ctrl
     int ProfAclInit(const std::string& profResultPath);
@@ -213,8 +227,7 @@ private:
     PROF_CONF_CONST_PTR profStratCfg_;
     uint64_t dataTypeConfig_;
     uint64_t startIndex_;
-    std::atomic<bool> isWarmuped_;
-    std::atomic<bool> isStarted_;
+    std::atomic<ApiStatus> apiStatus_;
 };
 } // namespace Api
 } // namespace Msprofiler
