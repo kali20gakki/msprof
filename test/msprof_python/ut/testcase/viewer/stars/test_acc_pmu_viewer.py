@@ -31,7 +31,9 @@ class TestAccPmuViewer(unittest.TestCase):
         ret = check.get_trace_timeline([])
         self.assertEqual([], ret)
 
-        datas = [AccPmuTestData(1, 2, 3, 4, 5, 6, 7, 8, 9, 123)]
+        datas = [AccPmuTestData(1, 2, 3, 4, 5, 6, 7, 8, 9, 123),
+                 AccPmuTestData(2, 2, 3, 4, 5, 6, 7, 8, 9, 123),
+                 AccPmuTestData(2, 3, 4, 5, 6, 7, 8, 9, 10, 123)]
         check = AccPmuViewer({}, {})
         ret = check.get_trace_timeline(datas)
-        self.assertEqual(5, len(ret))
+        self.assertEqual(9, len(ret))

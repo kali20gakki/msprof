@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
+# Copyright (c) Huawei Technologies Co., Ltd. 2021-2025. All rights reserved.
 
 from abc import ABC
 
@@ -48,18 +48,29 @@ class AccPmuViewer(BaseViewer, ABC):
         if not datas:
             return []
         result = []
+
+        # datas ordered by timestamp
+        headers_list = ["read_bandwidth", "write_bandwidth", "read_ost", "write_ost"]
+        result_list = [0, 0, 0, 0]
+        prev_time = 0.0
         for data in datas:
             local_time = InfoConfReader().trans_into_local_time(raw_timestamp=data.timestamp, use_us=True)
-            result.append(["read_bandwidth", local_time,
-                           {'value': data.read_bandwidth, 'acc_id': data.acc_id}])
-            result.append(["write_bandwidth", local_time,
-                           {'value': data.write_bandwidth, 'acc_id': data.acc_id}])
-            result.append(["read_ost", local_time,
-                           {'value': data.read_ost, 'acc_id': data.acc_id}])
-            result.append(["write_ost", local_time,
-                           {'value': data.write_ost, 'acc_id': data.acc_id}])
-        for item in result:
-            item[2:2] = [self.pid, self.tid]
+            data_list = [data.read_bandwidth, data.write_bandwidth, data.read_ost, data.write_ost]
+            if not prev_time:
+                result_list = data_list
+                prev_time = local_time
+                continue
+            if prev_time == local_time:
+                result_list = [max(value, data_list[i]) for i, value in enumerate(result_list)]
+            else:
+                for i, value in enumerate(result_list):
+                    result.append([headers_list[i], prev_time, self.pid, self.tid, {"value": value}])
+                result_list = [max(0, data_list[i]) for i, value in enumerate(result_list)]
+                prev_time = local_time
+        # inject last data to result
+        for i, value in enumerate(result_list):
+            result.append([headers_list[i], prev_time, self.pid, self.tid, {"value": value}])
+
         _trace = TraceViewManager.column_graph_trace(TraceViewHeaderConstant.COLUMN_GRAPH_HEAD_LEAST, result)
         result = TraceViewManager.metadata_event(self.get_timeline_header())
         result.extend(_trace)

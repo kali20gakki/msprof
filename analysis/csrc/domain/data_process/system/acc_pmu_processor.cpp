@@ -78,7 +78,7 @@ OriAccPmuData AccPmuProcessor::LoadData(const DBInfo &accPmuDB, const std::strin
         return oriData;
     }
     std::string sql{"SELECT acc_id, read_bandwidth, write_bandwidth, read_ost, write_ost, timestamp "
-                    "FROM " + accPmuDB.tableName};
+                    "FROM " + accPmuDB.tableName + " ORDER BY timestamp ASC, acc_id ASC"};
     if (!accPmuDB.dbRunner->QueryData(sql, oriData)) {
         ERROR("Failed to obtain data from the % table.", accPmuDB.tableName);
     }

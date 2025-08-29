@@ -48,8 +48,8 @@ class AccPmuModel(ParserModel):
         if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_ACC_PMU_DATA):
             return []
         sql = "select acc_id, read_bandwidth, write_bandwidth ,read_ost, write_ost, " \
-              "timestamp/{NS_TO_US} as timestamp from {}".format(DBNameConstant.TABLE_ACC_PMU_DATA,
-                                                                 NS_TO_US=NumberConstant.NS_TO_US)
+              "timestamp/{NS_TO_US} as timestamp from {} ORDER BY timestamp ASC, acc_id ASC".format(
+            DBNameConstant.TABLE_ACC_PMU_DATA, NS_TO_US=NumberConstant.NS_TO_US)
         return DBManager.fetch_all_data(self.cur, sql, dto_class=AccPmuOriDto)
 
     def get_summary_data(self: any) -> list:

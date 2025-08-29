@@ -1,6 +1,6 @@
 /* ******************************************************************************
-            版权所有 (c) 华为技术有限公司 2024-2024
-            Copyright, 2024, Huawei Tech. Co., Ltd.
+            版权所有 (c) 华为技术有限公司 2024-2025
+            Copyright, 2025, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
  * File Name          : acc_pmu_assembler.cpp
@@ -11,6 +11,7 @@
  */
 
 #include "analysis/csrc/application/timeline/acc_pmu_assembler.h"
+
 #include "analysis/csrc/domain/entities/viewer_data/system/include/acc_pmu_data.h"
 #include "analysis/csrc/domain/services/environment/context.h"
 
@@ -22,30 +23,57 @@ using namespace Analysis::Infra;
 using namespace Analysis::Utils;
 namespace {
 const std::vector<std::string> COUNTERS {"read_bandwidth", "read_ost", "write_bandwidth", "write_ost"};
-const std::string ACC_ID = "acc_id";
 const std::string VALUE = "value";
 }
 
 AccPmuAssembler::AccPmuAssembler() : JsonAssembler(PROCESS_ACC_PMU, {{MSPROF_JSON_FILE, FileCategory::MSPROF}}) {}
 
-void GenerateAccPmuTrace(std::vector<AccPmuData> &accPmuData, const std::unordered_map<uint16_t, uint32_t> &pidMap,
-                         std::vector<std::shared_ptr<TraceEvent>> &res)
+void InjectAccPmuTraceToRes(std::vector<uint32_t> &dataList, std::string &time,
+                            std::vector<std::shared_ptr<TraceEvent>> &res)
 {
     std::shared_ptr<CounterEvent> event;
-    std::string time;
-    std::string accId;
-    uint32_t pid;
-    for (const auto &data : accPmuData) {
-        time = DivideByPowersOfTenWithPrecision(data.timestamp);
-        pid = pidMap.at(data.deviceId);
-        std::vector<uint32_t> level {data.readBwLevel, data.readOstLevel, data.writeBwLevel, data.writeOstLevel};
-        for (size_t i = 0; i < level.size(); i++) {
-            MAKE_SHARED_RETURN_VOID(event, CounterEvent, pid, DEFAULT_TID, time, COUNTERS[i]);
-            event->SetSeriesIValue(ACC_ID, data.accId);
-            event->SetSeriesIValue(VALUE, level[i]);
+    const int pidIndex = 4;
+    for (size_t i = 0; i < COUNTERS.size(); ++i) {
+        MAKE_SHARED_RETURN_VOID(event, CounterEvent, dataList[pidIndex], DEFAULT_TID, time, COUNTERS[i]);
+        if (event != nullptr) {
+            event->SetSeriesIValue(VALUE, dataList[i]);
             res.push_back(event);
         }
     }
+}
+
+void GenerateAccPmuTrace(std::vector<AccPmuData> &accPmuData, const std::unordered_map<uint16_t, uint32_t> &pidMap,
+                         std::vector<std::shared_ptr<TraceEvent>> &res)
+{
+    std::string time;
+    std::string prevTime;
+    uint32_t pid;
+    std::vector<uint32_t> resultDataList = {0, 0, 0, 0, 0};
+    // processor中sql语句按timestamp升序排序，故可保证time顺序
+    for (const auto &data: accPmuData) {
+        time = DivideByPowersOfTenWithPrecision(data.timestamp);
+        pid = pidMap.at(data.deviceId);
+        std::vector<uint32_t> dataList = {data.readBwLevel, data.readOstLevel, data.writeBwLevel, data.writeOstLevel,
+                                          pid};
+        if (prevTime.empty()) {
+            resultDataList = dataList;
+            prevTime = time;
+            continue;
+        }
+        if (prevTime == time) {
+            for (size_t i = 0; i < resultDataList.size(); ++i) {
+                resultDataList[i] = std::max(resultDataList[i], dataList[i]);
+            }
+        } else {
+            InjectAccPmuTraceToRes(resultDataList, prevTime, res);
+            resultDataList = {0, 0, 0, 0, 0};
+            for (size_t i = 0; i < resultDataList.size(); ++i) {
+                resultDataList[i] = std::max(resultDataList[i], dataList[i]);
+            }
+            prevTime = time;
+        }
+    }
+    InjectAccPmuTraceToRes(resultDataList, prevTime, res);
 }
 
 uint8_t AccPmuAssembler::AssembleData(DataInventory &dataInventory, JsonWriter &ostream, const std::string &profPath)
