@@ -29,7 +29,7 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/common/validation/param_validation.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/stub/error_manager/msprof_error_manager_stub.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_handle.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/runtime_plugin.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/acl_plugin.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/tsdclient_plugin.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/driver/channel/ai_drv_prof_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp
