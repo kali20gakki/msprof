@@ -107,7 +107,15 @@ msptiResult MstxParser::ReportMark(const char* msg, RtStreamT stream, const char
 
 msptiResult MstxParser::ReportRangeStartA(const char* msg, RtStreamT stream, uint64_t& markId, const char* domain)
 {
-    uint64_t timestamp = Mspti::Common::ContextManager::GetInstance()->GetHostTimeStampNs();
+    RangeStartContext mstxContext{};
+    uint64_t timestamp = 0;
+    if (Common::ContextManager::GetInstance()->GetHostTimeInfo(mstxContext.devTimeInfo)) {
+        timestamp = Common::ContextManager::CalculateRealTime(Mspti::Common::Utils::GetHostSysCnt(),
+                                                              mstxContext.devTimeInfo);
+    } else {
+        timestamp = Mspti::Common::Utils::GetClockRealTimeNs();
+    }
+    mstxContext.stream = stream;
     auto msgPtr = TryCacheMarkMsg(msg);
     if (msgPtr == nullptr) {
         MSPTI_LOGE("Try Cache Mark msg failed.");
@@ -139,31 +147,33 @@ msptiResult MstxParser::ReportRangeStartA(const char* msg, RtStreamT stream, uin
         Common::ReinterpretConvert<msptiActivity*>(activity), sizeof(msptiActivityMarker));
     {
         std::lock_guard<std::mutex> lock(rangeInfoMtx_);
-        markId2Stream_.insert({markId, stream});
+        markId2Context_.emplace(markId, mstxContext);
     }
     return ret;
 }
 
 msptiResult MstxParser::ReportRangeEnd(uint64_t rangeId)
 {
-    uint64_t timestamp = Mspti::Common::ContextManager::GetInstance()->GetHostTimeStampNs();
+    uint64_t timestamp;
     bool withStream = false;
     {
         std::lock_guard<std::mutex> lock(rangeInfoMtx_);
-        auto iter = markId2Stream_.find(rangeId);
-        if (iter == markId2Stream_.end()) {
+        auto iter = markId2Context_.find(rangeId);
+        if (iter == markId2Context_.end()) {
             MSPTI_LOGW("Input rangeId[%lu] is invalid.", rangeId);
             return MSPTI_SUCCESS;
         }
-        if (iter->second) {
+        timestamp = Common::ContextManager::CalculateRealTime(Mspti::Common::Utils::GetHostSysCnt(),
+                                                              iter->second.devTimeInfo);
+        if (iter->second.stream) {
             if (rtProfilerTraceEx(rangeId, static_cast<uint64_t>(MSPTI_ACTIVITY_FLAG_MARKER_END_WITH_DEVICE),
-                                  MARK_TAG_ID, iter->second) != MSPTI_SUCCESS) {
+                                  MARK_TAG_ID, iter->second.stream) != MSPTI_SUCCESS) {
                 MSPTI_LOGE("Failed to run range end func.");
                 return MSPTI_ERROR_INNER;
             }
             withStream = true;
         }
-        markId2Stream_.erase(iter);
+        markId2Context_.erase(iter);
     }
     msptiActivityMarker* activity = GetDefaultMarkActivity().Get();
     if (UNLIKELY(activity == nullptr)) {

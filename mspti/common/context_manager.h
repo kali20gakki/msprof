@@ -1,5 +1,5 @@
 /* ******************************************************************************
-            版权所有 (c) 华为技术有限公司 2024-2024
+            版权所有 (c) 华为技术有限公司 2024-2025
             Copyright, 2024, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
@@ -26,9 +26,9 @@ namespace Mspti {
 namespace Common {
 
 struct DevTimeInfo {
-    uint64_t freq;
-    uint64_t startRealTime;
-    uint64_t startSysCnt;
+    uint64_t freq{0};
+    uint64_t startRealTime{0};
+    uint64_t startSysCnt{0};
 };
 
 enum class PlatformType {
@@ -43,6 +43,9 @@ public:
     void InitDevTimeInfo(uint32_t deviceId);
     void InitHostTimeInfo();
     bool HostFreqIsEnable();
+    bool GetHostTimeInfo(DevTimeInfo& devTimeInfo);
+    bool GetCurDevTimeInfo(uint32_t deviceId, DevTimeInfo& devTimeInfo);
+    static uint64_t CalculateRealTime(uint64_t sysCnt, const DevTimeInfo& devTimeInfo);
     uint64_t GetRealTimeFromSysCnt(uint32_t deviceId, uint64_t sysCnt);
     std::vector<uint64_t> GetRealTimeFromSysCnt(uint32_t deviceId, const std::vector<uint64_t>& sysCnts);
     // Host
@@ -65,7 +68,6 @@ private:
     ContextManager& operator=(ContextManager &&obj) = delete;
 
     void Run();
-    static uint64_t CalculateRealTime(uint64_t sysCnt, DevTimeInfo& devTimeInfo);
 
 private:
     std::unordered_map<uint32_t, std::unique_ptr<DevTimeInfo>> devTimeInfo_;

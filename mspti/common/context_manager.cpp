@@ -1,5 +1,5 @@
 /* ******************************************************************************
-            版权所有 (c) 华为技术有限公司 2024-2024
+            版权所有 (c) 华为技术有限公司 2024-2025
             Copyright, 2024, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
@@ -194,8 +194,11 @@ uint64_t ContextManager::GetRealTimeFromSysCnt(uint64_t sysCnt)
     return CalculateRealTime(sysCnt, hostTime);
 }
 
-inline uint64_t ContextManager::CalculateRealTime(uint64_t sysCnt, DevTimeInfo &devTimeInfo)
+uint64_t ContextManager::CalculateRealTime(uint64_t sysCnt, const DevTimeInfo &devTimeInfo)
 {
+    if (devTimeInfo.freq == 0) {
+        return sysCnt;
+    }
     int64_t delta = static_cast<int64_t>(sysCnt) - static_cast<int64_t>(devTimeInfo.startSysCnt);
     return (delta / static_cast<int64_t>(devTimeInfo.freq)) * MSTONS +
            (delta % static_cast<int64_t>(devTimeInfo.freq) * MSTONS) / static_cast<int64_t>(devTimeInfo.freq) +
@@ -291,6 +294,27 @@ msptiResult ContextManager::StopSyncTime()
 ContextManager::~ContextManager()
 {
     StopSyncTime();
+}
+
+bool ContextManager::GetHostTimeInfo(DevTimeInfo& devTimeInfo)
+{
+    std::lock_guard<std::mutex> lk(hostTimeMtx_);
+    if (hostTimeInfo_ == nullptr) {
+        return false;
+    }
+    devTimeInfo = *hostTimeInfo_;
+    return true;
+}
+
+bool ContextManager::GetCurDevTimeInfo(uint32_t deviceId, DevTimeInfo& devTimeInfo)
+{
+    std::lock_guard<std::mutex> lk(devTimeMtx_);
+    auto iter = devTimeInfo_.find(deviceId);
+    if (iter == devTimeInfo_.end() || iter->second->freq == 0) {
+        return false;
+    }
+    devTimeInfo = *iter->second;
+    return true;
 }
 
 }  // Common

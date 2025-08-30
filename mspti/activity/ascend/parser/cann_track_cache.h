@@ -27,7 +27,7 @@ struct ApiEvent {
     uint16_t level;
     MsprofApi api;
     MsprofCompactInfo compactInfo;
-    std::vector<std::shared_ptr<ApiEvent>> childs;
+    std::vector<std::unique_ptr<ApiEvent>> childs;
 };
 
 class ProfTask {

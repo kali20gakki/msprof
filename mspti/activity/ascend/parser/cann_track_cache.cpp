@@ -19,6 +19,7 @@
 #include "communication_calculator.h"
 #include "common/plog_manager.h"
 #include "common/utils.h"
+#include "common/mpsc_queue.h"
 #include "activity/activity_manager.h"
 
 namespace Mspti {
@@ -44,10 +45,11 @@ template <typename T> struct TagAging {
 };
 
 struct CannThreadCache {
-    uint32_t threadId;
-    Mspti::Common::MPSCQueue<std::shared_ptr<TagAging<MsprofCompactInfo>>, Mspti::Common::DEFAULT_CAPCAITY> taskQueue;
-    Mspti::Common::MPSCQueue<std::shared_ptr<TagAging<MsprofApi>>, Mspti::Common::DEFAULT_CAPCAITY> nodeLaunchQueue;
-    Mspti::Common::MPSCQueue<std::shared_ptr<TagAging<MsprofApi>>, Mspti::Common::DEFAULT_CAPCAITY> communicationQueue;
+    uint32_t threadId{};
+    std::mutex taskMutex;
+    std::multimap<uint64_t, std::shared_ptr<TagAging<MsprofCompactInfo>>> taskQueue;
+    Mspti::Common::MPSCQueue<std::shared_ptr<TagAging<MsprofApi>>> nodeLaunchQueue;
+    Mspti::Common::MPSCQueue<std::shared_ptr<TagAging<MsprofApi>>> communicationQueue;
 };
 
 using CannThreadCachePtr = std::shared_ptr<CannThreadCache>;
@@ -75,7 +77,6 @@ private:
     std::unordered_map<std::uint64_t, CannThreadCachePtr> threadCaches_{};
     std::mutex targetThreadMutex_;
     std::vector<uint64_t> targetThreadId_{};
-    std::mutex cvMutex_;
     std::condition_variable cv;
     std::atomic<bool> threadRun_{ false };
     std::thread t_;
@@ -109,23 +110,19 @@ msptiResult CannTrackCache::CannTrackCacheImpl::Run()
 {
     pthread_setname_np(pthread_self(), "CannTrackCache");
     while (threadRun_) {
-        std::unique_lock<std::mutex> lock(cvMutex_);
-        cv.wait(lock, [this] { return !targetThreadId_.empty() || !threadRun_.load(); });
-        if (!threadRun_.load()) {
-            break;
-        }
-
         std::vector<uint64_t> threads;
         {
-            std::lock_guard<std::mutex> lk(targetThreadMutex_);
+            std::unique_lock<std::mutex> lock(targetThreadMutex_);
+            cv.wait(lock, [this] { return !targetThreadId_.empty() || !threadRun_.load(); });
             threads = std::move(targetThreadId_);
             targetThreadId_.clear();
         }
-
+        if (!threadRun_.load()) {
+            break;
+        }
         if (threads.empty()) {
             continue;
         }
-
         for (auto threadId : threads) {
             auto cache = GetOrCreateCache(threadId);
             Analysis(cache);
@@ -161,7 +158,8 @@ msptiResult CannTrackCache::CannTrackCacheImpl::AppendTsTrack(bool agingFlag, co
         MSPTI_LOGE("copy TagAging MsprofCompactInfo data failed");
         return MSPTI_ERROR_INNER;
     }
-    cache->taskQueue.Push(agingCopy);
+    std::lock_guard<std::mutex> lk(cache->taskMutex);
+    cache->taskQueue.emplace(data->timeStamp, agingCopy);
     return MSPTI_SUCCESS;
 }
 
@@ -195,16 +193,11 @@ msptiResult CannTrackCache::CannTrackCacheImpl::AppendNodeLunch(bool agingFlag, 
         }
         cache->nodeLaunchQueue.Push(agingCopy);
     }
-
     {
         std::lock_guard<std::mutex> lk(targetThreadMutex_);
         targetThreadId_.push_back(data->threadId);
     }
-
-    {
-        std::lock_guard<std::mutex> lock(cvMutex_);
-        cv.notify_one(); // 通知消费者有新数据
-    }
+    cv.notify_one(); // 通知消费者有新数据
     return MSPTI_SUCCESS;
 }
 
@@ -257,8 +250,8 @@ msptiResult CannTrackCache::CannTrackCacheImpl::Analysis(const CannThreadCachePt
         if (!nodeLaunchApi) {
             continue;
         }
-        std::shared_ptr<ApiEvent> api2TaskInfo;
-        Mspti::Common::MsptiMakeSharedPtr(api2TaskInfo);
+        std::unique_ptr<ApiEvent> api2TaskInfo;
+        Mspti::Common::MsptiMakeUniquePtr(api2TaskInfo);
         if (!UNLIKELY(api2TaskInfo)) {
             MSPTI_LOGE("fail to malloc api2TaskInfo");
             return MSPTI_ERROR_INNER;
@@ -281,12 +274,9 @@ void CannTrackCache::CannTrackCacheImpl::MountCommunicationNode(ApiEvent &apiEve
 {
     std::shared_ptr<TagAging<MsprofApi>> frontApi;
     while (!cache->communicationQueue.IsEmpty()) {
-        cache->communicationQueue.Peek(frontApi);
-        if (!InApiRange(apiEvent.api, *frontApi->data)) {
-            return;
-        }
-        std::shared_ptr<ApiEvent> communicationTask;
-        Mspti::Common::MsptiMakeSharedPtr(communicationTask);
+        cache->communicationQueue.Pop(frontApi);
+        std::unique_ptr<ApiEvent> communicationTask;
+        Mspti::Common::MsptiMakeUniquePtr(communicationTask);
         if (!UNLIKELY(communicationTask)) {
             MSPTI_LOGE("fail to malloc communicationTask");
             return;
@@ -295,26 +285,26 @@ void CannTrackCache::CannTrackCacheImpl::MountCommunicationNode(ApiEvent &apiEve
         communicationTask->api = *frontApi->data;
         communicationTask->level = communicationTask->api.level;
         if (MountCompactInfo(*communicationTask, cache)) {
-            apiEvent.childs.emplace_back(communicationTask);
+            apiEvent.childs.emplace_back(std::move(communicationTask));
         }
-        cache->communicationQueue.Pop(frontApi);
     }
 }
 
 bool CannTrackCache::CannTrackCacheImpl::MountCompactInfo(ApiEvent &apiEvent, const CannThreadCachePtr &cache)
 {
-    std::shared_ptr<TagAging<MsprofCompactInfo>> curTask;
-    if (cache->taskQueue.IsEmpty()) {
+    std::lock_guard<std::mutex> lk(cache->taskMutex);
+    if (cache->taskQueue.empty()) {
         return false;
     }
-    auto res = cache->taskQueue.PopIf(curTask, [&apiEvent](const std::shared_ptr<TagAging<MsprofCompactInfo>> &item) {
-        return InApiRange(apiEvent.api, *item->data);
-    });
-    if (res) {
-        apiEvent.agingFlag = curTask->agingFlag;
-        apiEvent.compactInfo = *curTask->data;
+    auto startRuntimeTask = cache->taskQueue.lower_bound(apiEvent.api.beginTime);
+    auto endRuntimeTask = cache->taskQueue.upper_bound(apiEvent.api.endTime);
+    if (std::distance(startRuntimeTask, endRuntimeTask) == 0) {
+        return false;
     }
-    return res;
+    apiEvent.agingFlag = startRuntimeTask->second->agingFlag;
+    apiEvent.compactInfo = *startRuntimeTask->second->data;
+    cache->taskQueue.erase(startRuntimeTask, endRuntimeTask);
+    return true;
 }
 
 CannThreadCachePtr CannTrackCache::CannTrackCacheImpl::GetOrCreateCache(uint64_t threadId)

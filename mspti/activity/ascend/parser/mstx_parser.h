@@ -21,9 +21,15 @@
 
 #include "common/inject/runtime_inject.h"
 #include "activity/ascend/channel/channel_data.h"
+#include "common/context_manager.h"
 
 namespace Mspti {
 namespace Parser {
+struct RangeStartContext {
+    RtStreamT stream;
+    Common::DevTimeInfo devTimeInfo;
+};
+
 class MstxParser {
 public:
     static MstxParser* GetInstance();
@@ -55,7 +61,7 @@ private:
     std::atomic<uint64_t> gMarkId_{0};
     static constexpr uint32_t MARK_TAG_ID{11};
     std::mutex rangeInfoMtx_;
-    std::unordered_map<uint64_t, RtStreamT> markId2Stream_;
+    std::unordered_map<uint64_t, RangeStartContext> markId2Context_;
     static std::unordered_map<std::uint64_t, std::string> hashMarkMsg_;
     static std::mutex markMsgMtx_;
 
