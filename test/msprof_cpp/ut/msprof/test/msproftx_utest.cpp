@@ -24,7 +24,7 @@
 #include "msprof_stamp_pool.h"
 #include "msprof_tx_manager.h"
 #include "msprof_reporter_mgr.h"
-#include "runtime_plugin.h"
+#include "acl_plugin.h"
 
 using namespace analysis::dvvp::common::error;
 using namespace Msprof::Engine;
@@ -224,7 +224,7 @@ TEST_F(MsprofTxUtest, MsprofTxMarkExWillReturnFailWithRtApiFail)
     manager->Init();
     std::string msg = "test";
     aclrtStream streamId = (void *)0x12345; // 0x12345 fake stream addr
-    MOCKER_CPP(&Collector::Dvvp::Plugin::RuntimePlugin::MsprofRtProfilerTraceEx)
+    MOCKER_CPP(&Collector::Dvvp::Plugin::AclPlugin::MsprofAclrtProfTrace)
         .stubs()
         .will(returnValue(PROFILING_FAILED));
     EXPECT_EQ(PROFILING_FAILED, manager->MarkEx(msg.c_str(), msg.size(), streamId));
@@ -240,7 +240,7 @@ TEST_F(MsprofTxUtest, MsprofTxMarkExWillReturnFailWithReportFail)
     manager->Init();
     std::string msg = "test";
     aclrtStream streamId = (void *)0x12345; // 0x12345 fake stream addr
-    MOCKER_CPP(&Collector::Dvvp::Plugin::RuntimePlugin::MsprofRtProfilerTraceEx)
+    MOCKER_CPP(&Collector::Dvvp::Plugin::AclPlugin::MsprofAclrtProfTrace)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
     EXPECT_EQ(PROFILING_FAILED, manager->MarkEx(msg.c_str(), msg.size(), streamId));
@@ -256,7 +256,7 @@ TEST_F(MsprofTxUtest, MsprofTxMarkExWillReturnSuccWithReportSucc)
     manager->Init();
     std::string msg = "test";
     aclrtStream streamId = (void *)0x12345; // 0x12345 fake stream addr
-    MOCKER_CPP(&Collector::Dvvp::Plugin::RuntimePlugin::MsprofRtProfilerTraceEx)
+    MOCKER_CPP(&Collector::Dvvp::Plugin::AclPlugin::MsprofAclrtProfTrace)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
     EXPECT_EQ(PROFILING_SUCCESS, manager->MarkEx(msg.c_str(), msg.size(), streamId));
