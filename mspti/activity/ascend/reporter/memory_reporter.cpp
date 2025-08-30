@@ -49,6 +49,8 @@ inline Mspti::Common::ThreadLocal<msptiActivityMemory>& GetDefaultMemoryActivity
                 return activityMemory;
             }
             activityMemory->kind = MSPTI_ACTIVITY_KIND_MEMORY;
+            activityMemory->processId = Common::Utils::GetPid();
+            activityMemory->streamId = MSPTI_INVALID_STREAM_ID;
             return activityMemory;
         });
     return instance;
@@ -180,7 +182,6 @@ msptiResult MemoryReporter::ReportMemsetActivity(const MemsetRecord &record)
         MSPTI_LOGE("Get Default MarkActivity is nullptr");
         return MSPTI_ERROR_INNER;
     }
-    activityMemset->kind = MSPTI_ACTIVITY_KIND_MEMSET;
     activityMemset->value = record.value;
     activityMemset->bytes = record.bytes;
     activityMemset->start = record.start;
@@ -205,7 +206,6 @@ msptiResult MemoryReporter::ReportMemcpyActivity(const MemcpyRecord &record)
         MSPTI_LOGE("Get Default MarkActivity is nullptr");
         return MSPTI_ERROR_INNER;
     }
-    activityMemcpy->kind = MSPTI_ACTIVITY_KIND_MEMCPY;
     activityMemcpy->copyKind = GetMsptiMemcpyKind(record.copyKind);
     activityMemcpy->bytes = record.bytes;
     activityMemcpy->start = record.start;

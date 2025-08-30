@@ -34,7 +34,7 @@ protected:
 
 TEST_F(CommunicationCalculatorUtest, ShouldReturnSuccessWhenChildEmpty)
 {
-    std::shared_ptr<Mspti::Parser::ApiEvent> api2TaskInfo = std::make_shared<Mspti::Parser::ApiEvent>();
+    std::unique_ptr<Mspti::Parser::ApiEvent> api2TaskInfo = std::make_unique<Mspti::Parser::ApiEvent>();
     auto &instance = Mspti::Parser::CommunicationCalculator::GetInstance();
     EXPECT_EQ(instance.AppendApi2TaskInfo(api2TaskInfo), MSPTI_SUCCESS);
 }
@@ -47,14 +47,14 @@ TEST_F(CommunicationCalculatorUtest, ShouldReturnSuccess)
     uint64_t subBeginTime = 110;
     uint64_t subEndTime = 180;
     uint16_t level = MSPROF_REPORT_HCCL_NODE_LEVEL;
-    std::shared_ptr<Mspti::Parser::ApiEvent> api2TaskInfo = std::make_shared<Mspti::Parser::ApiEvent>();
+    std::unique_ptr<Mspti::Parser::ApiEvent> api2TaskInfo = std::make_unique<Mspti::Parser::ApiEvent>();
     api2TaskInfo->api.beginTime = beginTime;
     api2TaskInfo->api.endTime = endTime;
     api2TaskInfo->api.threadId = threadId;
-    std::shared_ptr<Mspti::Parser::ApiEvent> subApi2TaskInfo = std::make_shared<Mspti::Parser::ApiEvent>();
+    std::unique_ptr<Mspti::Parser::ApiEvent> subApi2TaskInfo = std::make_unique<Mspti::Parser::ApiEvent>();
     subApi2TaskInfo->api.beginTime = subBeginTime;
     subApi2TaskInfo->api.endTime = subEndTime;
-    api2TaskInfo->childs.push_back(subApi2TaskInfo);
+    api2TaskInfo->childs.push_back(std::move(subApi2TaskInfo));
     auto &instance = Mspti::Parser::CommunicationCalculator::GetInstance();
     EXPECT_EQ(instance.AppendApi2TaskInfo(api2TaskInfo), MSPTI_SUCCESS);
 }

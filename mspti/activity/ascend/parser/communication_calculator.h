@@ -30,7 +30,7 @@ class CommunicationCalculator {
 public:
     msptiResult AppendCompactInfo(bool agingFlag, const MsprofCompactInfo *data);
 
-    msptiResult AppendApi2TaskInfo(const std::shared_ptr<ApiEvent>& ApiEvent);
+    msptiResult AppendApi2TaskInfo(const std::unique_ptr<ApiEvent>& ApiEvent);
 
     static CommunicationCalculator &GetInstance();
 

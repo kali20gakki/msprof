@@ -59,7 +59,7 @@ struct CommunicationOpDesc {
     uint64_t groupNameHash;
     uint64_t count;
     uint64_t correlationId;
-    std::vector<std::shared_ptr<CommunicationTask>> tasks;
+    std::vector<std::unique_ptr<CommunicationTask>> tasks;
 };
 }
 }
