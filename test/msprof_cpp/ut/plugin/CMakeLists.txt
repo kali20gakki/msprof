@@ -1,7 +1,7 @@
 set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/driver_plugin.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/profapi_plugin.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/acl_plugin.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/runtime_plugin.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/slog_plugin.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/dcmi_plugin.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_handle.cpp
@@ -18,7 +18,7 @@ set(localSrcFiles
     test/driver_plugin_utest.cpp
     test/plugin_handle_utest.cpp
     test/profapi_plugin_utest.cpp
-	test/acl_plugin_utest.cpp
+    test/runtime_plugin_utest.cpp
     test/slog_plugin_utest.cpp
     test/dcmi_plugin_utest.cpp
     test/tsdclient_plugin_utest.cpp

@@ -102,7 +102,7 @@ set(msprofilerCpp
     common/utils/utils.cpp
     common/validation/param_validation.cpp
     depend/src/driver_plugin.cpp
-    depend/src/acl_plugin.cpp
+    depend/src/runtime_plugin.cpp
     depend/src/plugin_handle.cpp
     depend/src/slog_plugin.cpp
     depend/src/profapi_plugin.cpp

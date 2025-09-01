@@ -22,7 +22,7 @@
 #include "transport/hash_data.h"
 #include "profapi_plugin.h"
 #include "platform/platform.h"
-#include "acl_plugin.h"
+#include "runtime_plugin.h"
 
 using namespace Analysis::Dvvp::Analyze;
 using namespace analysis::dvvp::common::error;
@@ -240,7 +240,7 @@ static bool GetVisibleDevIdListByLogicId(UINT32_T_PTR deviceIdList, const uint32
 {
     for (uint32_t i = 0; i < deviceNums; i++) {
         int32_t visibleDevId = 0;
-        int32_t ret = AclPlugin::instance()->MsprofAclrtGetLogicDevIdByUserDevId(static_cast<int32_t>(
+        int32_t ret = RuntimePlugin::instance()->MsprofRtGetVisibleDeviceIdByLogicDeviceId(static_cast<int32_t>(
             deviceIdList[i]), &visibleDevId);
         if (ret == PROFILING_NOTSUPPORT) {
             MSPROF_LOGI("RtGetVisibleDeviceIdByLogicDeviceId not support, use logic devId");
