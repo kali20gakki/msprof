@@ -250,8 +250,8 @@ int MsprofTxManager::MarkEx(CONST_CHAR_PTR msg, size_t msgLen, aclrtStream strea
     info.value.stampInfo.eventType = static_cast<uint16_t>(EventType::MARK_EX);
     info.value.stampInfo.startTime = static_cast<uint64_t>(Utils::GetClockRealtimeOrCPUCycleCounter());
     info.value.stampInfo.endTime = info.value.stampInfo.startTime;
-    // aclrtProfTrace
-    if (AclPlugin::instance()->MsprofAclrtProfTrace(markIdx, MARKEX_MODEL_ID, MARKEX_TAG_ID, stream) !=
+    // rtProfilerTraceEx
+    if (RuntimePlugin::instance()->MsprofRtProfilerTraceEx(markIdx, MARKEX_MODEL_ID, MARKEX_TAG_ID, stream) !=
         PROFILING_SUCCESS) {
         MSPROF_LOGE("[MarkEx]Failed to run mstx task, mark idx=%u", markIdx);
         return PROFILING_FAILED;

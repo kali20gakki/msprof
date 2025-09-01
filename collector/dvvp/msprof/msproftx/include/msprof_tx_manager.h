@@ -15,7 +15,7 @@
 #include "common/singleton/singleton.h"
 #include "msprof_tx_reporter.h"
 #include "msprof_stamp_pool.h"
-#include "acl_plugin.h"
+#include "runtime_plugin.h"
 
 namespace Msprof {
 namespace MsprofTx {

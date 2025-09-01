@@ -248,7 +248,7 @@ TEST_F(MstxUtest, MstxMarkAFuncWillReturnWhenRtProfilerTraceExFail)
     MstxManager::instance()->Start(emptyMstxDomainInclude, emptyMstxDomainExclude);
     aclrtStream stream = (aclrtStream)0x12345678;
     const char* msg = "record";
-    MOCKER_CPP(&Collector::Dvvp::Plugin::AclPlugin::MsprofAclrtProfTrace)
+    MOCKER_CPP(&Collector::Dvvp::Plugin::RuntimePlugin::MsprofRtProfilerTraceEx)
         .stubs()
         .will(returnValue(PROFILING_FAILED));
     MsprofMstxApi::MstxMarkAFunc(msg, stream);
@@ -262,7 +262,7 @@ TEST_F(MstxUtest, MstxMarkAFuncWillReturnWhenSaveMstxDataFail)
     MstxManager::instance()->Start(emptyMstxDomainInclude, emptyMstxDomainExclude);
     aclrtStream stream = (aclrtStream)0x12345678;
     const char* msg = "record";
-    MOCKER_CPP(&Collector::Dvvp::Plugin::AclPlugin::MsprofAclrtProfTrace)
+    MOCKER_CPP(&Collector::Dvvp::Plugin::RuntimePlugin::MsprofRtProfilerTraceEx)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
     MOCKER_CPP(&Collector::Dvvp::Mstx::MstxManager::SaveMstxData)
@@ -279,7 +279,7 @@ TEST_F(MstxUtest, MstxMarkAFuncWillSaveMstxDataWhenSaveMstxDataSuccWithInputStre
     MstxManager::instance()->Start(emptyMstxDomainInclude, emptyMstxDomainExclude);
     aclrtStream stream = (aclrtStream)0x12345678;
     const char* msg = "record";
-    MOCKER_CPP(&Collector::Dvvp::Plugin::AclPlugin::MsprofAclrtProfTrace)
+    MOCKER_CPP(&Collector::Dvvp::Plugin::RuntimePlugin::MsprofRtProfilerTraceEx)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
     MsprofMstxApi::MstxMarkAFunc(msg, stream);
@@ -327,7 +327,7 @@ TEST_F(MstxUtest, MstxRangeStartAFuncWillReturnZeroWhenRtProfilerTraceExFail)
     MstxManager::instance()->Start(emptyMstxDomainInclude, emptyMstxDomainExclude);
     aclrtStream stream = (aclrtStream)0x12345678;
     const char* msg = "record";
-    MOCKER_CPP(&Collector::Dvvp::Plugin::AclPlugin::MsprofAclrtProfTrace)
+    MOCKER_CPP(&Collector::Dvvp::Plugin::RuntimePlugin::MsprofRtProfilerTraceEx)
         .stubs()
         .will(returnValue(PROFILING_FAILED));
     EXPECT_EQ(MSTX_INVALID_RANGE_ID, MsprofMstxApi::MstxRangeStartAFunc(msg, stream));
@@ -340,7 +340,7 @@ TEST_F(MstxUtest, MstxRangeStartAFuncWillReturnZeroWhenSaveMstxDataFail)
     MstxManager::instance()->Start(emptyMstxDomainInclude, emptyMstxDomainExclude);
     aclrtStream stream = (aclrtStream)0x12345678;
     const char* msg = "record";
-    MOCKER_CPP(&Collector::Dvvp::Plugin::AclPlugin::MsprofAclrtProfTrace)
+    MOCKER_CPP(&Collector::Dvvp::Plugin::RuntimePlugin::MsprofRtProfilerTraceEx)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
     MOCKER_CPP(&Collector::Dvvp::Mstx::MstxManager::SaveMstxData)
@@ -356,7 +356,7 @@ TEST_F(MstxUtest, MstxRangeStartAFuncWillNotSaveMstxDataWhenMstxRangeEndIsNotCal
     MstxManager::instance()->Start(emptyMstxDomainInclude, emptyMstxDomainExclude);
     aclrtStream stream = (aclrtStream)0x12345678;
     const char* msg = "record";
-    MOCKER_CPP(&Collector::Dvvp::Plugin::AclPlugin::MsprofAclrtProfTrace)
+    MOCKER_CPP(&Collector::Dvvp::Plugin::RuntimePlugin::MsprofRtProfilerTraceEx)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
     EXPECT_NE(MSTX_INVALID_RANGE_ID, MsprofMstxApi::MstxRangeStartAFunc(msg, stream));
@@ -380,7 +380,7 @@ TEST_F(MstxUtest, MstxRangeStartAFuncWillSaveMstxDataWhenMstxRangeEndIsCalledWit
     MstxManager::instance()->Start(emptyMstxDomainInclude, emptyMstxDomainExclude);
     aclrtStream stream = (aclrtStream)0x12345678;
     const char* msg = "record";
-    MOCKER_CPP(&Collector::Dvvp::Plugin::AclPlugin::MsprofAclrtProfTrace)
+    MOCKER_CPP(&Collector::Dvvp::Plugin::RuntimePlugin::MsprofRtProfilerTraceEx)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
     uint64_t id = MsprofMstxApi::MstxRangeStartAFunc(msg, stream);
@@ -472,7 +472,7 @@ TEST_F(MstxUtest, MstxRangeEndFuncWillSaveMstxDataWhenSaveMstxDataSuccWithInputS
     MstxManager::instance()->Start(emptyMstxDomainInclude, emptyMstxDomainExclude);
     aclrtStream stream = (aclrtStream)0x12345678;
     const char* msg = "record";
-    MOCKER_CPP(&Collector::Dvvp::Plugin::AclPlugin::MsprofAclrtProfTrace)
+    MOCKER_CPP(&Collector::Dvvp::Plugin::RuntimePlugin::MsprofRtProfilerTraceEx)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
     uint64_t id = MsprofMstxApi::MstxRangeStartAFunc(msg, stream);
@@ -618,7 +618,7 @@ TEST_F(MstxUtest, MstxDomainMarkAFuncWillNotMarkWhenMsprofRtProfilerTraceExFail)
 {
     GlobalMockObject::verify();
     aclrtStream stream = (aclrtStream)0x12345678;
-    MOCKER_CPP(&Collector::Dvvp::Plugin::AclPlugin::MsprofAclrtProfTrace)
+    MOCKER_CPP(&Collector::Dvvp::Plugin::RuntimePlugin::MsprofRtProfilerTraceEx)
         .stubs()
         .will(returnValue(PROFILING_FAILED));
     auto handle = MsprofMstxApi::MstxDomainCreateAFunc("test");
@@ -633,7 +633,7 @@ TEST_F(MstxUtest, MstxDomainMarkAFuncWillNotMarkWhenMsprofRtProfilerTraceExSucc)
 {
     GlobalMockObject::verify();
     aclrtStream stream = (aclrtStream)0x12345678;
-    MOCKER_CPP(&Collector::Dvvp::Plugin::AclPlugin::MsprofAclrtProfTrace)
+    MOCKER_CPP(&Collector::Dvvp::Plugin::RuntimePlugin::MsprofRtProfilerTraceEx)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
     auto handle = MsprofMstxApi::MstxDomainCreateAFunc("test");
