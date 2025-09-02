@@ -196,7 +196,7 @@ void ProfDrvEvent::WaitEvent(struct TaskEventAttr *eventAttr, uint32_t grpId)
                 return;
             }
         } else {
-            MSPROF_LOGE("Wait event failed, device id:%u, channel id:%d, event id:%u, return:%d",
+            MSPROF_LOGW("Wait event failed, device id:%u, channel id:%d, event id:%u, return:%d",
                 eventAttr->deviceId, eventAttr->channelId, event.comm.event_id, err);
             return;
         }
