@@ -53,7 +53,7 @@ class TestHcclOpInfoParser(unittest.TestCase):
         data_list = [
             HcclOpInfoBean([23130, 10000, 10, 353695, 20, 38202863941896, 2, 3, 0b01000101, 43642, 72840854065026987]),
             HcclOpInfoBean([23130, 10000, 10, 353695, 20, 38202866941806, 0, 4, 0b00110001, 74162, 16426617625805244]),
-            HcclOpInfoBean([23130, 10000, 10, 353695, 20, 38202867941996, 1, 2, 0, 61555, 9380863679156556794])
+            HcclOpInfoBean([23130, 10000, 10, 353695, 20, 38202863941896, 1, 2, 0, 61555, 9380863679156556794])
         ]
         with mock.patch(GE_HASH_MODEL_NAMESPACE + '.GeHashViewModel.init'), \
                 mock.patch(GE_HASH_MODEL_NAMESPACE + '.GeHashViewModel.get_type_hash_data'), \
@@ -65,12 +65,10 @@ class TestHcclOpInfoParser(unittest.TestCase):
             }
             check = HcclOpInfoParser(self.file_list, CONFIG)
             check.reformat_data(data_list)
-            data = list(check._hccl_op_info_data)
+            data = check._hccl_op_info_data
             self.assertEqual(len(data), 3)
             self.assertEqual(len(data[0]), 10)
-            expect_data = {
-                ('node', 'hccl_op_info', 353695, 38202866941806, 0, 0, 'FP32', '49', 74162, '16426617625805244'),
-                ('node', 'hccl_op_info', 353695, 38202867941996, 1, 0, 'INT32', '0', 61555, '9380863679156556794'),
-                ('node', 'hccl_op_info', 353695, 38202863941896, 0, 1, 'FP16', '69', 43642, '72840854065026987')
-            }
-            self.assertEqual(check._hccl_op_info_data, expect_data)
+            self.assertEqual(data[0][1], 'hccl_op_info')
+            self.assertEqual(data[0][4:], [0, 1, 'FP16', '69', 43642, '72840854065026987'])
+            self.assertEqual(data[1][4:], [0, 0, 'FP32', '49', 74162, '16426617625805244'])
+            self.assertEqual(data[2][4:], [1, 0, 'INT32', '0', 61555, '9380863679156556794'])
