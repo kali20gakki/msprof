@@ -175,15 +175,21 @@ class KfcCalculator(ICalculator, MsMultiProcess):
         kfc_comm_task_data = self.process_kfc_info_data(kfc_comm_task_data, kfc_info)
         kfc_comm_task_data.sort(key=lambda x: x.start_time + x.duration)
         kfc_op_data_stream_id_table = {}
+        mismatch_stream_id_set = set()
         for data in kfc_op_data:
             # kfc大算子流
             if data.host_task_type in self.BLACK_KFC_OP_TYPE or data.op_name in self.BLACK_KFC_OP_NAME:
                 continue
-            group_name = kfc_stream_id_group_table.get(data.stream_id, "N/A")
+            group_name = kfc_stream_id_group_table.get(data.stream_id)
+            if group_name is None:
+                mismatch_stream_id_set.add(data.stream_id)
+                continue
             kfc_op_data_stream_id_table.setdefault(data.stream_id, []).append(
                 self.KFC_OP_DATA(data, group_name, "N/A", 0, 1, "N/A",
                                  -1, -1, "N/A", "N/A", -1, -1, DeviceHcclSource.INVALID.value)
             )
+        if mismatch_stream_id_set:
+            logging.error(f"Can not match any group name for these stream ids: {mismatch_stream_id_set}")
         master_stream_task = self.get_master_stream_task_in_hccl_op(kfc_comm_task_data, aicpu_task_flip)
         for data in kfc_comm_task_data:
             # kfc小算子流
@@ -242,6 +248,7 @@ class KfcCalculator(ICalculator, MsMultiProcess):
             unique_id = "{0}-{1}-{2}-{3}".format(data.stream_id, data.task_id, data.context_id, data.batch_id)
             hccl_small_task[unique_id] = data
         master_stream_task = {}
+        mismatch_master_task_set = set()
         for data in master_stream_hccl_task:
             if data.task_type != self.FIRST_TASK_TYPE and data.task_type != self.LAST_TASK_TYPE:
                 logging.warning('The main stream task type is invalid, type is %d', data.task_type)
@@ -254,9 +261,12 @@ class KfcCalculator(ICalculator, MsMultiProcess):
                 self._master_stream_first_task.add(unique_id)
             small_task = hccl_small_task.get(unique_id)
             if not small_task:
+                mismatch_master_task_set.add(unique_id)
                 continue
             master_stream_task.setdefault(data.aicpu_stream_id, {})
             master_stream_task[data.aicpu_stream_id][data.timestamp] = [data.task_type, small_task]
+        if mismatch_master_task_set:
+            logging.error(f"Can not match any master task for these unique id: {mismatch_master_task_set}")
         return master_stream_task
 
     def calculate_kfc_op(self: any) -> None:
@@ -274,6 +284,7 @@ class KfcCalculator(ICalculator, MsMultiProcess):
             kfc_op_with_task_index = {}
             for i, op_data in enumerate(kfc_op_data):
                 curr_hccl_op_info, idx = self.get_hccl_op_info(op_data, idx, hccl_op_info)
+                # op 大算子的起始结束时间将设置为主流首尾小算子时间
                 op_data, time_idx = self.update_op_data_time(op_data, time_idx, timestamp_master_stream_task_table)
                 data = op_data.ascend_data
                 iter_id = 1

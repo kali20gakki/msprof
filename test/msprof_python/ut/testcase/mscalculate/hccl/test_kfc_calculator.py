@@ -53,6 +53,10 @@ class TestKfcCalculator(unittest.TestCase):
             # hccl aicpu kernel, 异步
             AscendTaskViewModel.ASCEND_TASK_TYPE(0, 0, 19, 0, 4294967295, 0, 38140478700000,
                                                  100000, "KERNEL_AICPU", "AI_CPU", 0, "allgatherAicpuKernel", -1),
+            # hccl aicpu kernel, 异步 stream 29 异常数据,和host数据无法对齐
+            AscendTaskViewModel.ASCEND_TASK_TYPE(0, 0, 29, 0, 4294967295, 0, 38140478700000,
+                                                 100000, "KERNEL_AICPU", "AI_CPU", 0, "allgatherAicpuKernel", -1),
+
             # mc2 aicpu kernel, 同步
             AscendTaskViewModel.ASCEND_TASK_TYPE(0, 0, 19, 2, 4294967295, 0, 38140478900000,
                                                  200000, "KERNEL_AICPU", "AI_CPU", 0, "MatmulAllReduceAicpu", -1),
@@ -100,12 +104,14 @@ class TestKfcCalculator(unittest.TestCase):
             (38140478700010, 19, 0, 52, 0, 0, 0, 0),  # batch_id = 0
             (38140478707100, 19, 0, 52, 2, 0, 0, 1),  # batch_id = 2
             (38140478715000, 19, 0, 52, 2, 0, 0, 1),  # batch_id = 3
+            (38140478700010, 29, 0, 80, 0, 0, 0, 0),  # batch_id = 0 异常数据,和host数据无法对齐
         ]
         aicpu_task_flip = [
             (52, 38140478704000, 0, 1),  # task id翻转
             (52, 38140478707000, 0, 2),  # task id翻转
             (52, 38140478710000, 4, 2),  # 重执行上报flip
             (52, 38140478712000, 0, 3),  # task id翻转
+            (80, 38140478704000, 0, 1),  # task id翻转 异常数据,和host数据无法对齐
         ]
         ts_task_flip = [
             TaskFlip(52, 38140478850000, 4, 2),  # 重执行上报flip
@@ -113,6 +119,7 @@ class TestKfcCalculator(unittest.TestCase):
         ]
         comm_info = [
             Mc2CommInfoViewModel.MC2_COMM_INFO_TYPE(group_name, 8, 0, 0, 19, "52,53,54,55,56,57,58,59"),
+            Mc2CommInfoViewModel.MC2_COMM_INFO_TYPE(group_name, 2, 0, 0, 30, "80,81"), # 异常数据,和host数据无法对齐
         ]
         ge_data = [
             (4294967295, 'allgather', 19, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
