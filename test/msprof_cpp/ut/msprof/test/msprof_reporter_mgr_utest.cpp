@@ -105,12 +105,15 @@ TEST_F(MsprofReporterMgrUtest, RegReportTypeInfo)
 TEST_F(MsprofReporterMgrUtest, GetRegReportTypeInfo)
 {
     GlobalMockObject::verify();
-    EXPECT_EQ("", MsprofReporterMgr::instance()->GetRegReportTypeInfo(1, 1));
+    std::string tag;
+    MsprofReporterMgr::instance()->GetRegReportTypeInfo(1, 1, tag);
+    EXPECT_EQ("invalid", tag);
     uint16_t level = 0;
     uint32_t typeId = 0;
     std::string typeName = "test";
     MsprofReporterMgr::instance()->RegReportTypeInfo(level, typeId, typeName);
-    EXPECT_EQ(typeName, MsprofReporterMgr::instance()->GetRegReportTypeInfo(level, typeId));
+    MsprofReporterMgr::instance()->GetRegReportTypeInfo(level, typeId, tag);
+    EXPECT_EQ(typeName, tag);
 }
 
 TEST_F(MsprofReporterMgrUtest, StopReporters)

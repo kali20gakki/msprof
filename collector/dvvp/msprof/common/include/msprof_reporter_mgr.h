@@ -62,7 +62,7 @@ public:
     int32_t ReportData(uint32_t agingFlag, const MsprofAdditionalInfo &data);
     int32_t SendAdditinalData(SHARED_PTR_ALIA<ProfileFileChunk> fileChunk);
     int32_t RegReportTypeInfo(uint16_t level, uint32_t typeId, const std::string &typeName);
-    std::string& GetRegReportTypeInfo(uint16_t level, uint32_t typeId);
+    void GetRegReportTypeInfo(uint16_t level, uint32_t typeId, std::string& tag);
     uint64_t GetHashId(const std::string &info);
     int32_t SendAdditionalInfo(SHARED_PTR_ALIA<ProfileFileChunk> fileChunk);
     void NotifyQuit();

@@ -193,10 +193,16 @@ int32_t MsprofReporterMgr::RegReportTypeInfo(uint16_t level, uint32_t typeId, co
     return PROFILING_SUCCESS;
 }
 
-std::string& MsprofReporterMgr::GetRegReportTypeInfo(uint16_t level, uint32_t typeId)
+void MsprofReporterMgr::GetRegReportTypeInfo(uint16_t level, uint32_t typeId, std::string& tag)
 {
     std::lock_guard<std::mutex> lk(regTypeInfoMtx_);
-    return reportTypeInfoMap_[level][typeId];
+    if (reportTypeInfoMap_.find(level) != reportTypeInfoMap_.end() &&
+        reportTypeInfoMap_[level].find(typeId) != reportTypeInfoMap_[level].end()) {
+        tag = reportTypeInfoMap_[level][typeId];
+    } else {
+        MSPROF_LOGW("This data can not found message: level[%u], type[%u].", level, typeId);
+        tag = "invalid";
+    }
 }
 
 void MsprofReporterMgr::FillFileChunkData(const std::string &saveHashData,

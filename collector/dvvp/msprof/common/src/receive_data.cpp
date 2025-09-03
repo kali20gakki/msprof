@@ -506,7 +506,7 @@ void ReceiveData::SetDataChunkTag(uint16_t level, uint32_t typeId, std::string &
             break;
         case MSPROF_COMPACT_PROFILE_DATA_TYPE:
         case MSPROF_ADDITIONAL_PROFILE_DATA_TYPE:
-            tag = MsprofReporterMgr::instance()->GetRegReportTypeInfo(level, typeId);
+            MsprofReporterMgr::instance()->GetRegReportTypeInfo(level, typeId, tag);
             tag = tag.empty() ? "invalid" : tag;
             break;
         default:
@@ -536,8 +536,12 @@ int32_t ReceiveData::DumpData(std::vector<T> &message, SHARED_PTR_ALIA<ProfileFi
             return PROFILING_FAILED;
         }
         if (isFirstMessage) { // deal with the data only need to init once
-            std::string tag = needTypeInfo ? MsprofReporterMgr::instance()->GetRegReportTypeInfo(
-                message[i].level, message[i].type) : "data";
+            std::string tag;
+            if (needTypeInfo) {
+                MsprofReporterMgr::instance()->GetRegReportTypeInfo(message[i].level, message[i].type, tag);
+            } else {
+                tag = "data";
+            }
             if (tag.empty()) {
                 MSPROF_LOGW("This dump data cann't found message level[%u], type[%u].",
                     message[i].level, message[i].type);
