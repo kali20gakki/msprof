@@ -16,6 +16,7 @@
 #include "command_handle.h"
 #include "platform/platform.h"
 #include "dyn_prof_mgr.h"
+#include "mstx_inject.h"
 
 namespace Analysis {
 namespace Dvvp {
@@ -383,6 +384,7 @@ int32_t MsprofilerInit()
         MSPROF_LOGE("Failed to register enable typeId callback");
         return PROFILING_FAILED;
     }
+    MsprofMstxApi::MstxRegistMstxFunc();
     return PROFILING_SUCCESS;
 }
 

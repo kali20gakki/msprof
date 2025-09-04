@@ -63,12 +63,14 @@ function create_temp_dir() {
     mkdir -p ${temp_dir}
     local collector_dir="${PREFIX_DIR}/collector"
     local mspti_dir="${PREFIX_DIR}/mspti"
+    local profcommon_dir=${PREFIX_DIR}/profcommon
 
     # if we want to change product, we also need to change rollback_precheck
     cp ${collector_dir}/lib/libmsprofiler.so ${temp_dir}
     cp -r ${collector_dir}/stub ${temp_dir}
     cp ${collector_dir}/bin/msprof ${temp_dir}
     cp ${mspti_dir}/libmspti.so ${temp_dir}
+    cp ${profcommon_dir}/libprof_common.so ${temp_dir}
     cp ${TOP_DIR}/build/build/dist/msprof-0.0.1-py3-none-any.whl ${temp_dir}
     cp ${TOP_DIR}/build/build/dist/mspti-0.0.1-py3-none-any.whl ${temp_dir}
     cp ${TOP_DIR}/collector/inc/external/acl/acl_prof.h ${temp_dir}
@@ -156,6 +158,7 @@ check_file_exist() {
   check_package ${temp_dir}/mspti_result.h ${PKG_LIMIT_SIZE}
   check_package ${temp_dir}/samples ${PKG_LIMIT_SIZE}
   check_package ${temp_dir}/mstx_samples/samples ${PKG_LIMIT_SIZE}
+  check_package ${temp_dir}/libprof_common.so ${PKG_LIMIT_SIZE}
 }
 
 function check_package() {

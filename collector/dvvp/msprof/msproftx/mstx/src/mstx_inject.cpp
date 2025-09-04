@@ -17,6 +17,7 @@
 #include "runtime_plugin.h"
 #include "mstx_manager.h"
 #include "mstx_domain_mgr.h"
+#include "external/prof_common.h"
 
 using namespace Collector::Dvvp::Plugin;
 using namespace Collector::Dvvp::Mstx;
@@ -363,11 +364,8 @@ int GetModuleTableFunc(MstxGetModuleFuncTableFunc getFuncTable)
     }
     return retVal;
 }
-}
 
-using namespace MsprofMstxApi;
-
-extern "C" int __attribute__((visibility("default"))) InitInjectionMstx(MstxGetModuleFuncTableFunc getFuncTable)
+int InitInjectionMstx(MstxGetModuleFuncTableFunc getFuncTable)
 {
     if (getFuncTable == nullptr) {
         MSPROF_LOGE("Input null mstx getfunctable pointer");
@@ -380,3 +378,15 @@ extern "C" int __attribute__((visibility("default"))) InitInjectionMstx(MstxGetM
     return MSTX_SUCCESS;
 }
 
+void MstxRegistMstxFunc()
+{
+    MSPROF_LOGI("profiler registeMstxFunc to profcommon.so");
+    ProfRegisteMstxFunc(InitInjectionMstx, PROF_MODULE_MSPROF);
+}
+
+void EnableMstxFunc()
+{
+    MSPROF_LOGI("profiler enable mstx funcs");
+    EnableMstxFunc(PROF_MODULE_MSPROF);
+}
+}

@@ -40,6 +40,7 @@ function implement_install() {
 
 	copy_file ${LIBMSPROFILER} ${install_path}/${LIBMSPROFILER_PATH}/${LIBMSPROFILER}
 	copy_file ${LIBMSPTI} ${install_path}/${LIBMSPTI_PATH}/lib64/${LIBMSPTI}
+	copy_file ${LIBPROFCOMMON} ${install_path}/${LIBMSPROFILER_PATH}/${LIBPROFCOMMON}
 }
 
 function copy_file() {

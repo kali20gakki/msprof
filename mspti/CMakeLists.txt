@@ -26,6 +26,7 @@ set_target_properties(mspti_shared
 target_include_directories(mspti_shared PRIVATE
     ${CMAKE_SOURCE_DIR}
     ${TOP_DIR}/platform/securec/include
+    ${TOP_DIR}/profcommon/external
 )
 
 target_compile_options(mspti_shared PRIVATE
@@ -48,6 +49,7 @@ target_compile_options(mspti_shared PRIVATE
 
 target_link_directories(mspti_shared PRIVATE
     ${SECUREC_LIB_DIR}
+    ${CMAKE_INSTALL_PREFIX}/profcommon
 )
 
 target_link_options(mspti_shared PRIVATE
@@ -63,6 +65,7 @@ target_link_libraries(mspti_shared PRIVATE
     dl
     c_sec
     pthread
+    prof_common
 )
 
 install(TARGETS mspti_shared OPTIONAL

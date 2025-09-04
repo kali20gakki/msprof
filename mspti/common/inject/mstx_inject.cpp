@@ -18,6 +18,7 @@
 #include "activity/ascend/parser/mstx_parser.h"
 #include "common/utils.h"
 #include "common/plog_manager.h"
+#include "mstx_inject.h"
 
 using namespace Mspti::Activity;
 using namespace Mspti::Common;
@@ -56,7 +57,7 @@ MstxDomainMgr* MstxDomainMgr::GetInstance()
     return &instance;
 }
 
-mstxDomainHandle_t MstxDomainMgr::CreateDomainHandle(const char* name)
+mstxDomainHandle_t MstxDomainMgr::CreateDomainHandle(const char *name)
 {
     if (strcmp(g_defaultDomainName.c_str(), name) == 0) {
         MSPTI_LOGE("domain name can not be 'default'!");
@@ -153,6 +154,19 @@ bool MstxDomainMgr::isDomainEnable(const char* name)
     std::string nameStr(name);
     std::lock_guard<std::mutex> lk(domainMutex_);
     return disableDomains_.count(nameStr) == 0 ? true : false;
+}
+
+msptiResult MstxDomainMgr::MstxRegistMstxFunc()
+{
+    MSPTI_LOGI("mspti registeMstxFunc to profcommon.so");
+    ProfRegisteMstxFunc(InitInjectionMstx, PROF_MODULE_MSPTI);
+    return MSPTI_SUCCESS;
+}
+
+void MstxDomainMgr::MsptiEnableMstxFunc()
+{
+    MSPTI_LOGI("mspti enable mstxFuncs");
+    EnableMstxFunc(PROF_MODULE_MSPTI);
 }
 }
 

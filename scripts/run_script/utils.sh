@@ -20,12 +20,14 @@ MSPROF_RUN_NAME="mindstudio-msprof"
 LIBMSPROFILER="libmsprofiler.so"
 LIBMSPROFILER_STUB="stub/libmsprofiler.so"
 LIBMSPTI="libmspti.so"
+LIBPROFCOMMON="libprof_common.so"
 # never use analysis/, or remove important file by softlink
 ANALYSIS="analysis"
 MSPROF="msprof"
 
 LIBMSPROFILER_PATH="/runtime/lib64/"
 LIBMSPTI_PATH="/tools/mspti/"
+LIBPROFCOMMON_PATH="/runtime/lib64/"
 ANALYSIS_PATH="/tools/profiler/profiler_tool/"
 MSPROF_PATH="/tools/profiler/bin/"
 

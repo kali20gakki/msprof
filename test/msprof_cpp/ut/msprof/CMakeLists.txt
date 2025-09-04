@@ -111,6 +111,7 @@ set(profilerSrcFile
     test/dyn_prof_utest.cpp
     test/prof_manager_utest.cpp
     ../stub/ge_stub.cpp
+	../stub/prof_common_stub.cpp
     ../stub/devdrv_runtime_api_stub.cpp
     ../stub/profile_drv_user_stub.cpp
     ../../stub/driver_plugin_stub.cpp
@@ -191,6 +192,7 @@ target_include_directories(msprofiler_utest PRIVATE
     ${TOP_DIR}/collector/dvvp/depend/inc/profapi
 	${TOP_DIR}/ace/npuruntime/inc
 	${TOP_DIR}/abl/msprof/inc
+	${TOP_DIR}/profcommon
 	${MSPROF_SOURCE_DIR}/dvvp/msprofiler/inc
 	${MSPROF_SOURCE_DIR}/dvvp/depend/include/stub
 )

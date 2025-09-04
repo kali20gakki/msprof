@@ -222,6 +222,7 @@ target_include_directories(msprofiler_share PRIVATE
     ${msprofilerInc}
     ${TOP_DIR}/collector/dvvp/depend/inc/metadef/error_manager/error_manager_wrapper
     ${TOP_DIR}/collector/dvvp/depend/inc
+    ${TOP_DIR}/profcommon/
 )
 
 set_target_properties(msprofiler_share
@@ -259,6 +260,7 @@ target_link_options(msprofiler_share PRIVATE
 target_link_directories(msprofiler_share PRIVATE
     ${SECUREC_LIB_DIR}
     ${ERROR_MANAGER_LIB_DIR}
+    ${CMAKE_INSTALL_PREFIX}/profcommon
 )
 
 target_link_libraries(msprofiler_share PRIVATE
@@ -267,6 +269,7 @@ target_link_libraries(msprofiler_share PRIVATE
     error_manager
     -Wl,--as-needed
     dl
+    prof_common
 )
 
 install(TARGETS msprofiler_share OPTIONAL

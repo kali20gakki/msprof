@@ -66,6 +66,15 @@ set_target_properties(error_manager
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_INSTALL_PREFIX}/error_manager
 )
 
+ExternalProject_Add(profcommon
+    SOURCE_DIR ${TOP_DIR}/profcommon
+    CONFIGURE_COMMAND ${CMAKE_COMMAND}
+    -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+    <SOURCE_DIR>
+    BUILD_COMMAND $(MAKE)
+)
+
 if(OBJECT STREQUAL all OR OBJECT STREQUAL collector)
 ExternalProject_Add(msprof
     SOURCE_DIR ${TOP_DIR}
@@ -78,7 +87,7 @@ ExternalProject_Add(msprof
                 -DHITEST=${HITEST}
                 <SOURCE_DIR>
     BUILD_COMMAND $(MAKE)
-    DEPENDS c_sec
+    DEPENDS c_sec profcommon
 )
 endif()
 
@@ -103,6 +112,6 @@ ExternalProject_Add(mspti
                 -DSECUREC_LIB_DIR=${CMAKE_INSTALL_PREFIX}/securec_shared
                 <SOURCE_DIR>
     BUILD_COMMAND $(MAKE)
-    DEPENDS c_sec
+    DEPENDS c_sec profcommon
 )
 endif()

@@ -21,6 +21,8 @@
 #include "external/mspti_result.h"
 #include "external/mspti_activity.h"
 
+#include "prof_common.h"
+
 #define MSTX_FAIL 1
 #define MSTX_SUCCESS 0
 
@@ -31,10 +33,7 @@ typedef enum {
     MSTX_FUNC_MARKA                         = 1,
     MSTX_FUNC_RANGE_STARTA                  = 2,
     MSTX_FUNC_RANGE_END                     = 3,
-    MSTX_API_CORE_MEMHEAP_REGISTER          = 4,
-    MSTX_API_CORE_MEMHEAP_UNREGISTER        = 5,
-    MSTX_API_CORE_MEM_REGIONS_REGISTER      = 6,
-    MSTX_API_CORE_MEM_REGIONS_UNREGISTER    = 7,
+    MSTX_API_CORE_GET_TOOL_ID               = 4,
     MSTX_FUNC_END
 } MstxCoreFuncId;
 
@@ -47,22 +46,10 @@ typedef enum {
     MSTX_FUNC_DOMAIN_RANGE_END    = 5,
     MSTX_FUNC_DOMAIN_END
 } MstxCore2FuncId;
- 
-typedef enum {
-    MSTX_API_MODULE_INVALID                 = 0,
-    MSTX_API_MODULE_CORE                    = 1,
-    MSTX_API_MODULE_CORE_DOMAIN             = 2,
-    MSTX_API_MODULE_SIZE,                   // end of the enum, new enum items must be added before this
-    MSTX_API_MODULE_FORCE_INT               = 0x7fffffff
-} MstxFuncModule;
 
 struct mstxDomainRegistration_st {};
 typedef struct mstxDomainRegistration_st MstxDomainHandle;
 typedef MstxDomainHandle* mstxDomainHandle_t;
-
-typedef void (*MstxFuncPointer)(void);
-typedef MstxFuncPointer** MstxFuncTable;
-typedef int (*MstxGetModuleFuncTableFunc)(MstxFuncModule module, MstxFuncTable *outTable, unsigned int *outSize);
 
 void MstxMarkAFunc(const char* msg, RtStreamT stream);
 uint64_t MstxRangeStartAFunc(const char* msg, RtStreamT stream);
@@ -85,6 +72,9 @@ class MstxDomainMgr {
 public:
     static MstxDomainMgr* GetInstance();
 
+    msptiResult MstxRegistMstxFunc();
+    void MsptiEnableMstxFunc();
+    void MsptiDisableMstxFunc();
     mstxDomainHandle_t CreateDomainHandle(const char* name);
     void DestroyDomainHandle(mstxDomainHandle_t);
 
@@ -112,14 +102,6 @@ private:
 };
 };
 
-#if defined(__cplusplus)
-extern "C" {
-#endif
-
-MSPTI_API int InitInjectionMstx(MstxGetModuleFuncTableFunc getFuncTable);
-
-#if defined(__cplusplus)
-}
-#endif
+int InitInjectionMstx(MstxGetModuleFuncTableFunc getFuncTable);
 
 #endif

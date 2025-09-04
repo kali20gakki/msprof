@@ -23,6 +23,7 @@
 #include "profapi_plugin.h"
 #include "platform/platform.h"
 #include "runtime_plugin.h"
+#include "mstx_inject.h"
 
 using namespace Analysis::Dvvp::Analyze;
 using namespace analysis::dvvp::common::error;
@@ -107,6 +108,8 @@ aclError aclprofInit(CONST_CHAR_PTR profilerResultPath, size_t length)
 
     ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfInit();
     RETURN_IF_NOT_SUCCESS(ret);
+
+    MsprofMstxApi::EnableMstxFunc();
 
     MSPROF_LOGI("Acl has been allocated config of profiling initialize, successfully execute aclprofInit");
     return ACL_SUCCESS;

@@ -21,6 +21,7 @@ include_directories(
     ${TOP_DIR}/test/msprof_cpp/mspti_ut/stub
     ${TOP_DIR}/mspti
     ${TOP_DIR}/mspti/external
+    ${TOP_DIR}/profcommon/external
     ${TOP_DIR}/platform/securec/include
     ${GTEST_INCLUDE_DIR}
 )

@@ -12,7 +12,7 @@
 #include "callback/callback_manager.h"
 
 #include <memory>
-
+#include "common/inject/mstx_inject.h"
 #include "activity/activity_manager.h"
 #include "activity/ascend/dev_task_manager.h"
 #include "common/plog_manager.h"
@@ -91,6 +91,7 @@ msptiResult CallbackManager::Init(msptiSubscriberHandle *subscriber, msptiCallba
     init_.store(true);
     Mspti::Ascend::DevTaskManager::GetInstance()->RegisterReportCallback();
     Mspti::Common::ContextManager::GetInstance()->StartSyncTime();
+    Mspti::MstxDomainMgr::GetInstance()->MsptiEnableMstxFunc();
     MSPTI_LOGI("CallbackManager Init success.");
     return MSPTI_SUCCESS;
 }
