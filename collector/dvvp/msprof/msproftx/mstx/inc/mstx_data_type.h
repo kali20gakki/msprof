@@ -16,6 +16,8 @@
 #define MSTX_SUCCESS 0
 #define MSTX_FAIL 1
 
+#include "external/prof_common.h"
+
 typedef enum {
     MSTX_FUNC_START                         = 0,
     MSTX_FUNC_MARKA                         = 1,
@@ -37,14 +39,6 @@ typedef enum {
     MSTX_FUNC_DOMAIN_RANGE_END    = 5,
     MSTX_FUNC_DOMAIN_END
 } MstxCore2FuncId;
-
-typedef enum {
-    MSTX_API_MODULE_INVALID                 = 0,
-    MSTX_API_MODULE_CORE                    = 1,
-    MSTX_API_MODULE_CORE_DOMAIN             = 2,
-    MSTX_API_MODULE_SIZE,                   // end of the enum, new enum items must be added before this
-    MSTX_API_MODULE_FORCE_INT               = 0x7fffffff
-} MstxFuncModule;
 
 struct MstxDomainRegistrationSt {};
 typedef struct MstxDomainRegistrationSt MstxDomainHandle;

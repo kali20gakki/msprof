@@ -6,6 +6,7 @@ add_executable(mspti_parser_utest
     hccl_reporter_utest.cpp
     device_task_calculator_utest.cpp
     communication_calculator_utest.cpp
+    ${TOP_DIR}/mspti/common/inject/mstx_inject.cpp
     ${TOP_DIR}/mspti/activity/activity_manager.cpp
     ${TOP_DIR}/mspti/activity/ascend/parser/parser_manager.cpp
     ${TOP_DIR}/mspti/activity/ascend/parser/cann_hash_cache.cpp
@@ -29,6 +30,7 @@ add_executable(mspti_parser_utest
     ${UT_TOP_DIR}/stub/inject/driver_inject_stub.cpp
     ${UT_TOP_DIR}/stub/inject/runtime_inject_stub.cpp
     ${UT_TOP_DIR}/stub/inject/hccl_inject_stub.cpp
+    ${UT_TOP_DIR}/stub/inject/prof_common_stub.cpp
 )
 
 target_include_directories(mspti_parser_utest PRIVATE

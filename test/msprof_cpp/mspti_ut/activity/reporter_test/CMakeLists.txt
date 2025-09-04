@@ -2,6 +2,7 @@ add_executable(mspti_reporter_utest
     ${SRC_FILE}
     main.cpp
     memory_reporter_utest.cpp
+    ${TOP_DIR}/mspti/common/inject/mstx_inject.cpp
     ${TOP_DIR}/mspti/activity/activity_manager.cpp
     ${TOP_DIR}/mspti/activity/ascend/reporter/memory_reporter.cpp
     ${TOP_DIR}/mspti/activity/ascend/reporter/external_correlation_reporter.cpp
@@ -26,6 +27,7 @@ add_executable(mspti_reporter_utest
     ${UT_TOP_DIR}/stub/inject/driver_inject_stub.cpp
     ${UT_TOP_DIR}/stub/inject/runtime_inject_stub.cpp
     ${UT_TOP_DIR}/stub/inject/hccl_inject_stub.cpp
+    ${UT_TOP_DIR}/stub/inject/prof_common_stub.cpp
 )
 
 target_include_directories(mspti_reporter_utest PRIVATE

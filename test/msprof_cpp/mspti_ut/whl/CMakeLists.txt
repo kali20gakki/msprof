@@ -26,6 +26,7 @@ add_executable(mspti_adapter_utest
     ${UT_TOP_DIR}/stub/inject/profapi_inject_stub.cpp
     ${UT_TOP_DIR}/stub/inject/runtime_inject_stub.cpp
     ${UT_TOP_DIR}/stub/inject/hccl_inject_stub.cpp
+    ${UT_TOP_DIR}/stub/inject/prof_common_stub.cpp
     ${TOP_DIR}/mspti/common/inject/mstx_inject.cpp
 )
 

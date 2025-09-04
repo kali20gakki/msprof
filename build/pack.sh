@@ -86,6 +86,7 @@ for DIR in ${OUT_DIR}/platform/Tuscany/*$(lsb_release -i | awk '{print $3}' | tr
     
     cp -f ${CUR_DIR}/tmp/mindstudio/mindstudio-toolkit/tools/msprof/stub/libmsprofiler.so ${CUR_DIR}/tmp/cann_runtime/${PACKAGE_NAME_RUNTIME}/runtime/lib64/stub/libmsprofiler.so
     cp -f ${CUR_DIR}/tmp/mindstudio/mindstudio-toolkit/tools/msprof/libmsprofiler.so ${CUR_DIR}/tmp/cann_runtime/${PACKAGE_NAME_RUNTIME}/runtime/lib64/libmsprofiler.so
+    cp -f ${CUR_DIR}/tmp/mindstudio/mindstudio-toolkit/tools/msprof/libprof_common.so ${CUR_DIR}/tmp/cann_toolkit/${PACKAGE_NAME_TOOLKIT}/runtime/lib64/libprof_common.so
     cp -f ${CUR_DIR}/tmp/mindstudio/mindstudio-toolkit/tools/mspti/lib64/libmspti.so ${CUR_DIR}/tmp/cann_runtime/${PACKAGE_NAME_RUNTIME}/runtime/lib64/libmspti.so
     cp -f ${CUR_DIR}/tmp/mindstudio/mindstudio-toolkit/tools/msprof/msprof ${CUR_DIR}/tmp/cann_toolkit/${PACKAGE_NAME_TOOLKIT}/toolkit/tools/profiler/bin/msprof
     rm -rf ${CUR_DIR}/tmp/cann_toolkit/${PACKAGE_NAME_TOOLKIT}/toolkit/tools/profiler/profiler_tool/msprof-0.0.1-py3-none-any.whl

@@ -2,6 +2,7 @@ add_executable(context_manager_utest
     ${SRC_FILE}
     main.cpp
     context_manager_utest.cpp
+    ${TOP_DIR}/mspti/common/inject/mstx_inject.cpp
     ${TOP_DIR}/mspti/activity/ascend/dev_task_manager.cpp
     ${TOP_DIR}/mspti/activity/ascend/dev_prof_task.cpp
     ${TOP_DIR}/mspti/activity/ascend/channel/channel_pool_manager.cpp
@@ -26,6 +27,7 @@ add_executable(context_manager_utest
     ${UT_TOP_DIR}/stub/inject/hccl_inject_stub.cpp
     ${UT_TOP_DIR}/stub/inject/profapi_inject_stub.cpp
     ${UT_TOP_DIR}/stub/inject/runtime_inject_stub.cpp
+    ${UT_TOP_DIR}/stub/inject/prof_common_stub.cpp
 )
 
 set_target_properties(context_manager_utest

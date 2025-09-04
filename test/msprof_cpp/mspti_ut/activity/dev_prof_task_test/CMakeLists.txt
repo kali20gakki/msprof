@@ -14,9 +14,11 @@ add_executable(dev_prof_task_utest
     ${SRC_FILE}
     main.cpp
     dev_prof_task_utest.cpp
+    ${TOP_DIR}/mspti/common/inject/mstx_inject.cpp
     ${UT_TOP_DIR}/stub/inject/profapi_inject_stub.cpp
     ${UT_TOP_DIR}/stub/inject/driver_inject_stub.cpp
     ${UT_TOP_DIR}/stub/inject/runtime_inject_stub.cpp
+    ${UT_TOP_DIR}/stub/inject/prof_common_stub.cpp
 )
 
 target_include_directories(dev_prof_task_utest PRIVATE
