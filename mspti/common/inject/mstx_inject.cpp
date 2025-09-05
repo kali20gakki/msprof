@@ -155,19 +155,6 @@ bool MstxDomainMgr::isDomainEnable(const char* name)
     std::lock_guard<std::mutex> lk(domainMutex_);
     return disableDomains_.count(nameStr) == 0 ? true : false;
 }
-
-msptiResult MstxDomainMgr::MstxRegistMstxFunc()
-{
-    MSPTI_LOGI("mspti registeMstxFunc to profcommon.so");
-    ProfRegisteMstxFunc(InitInjectionMstx, PROF_MODULE_MSPTI);
-    return MSPTI_SUCCESS;
-}
-
-void MstxDomainMgr::MsptiEnableMstxFunc()
-{
-    MSPTI_LOGI("mspti enable mstxFuncs");
-    EnableMstxFunc(PROF_MODULE_MSPTI);
-}
 }
 
 namespace MsptiMstxApi {
@@ -378,9 +365,18 @@ int GetModuleTableFunc(MstxGetModuleFuncTableFunc getFuncTable)
     return retVal;
 }
 
+msptiResult MstxRegistMstxFunc()
+{
+    MSPTI_LOGI("mspti registeMstxFunc to profcommon.so");
+    ProfRegisteMstxFunc(InitInjectionMstx, PROF_MODULE_MSPTI);
+    return MSPTI_SUCCESS;
 }
 
-using namespace MsptiMstxApi;
+void MsptiEnableMstxFunc()
+{
+    MSPTI_LOGI("mspti enable mstxFuncs");
+    EnableMstxFunc(PROF_MODULE_MSPTI);
+}
 
 int InitInjectionMstx(MstxGetModuleFuncTableFunc getFuncTable)
 {
@@ -394,6 +390,10 @@ int InitInjectionMstx(MstxGetModuleFuncTableFunc getFuncTable)
     }
     return MSPTI_SUCCESS;
 }
+}
+
+using namespace MsptiMstxApi;
+msptiResult res = MstxRegistMstxFunc();
 
 msptiResult msptiActivityEnableMarkerDomain(const char* name)
 {

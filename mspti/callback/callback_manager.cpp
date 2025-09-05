@@ -91,7 +91,7 @@ msptiResult CallbackManager::Init(msptiSubscriberHandle *subscriber, msptiCallba
     init_.store(true);
     Mspti::Ascend::DevTaskManager::GetInstance()->RegisterReportCallback();
     Mspti::Common::ContextManager::GetInstance()->StartSyncTime();
-    Mspti::MstxDomainMgr::GetInstance()->MsptiEnableMstxFunc();
+    MsptiMstxApi::MsptiEnableMstxFunc();
     MSPTI_LOGI("CallbackManager Init success.");
     return MSPTI_SUCCESS;
 }

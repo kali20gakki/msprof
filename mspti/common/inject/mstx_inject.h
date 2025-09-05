@@ -71,10 +71,6 @@ struct MstxDomainAttr {
 class MstxDomainMgr {
 public:
     static MstxDomainMgr* GetInstance();
-
-    msptiResult MstxRegistMstxFunc();
-    void MsptiEnableMstxFunc();
-    void MsptiDisableMstxFunc();
     mstxDomainHandle_t CreateDomainHandle(const char* name);
     void DestroyDomainHandle(mstxDomainHandle_t);
 
@@ -102,6 +98,10 @@ private:
 };
 };
 
+namespace MsptiMstxApi {
 int InitInjectionMstx(MstxGetModuleFuncTableFunc getFuncTable);
+msptiResult MstxRegistMstxFunc();
+void MsptiEnableMstxFunc();
+}
 
 #endif

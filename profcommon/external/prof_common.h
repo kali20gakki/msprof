@@ -25,7 +25,8 @@ extern "C" {
 typedef enum {
     MODULE_INVALID,
     PROF_MODULE_MSPROF,
-    PROF_MODULE_MSPTI
+    PROF_MODULE_MSPTI,
+    PROF_MODULE_SIZE
 } ProfModule;
 
 typedef enum {
