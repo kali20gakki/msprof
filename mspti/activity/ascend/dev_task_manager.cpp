@@ -17,7 +17,6 @@
 #include "common/plog_manager.h"
 #include "common/inject/driver_inject.h"
 #include "common/inject/profapi_inject.h"
-#include "common/inject/mstx_inject.h"
 #include "common/utils.h"
 #include "securec.h"
 
@@ -49,7 +48,6 @@ DevTaskManager::DevTaskManager()
 {
     Mspti::Ascend::Channel::ChannelPoolManager::GetInstance()->Init();
     Mspti::Common::ContextManager::GetInstance()->InitHostTimeInfo();
-    Mspti::MstxDomainMgr::GetInstance()->MstxRegistMstxFunc();
     RegisterReportCallback();
 }
 

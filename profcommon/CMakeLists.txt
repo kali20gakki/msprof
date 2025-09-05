@@ -43,6 +43,9 @@ target_compile_options(prof_common_shared PRIVATE
         -fvisibility-inlines-hidden
         -Wfloat-equal
         -Wextra
+        -Werror=uninitialized
+        -Werror=return-type
+        -Wall
         -D_FORTIFY_SOURCE=2
         $<$<NOT:$<STREQUAL:${CMAKE_BUILD_TYPE},Debug>>:-O2>
 )

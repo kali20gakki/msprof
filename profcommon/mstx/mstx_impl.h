@@ -22,6 +22,8 @@
 #define MSTX_FAIL 1
 #define MSTX_SUCCESS 0
 
+#define MSTX_INVALID_RANGE_ID 0
+
 namespace Common {
 namespace Mstx {
 
@@ -68,8 +70,8 @@ void MstxDomainRangeEndImpl(mstxDomainHandle_t domain, mstxRangeId id);
 int GetModuleTableFunc(MstxGetModuleFuncTableFunc getFuncTable);
 void ProfRegisteMstxFunc(MstxInitInjectionFunc mstxInitFunc, ProfModule module);
 void EnableMstxFunc(ProfModule module);
-int MstxGetModuleFuncTable(
-    MstxFuncModule module, MstxFuncTable* outTable, unsigned int* outSize);
+int MsptiMstxGetModuleFuncTable(MstxFuncModule module, MstxFuncTable* outTable, unsigned int* outSize);
+int ProfMstxGetModuleFuncTable(MstxFuncModule module, MstxFuncTable* outTable, unsigned int* outSize);
 
 using MstxMarkAFunc = decltype(&MstxMarkAImpl);
 using MstxRangeStartAFunc = decltype(&MstxRangeStartAImpl);

@@ -27,7 +27,7 @@ MSPROF="msprof"
 
 LIBMSPROFILER_PATH="/runtime/lib64/"
 LIBMSPTI_PATH="/tools/mspti/"
-LIBPROFCOMMON_PATH="/runtime/lib64/"
+LIBPROFCOMMON_PATH="/tools/mspti/"
 ANALYSIS_PATH="/tools/profiler/profiler_tool/"
 MSPROF_PATH="/tools/profiler/bin/"
 

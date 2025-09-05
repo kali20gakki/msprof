@@ -14,16 +14,15 @@
 
 #include <vector>
 #include <atomic>
+#include <unordered_map>
+#include <mutex>
+#include <array>
 
 #include "common/util.h"
 
 namespace Common {
 namespace Mstx {
-namespace {
-    std::atomic<ProfModule> curModule{PROF_MODULE_MSPROF};
-}
-
-typedef struct MstxContext_t {
+struct MstxContext_t {
     MstxGetModuleFuncTableFunc getModuleFuncTable;
 
     MstxMarkAFunc mstxMarkAPtr;
@@ -41,109 +40,173 @@ typedef struct MstxContext_t {
     MstxFuncPointer* funcTableCore2[MSTX_FUNC_DOMAIN_END + 1];
 };
 
-MstxContext_t g_profMstxContext = {
-    MstxGetModuleFuncTable,
-
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-
+class MstxContextManager {
+public:
+    static MstxContextManager& GetInstance()
     {
-        nullptr,
-        reinterpret_cast<MstxFuncPointer*>(&g_profMstxContext.mstxMarkAPtr),
-        reinterpret_cast<MstxFuncPointer*>(&g_profMstxContext.mstxRangeStartAPtr),
-        reinterpret_cast<MstxFuncPointer*>(&g_profMstxContext.mstxRangeEndPtr),
-        reinterpret_cast<MstxFuncPointer*>(&g_profMstxContext.mstxGetToolIdPtr),
-        nullptr
-    },
-    {
-        nullptr,
-        reinterpret_cast<MstxFuncPointer*>(&g_profMstxContext.mstxDomainCreateAPtr),
-        reinterpret_cast<MstxFuncPointer*>(&g_profMstxContext.mstxDomainDestroyPtr),
-        reinterpret_cast<MstxFuncPointer*>(&g_profMstxContext.mstxDomainMarkAPtr),
-        reinterpret_cast<MstxFuncPointer*>(&g_profMstxContext.mstxDomainRangeStartAPtr),
-        reinterpret_cast<MstxFuncPointer*>(&g_profMstxContext.mstxDomainRangeEndPtr),
-        nullptr
+        static MstxContextManager instance;
+        return instance;
     }
-};
 
-MstxContext_t g_msptiMstxContext = {
-    MstxGetModuleFuncTable,
-
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-
+    const MstxContext_t& GetCurContext()
     {
-        nullptr,
-        reinterpret_cast<MstxFuncPointer*>(&g_msptiMstxContext.mstxMarkAPtr),
-        reinterpret_cast<MstxFuncPointer*>(&g_msptiMstxContext.mstxRangeStartAPtr),
-        reinterpret_cast<MstxFuncPointer*>(&g_msptiMstxContext.mstxRangeEndPtr),
-        reinterpret_cast<MstxFuncPointer*>(&g_msptiMstxContext.mstxGetToolIdPtr),
-        nullptr
-    },
-    {
-        nullptr,
-        reinterpret_cast<MstxFuncPointer*>(&g_msptiMstxContext.mstxDomainCreateAPtr),
-        reinterpret_cast<MstxFuncPointer*>(&g_msptiMstxContext.mstxDomainDestroyPtr),
-        reinterpret_cast<MstxFuncPointer*>(&g_msptiMstxContext.mstxDomainMarkAPtr),
-        reinterpret_cast<MstxFuncPointer*>(&g_msptiMstxContext.mstxDomainRangeStartAPtr),
-        reinterpret_cast<MstxFuncPointer*>(&g_msptiMstxContext.mstxDomainRangeEndPtr),
-        nullptr
+        return GetContext(curModule.load());
     }
-};
 
+    const MstxContext_t& GetContext(ProfModule module)
+    {
+        if (module == PROF_MODULE_MSPROF) {
+            return profMstxContext;
+        }
+        return msptiMstxContext;
+    }
+
+    ProfModule GetCurModule()
+    {
+        return curModule;
+    }
+
+    void EnableMstxFunc(ProfModule module)
+    {
+        curModule = module;
+    }
+
+    void RecordDomainHandle(mstxDomainHandle_t profDomainHandle, mstxDomainHandle_t ptiDomainHandle)
+    {
+        if (!profDomainHandle || !ptiDomainHandle) {
+            return;
+        }
+        std::lock_guard<std::mutex> lk(domainMutex_);
+        connectDomainMap[PROF_MODULE_MSPROF][ptiDomainHandle] = profDomainHandle;
+        connectDomainMap[PROF_MODULE_MSPTI][profDomainHandle] = ptiDomainHandle;
+    }
+
+    void RemoveDomainHandle(mstxDomainHandle_t domainHandle, ProfModule curModule)
+    {
+        if (!domainHandle) {
+            return;
+        }
+        std::lock_guard<std::mutex> lk(domainMutex_);
+        connectDomainMap[curModule].erase(domainHandle);
+    }
+
+    mstxDomainHandle_t GetRealDomainHandle(mstxDomainHandle_t domainHandle, ProfModule curModule)
+    {
+        if (!domainHandle) {
+            return domainHandle;
+        }
+        std::lock_guard<std::mutex> lk(domainMutex_);
+        const auto& domainMap = connectDomainMap[curModule];
+        auto it = domainMap.find(domainHandle);
+        if (it == domainMap.end()) {
+            return domainHandle;
+        }
+        return it->second;
+    }
+
+    int MstxGetModuleFuncTable(MstxFuncModule module, MstxFuncTable* outTable, unsigned int* outSize, ProfModule profModule)
+    {
+        if (!outSize || !outTable) {
+            return MSTX_FAIL;
+        }
+        MstxContext_t* context = (profModule == PROF_MODULE_MSPROF) ? &profMstxContext : &msptiMstxContext;
+        switch (module) {
+            case MSTX_API_MODULE_CORE:
+                *outTable = context->funcTableCore;
+                *outSize = LengthOf(context->funcTableCore);
+                break;
+            case MSTX_API_MODULE_CORE_DOMAIN:
+                *outTable = context->funcTableCore2;
+                *outSize = LengthOf(context->funcTableCore);
+                break;
+            default:
+                return MSTX_FAIL;
+        }
+        return MSTX_SUCCESS;
+    }
+
+private:
+    MstxContextManager()
+    {
+        profMstxContext = {
+            Common::Mstx::ProfMstxGetModuleFuncTable,
+ 
+            nullptr, nullptr, nullptr, nullptr,
+            nullptr, nullptr, nullptr, nullptr, nullptr,
+ 
+            {
+                nullptr,
+                reinterpret_cast<MstxFuncPointer*>(&profMstxContext.mstxMarkAPtr),
+                reinterpret_cast<MstxFuncPointer*>(&profMstxContext.mstxRangeStartAPtr),
+                reinterpret_cast<MstxFuncPointer*>(&profMstxContext.mstxRangeEndPtr),
+                reinterpret_cast<MstxFuncPointer*>(&profMstxContext.mstxGetToolIdPtr),
+                nullptr
+            },
+            {
+                nullptr,
+                reinterpret_cast<MstxFuncPointer*>(&profMstxContext.mstxDomainCreateAPtr),
+                reinterpret_cast<MstxFuncPointer*>(&profMstxContext.mstxDomainDestroyPtr),
+                reinterpret_cast<MstxFuncPointer*>(&profMstxContext.mstxDomainMarkAPtr),
+                reinterpret_cast<MstxFuncPointer*>(&profMstxContext.mstxDomainRangeStartAPtr),
+                reinterpret_cast<MstxFuncPointer*>(&profMstxContext.mstxDomainRangeEndPtr),
+                nullptr
+            }
+        };
+ 
+        msptiMstxContext = {
+            Common::Mstx::MsptiMstxGetModuleFuncTable,
+
+            nullptr, nullptr, nullptr, nullptr,
+            nullptr, nullptr, nullptr, nullptr, nullptr,
+
+            {
+                nullptr,
+                reinterpret_cast<MstxFuncPointer*>(&msptiMstxContext.mstxMarkAPtr),
+                reinterpret_cast<MstxFuncPointer*>(&msptiMstxContext.mstxRangeStartAPtr),
+                reinterpret_cast<MstxFuncPointer*>(&msptiMstxContext.mstxRangeEndPtr),
+                reinterpret_cast<MstxFuncPointer*>(&msptiMstxContext.mstxGetToolIdPtr),
+                nullptr
+            },
+            {
+                nullptr,
+                reinterpret_cast<MstxFuncPointer*>(&msptiMstxContext.mstxDomainCreateAPtr),
+                reinterpret_cast<MstxFuncPointer*>(&msptiMstxContext.mstxDomainDestroyPtr),
+                reinterpret_cast<MstxFuncPointer*>(&msptiMstxContext.mstxDomainMarkAPtr),
+                reinterpret_cast<MstxFuncPointer*>(&msptiMstxContext.mstxDomainRangeStartAPtr),
+                reinterpret_cast<MstxFuncPointer*>(&msptiMstxContext.mstxDomainRangeEndPtr),
+                nullptr
+            }
+        };
+    }
+    MstxContext_t profMstxContext;
+    MstxContext_t msptiMstxContext;
+    std::mutex domainMutex_;
+    std::array<std::unordered_map<mstxDomainHandle_t, mstxDomainHandle_t>, PROF_MODULE_SIZE> connectDomainMap;
+    std::atomic<ProfModule> curModule{PROF_MODULE_MSPROF};
+};
 
 void MstxMarkAImpl(const char* message, aclrtStream stream)
 {
-    if (curModule == PROF_MODULE_MSPROF) {
-        if (g_profMstxContext.mstxMarkAPtr) {
-            g_profMstxContext.mstxMarkAPtr(message, stream);
-        }
-    } else if (curModule == PROF_MODULE_MSPTI) {
-        if (g_msptiMstxContext.mstxMarkAPtr) {
-            g_msptiMstxContext.mstxMarkAPtr(message, stream);
-        }
+    auto& curContext = MstxContextManager::GetInstance().GetCurContext();
+    if (curContext.mstxMarkAPtr) {
+        curContext.mstxMarkAPtr(message, stream);
     }
 }
 
 mstxRangeId MstxRangeStartAImpl(const char* message, aclrtStream stream)
 {
-    if (curModule == PROF_MODULE_MSPROF) {
-        if (g_profMstxContext.mstxRangeStartAPtr) {
-            return g_profMstxContext.mstxRangeStartAPtr(message, stream);
-        }
-    } else if (curModule == PROF_MODULE_MSPTI) {
-        if (g_msptiMstxContext.mstxRangeStartAPtr) {
-            return g_msptiMstxContext.mstxRangeStartAPtr(message, stream);
-        }
+    auto& curContext = MstxContextManager::GetInstance().GetCurContext();
+    if (curContext.mstxRangeStartAPtr) {
+        return curContext.mstxRangeStartAPtr(message, stream);
     }
+    return MSTX_INVALID_RANGE_ID;
 }
 
 void MstxRangeEndImpl(mstxRangeId id)
 {
-    if (curModule == PROF_MODULE_MSPROF) {
-        if (g_profMstxContext.mstxRangeEndPtr) {
-            g_profMstxContext.mstxRangeEndPtr(id);
-        }
-    } else if (curModule == PROF_MODULE_MSPTI) {
-        if (g_msptiMstxContext.mstxRangeEndPtr) {
-            g_msptiMstxContext.mstxRangeEndPtr(id);
-        }
+    auto& curContext = MstxContextManager::GetInstance().GetCurContext();
+    if (curContext.mstxRangeEndPtr) {
+        curContext.mstxRangeEndPtr(id);
     }
 }
 
@@ -154,67 +217,73 @@ void MstxGetToolIdImpl(uint64_t *id)
 
 mstxDomainHandle_t MstxDomainCreateAImpl(const char *name)
 {
-    if (curModule == PROF_MODULE_MSPROF) {
-        if (g_profMstxContext.mstxDomainCreateAPtr) {
-            return g_profMstxContext.mstxDomainCreateAPtr(name);
-        }
-    } else if (curModule == PROF_MODULE_MSPTI) {
-        if (g_msptiMstxContext.mstxDomainCreateAPtr) {
-            return g_msptiMstxContext.mstxDomainCreateAPtr(name);
-        }
+    auto& contextManager = MstxContextManager::GetInstance();
+    auto& profContext = contextManager.GetContext(PROF_MODULE_MSPROF);
+    mstxDomainHandle_t profDomain = nullptr;
+    if (profContext.mstxDomainCreateAPtr) {
+        profDomain = profContext.mstxDomainCreateAPtr(name);
     }
+
+    auto& ptiContext = contextManager.GetContext(PROF_MODULE_MSPTI);
+    mstxDomainHandle_t ptiDomain = nullptr;
+    if (ptiContext.mstxDomainCreateAPtr) {
+        ptiDomain = ptiContext.mstxDomainCreateAPtr(name);
+    }
+    contextManager.RecordDomainHandle(profDomain, ptiDomain);
+    if (contextManager.GetCurModule() == PROF_MODULE_MSPROF) {
+        return profDomain;
+    }
+    return ptiDomain;
 }
 
 void MstxDomainDestroyImpl(mstxDomainHandle_t domain)
 {
-    if (curModule == PROF_MODULE_MSPROF) {
-        if (g_profMstxContext.mstxDomainDestroyPtr) {
-            g_profMstxContext.mstxDomainDestroyPtr(domain);
-        }
-    } else if (curModule == PROF_MODULE_MSPTI) {
-        if (g_msptiMstxContext.mstxDomainDestroyPtr) {
-            g_msptiMstxContext.mstxDomainDestroyPtr(domain);
-        }
+    auto& contextManager = MstxContextManager::GetInstance();
+    auto& profContext = contextManager.GetContext(PROF_MODULE_MSPROF);
+
+    if (profContext.mstxDomainDestroyPtr) {
+        auto profDomain = contextManager.GetRealDomainHandle(domain, PROF_MODULE_MSPROF);
+        profContext.mstxDomainDestroyPtr(profDomain);
+        contextManager.RemoveDomainHandle(domain, PROF_MODULE_MSPROF);
+    }
+
+    auto& ptiContext = contextManager.GetContext(PROF_MODULE_MSPTI);
+    if (ptiContext.mstxDomainDestroyPtr) {
+        auto ptiDomain = contextManager.GetRealDomainHandle(domain, PROF_MODULE_MSPTI);
+        ptiContext.mstxDomainDestroyPtr(ptiDomain);
+        contextManager.RemoveDomainHandle(domain, PROF_MODULE_MSPTI);
     }
 }
 
 void MstxDomainMarkAImpl(mstxDomainHandle_t domain, const char *message, aclrtStream stream)
 {
-    if (curModule == PROF_MODULE_MSPROF) {
-        if (g_profMstxContext.mstxDomainMarkAPtr) {
-            g_profMstxContext.mstxDomainMarkAPtr(domain, message, stream);
-        }
-    } else if (curModule == PROF_MODULE_MSPTI) {
-        if (g_msptiMstxContext.mstxDomainMarkAPtr) {
-            g_msptiMstxContext.mstxDomainMarkAPtr(domain, message, stream);
-        }
+    auto& curContext = MstxContextManager::GetInstance().GetCurContext();
+    ProfModule curModule = MstxContextManager::GetInstance().GetCurModule();
+    if (curContext.mstxDomainMarkAPtr) {
+        auto realDomain = MstxContextManager::GetInstance().GetRealDomainHandle(domain, curModule);
+        curContext.mstxDomainMarkAPtr(realDomain, message, stream);
     }
 }
 
 mstxRangeId MstxDomainRangeStartAImpl(mstxDomainHandle_t domain, const char *message,
                                       aclrtStream stream)
 {
-    if (curModule == PROF_MODULE_MSPROF) {
-        if (g_profMstxContext.mstxDomainRangeStartAPtr) {
-            return g_profMstxContext.mstxDomainRangeStartAPtr(domain, message, stream);
-        }
-    } else if (curModule == PROF_MODULE_MSPTI) {
-        if (g_msptiMstxContext.mstxDomainRangeStartAPtr) {
-            return g_msptiMstxContext.mstxDomainRangeStartAPtr(domain, message, stream);
-        }
+    auto& curContext = MstxContextManager::GetInstance().GetCurContext();
+    ProfModule curModule = MstxContextManager::GetInstance().GetCurModule();
+    if (curContext.mstxDomainRangeStartAPtr) {
+        auto realDomain = MstxContextManager::GetInstance().GetRealDomainHandle(domain, curModule);
+        return curContext.mstxDomainRangeStartAPtr(realDomain, message, stream);
     }
+    return MSTX_INVALID_RANGE_ID;
 }
 
 void MstxDomainRangeEndImpl(mstxDomainHandle_t domain, mstxRangeId id)
 {
-    if (curModule == PROF_MODULE_MSPROF) {
-        if (g_profMstxContext.mstxDomainRangeStartAPtr) {
-            g_profMstxContext.mstxDomainRangeEndPtr(domain, id);
-        }
-    } else if (curModule == PROF_MODULE_MSPTI) {
-        if (g_msptiMstxContext.mstxDomainRangeStartAPtr) {
-            g_msptiMstxContext.mstxDomainRangeEndPtr(domain, id);
-        }
+    auto& curContext = MstxContextManager::GetInstance().GetCurContext();
+    ProfModule curModule = MstxContextManager::GetInstance().GetCurModule();
+    if (curContext.mstxDomainRangeEndPtr) {
+        auto realDomain = MstxContextManager::GetInstance().GetRealDomainHandle(domain, curModule);
+        curContext.mstxDomainRangeEndPtr(realDomain, id);
     }
 }
 
@@ -283,50 +352,30 @@ int GetModuleTableFunc(MstxGetModuleFuncTableFunc getFuncTable)
     return retVal;
 }
 
-int MstxGetModuleFuncTable(
-    MstxFuncModule module, MstxFuncTable* outTable, unsigned int* outSize)
+int ProfMstxGetModuleFuncTable(MstxFuncModule module, MstxFuncTable* outTable, unsigned int* outSize)
 {
-    MstxFuncTable table = nullptr;
-    if (!outSize || !outTable) {
-        return MSTX_FAIL;
-    }
-    MstxContext_t* context = nullptr;
-    if (curModule == PROF_MODULE_MSPROF) {
-        context = &g_profMstxContext;
-    } else {
-        context = &g_msptiMstxContext;
-    }
-    switch (module) {
-        case MSTX_API_MODULE_CORE:
-            *outTable = context->funcTableCore;
-            *outSize = LengthOf(context->funcTableCore);
-            break;
-        case MSTX_API_MODULE_CORE_DOMAIN:
-            *outTable = context->funcTableCore2;
-            *outSize = LengthOf(context->funcTableCore);
-            break;
-        default:
-            return MSTX_FAIL;
-    }
+    return MstxContextManager::GetInstance().MstxGetModuleFuncTable(module, outTable, outSize, PROF_MODULE_MSPROF);
+}
 
-    return MSTX_SUCCESS;
+int MsptiMstxGetModuleFuncTable(MstxFuncModule module, MstxFuncTable* outTable, unsigned int* outSize)
+{
+    return MstxContextManager::GetInstance().MstxGetModuleFuncTable(module, outTable, outSize, PROF_MODULE_MSPTI);
 }
 
 void ProfRegisteMstxFunc(MstxInitInjectionFunc mstxInitFunc, ProfModule module)
 {
     if (mstxInitFunc) {
-        curModule = module;
         if (module == PROF_MODULE_MSPROF) {
-            mstxInitFunc(g_profMstxContext.getModuleFuncTable);
+            mstxInitFunc(ProfMstxGetModuleFuncTable);
         } else if (module == PROF_MODULE_MSPTI) {
-            mstxInitFunc(g_msptiMstxContext.getModuleFuncTable);
+            mstxInitFunc(MsptiMstxGetModuleFuncTable);
         }
     }
 }
 
 void EnableMstxFunc(ProfModule module)
 {
-    curModule = module;
+    MstxContextManager::GetInstance().EnableMstxFunc(module);
 }
 }
 }
