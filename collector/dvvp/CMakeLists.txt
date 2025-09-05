@@ -107,6 +107,7 @@ set(msprofilerCpp
     depend/src/slog_plugin.cpp
     depend/src/profapi_plugin.cpp
     depend/src/dcmi_plugin.cpp
+    depend/src/profcommon_plugin.cpp
     depend/src/tsdclient_plugin.cpp
     driver/channel/ai_drv_prof_api.cpp
     driver/devmgmt/ai_drv_dev_api.cpp
@@ -181,7 +182,7 @@ set(msprofilerInc
     msprof/platform/include
     msprof/msproftx/include
     msprof/msproftx/include
-    msprof/msproftx/mstx/inc
+    ${TOP_DIR}/collector/dvvp/msprof/msproftx/mstx/inc
     msprof/dynamic_profiling/include/
     msprof/dynamic_profiling/include
     adx/inc
@@ -260,7 +261,6 @@ target_link_options(msprofiler_share PRIVATE
 target_link_directories(msprofiler_share PRIVATE
     ${SECUREC_LIB_DIR}
     ${ERROR_MANAGER_LIB_DIR}
-    ${CMAKE_INSTALL_PREFIX}/profcommon
 )
 
 target_link_libraries(msprofiler_share PRIVATE
@@ -269,7 +269,6 @@ target_link_libraries(msprofiler_share PRIVATE
     error_manager
     -Wl,--as-needed
     dl
-    prof_common
 )
 
 install(TARGETS msprofiler_share OPTIONAL

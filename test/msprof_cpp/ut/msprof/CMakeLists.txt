@@ -25,6 +25,7 @@ set(profilerSrcList
 	${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_handle.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/depend/src/runtime_plugin.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/depend/src/dcmi_plugin.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/profcommon_plugin.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/depend/src/tsdclient_plugin.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/driver/channel/ai_drv_prof_api.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp
@@ -182,6 +183,7 @@ target_include_directories(msprofiler_utest PRIVATE
 	${MSPROF_SOURCE_DIR}/dvvp
 	${MSPROF_SOURCE_DIR}/dvvp/task_handle/include
 	${MSPROF_SOURCE_DIR}/dvvp/driver/inc
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/mstx/inc
 	${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/include
 	${TOP_DIR}/graphengine/inc/external
 	${TOP_DIR}/inc

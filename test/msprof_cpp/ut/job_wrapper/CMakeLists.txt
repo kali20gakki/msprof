@@ -87,6 +87,7 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/slog_plugin.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_handle.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/dcmi_plugin.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/depend/src/profcommon_plugin.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/params_adapter/params_adapter.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter.cpp
@@ -152,6 +153,7 @@ target_include_directories(job_wrapper_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/metadef
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/profapi
     ${MSPROF_SOURCE_DIR}/../inc
+    ${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/mstx/inc
     ${MSPROF_SOURCE_DIR}/dvvp/common/mmpa
     ${TOP_DIR}/abl/msprof/inc/toolchain
     ${TOP_DIR}/abl/libc_sec/include
