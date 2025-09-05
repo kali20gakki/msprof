@@ -17,7 +17,7 @@
 #include "runtime_plugin.h"
 #include "mstx_manager.h"
 #include "mstx_domain_mgr.h"
-#include "external/prof_common.h"
+#include "profcommon_plugin.h"
 
 using namespace Collector::Dvvp::Plugin;
 using namespace Collector::Dvvp::Mstx;
@@ -381,12 +381,12 @@ int InitInjectionMstx(MstxGetModuleFuncTableFunc getFuncTable)
 void MstxRegistMstxFunc()
 {
     MSPROF_LOGI("profiler registeMstxFunc to profcommon.so");
-    ProfRegisteMstxFunc(InitInjectionMstx, PROF_MODULE_MSPROF);
+    Collector::Dvvp::Plugin::ProfCommonPlugin::instance()->MsprofProfRegisteMstxFunc(InitInjectionMstx, PROF_MODULE_MSPROF);
 }
 
 void EnableMstxFunc()
 {
     MSPROF_LOGI("profiler enable mstx funcs");
-    EnableMstxFunc(PROF_MODULE_MSPROF);
+    Collector::Dvvp::Plugin::ProfCommonPlugin::instance()->MsprofEnableMstxFunc(PROF_MODULE_MSPROF);
 }
 }
