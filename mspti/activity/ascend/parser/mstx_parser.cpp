@@ -198,11 +198,26 @@ void MstxParser::ReportMarkDataToActivity(uint32_t deviceId, const StepTrace* st
     if (!stepTrace) {
         return;
     }
+    Common::DevTimeInfo devTimeInfo;
+    uint64_t deviceMarkId = stepTrace->indexId;
+    {
+        std::lock_guard<std::mutex> lk(deviceRangeInfoMtx_);
+        auto it = deviceMarkId2Context_.find(deviceMarkId);
+        if (it != deviceMarkId2Context_.end()) {
+            devTimeInfo = it->second;
+            deviceMarkId2Context_.erase(it);
+        } else if (Common::ContextManager::GetInstance()->GetCurDevTimeInfo(deviceId, devTimeInfo)) {
+            if (static_cast<uint32_t>(stepTrace->modelId) != MSPTI_ACTIVITY_FLAG_MARKER_INSTANTANEOUS_WITH_DEVICE) {
+                deviceMarkId2Context_.emplace(deviceMarkId, devTimeInfo);
+            }
+        } else {
+            MSPTI_LOGW("GetCurDevTimeInfo fail! deviceId is %u, rangeId is %lu", deviceId, stepTrace->indexId);
+        }
+    }
     msptiActivityMarker mark;
     mark.kind = MSPTI_ACTIVITY_KIND_MARKER;
     mark.sourceKind = MSPTI_ACTIVITY_SOURCE_KIND_DEVICE;
-    mark.timestamp = Mspti::Common::ContextManager::GetInstance()->GetRealTimeFromSysCnt(deviceId,
-                                                                                         stepTrace->timestamp);
+    mark.timestamp = Common::ContextManager::CalculateRealTime(stepTrace->timestamp, devTimeInfo);
     mark.id = stepTrace->indexId;
     mark.flag = static_cast<msptiActivityFlag>(stepTrace->modelId);
     mark.objectId.ds.deviceId = deviceId;

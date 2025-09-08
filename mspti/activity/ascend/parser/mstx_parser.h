@@ -61,6 +61,9 @@ private:
     std::atomic<uint64_t> gMarkId_{0};
     static constexpr uint32_t MARK_TAG_ID{11};
     std::mutex rangeInfoMtx_;
+
+    std::mutex deviceRangeInfoMtx_;
+    std::unordered_map<uint64_t, Common::DevTimeInfo> deviceMarkId2Context_;
     std::unordered_map<uint64_t, RangeStartContext> markId2Context_;
     static std::unordered_map<std::uint64_t, std::string> hashMarkMsg_;
     static std::mutex markMsgMtx_;
