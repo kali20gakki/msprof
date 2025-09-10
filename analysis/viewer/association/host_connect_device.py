@@ -27,6 +27,8 @@ class HostToDevice:
 
     def __init__(self, result_dir: str) -> None:
         self._result_dir = result_dir
+        # 没有api数据时没必要增加连线
+        self.exist_api = False
 
     @staticmethod
     def is_node_launch(api_trace: Dict[str, Any]) -> bool:
@@ -221,9 +223,12 @@ class HostToDevice:
         device_id = int(device_id)
         node_tasks = self.get_node_tasks()
         if data_type == self.MODULE_TASK_TIME:
+            if not self.exist_api:
+                return
             cann_pid = self.get_cann_pid()
             self.add_task_connection_data(traces, cann_pid, node_tasks, device_id)
         elif data_type == self.API_TYPE:
+            self.exist_api = True
             hccl_conn_ids = self.get_hccl_op_connection_ids()
             conn_to_ctxes = self.get_connection_id_to_context_ids_mapping(node_tasks, device_id)
             self.add_hccl_start_points(traces, conn_to_ctxes, hccl_conn_ids)

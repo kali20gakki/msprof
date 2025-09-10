@@ -70,6 +70,8 @@ class ExportCommand:
         MsProfCommonConstant.TIMELINE: [
             {'export_type': ExportDataType.STEP_TRACE,
              'handler': AiStackDataCheckManager.contain_training_trace_data_or_step},
+            {'export_type': ExportDataType.API,
+             'handler': AiStackDataCheckManager.contain_api_data},
             {'export_type': ExportDataType.TASK_TIME,
              'handler': AiStackDataCheckManager.contain_core_cpu_reduce_data},
             {'export_type': ExportDataType.HBM, 'handler': SystemDataCheckManager.contain_hbm_data},
@@ -119,8 +121,6 @@ class ExportCommand:
              'handler': AiStackDataCheckManager.contain_biu_perf_data},
             {'export_type': ExportDataType.ACC_PMU,
              'handler': AiStackDataCheckManager.contain_acc_pmu_data},
-            {'export_type': ExportDataType.API,
-             'handler': AiStackDataCheckManager.contain_api_data},
             {'export_type': ExportDataType.SIO,
              'handler': AiStackDataCheckManager.contain_sio_data},
             {'export_type': ExportDataType.QOS,

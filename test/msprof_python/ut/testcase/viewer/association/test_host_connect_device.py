@@ -59,6 +59,7 @@ class TestHostToDevice(unittest.TestCase):
                 mock.patch(NAMESPACE + ".HostToDevice.get_hccl_op_connection_ids", return_value={14983}), \
                 mock.patch(NAMESPACE + ".HostToDevice.get_connection_id_to_context_ids_mapping",
                            return_value={14983: [4294967295]}):
+            InfoConfReader()._info_json = {"devices": 0}
             connection = HostToDevice("")
             connection.add_connect_line(api_data, "api")
             self.assertEqual(api_data, expected_data)
@@ -119,8 +120,13 @@ class TestHostToDevice(unittest.TestCase):
                 mock.patch(NAMESPACE + ".HostToDevice.get_cann_pid", return_value=3), \
                 mock.patch(NAMESPACE + ".HostToDevice.get_connection_id_to_context_ids_mapping",
                            return_value={14983: [4294967295]}):
+            InfoConfReader()._info_json = {"devices": 0}
             InfoConfReader()._host_freq = 123456
             connection = HostToDevice("")
+            connection.add_connect_line(task_time_data, "task_time")
+            self.assertEqual(task_time_data, task_time_data)
+
+            connection.exist_api = True
             connection.add_connect_line(task_time_data, "task_time")
             self.assertEqual(task_time_data, expected_data)
 
@@ -151,6 +157,7 @@ class TestHostToDevice(unittest.TestCase):
         with mock.patch(NAMESPACE + '.HostToDevice.get_node_tasks', return_value={(4, 33573, 23), (4, 33574, 23)}), \
                 mock.patch(NAMESPACE + ".HostToDevice.get_connection_id_to_context_ids_mapping",
                            return_value={14983: [4294967295]}):
+            InfoConfReader()._info_json = {"devices": 0}
             connection = HostToDevice("")
             connection.add_connect_line(hccl_data, "communication")
             self.assertEqual(hccl_data, expected_data)
@@ -231,8 +238,13 @@ class TestHostToDevice(unittest.TestCase):
                         return_value={(0, 4, 33573, 23): (2287318, 10000000),
                                       (0, 4, 33574, 23): (2287318, 20000000)}), \
                 mock.patch(NAMESPACE + ".HostToDevice.get_cann_pid", return_value=3):
+            InfoConfReader()._info_json = {"devices": 0}
             InfoConfReader()._host_freq = 123456
             connection = HostToDevice("")
+            connection.add_connect_line(task_time_data, "task_time")
+            self.assertEqual(task_time_data, task_time_data)
+
+            connection.exist_api = True
             connection.add_connect_line(task_time_data, "task_time")
             self.assertEqual(task_time_data, expected_data)
 
