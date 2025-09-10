@@ -9,6 +9,7 @@ from common_func.config_mgr import ConfigMgr
 from common_func.data_check_manager import DataCheckManager
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
+from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msvp_common import path_check
 from common_func.path_manager import PathManager
@@ -147,7 +148,7 @@ class AiStackDataCheckManager(DataCheckManager):
         """
         The data path contain op summary data or not
         """
-        if cls.check_export_with_so():
+        if cls.check_export_with_so() or InfoConfReader().is_level0():
             return False
         return AiStackDataCheckManager._check_output(result_dir, device_id) and \
             DBManager.check_connect_db(result_dir, DBNameConstant.DB_OP_COUNTER)[0]
@@ -351,7 +352,7 @@ class AiStackDataCheckManager(DataCheckManager):
         """
         The data path contain hccl statistic data or not
         """
-        if cls.check_export_with_so():
+        if cls.check_export_with_so() or InfoConfReader().is_level0():
             return False
         return AiStackDataCheckManager._check_output(result_dir, device_id) and DBManager.check_tables_in_db(
             PathManager.get_db_path(result_dir, DBNameConstant.DB_HCCL_SINGLE_DEVICE),

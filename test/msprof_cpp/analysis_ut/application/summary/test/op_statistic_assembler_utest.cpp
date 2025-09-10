@@ -15,6 +15,7 @@
 #include "mockcpp/mockcpp.hpp"
 #include "analysis/csrc/application/summary/op_statistic_assembler.h"
 #include "analysis/csrc/application/summary/summary_constant.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/op_statistic_data.h"
 #include "analysis/csrc/infrastructure/dfx/error_code.h"
 
@@ -44,6 +45,7 @@ class OpStatisticAssemblerUTest : public testing::Test {
         EXPECT_TRUE(File::CreateDir(BASE_PATH));
         EXPECT_TRUE(File::CreateDir(PROF_PATH));
         EXPECT_TRUE(File::CreateDir(RESULT_PATH));
+        MOCKER_CPP(&Analysis::Domain::Environment::Context::IsLevel0).stubs().will(returnValue(false));
     }
 };
 

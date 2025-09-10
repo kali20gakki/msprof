@@ -11,6 +11,7 @@
  */
 
 #include "analysis/csrc/domain/services/persistence/host/cann_trace_db_dumper.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 #include "analysis/csrc/domain/services/parser/host/cann/hash_data.h"
 #include "analysis/csrc/infrastructure/utils/thread_pool.h"
 #include "analysis/csrc/infrastructure/utils/time_logger.h"
@@ -18,6 +19,7 @@
 
 namespace Analysis {
 namespace Domain {
+using Context = Analysis::Domain::Environment::Context;
 using ThreadPool = Analysis::Utils::ThreadPool;
 using HashData = Analysis::Domain::Host::Cann::HashData;
 using TypeData = Analysis::Domain::Host::Cann::TypeData;
@@ -222,9 +224,10 @@ void CANNTraceDBDumper::DumpOpDesc(const HostTasks &computeTasks)
         result_ = false;
         return;
     }
+    bool isLevel0 = Context::GetInstance().IsLevel0(Utils::File::PathJoin({hostFilePath_, ".."}));
     for (const auto &task: computeTasks) {
         if (task) {
-            AddTaskInfo(task, data);
+            AddTaskInfo(task, data, isLevel0);
         }
     }
     if (!opDescDBRunner.InsertData("TaskInfo", data)) {
@@ -299,7 +302,7 @@ std::string CANNTraceDBDumper::GetFormat(uint32_t oriFormat)
     return enumFormat;
 }
 
-void CANNTraceDBDumper::AddTaskInfo(const std::shared_ptr<HostTask> &task, TaskInfoData &data)
+void CANNTraceDBDumper::AddTaskInfo(const std::shared_ptr<HostTask> &task, TaskInfoData &data, bool isLevel0)
 {
     if (!task->op) {
         // treeAnalyze中通过白名单控制,此时无kernelName算子为非预期算子
@@ -309,21 +312,26 @@ void CANNTraceDBDumper::AddTaskInfo(const std::shared_ptr<HostTask> &task, TaskI
             return;
         }
         auto name = HashData::GetInstance().Get(task->kernelName);
+        auto taskType = isLevel0 ? NA : TransTaskTypeFromRtsToGe(task->taskType);
+        auto opType = isLevel0 ? NA : name;
         data.emplace_back(task->modelId, name, task->streamId, task->taskId, 0, 0, NA,
-                          TransTaskTypeFromRtsToGe(task->taskType), name, // opType
-                          task->requestId, task->thread_id, task->timeStamp, task->batchId,
-                          0, NA, NA, NA, NA, NA, NA,
-                          task->deviceId, task->contextId, NA, NA);
+                          taskType, opType, task->requestId, task->thread_id, task->timeStamp, task->batchId,
+                          0, NA, NA, NA, NA, NA, NA, task->deviceId, task->contextId, NA, NA);
         return;
     }
-    auto desc = task->op->opDesc;
-    if (!desc or !desc->nodeDesc) {
-        // L0
+
+    if (isLevel0) {
         auto name = HashData::GetInstance().Get(task->op->name);
         data.emplace_back(task->modelId, name, task->streamId, task->taskId, 0, 0, NA, NA, NA,
                           task->requestId, task->thread_id, task->timeStamp, task->batchId,
                           0, NA, NA, NA, NA, NA, NA,
                           task->deviceId, task->contextId, NA, NA);
+        return;
+    }
+
+    auto desc = task->op->opDesc;
+    if (!desc or !desc->nodeDesc) {
+        ERROR("Can't find node desc for api: %, timestamp is %", task->kernelName, task->timeStamp);
         return;
     }
     auto node = desc->nodeDesc;

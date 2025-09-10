@@ -33,7 +33,8 @@ class DataCheckManager:
             if os.path.exists(os.path.join(sub_path, Constant.SAMPLE_FILE)):
                 sample_config = ConfigMgr.read_sample_config(sub_path)
                 break
-        return sample_config.get("profLevel", "") == StrConstant.PROF_LEVEL_0
+        return sample_config.get("profLevel", "") == StrConstant.PROF_LEVEL_0 or \
+            sample_config.get("prof_level", "") == StrConstant.PROF_LEVEL_0_HISI
 
     @classmethod
     def check_export_with_so(cls):

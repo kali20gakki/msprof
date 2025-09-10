@@ -61,7 +61,7 @@ private:
     // 落盘GeFusionOpInfo
     void DumpGeFusionOps(const GeFusionOpInfos &geFusionOps);
 
-    void AddTaskInfo(const std::shared_ptr<HostTask> &task, TaskInfoData &data);
+    void AddTaskInfo(const std::shared_ptr<HostTask> &task, TaskInfoData &data, bool isLevel0);
 
     void AddTensorShapeInfo(const std::shared_ptr<ConcatTensorInfo> &tensorDesc, MsprofNodeBasicInfo nodeBasicInfo,
                             TaskInfoData &data, const std::shared_ptr<HostTask> &task);

@@ -195,8 +195,8 @@ class HCCLExport:
         return hccl_format_op_data
 
     def _format_hccl_communication_data(self, hccl_data: List[HcclTask], group_type: int = 0):
-        # for L0 collect, plane id will be filled -1。如果所有的plane id都是非法，则直接返回，否则筛选合法的数据继续处理
-        if not hccl_data or all(hccl_task.plane_id == self.INVALID_PLANE for hccl_task in hccl_data):
+        # check level0 by sample.json
+        if not hccl_data or InfoConfReader().is_level0():
             return []
         _hccl_format_data = [0] * len(hccl_data)
         index = 0

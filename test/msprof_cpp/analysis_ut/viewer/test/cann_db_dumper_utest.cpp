@@ -381,16 +381,31 @@ TEST_F(CannDBDumperUtest, TestGetFormat_SubFormat_One)
     EXPECT_EQ(result, "NCHW:1");
 }
 
-TEST_F(CannDBDumperUtest, TestAddTaskInfoOpIsNull)
+TEST_F(CannDBDumperUtest, TestAddTaskInfoOpIsNullWhenProfLevel0)
 {
     CANNTraceDBDumper cannTraceDbDumper(TEST_DB_FILE_PATH);
     auto hostTaskPtr = std::make_shared<HostTask>();
     hostTaskPtr->op = nullptr;
     hostTaskPtr->kernelName = 0;
     CANNTraceDBDumper::TaskInfoData taskInfoData;
-    cannTraceDbDumper.AddTaskInfo(hostTaskPtr, taskInfoData);
+    bool isLevel0 = true;
+    cannTraceDbDumper.AddTaskInfo(hostTaskPtr, taskInfoData, isLevel0);
     hostTaskPtr->kernelName = 1;
-    cannTraceDbDumper.AddTaskInfo(hostTaskPtr, taskInfoData);
+    cannTraceDbDumper.AddTaskInfo(hostTaskPtr, taskInfoData, isLevel0);
+    EXPECT_EQ(taskInfoData.size(), 1ul);
+}
+
+TEST_F(CannDBDumperUtest, TestAddTaskInfoOpIsNullWhenProfLevel1)
+{
+    CANNTraceDBDumper cannTraceDbDumper(TEST_DB_FILE_PATH);
+    auto hostTaskPtr = std::make_shared<HostTask>();
+    hostTaskPtr->op = nullptr;
+    hostTaskPtr->kernelName = 0;
+    CANNTraceDBDumper::TaskInfoData taskInfoData;
+    bool isLevel0 = false;
+    cannTraceDbDumper.AddTaskInfo(hostTaskPtr, taskInfoData, isLevel0);
+    hostTaskPtr->kernelName = 1;
+    cannTraceDbDumper.AddTaskInfo(hostTaskPtr, taskInfoData, isLevel0);
     EXPECT_EQ(taskInfoData.size(), 1ul);
 }
 

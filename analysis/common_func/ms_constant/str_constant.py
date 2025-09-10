@@ -429,6 +429,7 @@ class StrConstant:
 
     # prof level
     PROF_LEVEL_0 = "l0"
+    PROF_LEVEL_0_HISI = "level0"
 
     STATUS = "status"
     INFO = "info"
