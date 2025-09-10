@@ -237,7 +237,10 @@ msptiResult ActivityManager::FlushAll()
     for (const auto &buffer : flushBuffers) {
         buffer->UnInit(bufferCompleted_handle_);
     }
-    JoinWorkThreads();
+    {
+        std::unique_lock<std::mutex> lck(cv_mtx_);
+        JoinWorkThreads();
+    }
     MSPTI_LOGI("Flush all activity buffer.");
     return MSPTI_SUCCESS;
 }
