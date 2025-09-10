@@ -11,11 +11,13 @@
  */
 
 #include "analysis/csrc/application/summary/comm_statistic_assembler.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 #include "analysis/csrc/infrastructure/dfx/error_code.h"
 
 namespace Analysis {
 namespace Application {
 using namespace Analysis::Utils;
+using Context = Analysis::Domain::Environment::Context;
 
 CommStatisticAssembler::CommStatisticAssembler(const std::string& name, const std::string& profPath)
     : SummaryAssembler(name, profPath)
@@ -49,7 +51,8 @@ void CommStatisticAssembler::GenerateCommStatistic(std::vector<HcclStatisticData
 uint8_t CommStatisticAssembler::AssembleData(DataInventory& dataInventory)
 {
     auto commStatisticData = dataInventory.GetPtr<std::vector<HcclStatisticData>>();
-    if (commStatisticData == nullptr) {
+    auto isLevel0 = Context::GetInstance().IsLevel0(profPath_);
+    if (commStatisticData == nullptr || isLevel0) {
         WARN("Communication Statistic data not exist.");
         return DATA_NOT_EXIST;
     }

@@ -4,6 +4,7 @@ aux_source_directory(${TOP_DIR}/analysis/csrc/infrastructure/data_inventory DEVI
 aux_source_directory(${TOP_DIR}/analysis/csrc/domain/entities/hal DEVICE_PARSER_SOURCE)
 aux_source_directory(${TOP_DIR}/analysis/csrc/domain/entities/step_trace DEVICE_PARSER_SOURCE)
 aux_source_directory(${TOP_DIR}/analysis/csrc/infrastructure/process DEVICE_PARSER_SOURCE)
+aux_source_directory(${TOP_DIR}/analysis/csrc/domain/services/environment DEVICE_PARSER_SOURCE)
 aux_source_directory(${TOP_DIR}/analysis/csrc/domain/services/parser DEVICE_PARSER_SOURCE)
 aux_source_directory(${TOP_DIR}/analysis/csrc/domain/services/parser/log DEVICE_PARSER_SOURCE)
 aux_source_directory(${TOP_DIR}/analysis/csrc/domain/services/parser/pmu DEVICE_PARSER_SOURCE)

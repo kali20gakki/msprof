@@ -12,6 +12,7 @@ from unittest import mock
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
+from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.path_manager import PathManager
 from constant.constant import clear_dt_project
@@ -165,6 +166,7 @@ class TestCANNAnalysisGear(unittest.TestCase):
         Runtime(thread 1): event1 event2 event5 event7 event10    |    event16 event18
         Runtime(thread 2):                                     event13
         '''
+        InfoConfReader()._sample_json["profLevel"] = "l1"
         gear = TaskGear(self.PROF_HOST_DIR)
         api_db = ApiDataDatabase(1)
         record_db = AdditionalRecordDatabase(1)
@@ -320,9 +322,10 @@ class TestCANNAnalysisGear(unittest.TestCase):
                            Constant.HCCL_LEVEL: Event.invalid_event()})
         gear.flush_data()
 
+        # 根据level判定后， reduce_tbe（多线程下发）根据nodeBasicInfo判定level的方案失效 无法进入l0流程
         self.assertEqual(
             DBManager.get_table_data_count(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_GE_INFO),
-                                           DBNameConstant.TABLE_GE_TASK), 5)
+                                           DBNameConstant.TABLE_GE_TASK), 4)
         self.assertTrue(
             DBManager.check_item_in_table(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_GE_INFO),
                                           DBNameConstant.TABLE_GE_TASK, 'op_type', "1"))
@@ -342,6 +345,7 @@ class TestCANNAnalysisGear(unittest.TestCase):
         self.assertTrue(
             DBManager.check_item_in_table(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_HCCL),
                                           DBNameConstant.TABLE_HCCL_OP, 'data_type', "FP32"))
+        del InfoConfReader()._sample_json["profLevel"]
 
     def test_task_gear_should_return_when_invalid_node_event(self):
         gear = TaskGear(self.PROF_HOST_DIR)
@@ -358,6 +362,7 @@ class TestCANNAnalysisGear(unittest.TestCase):
                                            DBNameConstant.TABLE_GE_TASK), 0)
 
     def test_task_gear_should_save_one_op_when_one_traditional_mode_node_event_FROM_PROF_LEVEL0(self):
+        InfoConfReader()._sample_json["profLevel"] = "l0"
         gear = TaskGear(self.PROF_HOST_DIR)
         api_db = ApiDataDatabase(1)
         record_db = AdditionalRecordDatabase(1)
@@ -377,6 +382,7 @@ class TestCANNAnalysisGear(unittest.TestCase):
         self.assertEqual(
             DBManager.get_table_data_count(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_GE_INFO),
                                            DBNameConstant.TABLE_GE_TASK), 1)
+        del InfoConfReader()._sample_json["profLevel"]
 
     def test_task_gear_should_save_one_op_when_one_traditional_mode_node_event_FROM_PROF_LEVEL1(self):
         gear = TaskGear(self.PROF_HOST_DIR)

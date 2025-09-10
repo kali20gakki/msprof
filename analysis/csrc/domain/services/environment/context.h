@@ -83,6 +83,7 @@ public:
     uint16_t GetAiCoreNum(uint16_t deviceId, const std::string &profPath);
     uint64_t GetTotalMem(uint16_t deviceId, const std::string &profPath);
     uint64_t GetNetCardTotalSpeed(uint16_t deviceId, const std::string &profPath);
+    bool IsLevel0(const std::string &profPath);
 public:
     // 获取对应device的芯片型号
     uint16_t GetPlatformVersion(uint16_t deviceId = DEFAULT_DEVICE_ID, const std::string &profPath = "");

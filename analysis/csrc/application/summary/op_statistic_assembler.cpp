@@ -11,11 +11,13 @@
  */
 
 #include "analysis/csrc/application/summary/op_statistic_assembler.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 #include "analysis/csrc/infrastructure/dfx/error_code.h"
 
 namespace Analysis {
 namespace Application {
 using namespace Analysis::Utils;
+using Context = Analysis::Domain::Environment::Context;
 
 OpStatisticAssembler::OpStatisticAssembler(const std::string& name, const std::string& profPath)
     : SummaryAssembler(name, profPath)
@@ -49,7 +51,8 @@ void OpStatisticAssembler::GenerateOpStatistic(std::vector<OpStatisticData>& opS
 uint8_t OpStatisticAssembler::AssembleData(DataInventory& dataInventory)
 {
     auto commStatisticData = dataInventory.GetPtr<std::vector<OpStatisticData>>();
-    if (commStatisticData == nullptr) {
+    auto isLevel0 = Context::GetInstance().IsLevel0(profPath_);
+    if (commStatisticData == nullptr || isLevel0) {
         WARN("Op Statistic data not exist.");
         return DATA_NOT_EXIST;
     }

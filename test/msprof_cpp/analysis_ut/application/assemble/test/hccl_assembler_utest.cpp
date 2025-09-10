@@ -130,6 +130,7 @@ TEST_F(HcclAssemblerUTest, ShouldReturnTrueWhenDataAssembleSuccess)
     dataInventory_.Inject(opDataS);
     dataInventory_.Inject(taskS);
     MOCKER_CPP(&Context::GetPidFromInfoJson).stubs().will(returnValue(10085)); // pid 10085
+    MOCKER_CPP(&Context::IsLevel0).stubs().will(returnValue(false));
     EXPECT_TRUE(assembler.Run(dataInventory_, PROF_PATH));
     auto files = File::GetOriginData(RESULT_PATH, {"msprof"}, {});
     EXPECT_EQ(1ul, files.size());

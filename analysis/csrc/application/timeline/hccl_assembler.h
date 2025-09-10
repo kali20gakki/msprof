@@ -16,6 +16,7 @@
 #include "analysis/csrc/application/timeline/json_assembler.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/communication_info_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/kfc_turn_data.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 #include "analysis/csrc/application/timeline/connection_id_pool.h"
 #include "analysis/csrc/infrastructure/utils/utils.h"
@@ -106,13 +107,16 @@ private:
                                std::unordered_map<uint16_t, uint32_t> &pidMap, const LayerInfo &layerInfo)
     {
         INFO("Start GenerateCommTaskTrace");
+        if (Analysis::Domain::Environment::Context::GetInstance().IsLevel0(profPath)) {
+            return;
+        }
         uint32_t formatPid;
         int tid;
         std::string transport;
         std::string dataType;
         std::string linkType;
         for (auto &data : task) {
-            // L0场景不应该单纯根据planeId值判定 有数据就应该处理呈现
+            // 上面已经判定过level0 此处正常不应该进入分支，但是由于lccl适配问题，导致依然存在类似场景
             if (data.planeId == INVALID_PLANE) {
                 continue;
             }

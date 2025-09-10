@@ -1084,3 +1084,25 @@ TEST_F(ContextUTest, TestGetNetCardTotalSpeedShouldReturnMemValueWhenInfoIsInval
     EXPECT_THROW(Context::GetInstance().GetNetCardTotalSpeed(HOST_ID, {File::PathJoin({CONTEXT_DIR, TEST_DIR})}),
                  nlohmann::json_abi_v3_11_3::detail::type_error);
 }
+
+TEST_F(ContextUTest, TestIsLevel0ShouldCheckProfLevel)
+{
+    EXPECT_TRUE(File::DeleteFile(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, SAMPLE_JSON})));
+    // sample.json
+    nlohmann::json sample = {
+        {"ai_core_profiling_mode", "task-based"},
+        {"llc_profiling", "read"},
+        {"profLevel", "l1"},
+    };
+    FileWriter infoWriter(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, SAMPLE_JSON}));
+    infoWriter.WriteText(sample.dump());
+    EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
+
+    EXPECT_FALSE(Context::GetInstance().IsLevel0(File::PathJoin({CONTEXT_DIR, TEST_DIR})));
+
+    nlohmann::json record = {};
+    // info empty
+    MOCKER_CPP(&Context::GetInfoByDeviceId).stubs().will(returnValue(record));
+    EXPECT_TRUE(Context::GetInstance().IsLevel0(File::PathJoin({CONTEXT_DIR, TEST_DIR})));
+    MOCKER_CPP(&Context::GetInfoByDeviceId).reset();
+}

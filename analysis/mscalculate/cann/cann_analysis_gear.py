@@ -10,6 +10,7 @@ from typing import Union
 
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
+from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.ge_enum_constant import GeTaskType
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_object import HighPerfDict
@@ -526,15 +527,15 @@ class TaskGear(CANNGear):
             task_type = Constant.TASK_TYPE_HCCL
         return task_type
 
-    def add_kernel_task(self, call_stack: dict, add_dto: TaskTrackDto):
+    def add_kernel_task(self, call_stack: dict, add_dto: TaskTrackDto, is_level0: bool):
         node_event: Event = call_stack.get(Constant.NODE_LEVEL)
         node_dto: ApiDataDto = self.db.get_api(node_event)
         hccl_event: Event = call_stack.get(Constant.HCCL_LEVEL)
         hccl_dto: ApiDataDto = self.db.get_api(hccl_event)
 
         if not node_dto.item_id and not hccl_dto.item_id:
-            # this happens when runtime task is not respond to a op
-            self.add_kernel_task_only_task_track(add_dto)
+            # this happens when runtime task is not respond to a op; or only runtime task
+            self.add_kernel_task_only_task_track(add_dto, is_level0)
             return
 
         if node_dto.item_id.startswith("Lccl"):
@@ -544,12 +545,16 @@ class TaskGear(CANNGear):
         model_id = model_dto.item_id if model_dto.item_id != "" else self.INVALID_MODEL_ID
         request_id = model_dto.request_id if model_dto.request_id is not None else -1
 
-        node_descs = self.get_node_descs(node_event)
-        if not node_descs:
+        if is_level0:
             # this happens when prof data is collected in level 0,
-            # or hccl (reduce TBE op) op which is not same thread with node launch.
+            # or hccl (reduce TBE op) op which is not same thread with node launch. 此场景在当前分支下失效 待具体数据验证
             self.add_kernel_task_l0([node_dto, self.NodeDesc()], add_dto,
                                     [hccl_event, hccl_dto], [model_id, request_id])
+            return
+
+        node_descs = self.get_node_descs(node_event)
+        if not node_descs:
+            logging.error("Can't find node desc for api: %s, timestamp is %d", node_dto.item_id, add_dto.timestamp)
             return
 
         for node_desc in node_descs.values():
@@ -620,14 +625,16 @@ class TaskGear(CANNGear):
                                    "YES" if node_basic_info_dto.op_flag else "NO",
                                    "N/A" if not node_attr_info.hashid else node_attr_info.hashid])
 
-    def add_kernel_task_only_task_track(self, rts_trk_dto: TaskTrackDto):
+    def add_kernel_task_only_task_track(self, rts_trk_dto: TaskTrackDto, is_level0: bool):
         if rts_trk_dto.kernel_name == Constant.NA:
             return
-        task_type = self.RTS_TASK_TYPE_MAP.get(rts_trk_dto.task_type, rts_trk_dto.task_type)
+        task_type = Constant.NA if is_level0 else self.RTS_TASK_TYPE_MAP.get(rts_trk_dto.task_type,
+                                                                             rts_trk_dto.task_type)
+        op_type = Constant.NA if is_level0 else rts_trk_dto.kernel_name
         context_id = 0 if task_type in [GeTaskType.MIX_AIC.name, GeTaskType.MIX_AIV.name] else self.INVALID_CONTEXT_ID
         self.task_info.append([self.INVALID_MODEL_ID, rts_trk_dto.kernel_name,
                                rts_trk_dto.stream_id, rts_trk_dto.task_id, 0, 0,
-                               Constant.NA, task_type, rts_trk_dto.kernel_name, -1, rts_trk_dto.thread_id,
+                               Constant.NA, task_type, op_type, -1, rts_trk_dto.thread_id,
                                rts_trk_dto.timestamp, rts_trk_dto.batch_id,
                                None, None, None, None, None, None, None,
                                rts_trk_dto.device_id, context_id, Constant.NA, Constant.NA])
@@ -637,6 +644,7 @@ class TaskGear(CANNGear):
         if not event.is_invalid() and not event.additional_record:
             return
 
+        is_level0 = InfoConfReader().is_level0()
         mem_cpy_dto, task_track_dtos = self.get_task_level_additional_dto(event)
         for task_track_dto in task_track_dtos:
             if task_track_dto.struct_type is not None:
@@ -647,7 +655,7 @@ class TaskGear(CANNGear):
                 self.add_hccl_task(call_stack.get(Constant.MODEL_LEVEL), hccl_event, task_track_dto)
                 self.add_hccl_op(call_stack, task_track_dto)
             if self.is_kernel_task(task_track_dto, hccl_event.is_invalid()):
-                self.add_kernel_task(call_stack, task_track_dto)
+                self.add_kernel_task(call_stack, task_track_dto, is_level0)
 
     def save_task_info(self):
         if not self.task_info:

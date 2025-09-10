@@ -453,11 +453,25 @@ class InfoConfReader:
         """
         return self._host_local_time_offset if is_host else self._local_time_offset
 
-    def get_qos_events(self: any) -> float:
+    def get_qos_events(self: any) -> str:
         """
         get qosEvents from sample.json
         """
         return str(self._sample_json.get("qosEvents", ""))
+
+    def is_level0(self) -> bool:
+        """
+        check prof level0
+        """
+        prof_level = self._get_prof_level()
+        return prof_level == StrConstant.PROF_LEVEL_0 or prof_level == StrConstant.PROF_LEVEL_0_HISI
+
+    def _get_prof_level(self: any) -> str:
+        """
+        get prof level from sample.json
+        """
+        prof_level = self._sample_json.get("profLevel")
+        return prof_level if prof_level else self._sample_json.get("prof_level") # hisi key name
 
     def _load_json(self: any, result_path: str) -> None:
         """

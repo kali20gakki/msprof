@@ -585,6 +585,20 @@ uint64_t Context::GetNetCardTotalSpeed(uint16_t deviceId, const std::string &pro
     return totalSpeed;
 }
 
+bool Context::IsLevel0(const std::string &profPath)
+{
+    auto info = GetInfoByDeviceId(DEFAULT_DEVICE_ID, profPath);
+    // 这里如果没有host目录 会去取到device的数据 本质上依赖外层路径校验
+    if (info.empty()) {
+        ERROR("info is empty, input path %", profPath);
+        return true;
+    }
+    std::set<std::string> level0Set = {"l0", "level0"};
+    // profLevel(产品): l0, l1       prof_level(hisi): level0, level1
+    std::string profLevel = info.contains("profLevel") ? info.value("profLevel", "") : info.value("prof_level", "");
+    return (level0Set.find(profLevel) != level0Set.end());
+}
+
 }  // namespace Environment
 }  // namespace Parser
 }  // namespace Analysis
