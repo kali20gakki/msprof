@@ -789,6 +789,7 @@ class ExportCommand:
             return
         LoadInfoManager.load_info(device_path)
         self._update_list_map(device_path)
+        MsprofTimeline().set_connection_list(device_path)
         MsprofTimeline().init_export_data()
 
         self._add_export_type(device_path)

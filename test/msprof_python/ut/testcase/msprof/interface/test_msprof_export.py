@@ -721,7 +721,10 @@ class TestExportCommand(unittest.TestCase):
         path_table = {"collection_path": "test", "host": "test/host", "device": ["test/device_0"]}
         args_dic = {"collection_path": "test", "iteration_id": None, "model_id": None, "iteration_count": None}
         args = Namespace(**args_dic)
-        with mock.patch(NAMESPACE + '.ExportCommand._view_data'), \
+        with mock.patch(NAMESPACE + '.ExportCommand._handle_export'), \
+                mock.patch('framework.load_info_manager.LoadInfoManager.load_info'), \
+                mock.patch(NAMESPACE + '.ExportCommand._update_list_map'), \
+                mock.patch(NAMESPACE + '.ExportCommand._add_export_type'), \
                 mock.patch(NAMESPACE + '.ExportCommand._check_export_timeline_with_so', return_value=True), \
                 mock.patch('importlib.import_module'):
             test = ExportCommand("timeline", args)
@@ -731,7 +734,10 @@ class TestExportCommand(unittest.TestCase):
         path_table = {"collection_path": "test", "host": "test/host", "device": ["test/device_0"]}
         args_dic = {"collection_path": "test", "iteration_id": None, "model_id": None, "iteration_count": None}
         args = Namespace(**args_dic)
-        with mock.patch(NAMESPACE + '.ExportCommand._view_data'), \
+        with mock.patch(NAMESPACE + '.ExportCommand._handle_export'), \
+                mock.patch('framework.load_info_manager.LoadInfoManager.load_info'), \
+                mock.patch(NAMESPACE + '.ExportCommand._update_list_map'), \
+                mock.patch(NAMESPACE + '.ExportCommand._add_export_type'), \
                 mock.patch(NAMESPACE + '.ExportCommand._check_export_summary_with_so', return_value=True), \
                 mock.patch('importlib.import_module'), \
                 mock.patch('msinterface.msprof_output_summary.MsprofOutputSummary.export'):

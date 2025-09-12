@@ -28,7 +28,6 @@ class MsprofTimeline:
     """
     This class is used to export a summary timeline json file.
     """
-    CONNECT_LIST = [HostToDevice]
     FILE_NAME = os.path.basename(__file__)
 
     def __init__(self: any) -> None:
@@ -38,6 +37,7 @@ class MsprofTimeline:
         self._export_data_list = []
         self._iteration_time = (float('-inf'), float('inf'))
         self._default_sort_index = TraceViewHeaderConstant.DEFAULT_LAYER_SORT_START
+        self.connect_list = {}
 
     @classmethod
     def get_timeline_header(cls: any, pid: str, pid_sort_index: int) -> list:
@@ -154,8 +154,8 @@ class MsprofTimeline:
         :param json_list: json list
         :param data_type: data_type
         """
-        for connect_obj in self.CONNECT_LIST:
-            connect_obj(self._result_dir).add_connect_line(json_list, data_type)
+        for connect_obj in self.connect_list.values():
+            connect_obj.add_connect_line(json_list, data_type)
 
     def add_sort_index(self: any, json_list: list) -> None:
         """
@@ -209,6 +209,11 @@ class MsprofTimeline:
         time_end = time_start + time_dur
 
         return start_time <= time_start < end_time or time_start < start_time < time_end
+
+    def set_connection_list(self, result_dir: str):
+        # 入参设置result_dir 避免依赖成员变量
+        host_to_device_obj = HostToDevice(result_dir)
+        self.connect_list.setdefault("host_to_device", host_to_device_obj)
 
     def set_iteration_info(self: any, result_dir: str, iter_range: IterationRange) -> None:
         """
