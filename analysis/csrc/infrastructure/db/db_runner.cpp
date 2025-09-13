@@ -26,7 +26,7 @@ static std::string GetColumnsString(const std::vector <TableColumn> &cols)
     std::transform(cols.begin(), cols.end(), result.begin(), [](const TableColumn &col) {
         return col.ToString();
     });
-    return Join(result, ",");
+    return Join(result, ", ");
 }
 
 bool DBRunner::CheckTableExists(const std::string &tableName)
