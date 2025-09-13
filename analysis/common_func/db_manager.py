@@ -243,7 +243,7 @@ class DBManager:
         hd_with_type_list = []
         for i, _ in enumerate(headers):
             hd_with_type_list.append(headers[i] + " " + type_names[i])
-        hd_with_type_list_str += ','.join(hd_with_type_list)
+        hd_with_type_list_str += ', '.join(hd_with_type_list)
         hd_with_type_list_str += ")"
         return hd_with_type_list_str
 
