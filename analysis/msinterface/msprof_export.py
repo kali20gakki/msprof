@@ -623,6 +623,9 @@ class ExportCommand:
     def _show_cluster_tuning(self) -> None:
         if self.command_type != MsProfCommonConstant.SUMMARY:
             return
+
+        # 在该代码段屏蔽所有的log打印内容（对打屏内容不做处理）
+        logging.disable(level=logging.CRITICAL)
         ClusterTuning(self._cluster_params.get('cluster_path')).run()
         params = {
             "collection_path": self.collection_path,
@@ -634,6 +637,9 @@ class ExportCommand:
             ClusterTuningFacade(params).process()
         except ProfException:
             warn(self.FILE_NAME, 'Cluster Tuning did not complete!')
+        finally:
+            # 解禁打屏限制
+            logging.disable(logging.NOTSET)
 
     def _update_cluster_params(self: any, sub_path: str, is_cluster: bool) -> None:
         if is_cluster:

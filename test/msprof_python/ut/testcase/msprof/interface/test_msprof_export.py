@@ -478,6 +478,20 @@ class TestExportCommand(unittest.TestCase):
                 test.list_map["devices_list"] = ["1"]
                 test.process()
 
+    def test_process_when_command_type_is_summary_in_cluster(self):
+        args_dic = {"collection_path": "test"}
+        args = Namespace(**args_dic)
+        with mock.patch('os.path.exists', return_value=True), \
+                mock.patch('os.path.isdir', return_value=True), \
+                mock.patch('os.access', return_value=True), \
+                mock.patch('common_func.msprof_common.check_path_valid'), \
+                mock.patch(NAMESPACE + '.ExportCommand._process_sub_dirs'), \
+                mock.patch('tuning.cluster_tuning.ClusterTuning.run'), \
+                mock.patch('tuning.cluster.cluster_tuning_facade.ClusterTuningFacade.process'):
+            test = ExportCommand("summary", args)
+            test._cluster_params = {'is_cluster_scene': True, 'cluster_path': []}
+            test.process()
+
     def test_test_process_test_when_command_type_is_db(self):
         args_dic = {"collection_path": "test"}
         args = Namespace(**args_dic)
