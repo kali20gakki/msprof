@@ -240,17 +240,19 @@ int32_t MmAccess(const std::string &pathName)
     return MmAccess2(pathName, F_OK);
 }
 
-char *MmDirName(char *path)
+char *MmDirName(char *path, size_t pathLen)
 {
-    if (path == nullptr) {
+    // 输入路径禁止大于系统路径上限
+    if (path == nullptr || pathLen > MMPA_MAX_PATH) {
         return nullptr;
     }
     return dirname(path);
 }
 
-char *MmBaseName(char *path)
+char *MmBaseName(char *path, size_t pathLen)
 {
-    if (path == nullptr) {
+    // 输入路径禁止大于系统路径上限
+    if (path == nullptr || pathLen > MMPA_MAX_PATH) {
         return nullptr;
     }
     return basename(path);
@@ -430,6 +432,7 @@ int32_t MmDup2(int32_t oldFd, int32_t newFd)
 int32_t MmRealPath(const char *path, char *realPath, int32_t realPathLen)
 {
     int32_t ret = PROFILING_SUCCESS;
+    // 保存路径需要大于系统路径上限 确保正确获取
     if ((realPath == nullptr) || (path == nullptr) || (realPathLen < MMPA_MAX_PATH)) {
         return PROFILING_INVALID_PARAM;
     }
@@ -944,10 +947,13 @@ static const char* LocalGetArmVersion(const char *cpuImplememter, uint32_t cpuIm
     return nullptr;
 }
 
-static void LocalGetArmManufacturer(char *cpuImplememter, MmCpuDesc *cpuInfo)
+static void LocalGetArmManufacturer(char *cpuImplememter, size_t cpuImplememterLen, MmCpuDesc *cpuInfo)
 {
-    size_t len = strlen(cpuInfo->manufacturer);
-    if (len != 0U) {
+    if (strlen(cpuInfo->manufacturer) != 0U) {
+        return;
+    }
+    if (!cpuImplememter || (cpuImplememterLen == 0 || cpuImplememterLen >= MMPA_CPUINFO_DEFAULT_SIZE)) {
+        MSPROF_LOGE("cpuImplememter size is invalid");
         return;
     }
     int32_t ret = PROFILING_FAILED;
@@ -1016,7 +1022,7 @@ static void LocalGetCpuProcV1(FILE *fp, MmCpuDesc *cpuInfo)
             MSPROF_LOGE("memcpy failed, error code is %d.", ret);
         }
     }
-    LocalGetArmManufacturer(cpuImplememter, cpuInfo);
+    LocalGetArmManufacturer(cpuImplememter, strlen(cpuImplememter), cpuInfo);
     return;
 }
 

@@ -757,12 +757,12 @@ TEST_F(MmpaUtest, MmAccess2WillReturnInvalidParamWhenInputInvalid)
 
 TEST_F(MmpaUtest, MmDirNameWillReturnNullWhenInputInvalid)
 {
-    EXPECT_EQ(nullptr, MmDirName(nullptr));
+    EXPECT_EQ(nullptr, MmDirName(nullptr, 0));
 }
 
 TEST_F(MmpaUtest, MmBaseNameWillReturnNullWhenInputInvalid)
 {
-    EXPECT_EQ(nullptr, MmBaseName(nullptr));
+    EXPECT_EQ(nullptr, MmBaseName(nullptr, 0));
 }
 
 TEST_F(MmpaUtest, MmMkdirWillReturnInvalidParamWhenInputInvalid)

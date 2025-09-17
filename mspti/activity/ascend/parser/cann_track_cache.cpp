@@ -260,7 +260,7 @@ bool CannTrackCache::CannTrackCacheImpl::IsCommunicationNode(const MsprofApi &no
     }
     std::shared_ptr<Tag<MsprofApi>> communication;
     cache->communicationQueue.Peek(communication);
-    return InApiRange(nodeLaunchApi, *communication->data);
+    return communication && InApiRange(nodeLaunchApi, *communication->data);
 }
 
 msptiResult CannTrackCache::CannTrackCacheImpl::Analysis(const CannThreadCachePtr &cache)
@@ -297,6 +297,9 @@ void CannTrackCache::CannTrackCacheImpl::MountCommunicationNode(ApiEvent &apiEve
     std::shared_ptr<Tag<MsprofApi>> frontApi;
     while (!cache->communicationQueue.IsEmpty()) {
         cache->communicationQueue.Pop(frontApi);
+        if (!frontApi) {
+            continue;
+        }
         std::unique_ptr<ApiEvent> communicationTask;
         Mspti::Common::MsptiMakeUniquePtr(communicationTask);
         if (!UNLIKELY(communicationTask)) {

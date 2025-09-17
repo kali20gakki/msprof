@@ -22,10 +22,10 @@ const char * const PLATFORM_CLOUD = "cloud";
 const std::string INFO_FILE_NAME = "info.json";
 
 struct InfoCpu : analysis::dvvp::message::BaseInfo {
-    uint32_t Id;
+    int32_t Id;
     std::string Name;
     std::string Frequency;
-    uint32_t Logical_CPU_Count;
+    int32_t Logical_CPU_Count;
     std::string Type;
 
     void ToObject(nlohmann::json &object) override
@@ -41,7 +41,7 @@ struct InfoCpu : analysis::dvvp::message::BaseInfo {
 };
 
 struct InfoDeviceInfo : analysis::dvvp::message::BaseInfo {
-    uint32_t id;
+    int id;
     uint32_t env_type;
     std::string ctrl_cpu_id;
     uint32_t ctrl_cpu_core_num;
@@ -85,7 +85,7 @@ struct InfoDeviceInfo : analysis::dvvp::message::BaseInfo {
 
 struct NetCardInfo : analysis::dvvp::message::BaseInfo {
     std::string netCardName;
-    int32_t speed;
+    uint32_t speed;
 
     void ToObject(nlohmann::json &object) override
     {
@@ -101,7 +101,7 @@ struct InfoMain : analysis::dvvp::message::BaseInfo {
     std::string version;
     std::string mac;
     std::string OS;
-    uint32_t cpuCores;
+    int32_t cpuCores = 0;
     std::string hostname;
     std::string hwtype;
     std::string devices;
@@ -110,15 +110,15 @@ struct InfoMain : analysis::dvvp::message::BaseInfo {
     std::vector<struct InfoDeviceInfo> DeviceInfo;
     std::string platform_version;
     std::string pid;
-    uint32_t memoryTotal;
-    uint32_t cpuNums;
-    uint32_t sysClockFreq;
+    uint32_t memoryTotal = 0;
+    long cpuNums = 0;
+    long sysClockFreq = 0;
     std::string upTime;
-    uint32_t netCardNums;
+    uint32_t netCardNums = 0;
     std::vector<struct NetCardInfo> netCard;
-    int32_t rank_id;
+    int32_t rank_id = 0;
     std::string pid_name;
-    uint32_t drvVersion;
+    uint32_t drvVersion = 0;
     std::string hostUid;
 
     void ToObject(nlohmann::json &object) override
