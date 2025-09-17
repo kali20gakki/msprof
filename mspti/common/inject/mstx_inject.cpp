@@ -393,7 +393,7 @@ int InitInjectionMstx(MstxGetModuleFuncTableFunc getFuncTable)
 }
 
 using namespace MsptiMstxApi;
-msptiResult res = MstxRegistMstxFunc();
+static msptiResult res = MstxRegistMstxFunc();
 
 msptiResult msptiActivityEnableMarkerDomain(const char* name)
 {
