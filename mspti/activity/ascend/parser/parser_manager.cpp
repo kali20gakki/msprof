@@ -25,9 +25,6 @@
 namespace Mspti {
 namespace Parser {
 namespace {
-const std::string LCCL_PREFIX = "Lccl";
-const std::string HCCL_PREFIX = "hcom_";
-
 inline Mspti::Common::ThreadLocal<msptiActivityApi> GetDefaultApiActivity()
 {
     static Mspti::Common::ThreadLocal<msptiActivityApi> instance(
@@ -49,17 +46,6 @@ ParserManager *ParserManager::GetInstance()
 {
     static ParserManager instance;
     return &instance;
-}
-
-bool IsCommunicationNodeLaunch(const std::string& nodeLaunchName)
-{
-    if (nodeLaunchName.substr(0, LCCL_PREFIX.size()) == LCCL_PREFIX) {
-        return true;
-    }
-    if (nodeLaunchName.substr(0, HCCL_PREFIX.size()) == HCCL_PREFIX) {
-        return true;
-    }
-    return false;
 }
 
 msptiResult ParserManager::ReportApi(const MsprofApi* const data)

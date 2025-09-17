@@ -20,6 +20,7 @@
 #include "common/plog_manager.h"
 #include "common/utils.h"
 #include "common/mpsc_queue.h"
+#include "common/context_manager.h"
 #include "activity/activity_manager.h"
 
 namespace Mspti {
@@ -36,20 +37,21 @@ inline bool InApiRange(const MsprofApi &data1, const MsprofApi &data2)
 }
 }
 
-template <typename T> struct TagAging {
+template <typename T> struct Tag {
     std::unique_ptr<T> data{};
     bool agingFlag = true;
-    explicit TagAging(T &&value) : data(std::make_unique<T>(std::move(value))), agingFlag(true) {}
-    explicit TagAging(bool aging, T &&value) : data(std::make_unique<T>(std::move(value))), agingFlag(aging) {}
-    explicit TagAging(bool aging, std::unique_ptr<T> &&value) : data(std::move(value)), agingFlag(aging) {}
+    uint64_t correlationId = 0;
+    explicit Tag(T &&value) : data(std::make_unique<T>(std::move(value))), agingFlag(true) {}
+    explicit Tag(bool aging, T &&value) : data(std::make_unique<T>(std::move(value))), agingFlag(aging) {}
+    explicit Tag(bool aging, std::unique_ptr<T> &&value) : data(std::move(value)), agingFlag(aging) {}
 };
 
 struct CannThreadCache {
     uint32_t threadId{};
     std::mutex taskMutex;
-    std::multimap<uint64_t, std::shared_ptr<TagAging<MsprofCompactInfo>>> taskQueue;
-    Mspti::Common::MPSCQueue<std::shared_ptr<TagAging<MsprofApi>>> nodeLaunchQueue;
-    Mspti::Common::MPSCQueue<std::shared_ptr<TagAging<MsprofApi>>> communicationQueue;
+    std::multimap<uint64_t, std::shared_ptr<Tag<MsprofCompactInfo>>> taskQueue;
+    Mspti::Common::MPSCQueue<std::shared_ptr<Tag<MsprofApi>>> nodeLaunchQueue;
+    Mspti::Common::MPSCQueue<std::shared_ptr<Tag<MsprofApi>>> communicationQueue;
 };
 
 using CannThreadCachePtr = std::shared_ptr<CannThreadCache>;
@@ -81,6 +83,19 @@ private:
     std::atomic<bool> threadRun_{ false };
     std::thread t_;
 };
+
+const std::string LCCL_PREFIX = "Lccl";
+const std::string HCCL_PREFIX = "hcom_";
+bool IsCommunicationNodeLaunch(const std::string& nodeLaunchName)
+{
+    if (nodeLaunchName.substr(0, LCCL_PREFIX.size()) == LCCL_PREFIX) {
+        return true;
+    }
+    if (nodeLaunchName.substr(0, HCCL_PREFIX.size()) == HCCL_PREFIX) {
+        return true;
+    }
+    return false;
+}
 
 CannTrackCache::CannTrackCacheImpl::~CannTrackCacheImpl()
 {
@@ -152,12 +167,13 @@ msptiResult CannTrackCache::CannTrackCacheImpl::AppendTsTrack(bool agingFlag, co
         MSPTI_LOGE("memcpy MsprofCompactInfo failed! threadId is %d", data->threadId);
         return MSPTI_ERROR_INNER;
     }
-    std::shared_ptr<TagAging<MsprofCompactInfo>> agingCopy;
+    std::shared_ptr<Tag<MsprofCompactInfo>> agingCopy;
     Mspti::Common::MsptiMakeSharedPtr(agingCopy, agingFlag, std::move(copy));
     if (UNLIKELY(agingCopy == nullptr)) {
-        MSPTI_LOGE("copy TagAging MsprofCompactInfo data failed");
+        MSPTI_LOGE("copy Tag MsprofCompactInfo data failed");
         return MSPTI_ERROR_INNER;
     }
+
     std::lock_guard<std::mutex> lk(cache->taskMutex);
     cache->taskQueue.emplace(data->timeStamp, agingCopy);
     return MSPTI_SUCCESS;
@@ -185,11 +201,16 @@ msptiResult CannTrackCache::CannTrackCacheImpl::AppendNodeLunch(bool agingFlag, 
             MSPTI_LOGE("memcpy nodeLaunch MsprofApi failed! threadId is %d", data->threadId);
             return MSPTI_ERROR_INNER;
         }
-        std::shared_ptr<TagAging<MsprofApi>> agingCopy;
+        std::shared_ptr<Tag<MsprofApi>> agingCopy;
         Mspti::Common::MsptiMakeSharedPtr(agingCopy, agingFlag, std::move(copy));
         if (UNLIKELY(agingCopy == nullptr)) {
-            MSPTI_LOGE("copy TagAging NodeLunch data failed");
+            MSPTI_LOGE("copy Tag NodeLunch data failed");
             return MSPTI_ERROR_INNER;
+        }
+        const auto& name = CannHashCache::GetInstance().GetHashInfo(data->itemId);
+        if (IsCommunicationNodeLaunch(name)) {
+            agingCopy->correlationId =
+                Mspti::Common::ContextManager::GetInstance()->UpdateAndReportCorrelationId(data->threadId);
         }
         cache->nodeLaunchQueue.Push(agingCopy);
     }
@@ -221,10 +242,10 @@ msptiResult CannTrackCache::CannTrackCacheImpl::AppendCommunication(bool agingFl
         MSPTI_LOGE("memcpy nodeLaunch MsprofApi failed! threadId is %d", data->threadId);
         return MSPTI_ERROR_INNER;
     }
-    std::shared_ptr<TagAging<MsprofApi>> agingCopy;
+    std::shared_ptr<Tag<MsprofApi>> agingCopy;
     Mspti::Common::MsptiMakeSharedPtr(agingCopy, agingFlag, std::move(copy));
     if (UNLIKELY(agingCopy == nullptr)) {
-        MSPTI_LOGE("copy TagAging Communication data failed");
+        MSPTI_LOGE("copy Tag Communication data failed");
         return MSPTI_ERROR_INNER;
     }
     cache->communicationQueue.Push(agingCopy);
@@ -237,7 +258,7 @@ bool CannTrackCache::CannTrackCacheImpl::IsCommunicationNode(const MsprofApi &no
     if (cache->communicationQueue.IsEmpty()) {
         return false;
     }
-    std::shared_ptr<TagAging<MsprofApi>> communication;
+    std::shared_ptr<Tag<MsprofApi>> communication;
     cache->communicationQueue.Peek(communication);
     return InApiRange(nodeLaunchApi, *communication->data);
 }
@@ -245,7 +266,7 @@ bool CannTrackCache::CannTrackCacheImpl::IsCommunicationNode(const MsprofApi &no
 msptiResult CannTrackCache::CannTrackCacheImpl::Analysis(const CannThreadCachePtr &cache)
 {
     while (!cache->nodeLaunchQueue.IsEmpty()) {
-        std::shared_ptr<TagAging<MsprofApi>> nodeLaunchApi;
+        std::shared_ptr<Tag<MsprofApi>> nodeLaunchApi;
         cache->nodeLaunchQueue.Pop(nodeLaunchApi);
         if (!nodeLaunchApi) {
             continue;
@@ -256,6 +277,7 @@ msptiResult CannTrackCache::CannTrackCacheImpl::Analysis(const CannThreadCachePt
             MSPTI_LOGE("fail to malloc api2TaskInfo");
             return MSPTI_ERROR_INNER;
         }
+        api2TaskInfo->correlationId = nodeLaunchApi->correlationId;
         api2TaskInfo->agingFlag = nodeLaunchApi->agingFlag;
         api2TaskInfo->api = *nodeLaunchApi->data;
         api2TaskInfo->threadId = nodeLaunchApi->data->threadId;
@@ -272,7 +294,7 @@ msptiResult CannTrackCache::CannTrackCacheImpl::Analysis(const CannThreadCachePt
 
 void CannTrackCache::CannTrackCacheImpl::MountCommunicationNode(ApiEvent &apiEvent, const CannThreadCachePtr &cache)
 {
-    std::shared_ptr<TagAging<MsprofApi>> frontApi;
+    std::shared_ptr<Tag<MsprofApi>> frontApi;
     while (!cache->communicationQueue.IsEmpty()) {
         cache->communicationQueue.Pop(frontApi);
         std::unique_ptr<ApiEvent> communicationTask;

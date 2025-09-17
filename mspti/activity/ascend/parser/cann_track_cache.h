@@ -22,9 +22,10 @@
 namespace Mspti {
 namespace Parser {
 struct ApiEvent {
+    uint16_t level;
     bool agingFlag = true;
     uint64_t threadId;
-    uint16_t level;
+    uint64_t correlationId;
     MsprofApi api;
     MsprofCompactInfo compactInfo;
     std::vector<std::unique_ptr<ApiEvent>> childs;

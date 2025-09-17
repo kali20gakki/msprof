@@ -64,7 +64,7 @@ class DeviceTaskCalculator {
     using DstsType = std::tuple<uint16_t, uint16_t, uint16_t, uint16_t>;
 
 public:
-    using CompleteFunc = std::function<msptiResult(std::shared_ptr<DeviceTask>)>;
+    using CompleteFunc = std::function<msptiResult(std::shared_ptr<DeviceTask>&)>;
 
     static DeviceTaskCalculator &GetInstance()
     {
@@ -72,7 +72,7 @@ public:
         return instance;
     }
 
-    void RegisterCallBack(const std::vector<std::shared_ptr<DeviceTask>> &assembleTasks, CompleteFunc completeFunc);
+    void RegisterCallBack(const std::vector<std::shared_ptr<DeviceTask>> &assembleTasks, const CompleteFunc& completeFunc);
 
     msptiResult ReportStarsSocLog(uint32_t deviceId, StarsSocHeader *socLogHeader);
 

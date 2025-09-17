@@ -8,7 +8,7 @@
  * Author             : msprof team
  * Creation Date      : 2024/05/07
  * *****************************************************************************
-*/
+ */
 
 #include "common/inject/profapi_inject.h"
 
@@ -118,23 +118,22 @@ int8_t MsptiHostFreqIsEnableImpl()
     return Mspti::Common::ContextManager::GetInstance()->HostFreqIsEnable() ? enable : disable;
 }
 
-int32_t MsptiApiReporterCallbackImpl(uint32_t agingFlag, const MsprofApi* const data)
+int32_t MsptiApiReporterCallbackImpl(uint32_t agingFlag, const MsprofApi * const data)
 {
     if (!data) {
         MSPTI_LOGE("Report Msprof Api data failed with nullptr.");
         return PROFAPI_ERROR;
     }
 
-    if (data->level == MSPROF_REPORT_NNOPBASE_LEVEL) {
-        if (Mspti::Parser::ParserManager::GetInstance()->ReportApi(data) != MSPTI_SUCCESS) {
-            MSPTI_LOGE("Report Msprof Api data to ParserManager failed.");
+    if (data->level == MSPROF_REPORT_NODE_BASE_LEVEL) {
+        if (data->type == MSPROF_REPORT_NODE_LAUNCH_TYPE &&
+            Mspti::Parser::CannTrackCache::GetInstance().AppendNodeLunch(agingFlag == 1, data) != MSPTI_SUCCESS) {
+            MSPTI_LOGE("Report Msprof Compact data to ParserManager failed.");
             return PROFAPI_ERROR;
         }
-    }
 
-    if (data->level == MSPROF_REPORT_NNOPBASE_LEVEL && data->type == MSPROF_REPORT_NODE_LAUNCH_TYPE) {
-        if (Mspti::Parser::CannTrackCache::GetInstance().AppendNodeLunch(agingFlag == 1, data)!= MSPTI_SUCCESS) {
-            MSPTI_LOGE("Report Msprof Compact data to ParserManager failed.");
+        if (Mspti::Parser::ParserManager::GetInstance()->ReportApi(data) != MSPTI_SUCCESS) {
+            MSPTI_LOGE("Report Msprof Api data to ParserManager failed.");
             return PROFAPI_ERROR;
         }
     }
@@ -175,7 +174,7 @@ int32_t MsptiCompactInfoReporterCallbackImpl(uint32_t agingFlag, CONST_VOID_PTR 
         }
     }
 
-    if (compact->level == MSPROF_REPORT_NNOPBASE_LEVEL
+    if (compact->level == MSPROF_REPORT_NODE_BASE_LEVEL
         && compact->type == MSPROF_REPORT_NODE_HCCL_OP_INFO_TYPE) {
         if (Mspti::Parser::CommunicationCalculator::GetInstance().AppendCompactInfo(
             agingFlag, compact)!= MSPTI_SUCCESS) {

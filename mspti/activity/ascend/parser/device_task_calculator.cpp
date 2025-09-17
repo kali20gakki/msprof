@@ -21,7 +21,7 @@
 namespace Mspti {
 namespace Parser {
 void DeviceTaskCalculator::RegisterCallBack(const std::vector<std::shared_ptr<DeviceTask>> &assembleTasks,
-    DeviceTaskCalculator::CompleteFunc completeFunc)
+    const DeviceTaskCalculator::CompleteFunc& completeFunc)
 {
     std::lock_guard<std::mutex> lockGuard(assembleTaskMutex_);
     for (auto &task : assembleTasks) {
