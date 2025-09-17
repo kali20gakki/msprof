@@ -37,7 +37,7 @@ public:
 private:
     msptiResult ReportCommunication(const DstType& dstKey, const std::shared_ptr<CommunicationOpDesc>& hcclOp);
 
-    msptiResult Record(std::shared_ptr<DeviceTask> taskTime);
+    msptiResult Record(const std::shared_ptr<DeviceTask>& taskTime);
 
     CommunicationCalculator() = default;
 

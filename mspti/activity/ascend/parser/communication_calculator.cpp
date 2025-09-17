@@ -43,7 +43,6 @@ msptiResult CommunicationCalculator::AppendCompactInfo(bool agingFlag, const Msp
     }
     communication->agingFlag = agingFlag;
     communication->dataType = data->data.hcclopInfo.dataType;
-    communication->correlationId = Mspti::Common::ContextManager::GetInstance()->GetCorrelationId(data->threadId);
     communication->groupNameHash = msprofHcclOpInfo.groupName;
     communication->algTypeHash = msprofHcclOpInfo.algType;
     communication->count = msprofHcclOpInfo.count;
@@ -77,6 +76,7 @@ std::shared_ptr<CommunicationOpDesc> TransApiEvent2CommOpDesc(const ApiEvent *ap
     if (!UNLIKELY(desc)) {
         return desc;
     }
+    desc->correlationId = api2TaskInfo->correlationId;
     desc->opNameHash = api2TaskInfo->api.itemId;
     desc->hostStartTime = api2TaskInfo->api.beginTime;
     desc->hostEndTime = api2TaskInfo->api.endTime;
@@ -137,24 +137,24 @@ msptiResult CommunicationCalculator::AppendApi2TaskInfo(const std::unique_ptr<Ap
         assembleTasks.push_back(lastTask);
     }
     DeviceTaskCalculator::GetInstance().RegisterCallBack(assembleTasks,
-        [this](std::shared_ptr<DeviceTask> task) { return Record(task); });
+        [this](const std::shared_ptr<DeviceTask>& task) { return Record(task); });
     return MSPTI_SUCCESS;
 }
 
-void AssembleTaskInfo(msptiActivityCommunication *communication, const CommunicationOpDesc *addationOpDesc,
+void AssembleTaskInfo(msptiActivityCommunication& communication, const CommunicationOpDesc *addationOpDesc,
                       const CommunicationOpDesc *OpTaskDesc)
 {
-    communication->kind = MSPTI_ACTIVITY_KIND_COMMUNICATION;
-    communication->dataType = static_cast<msptiCommunicationDataType>(addationOpDesc->dataType);
-    communication->count = addationOpDesc->count;
-    communication->ds.deviceId = OpTaskDesc->deviceId;
-    communication->ds.streamId = OpTaskDesc->streamId;
-    communication->start = OpTaskDesc->startTime;
-    communication->end = OpTaskDesc->endTime;
-    communication->algType = CannHashCache::GetInstance().GetHashInfo(addationOpDesc->algTypeHash).c_str();
-    communication->name = CannHashCache::GetInstance().GetHashInfo(OpTaskDesc->opNameHash).c_str();
-    communication->commName = CannHashCache::GetInstance().GetHashInfo(OpTaskDesc->groupNameHash).c_str();
-    communication->correlationId = addationOpDesc->correlationId;
+    communication.kind = MSPTI_ACTIVITY_KIND_COMMUNICATION;
+    communication.dataType = static_cast<msptiCommunicationDataType>(addationOpDesc->dataType);
+    communication.count = addationOpDesc->count;
+    communication.ds.deviceId = OpTaskDesc->deviceId;
+    communication.ds.streamId = OpTaskDesc->streamId;
+    communication.start = OpTaskDesc->startTime;
+    communication.end = OpTaskDesc->endTime;
+    communication.algType = CannHashCache::GetInstance().GetHashInfo(addationOpDesc->algTypeHash).c_str();
+    communication.name = CannHashCache::GetInstance().GetHashInfo(OpTaskDesc->opNameHash).c_str();
+    communication.commName = CannHashCache::GetInstance().GetHashInfo(addationOpDesc->groupNameHash).c_str();
+    communication.correlationId = OpTaskDesc->correlationId;
 }
 
 msptiResult CommunicationCalculator::ReportCommunication(const DstType& dstKey,
@@ -177,19 +177,14 @@ msptiResult CommunicationCalculator::ReportCommunication(const DstType& dstKey,
             }
         }
     }
-    std::unique_ptr<msptiActivityCommunication> record;
-    Mspti::Common::MsptiMakeUniquePtr(record);
-    if (UNLIKELY(record == nullptr)) {
-        MSPTI_LOGE("ReportCommunication alloc activity failed");
-        return MSPTI_ERROR_INNER;
-    }
-    AssembleTaskInfo(record.get(), addationOpDesc.get(), commOp.get());
+    msptiActivityCommunication record;
+    AssembleTaskInfo(record, addationOpDesc.get(), commOp.get());
     Mspti::Activity::ActivityManager::GetInstance()->Record(
-        Common::ReinterpretConvert<msptiActivity *>(record.get()), sizeof(msptiActivityCommunication));
+        Common::ReinterpretConvert<msptiActivity *>(&record), sizeof(msptiActivityCommunication));
     return MSPTI_SUCCESS;
 }
 
-msptiResult CommunicationCalculator::Record(std::shared_ptr<DeviceTask> taskTime)
+msptiResult CommunicationCalculator::Record(const std::shared_ptr<DeviceTask>& taskTime)
 {
     if (!taskTime) {
         MSPTI_LOGE("Record received null task");
@@ -205,7 +200,7 @@ msptiResult CommunicationCalculator::Record(std::shared_ptr<DeviceTask> taskTime
         commOp->deviceId = taskTime->deviceId;
         if (taskTime->isFfts && !taskTime->subTasks.empty()) {
             std::sort(taskTime->subTasks.begin(), taskTime->subTasks.end(),
-                [](const std::shared_ptr<SubTask> a, const std::shared_ptr<SubTask> b) {
+                [](const std::shared_ptr<SubTask>& a, const std::shared_ptr<SubTask>& b) {
                     return a->start < b->start;
                 });
             commOp->startTime = taskTime->subTasks.front()->start;
@@ -222,7 +217,7 @@ msptiResult CommunicationCalculator::Record(std::shared_ptr<DeviceTask> taskTime
         auto commOp = iter->second;
         if (taskTime->isFfts && !taskTime->subTasks.empty()) {
             std::sort(taskTime->subTasks.begin(), taskTime->subTasks.end(),
-                [](const std::shared_ptr<SubTask> a, const std::shared_ptr<SubTask> b) {
+                [](const std::shared_ptr<SubTask>& a, const std::shared_ptr<SubTask>& b) {
                     return a->end > b->end;
                 });
             commOp->endTime = taskTime->subTasks.front()->end;
