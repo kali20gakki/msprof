@@ -17,12 +17,12 @@
 
 #include "external/prof_common.h"
 
-#define MSTX_TOOL_MSPROF_ID 0x1000
+constexpr uint64_t MSTX_TOOL_MSPROF_ID = 0x1000;
 
-#define MSTX_FAIL 1
-#define MSTX_SUCCESS 0
+constexpr int MSTX_FAIL = 1;
+constexpr int MSTX_SUCCESS = 0;
 
-#define MSTX_INVALID_RANGE_ID 0
+constexpr uint64_t MSTX_INVALID_RANGE_ID = 0;
 
 namespace Common {
 namespace Mstx {
@@ -50,7 +50,7 @@ using AclError = int;
 using AclrtStream = void *;
 using AclrtContext = void *;
 
-typedef uint64_t mstxRangeId;
+using mstxRangeId = uint64_t;
 typedef void* aclrtStream;
 
 struct mstxDomainRegistration_st;

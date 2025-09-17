@@ -23,10 +23,10 @@
 
 #include "prof_common.h"
 
-#define MSTX_FAIL 1
-#define MSTX_SUCCESS 0
+constexpr int MSTX_FAIL = 1;
+constexpr int MSTX_SUCCESS = 0;
 
-#define MSTX_INVALID_RANGE_ID 0
+constexpr uint64_t MSTX_INVALID_RANGE_ID = 0;
 
 typedef enum {
     MSTX_FUNC_START                         = 0,
@@ -72,7 +72,7 @@ class MstxDomainMgr {
 public:
     static MstxDomainMgr* GetInstance();
     mstxDomainHandle_t CreateDomainHandle(const char* name);
-    void DestroyDomainHandle(mstxDomainHandle_t);
+    void DestroyDomainHandle(mstxDomainHandle_t domain);
 
     std::shared_ptr<std::string> GetDomainNameByHandle(mstxDomainHandle_t domain);
     bool isDomainEnable(mstxDomainHandle_t domainHandle);
