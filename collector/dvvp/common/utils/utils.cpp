@@ -319,7 +319,7 @@ std::string Utils::DirName(const std::string &path)
     std::string result;
     char *pathc = MSVP_STRDUP(path.c_str());
     if (pathc != nullptr) {
-        char *dirc = MmDirName(pathc);
+        char *dirc = MmDirName(pathc, strlen(pathc));
         if (dirc != nullptr) {
             result = dirc;
         }
@@ -346,7 +346,7 @@ std::string Utils::BaseName(const std::string &path)
     std::string result;
     char *pathc = MSVP_STRDUP(path.c_str());
     if (pathc != nullptr) {
-        char *basec = MmBaseName(pathc);
+        char *basec = MmBaseName(pathc, strlen(pathc));
         if (basec != nullptr) {
             result = basec;
         }
@@ -379,8 +379,8 @@ int Utils::SplitPath(const std::string &path, std::string &dir, std::string &bas
     dirc = MSVP_STRDUP(path.c_str());
     basec = MSVP_STRDUP(path.c_str());
     if (dirc != nullptr && basec != nullptr) {
-        dname = MmDirName(dirc);
-        bname = MmBaseName(basec);
+        dname = MmDirName(dirc, strlen(dirc));
+        bname = MmBaseName(basec, strlen(basec));
         if (dname != nullptr && bname != nullptr) {
             dir = std::string(dname);
             base = std::string(bname);
@@ -621,7 +621,7 @@ int Utils::ChangeWorkDir(const std::string &fileName)
     if (dirc == nullptr) {
         return PROFILING_FAILED;
     }
-    dName = MmDirName(dirc);
+    dName = MmDirName(dirc, strlen(dirc));
     if (dName == nullptr || MmChdir(std::string(dName)) != PROFILING_SUCCESS) {
         MSPROF_LOGW("chdir(%s) failed.", dirc);
     }

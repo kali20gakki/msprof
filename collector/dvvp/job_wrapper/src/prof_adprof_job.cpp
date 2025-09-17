@@ -41,7 +41,7 @@ ProfAdprofJob::~ProfAdprofJob()
 int ProfAdprofJob::InitAdprof()
 {
     bool result = false;
-    uint32_t ret = TsdClientPlugin::instance()->MsprofTsdCapabilityGet(collectionJobCfg_->comParams->devId,
+    auto ret = TsdClientPlugin::instance()->MsprofTsdCapabilityGet(collectionJobCfg_->comParams->devId,
         TSD_CAPABILITY_ADPROF, reinterpret_cast<uint64_t>(&result));
     if (ret != TSD_OK || !result) {
         MSPROF_LOGW("Tsd client not support adprof");
@@ -181,7 +181,7 @@ int ProfAdprofJob::Process()
 
 void ProfAdprofJob::CloseAdprof()
 {
-    uint32_t ret = TsdClientPlugin::instance()->MsprofProcessCloseSubProcList(collectionJobCfg_->comParams->devId,
+    auto ret = TsdClientPlugin::instance()->MsprofProcessCloseSubProcList(collectionJobCfg_->comParams->devId,
         &procStatusParam_, PROCESS_NUM);
     if (ret != TSD_OK && ret != TSD_HDC_CLIENT_CLOSED_EXTERNAL) {
         MSPROF_LOGW("Close adprof process unexpectedly, ret:%u devId:%d", ret, collectionJobCfg_->comParams->devId);
