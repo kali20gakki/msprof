@@ -334,6 +334,9 @@ int GetModuleTableFunc(MstxGetModuleFuncTableFunc getFuncTable)
         if (getFuncTable(static_cast<MstxFuncModule>(i), &outTable, &outSize) != MSTX_SUCCESS) {
             continue;
         }
+        if (outTable == nullptr || outSize == 0) {
+            continue;
+        }
         switch (i) {
             case MSTX_API_MODULE_CORE:
                 SetMstxModuleCoreApi(outTable, outSize);
