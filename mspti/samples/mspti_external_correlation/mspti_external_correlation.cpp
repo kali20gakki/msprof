@@ -33,7 +33,7 @@ enum class ExternalId {
     EXECUTION_EXTERNAL_ID = 1,
     CLEANUP_EXTERNAL_ID = 2
 };
-
+namespace {
 int64_t GetShapeSize(const std::vector<int64_t>& shape)
 {
     int64_t shapeSize = 1;
@@ -43,7 +43,7 @@ int64_t GetShapeSize(const std::vector<int64_t>& shape)
     return shapeSize;
 }
 
-template <typename T>
+template<typename T>
 int CreateAclTensor(const std::vector<T>& hostData, const std::vector<int64_t>& shape, void** deviceAddr,
                     aclDataType dataType, aclTensor** tensor)
 {
@@ -164,13 +164,13 @@ void PrintExternalCorrelationTrace()
 }
 
 // MSPTI
-void MsptiTrace(uint8_t *buffer, size_t size, size_t validSize)
+void MsptiTrace(uint8_t* buffer, size_t size, size_t validSize)
 {
     if (validSize <= 0) {
         LOG_PRINT("validSize is invalid");
         return;
     }
-    msptiActivity *pRecord = nullptr;
+    msptiActivity* pRecord = nullptr;
     msptiResult status = MSPTI_SUCCESS;
     do {
         status = msptiActivityGetNextRecord(buffer, validSize, &pRecord);
@@ -179,8 +179,8 @@ void MsptiTrace(uint8_t *buffer, size_t size, size_t validSize)
             PrintActivity(pRecord);
             switch (kind) {
                 case MSPTI_ACTIVITY_KIND_EXTERNAL_CORRELATION: {
-                    msptiActivityExternalCorrelation *pExternalCorrelationRecord =
-                            reinterpret_cast<msptiActivityExternalCorrelation *>(pRecord);
+                    msptiActivityExternalCorrelation* pExternalCorrelationRecord =
+                        reinterpret_cast<msptiActivityExternalCorrelation*>(pRecord);
                     uint64_t externalId = pExternalCorrelationRecord->externalId;
                     uint64_t correlationId = pExternalCorrelationRecord->correlationId;
                     s_externalCorrelationMap[externalId].push_back(correlationId);
@@ -210,6 +210,7 @@ void SetUpMspti(aclrtContext* context, aclrtStream* stream)
     msptiActivityEnable(MSPTI_ACTIVITY_KIND_KERNEL);
     msptiActivityEnable(MSPTI_ACTIVITY_KIND_API);
     msptiActivityEnable(MSPTI_ACTIVITY_KIND_EXTERNAL_CORRELATION);
+}
 }
 
 int main()

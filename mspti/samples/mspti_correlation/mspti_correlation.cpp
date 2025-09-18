@@ -26,7 +26,7 @@
 
 static std::unordered_map<uint64_t, msptiActivity*> g_CorrelationMap;
 static std::unordered_map<uint64_t, msptiActivityApi*> g_ApiConnectionMap;
-
+namespace {
 int64_t GetShapeSize(const std::vector<int64_t>& shape)
 {
     int64_t shapeSize = 1;
@@ -196,6 +196,7 @@ void SetUpMspti(aclrtContext* context, aclrtStream* stream)
     msptiActivityEnable(MSPTI_ACTIVITY_KIND_MARKER);
     msptiActivityEnable(MSPTI_ACTIVITY_KIND_KERNEL);
     msptiActivityEnable(MSPTI_ACTIVITY_KIND_API);
+}
 }
 
 int main()
