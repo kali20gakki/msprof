@@ -24,7 +24,7 @@ aclrtContext context;
 aclrtStream stream;
 mstxDomainHandle_t domainRange;
 std::string g_domainRangeName = "DoAclAdd_Inner";
-
+namespace {
 int64_t GetShapeSize(const std::vector<int64_t>& shape)
 {
     int64_t shapeSize = 1;
@@ -134,6 +134,7 @@ void MstxDomainInit()
 void MstxDomainDeInit()
 {
     mstxDomainDestroy(domainRange);
+}
 }
 
 int main(int argc, const char **argv)
