@@ -133,7 +133,11 @@ void SetUpMspti(aclrtContext* context, aclrtStream* stream)
 {
     UserData *pUserData = (UserData *)malloc(sizeof(UserData));
     if (pUserData != nullptr) {
-        memset_s(pUserData, sizeof(UserData), 0, sizeof(UserData));
+        if (memset_s(pUserData, sizeof(UserData), 0, sizeof(UserData)) != EOK) {
+            LOG_PRINT("memset failed!\n");
+            return;
+        }
+
         pUserData->context = context;
         pUserData->stream = stream;
     }
