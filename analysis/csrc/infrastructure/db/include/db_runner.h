@@ -57,6 +57,10 @@ bool DBRunner::InsertData(const std::string &tableName, const std::vector<std::t
     INFO("Start insert data to %", tableName);
     std::shared_ptr<Connection> conn;
     MAKE_SHARED_RETURN_VALUE(conn, Connection, false, path_);
+    if (!conn->IsDBOpened()) {
+        ERROR("Create connection failed, path is %d", path_);
+        return false;
+    }
     if (!conn->ExecuteInsert(tableName, data)) {
         ERROR("Insert data to % failed", tableName);
         return false;
@@ -71,6 +75,10 @@ bool DBRunner::QueryData(const std::string &sql, std::vector<std::tuple<Args...>
     INFO("Start query data");
     std::shared_ptr<Connection> conn;
     MAKE_SHARED_RETURN_VALUE(conn, Connection, false, path_);
+    if (!conn->IsDBOpened()) {
+        ERROR("Create connection failed, path is %d", path_);
+        return false;
+    }
     if (!conn->ExecuteQuery(sql, result)) {
         ERROR("Query data failed: %", sql);
         return false;
