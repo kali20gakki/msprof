@@ -11,7 +11,8 @@
  */
 #include <memory>
 #include <string>
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
+#include "mockcpp/mockcpp.hpp"
 #include "analysis/csrc/infrastructure/utils/thread_pool.h"
 #include "analysis/csrc/infrastructure/db/include/db_runner.h"
 
@@ -47,6 +48,40 @@ TEST_F(DBRunnerUtest, DBRunner)
     EXPECT_EQ(path, dbRunner->path_);
 }
 
+TEST_F(DBRunnerUtest, CheckTableExistsShouldReturnTrueWhenCreateTableSuccess)
+{
+    std::string path = "./a.db";
+    auto dbRunner = std::make_shared<DBRunner>(path);
+    std::vector<TableColumn> cols = {
+        TableColumn("id", "INT"),
+        TableColumn("name", "VARCHAR(255)"),
+        TableColumn("age", "INT")
+    };
+    const std::string tableName = "tb3";
+    auto rc = dbRunner->CreateTable(tableName, cols);
+    EXPECT_EQ(rc, true);
+    rc = dbRunner->CheckTableExists(tableName);
+    EXPECT_EQ(rc, true);
+}
+
+TEST_F(DBRunnerUtest, CheckTableExistsShouldReturnFalseWhenCreateConnectionFailed)
+{
+    std::string path = "./a.db";
+    auto dbRunner = std::make_shared<DBRunner>(path);
+    std::vector<TableColumn> cols = {
+        TableColumn("id", "INT"),
+        TableColumn("name", "VARCHAR(255)"),
+        TableColumn("age", "INT")
+    };
+    const std::string tableName = "tb3";
+    auto rc = dbRunner->CreateTable(tableName, cols);
+    EXPECT_EQ(rc, true);
+    MOCKER_CPP(&Connection::IsDBOpened).stubs().will(returnValue(false));
+    rc = dbRunner->CheckTableExists(tableName);
+    EXPECT_EQ(rc, false);
+    MOCKER_CPP(&Connection::IsDBOpened).reset();
+}
+
 TEST_F(DBRunnerUtest, CreateTable)
 {
     std::string path = "./a.db";
@@ -58,6 +93,21 @@ TEST_F(DBRunnerUtest, CreateTable)
     };
     auto rc = dbRunner->CreateTable("tb3", cols);
     EXPECT_EQ(rc, true);
+}
+
+TEST_F(DBRunnerUtest, CreateTableShouldReturnFalseWhenCreateConnectionFailed)
+{
+    std::string path = "./a.db";
+    auto dbRunner = std::make_shared<DBRunner>(path);
+    std::vector<TableColumn> cols = {
+        TableColumn("id", "INT"),
+        TableColumn("name", "VARCHAR(255)"),
+        TableColumn("age", "INT")
+    };
+    MOCKER_CPP(&Connection::IsDBOpened).stubs().will(returnValue(false));
+    auto rc = dbRunner->CreateTable("tb3", cols);
+    EXPECT_EQ(rc, false);
+    MOCKER_CPP(&Connection::IsDBOpened).reset();
 }
 
 TEST_F(DBRunnerUtest, CreateIndexWhenNoThisColThenReturnFalse)
@@ -75,14 +125,32 @@ TEST_F(DBRunnerUtest, CreateIndexWhenNoThisColThenReturnFalse)
     EXPECT_EQ(rc, false);
 }
 
+TEST_F(DBRunnerUtest, CreateIndexShouldReturnFalseWhenCreateConnectionFailed)
+{
+    std::string path = "./a.db";
+    auto dbRunner = std::make_shared<DBRunner>(path);
+    std::vector<TableColumn> cols = {
+        TableColumn("id", "INT"),
+        TableColumn("name", "VARCHAR(255)"),
+        TableColumn("age", "INT")
+    };
+    auto rc = dbRunner->CreateTable("tb3", cols);
+    EXPECT_EQ(rc, true);
+
+    MOCKER_CPP(&Connection::IsDBOpened).stubs().will(returnValue(false));
+    rc = dbRunner->CreateIndex("tb3", "a", {"a"});
+    EXPECT_EQ(rc, false);
+    MOCKER_CPP(&Connection::IsDBOpened).reset();
+}
+
 TEST_F(DBRunnerUtest, CreateIndexWhenCreateSuccessThenReturnTrue)
 {
     std::string path = "./a.db";
     auto dbRunner = std::make_shared<DBRunner>(path);
     std::vector<TableColumn> cols = {
-            TableColumn("id", "INT"),
-            TableColumn("name", "VARCHAR(255)"),
-            TableColumn("age", "INT")
+        TableColumn("id", "INT"),
+        TableColumn("name", "VARCHAR(255)"),
+        TableColumn("age", "INT")
     };
     auto rc = dbRunner->CreateTable("tb3", cols);
     EXPECT_EQ(rc, true);
@@ -90,12 +158,37 @@ TEST_F(DBRunnerUtest, CreateIndexWhenCreateSuccessThenReturnTrue)
     EXPECT_EQ(rc, true);
 }
 
-TEST_F(DBRunnerUtest, DropTable)
+TEST_F(DBRunnerUtest, DropTableShouldReturnTrueWhenDropTableSuccess)
 {
     std::string path = "./a.db";
+    const std::string tableName = "tb4";
     auto dbRunner = std::make_shared<DBRunner>(path);
-    auto rc = dbRunner->DropTable("tb3");
+    dbRunner->CreateTable(tableName, cols);
+    auto rc = dbRunner->DropTable(tableName);
     EXPECT_EQ(rc, true);
+}
+
+TEST_F(DBRunnerUtest, DropTableShouldReturnFasleWhenDropTableExecFailed)
+{
+    std::string path = "./a.db";
+    const std::string tableName = "tb4";
+    auto dbRunner = std::make_shared<DBRunner>(path);
+    dbRunner->CreateTable(tableName, cols);
+    // tableName为空字符串
+    auto rc = dbRunner->DropTable("");
+    EXPECT_EQ(rc, false);
+
+    // connection初始化异常
+    MOCKER_CPP(&Connection::IsDBOpened).stubs().will(returnValue(false));
+    rc = dbRunner->DropTable(tableName);
+    EXPECT_EQ(rc, false);
+    MOCKER_CPP(&Connection::IsDBOpened).reset();
+
+    // dropTable执行失败
+    MOCKER_CPP(&Connection::ExecuteDropTable).stubs().will(returnValue(false));
+    rc = dbRunner->DropTable(tableName);
+    EXPECT_EQ(rc, false);
+    MOCKER_CPP(&Connection::ExecuteDropTable).reset();
 }
 
 TEST_F(DBRunnerUtest, InsertData)
@@ -109,6 +202,21 @@ TEST_F(DBRunnerUtest, InsertData)
     };
     auto rc = dbRunner->InsertData("tb4", data);
     EXPECT_EQ(rc, true);
+}
+
+TEST_F(DBRunnerUtest, InsertDataShouldReturnFasleWhenDropTableExecFailed)
+{
+    std::string path = "./a.db";
+    auto dbRunner = std::make_shared<DBRunner>(path);
+    dbRunner->CreateTable("tb4", cols);
+    DATA_FORMAT data = {
+        std::make_tuple(2147483647, 4294967295, 9223372036854775807, 100, 118972596256332.95,
+                        1340.046875,  "hcom_allGather__516_2")
+    };
+    MOCKER_CPP(&Connection::IsDBOpened).stubs().will(returnValue(false));
+    auto rc = dbRunner->InsertData("tb4", data);
+    EXPECT_EQ(rc, false);
+    MOCKER_CPP(&Connection::IsDBOpened).reset();
 }
 
 TEST_F(DBRunnerUtest, DeleteData)
@@ -128,6 +236,28 @@ TEST_F(DBRunnerUtest, DeleteData)
     dbRunner->InsertData("tb3", data);
     auto rc = dbRunner->DeleteData("DELETE FROM tb3 WHERE age>20;");
     EXPECT_EQ(rc, true);
+}
+
+TEST_F(DBRunnerUtest, DeleteDataShouldReturnFalseWhenCreateConnectionFailed)
+{
+    std::string path = "./a.db";
+    auto dbRunner = std::make_shared<DBRunner>(path);
+    std::vector<TableColumn> cols = {
+        TableColumn("id", "INT"),
+        TableColumn("name", "VARCHAR(255)"),
+        TableColumn("age", "INT")
+    };
+    dbRunner->CreateTable("tb3", cols);
+    std::vector<std::tuple<int, std::string, int>> data = {
+        std::make_tuple(1, "Bob", 26),
+        std::make_tuple(2, "Tom", 18)
+    };
+    dbRunner->InsertData("tb3", data);
+
+    MOCKER_CPP(&Connection::IsDBOpened).stubs().will(returnValue(false));
+    auto rc = dbRunner->DeleteData("DELETE FROM tb3 WHERE age>20;");
+    EXPECT_EQ(rc, false);
+    MOCKER_CPP(&Connection::IsDBOpened).reset();
 }
 
 TEST_F(DBRunnerUtest, QueryData)
@@ -162,6 +292,24 @@ TEST_F(DBRunnerUtest, QueryData)
     }
 }
 
+TEST_F(DBRunnerUtest, QueryDataShouldReturnFalseWhenCreateConnectionFailed)
+{
+    std::string path = "./a.db";
+    auto dbRunner = std::make_shared<DBRunner>(path);
+    dbRunner->CreateTable("tb4", cols);
+    dbRunner->DeleteData("DELETE FROM tb4;");
+    DATA_FORMAT data = {
+        std::make_tuple(7, 8, 9, 10, 1320.4, 56.5, "hcom_allGather__516_1")
+    };
+    dbRunner->InsertData("tb4", data);
+    std::string sql = "SELECT * FROM tb4;";
+    DATA_FORMAT result;
+    MOCKER_CPP(&Connection::IsDBOpened).stubs().will(returnValue(false));
+    auto rc = dbRunner->QueryData(sql, result);
+    EXPECT_EQ(rc, false);
+    MOCKER_CPP(&Connection::IsDBOpened).reset();
+}
+
 TEST_F(DBRunnerUtest, UpdateData)
 {
     std::string path = "./a.db";
@@ -179,6 +327,27 @@ TEST_F(DBRunnerUtest, UpdateData)
     dbRunner->InsertData("tb3", data);
     auto rc = dbRunner->UpdateData("UPDATE tb3 SET age = 30 WHERE name = 'Tom';");
     EXPECT_EQ(rc, true);
+}
+
+TEST_F(DBRunnerUtest, UpdateDataShouldReturnFalseWhenCreateConnectionFailed)
+{
+    std::string path = "./a.db";
+    auto dbRunner = std::make_shared<DBRunner>(path);
+    std::vector<TableColumn> cols = {
+        TableColumn("id", "INT"),
+        TableColumn("name", "VARCHAR(255)"),
+        TableColumn("age", "INT")
+    };
+    dbRunner->CreateTable("tb3", cols);
+    std::vector<std::tuple<int, std::string, int>> data = {
+        std::make_tuple(1, "Bob", 26),
+        std::make_tuple(2, "Tom", 18)
+    };
+    dbRunner->InsertData("tb3", data);
+    MOCKER_CPP(&Connection::IsDBOpened).stubs().will(returnValue(false));
+    auto rc = dbRunner->UpdateData("UPDATE tb3 SET age = 30 WHERE name = 'Tom';");
+    EXPECT_EQ(rc, false);
+    MOCKER_CPP(&Connection::IsDBOpened).reset();
 }
 
 bool isEqual(const std::vector<TableColumn>& vec1, const std::vector<TableColumn>& vec2)
@@ -216,6 +385,23 @@ TEST_F(DBRunnerUtest, GetTableColumns)
     };
     auto tableColumns = dbRunner->GetTableColumns("tb4");
     EXPECT_TRUE(isEqual(tableColumns, expectedTableColumns));
+}
+
+TEST_F(DBRunnerUtest, GetTableColumnsShouldReturnEmptyVectorWhenCreateConnectionFailed)
+{
+    std::string path = "./a.db";
+    auto dbRunner = std::make_shared<DBRunner>(path);
+    dbRunner->CreateTable("tb4", cols);
+    DATA_FORMAT data = {
+        std::make_tuple(2147483647, 4294967295, 9223372036854775807, 100, 118972596256332.95,
+                        1340.046875,  "hcom_allGather__516_2")
+    };
+    dbRunner->InsertData("tb4", data);
+    std::vector<TableColumn> expectedTableColumns{};
+    MOCKER_CPP(&Connection::IsDBOpened).stubs().will(returnValue(false));
+    auto tableColumns = dbRunner->GetTableColumns("tb4");
+    EXPECT_TRUE(isEqual(tableColumns, expectedTableColumns));
+    MOCKER_CPP(&Connection::IsDBOpened).reset();
 }
 
 TEST_F(DBRunnerUtest, MultithreadingInsertQuery)

@@ -33,6 +33,10 @@ bool DBRunner::CheckTableExists(const std::string &tableName)
 {
     std::shared_ptr<Connection> conn;
     MAKE_SHARED_RETURN_VALUE(conn, Connection, false, path_);
+    if (!conn->IsDBOpened()) {
+        ERROR("Create Connection failed, path is %d", path_);
+        return false;
+    }
     return conn->CheckTableExists(tableName);
 }
 
@@ -47,6 +51,10 @@ bool DBRunner::CreateTable(const std::string &tableName, const std::vector <Tabl
     std::string sql = "CREATE TABLE IF NOT EXISTS " + tableName + " (" + valuesStr + ");";
     std::shared_ptr<Connection> conn;
     MAKE_SHARED_RETURN_VALUE(conn, Connection, false, path_);
+    if (!conn->IsDBOpened()) {
+        ERROR("Create Connection failed, path is %d", path_);
+        return false;
+    }
     if (!conn->ExecuteCreateTable(sql)) {
         ERROR("Create % failed", tableName);
         return false;
@@ -67,6 +75,10 @@ bool DBRunner::CreateIndex(const std::string &tableName, const std::string &inde
     std::string sql = "CREATE INDEX IF NOT EXISTS " + indexName + " ON " + tableName + " (" + valuesStr + ");";
     std::shared_ptr<Connection> conn;
     MAKE_SHARED_RETURN_VALUE(conn, Connection, false, path_);
+    if (!conn->IsDBOpened()) {
+        ERROR("Create Connection failed, path is %d", path_);
+        return false;
+    }
     if (!conn->ExecuteCreateIndex(sql)) {
         ERROR("Create % index failed", tableName);
         return false;
@@ -85,6 +97,10 @@ bool DBRunner::DropTable(const std::string &tableName) const
     std::string sql = "DROP TABLE " + tableName + ";";
     std::shared_ptr<Connection> conn;
     MAKE_SHARED_RETURN_VALUE(conn, Connection, false, path_);
+    if (!conn->IsDBOpened()) {
+        ERROR("Create Connection failed, path is %d", path_);
+        return false;
+    }
     if (!conn->ExecuteDropTable(sql)) {
         ERROR("Drop % failed", tableName);
         return false;
@@ -98,6 +114,10 @@ bool DBRunner::DeleteData(const std::string &sql) const
     INFO("Start delete data");
     std::shared_ptr<Connection> conn;
     MAKE_SHARED_RETURN_VALUE(conn, Connection, false, path_);
+    if (!conn->IsDBOpened()) {
+        ERROR("Create Connection failed, path is %d", path_);
+        return false;
+    }
     if (!conn->ExecuteDelete(sql)) {
         ERROR("Delete data failed: %", sql);
         return false;
@@ -111,6 +131,10 @@ bool DBRunner::UpdateData(const std::string &sql) const
     INFO("Start update data");
     std::shared_ptr<Connection> conn;
     MAKE_SHARED_RETURN_VALUE(conn, Connection, false, path_);
+    if (!conn->IsDBOpened()) {
+        ERROR("Create Connection failed, path is %d", path_);
+        return false;
+    }
     if (!conn->ExecuteUpdate(sql)) {
         ERROR("Update data failed: %", sql);
         return false;
@@ -124,7 +148,12 @@ std::vector<TableColumn> DBRunner::GetTableColumns(const std::string &tableName)
     INFO("Start get % headers", tableName);
     std::shared_ptr<Connection> conn;
     MAKE_SHARED_RETURN_VALUE(conn, Connection, {}, path_);
-    auto cols = conn->ExecuteGetTableColumns(tableName);
+    std::vector<TableColumn> cols;
+    if (!conn->IsDBOpened()) {
+        ERROR("Create Connection failed, tableName is %d", tableName);
+        return cols;
+    }
+    cols = conn->ExecuteGetTableColumns(tableName);
     if (cols.empty()) {
         ERROR("Get % columns failed", tableName);
         return cols;
