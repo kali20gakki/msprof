@@ -7,9 +7,11 @@ project(MSPTI_MSTX_ACTIVITY_DOMAIN)
 
 # Compile options
 add_compile_options(-std=c++11)
+add_compile_options(-D_FORTIFY_SOURCE=2 -O2)
 
 # 设置编译选项
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY  "./")
+set(CMAKE_SKIP_RPATH TRUE)
 set(CMAKE_CXX_FLAGS_DEBUG "-fPIC -O0 -g -Wall")
 set(CMAKE_CXX_FLAGS_RELEASE "-fPIC -O2 -Wall")
 
