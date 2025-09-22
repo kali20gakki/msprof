@@ -500,6 +500,7 @@ db命名：msprof_{时间戳}.db
 | algType      | INTEGER |     | 通信算子使用的算法，可分为多个阶段，如（HD-MESH）                                                |
 | count        | NUMERIC |     | 算子传输的dataType类型的数据量                                                         |
 | opType       | INTEGER |     | 算子类型，STRING_IDS(opType), 例：hcom_broadcast_                                  |
+| deviceId     | INTEGER |     | deviceId                                                                    |
 
 
 变更记录：
@@ -509,6 +510,7 @@ db命名：msprof_{时间戳}.db
 | 2024/3/7  | 330首次上线                                |
 | 2024/5/10 | 添加opType字段                             |
 | 2024/5/19 | dataType字段不再从StringIds里取，而从对应的enum表中获取 |
+| 2025/9/18 | 新增deviceId，避免和其他表强耦合，支持独立呈现            |
 
 ### CANN_API
 
@@ -948,11 +950,12 @@ timeline计算公式：
 
 变更记录：
 
-| 日期         | 内容                                             |
-|------------|------------------------------------------------|
-| 2024/5/15  | 新增表，用于存放msprof导出的相关配置信息                        |
-| 2024/12/16 | 中版本号变更，用于区分groupName变更事项，版本号1.1.0              |
-| 2025/1/21  | 小版本号变更，用于区分通信表notifyId，isMaster变更事项，版本号1.1.1   |
+| 日期         | 内容                                           |
+|------------|----------------------------------------------|
+| 2024/5/15  | 新增表，用于存放msprof导出的相关配置信息                      |
+| 2024/12/16 | 中版本号变更，用于区分groupName变更事项，版本号1.1.0            |
+| 2025/1/21  | 小版本号变更，用于区分通信表notifyId，isMaster变更事项，版本号1.1.1 |
+| 2025/9/18  | 中版本号变更，COMMUNICATION_OP新增deviceId，版本号1.2.0   |
 
 
 ### MSTX_EVENTS
@@ -1185,6 +1188,25 @@ timeline计算公式：
 | 2025/8/19 | 930首次上线 |
 
 
+### RANK_DEVICE_MAP
+CANN侧默认生成RANK_DEVICE_MAP表
+
+格式:
+
+| 字段名      | 类型      | 索引  | 含义           |
+|----------|---------|-----|--------------|
+| rankId   | INTEGER |     | rank id值     |
+| deviceId | INTEGER |     | 当前device id值 |
+
+变更记录:
+
+| 日期        | 内容                                        |
+|-----------|-------------------------------------------|
+| 2024/3/7  | 330首次上线                                   |
+| 2024/5/19 | 表中各字段统一修改为小驼峰命名                           |
+| 2025/9/22 | CANN侧默认生成该表，rankId记为-1，真实rankId由框架侧统一修改校准 |
+
+
 ## 2. pytorch框架数据db格式表结构
 db命名：ascend_pytorch_profiler_{rankId}.db
 （无rankId时：ascend_pytorch_profiler.db）
@@ -1314,23 +1336,6 @@ db命名：ascend_pytorch_profiler_{rankId}.db
 | 2024/3/7  | 330首次上线         |
 | 2024/5/19 | 表中各字段统一修改为小驼峰命名 |
 
-
-### RANK_DEVICE_MAP
-无rank_id场景不生成该表
-
-格式:
-
-| 字段名      | 类型      | 索引  | 含义           |
-|----------|---------|-----|--------------|
-| rankId   | INTEGER |     | rank id值     |
-| deviceId | INTEGER |     | 当前device id值 |
-
-变更记录:
-
-| 日期        | 内容              |
-|-----------|-----------------|
-| 2024/3/7  | 330首次上线         |
-| 2024/5/19 | 表中各字段统一修改为小驼峰命名 |
 
 ### STEP_TIME
 保存profiler采集step起始时间

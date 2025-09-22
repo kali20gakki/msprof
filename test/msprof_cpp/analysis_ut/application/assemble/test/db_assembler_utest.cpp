@@ -789,9 +789,9 @@ TEST_F(DBAssemblerUTest, TestRunHcclDataShouldReturnTrueWhenRunSuccess)
     EXPECT_EQ(expectName, opName);
 
     // 大算子数据
-    // opName, start, end, connectionId, group_name, opId, relay, retry, data_type, alg_type, count, op_type
+    // opName, start, end, connectionId, group_name, opId, relay, retry, data_type, alg_type, count, op_type, deviceId
     using CommunicationOpDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint64_t, uint64_t,
-        int32_t, int32_t, int32_t, uint64_t, uint64_t, uint64_t, uint64_t>>;
+        int32_t, int32_t, int32_t, uint64_t, uint64_t, uint64_t, uint64_t, uint16_t>>;
     CommunicationOpDataFormat opResult;
     sql = "SELECT * FROM " + TABLE_NAME_COMMUNICATION_OP;
     msprofDBRunner->QueryData(sql, opResult);
@@ -1089,9 +1089,10 @@ TEST_F(DBAssemblerUTest, TestRunMsprofTxDataShouldReturnFalseWhenReserveFailed)
     MOCKER_CPP(&SaveDataFormat::reserve).reset();
 }
 
-TEST_F(DBAssemblerUTest, TestRunNpuInfoDataShouldReturnTrueWhenProcessorRunSuccess)
+TEST_F(DBAssemblerUTest, TestRunNpuDataShouldReturnTrueWhenProcessorRunSuccess)
 {
     using NpuInfoDataFormat = std::vector<std::tuple<uint32_t, std::string>>;
+    using RankDeviceMapFormat = std::vector<std::tuple<int32_t, uint32_t>>;
     std::vector<std::string> deviceDirs = {"device_0", "device_1", "device_2", "device_3", "device_4", "device_5"};
     uint16_t chip0 = 0;
     uint16_t chip1 = 1;
@@ -1115,8 +1116,8 @@ TEST_F(DBAssemblerUTest, TestRunNpuInfoDataShouldReturnTrueWhenProcessorRunSucce
     MOCKER_CPP(&Context::GetPlatformVersion).reset();
     std::shared_ptr<DBRunner> dbRunner;
     MAKE_SHARED_NO_OPERATION(dbRunner, DBRunner, GetMsprofDbPath());
-    NpuInfoDataFormat checkData;
-    NpuInfoDataFormat expectData = {
+    NpuInfoDataFormat checkNpuInfoData;
+    NpuInfoDataFormat expectNpuInfoData = {
         {0, "Ascend310"},
         {1, "Ascend910A"},
         {2, "Ascend310P"},
@@ -1126,8 +1127,21 @@ TEST_F(DBAssemblerUTest, TestRunNpuInfoDataShouldReturnTrueWhenProcessorRunSucce
     };
     std::string sqlStr = "SELECT id, name FROM " + TABLE_NAME_NPU_INFO;
     ASSERT_NE(dbRunner, nullptr);
-    EXPECT_TRUE(dbRunner->QueryData(sqlStr, checkData));
-    EXPECT_EQ(expectData, checkData);
+    EXPECT_TRUE(dbRunner->QueryData(sqlStr, checkNpuInfoData));
+    EXPECT_EQ(expectNpuInfoData, checkNpuInfoData);
+
+    RankDeviceMapFormat checkRankDeviceMapData;
+    RankDeviceMapFormat expectRankDeviceMapData = {
+        {-1, 0},
+        {-1, 1},
+        {-1, 2},
+        {-1, 3},
+        {-1, 4},
+        {-1, 5},
+    };
+    sqlStr = "SELECT rankId, deviceId FROM " + TABLE_NAME_RANK_DEVICE_MAP;
+    EXPECT_TRUE(dbRunner->QueryData(sqlStr, checkRankDeviceMapData));
+    EXPECT_EQ(expectRankDeviceMapData, checkRankDeviceMapData);
 }
 
 TEST_F(DBAssemblerUTest, TestRunNpuInfoDataShouldReturnTrueWhenNoDevice)

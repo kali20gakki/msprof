@@ -33,6 +33,11 @@ namespace {
         {"name", SQL_TEXT_TYPE}
     };
 
+    const TableColumns RANK_DEVICE_MAP = {
+        {"rankId", SQL_INTEGER_TYPE},
+        {"deviceId", SQL_INTEGER_TYPE}
+    };
+
     const TableColumns HOST_INFO = {
         {"hostUid", SQL_TEXT_TYPE},
         {"hostName", SQL_TEXT_TYPE}
@@ -108,7 +113,8 @@ namespace {
         {"dataType", SQL_INTEGER_TYPE},
         {"algType", SQL_INTEGER_TYPE},
         {"count", SQL_NUMERIC_TYPE},
-        {"opType", SQL_INTEGER_TYPE}
+        {"opType", SQL_INTEGER_TYPE},
+        {"deviceId", SQL_INTEGER_TYPE}
     };
 
     const TableColumns CANN_API = {
@@ -370,6 +376,7 @@ MsprofDB::MsprofDB()
         {TABLE_NAME_STRING_IDS,                         STRING_IDS},
         {TABLE_NAME_SESSION_TIME_INFO,                  SESSION_TIME_INFO},
         {TABLE_NAME_NPU_INFO,                           NPU_INFO},
+        {TABLE_NAME_RANK_DEVICE_MAP,                    RANK_DEVICE_MAP},
         {TABLE_NAME_HOST_INFO,                          HOST_INFO},
         {TABLE_NAME_TASK,                               TASK},
         {TABLE_NAME_COMPUTE_TASK_INFO,                  COMPUTE_TASK_INFO},

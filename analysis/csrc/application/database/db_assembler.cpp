@@ -62,9 +62,9 @@ using CommScheduleDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64
 using ComputeTaskInfoFormat = std::vector<std::tuple<uint64_t, uint64_t, uint32_t, uint32_t, uint64_t, uint64_t,
         uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t>>;
 // 大算子数据
-// opName, start, end, connectionId, group_name, opId, relay, retry, data_type, alg_type, count, op_type
+// opName, start, end, connectionId, group_name, opId, relay, retry, data_type, alg_type, count, op_type, deviceId
 using CommunicationOpDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint64_t, uint64_t,
-        uint32_t, int32_t, int32_t, uint64_t, uint64_t, uint64_t, uint64_t>>;
+        uint32_t, int32_t, int32_t, uint64_t, uint64_t, uint64_t, uint64_t, uint16_t>>;
 // 小算子数据
 // name, globalTaskId, taskType, planeId, groupName, notifyId, rdmaType, srcRank, dstRank, transportType,
 // size, dataType, linkType, opId, isMaster, bandwidth
@@ -182,7 +182,7 @@ void ConvertOpData(CommunicationOpDataFormat &processedOpData, const std::vector
         uint64_t algType = IdPool::GetInstance().GetUint64Id(item.algType);
         uint64_t opType = IdPool::GetInstance().GetUint64Id(item.opType);
         processedOpData.emplace_back(opName, item.timestamp, item.end, item.connectionId, groupName, opId, item.relay,
-                                     item.retry, item.dataType, algType, item.count, opType);
+                                     item.retry, item.dataType, algType, item.count, opType, item.deviceId);
     }
 }
 
@@ -508,7 +508,8 @@ bool SaveMsprofTxData(DataInventory& dataInventory, DBInfo& msprofDB, const std:
 }
 
 void UpdateNpuData(const std::string& profPath, const std::string& deviceDir,
-                   std::vector<std::tuple<uint16_t, std::string>>& npuInfoData)
+                   std::vector<std::tuple<uint16_t, std::string>>& npuInfoData,
+                   std::vector<std::tuple<int16_t, uint16_t>>& rankDeviceMapData)
 {
     uint16_t deviceId = Utils::GetDeviceIdByDevicePath(deviceDir);
     uint16_t chip = Context::GetInstance().GetPlatformVersion(deviceId, profPath);
@@ -521,26 +522,33 @@ void UpdateNpuData(const std::string& profPath, const std::string& deviceDir,
         chipName = it->second;
     }
     npuInfoData.emplace_back(deviceId, chipName);
+    rankDeviceMapData.emplace_back(-1, deviceId);
 }
 
-bool SaveNpuInfoData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
+bool SaveNpuData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
 {
     if (profPath.empty()) {
         ERROR("Prof path is empty.");
         return false;
     }
-    // gpu_chip_num, gpu_name
-    using NpuInfoDataFormat = std::vector<std::tuple<uint16_t, std::string>>;
+
     auto deviceDirs = Utils::File::GetFilesWithPrefix(profPath, DEVICE_PREFIX);
+    // device_id, npu_name
+    using NpuInfoDataFormat = std::vector<std::tuple<uint16_t, std::string>>;
     NpuInfoDataFormat npuInfoData;
+    // rank_id, device_id
+    using RankDeviceMapDataFormat = std::vector<std::tuple<int16_t, uint16_t>>;
+    RankDeviceMapDataFormat rankDeviceMapData;
+
     for (const auto& deviceDir : deviceDirs) {
-        UpdateNpuData(profPath, deviceDir, npuInfoData);
+        UpdateNpuData(profPath, deviceDir, npuInfoData, rankDeviceMapData);
     }
-    if (npuInfoData.empty()) {
+    if (npuInfoData.empty() || rankDeviceMapData.empty()) {
         WARN("No device info in %.", profPath);
         return true;
     }
-    return SaveData(npuInfoData, TABLE_NAME_NPU_INFO, msprofDB);
+    return SaveData(npuInfoData, TABLE_NAME_NPU_INFO, msprofDB) &&
+            SaveData(rankDeviceMapData, TABLE_NAME_RANK_DEVICE_MAP, msprofDB);
 }
 
 bool SaveNpuMemData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
@@ -1092,7 +1100,7 @@ const std::unordered_map<std::string, SaveDataFunc> DATA_SAVER = {
     {Viewer::Database::PROCESSOR_NAME_LLC,                 SaveLlcData},
     {Viewer::Database::PROCESSOR_NAME_META_DATA,           SaveMetaData},
     {Viewer::Database::PROCESSOR_NAME_MSTX,                SaveMsprofTxData},
-    {Viewer::Database::PROCESSOR_NAME_NPU_INFO,            SaveNpuInfoData},
+    {Viewer::Database::PROCESSOR_NAME_NPU_INFO,            SaveNpuData},
     {Viewer::Database::PROCESSOR_NAME_NPU_MEM,             SaveNpuMemData},
     {Viewer::Database::PROCESSOR_NAME_NPU_OP_MEM,          SaveNpuOpMemData},
     {Viewer::Database::PROCESSOR_NAME_NPU_MODULE_MEM,      SaveNpuModuleMemData},
