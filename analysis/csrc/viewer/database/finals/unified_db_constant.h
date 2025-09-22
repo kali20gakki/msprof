@@ -53,6 +53,7 @@ const std::string TABLE_NAME_SESSION_TIME_INFO = "SESSION_TIME_INFO";
 
 const std::string PROCESSOR_NAME_NPU_INFO = "NPU_INFO";
 const std::string TABLE_NAME_NPU_INFO = "NPU_INFO";
+const std::string TABLE_NAME_RANK_DEVICE_MAP = "RANK_DEVICE_MAP";
 
 const std::string PROCESSOR_NAME_HOST_INFO = "HOST_INFO";
 const std::string TABLE_NAME_HOST_INFO = "HOST_INFO";
