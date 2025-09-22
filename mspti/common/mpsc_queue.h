@@ -16,6 +16,7 @@
 #include <cstdint>
 #include <atomic>
 #include <cstddef>
+#include <new>
 #include "common/plog_manager.h"
 
 namespace Mspti {
@@ -25,9 +26,13 @@ constexpr size_t DEFAULT_CAPCAITY = 2048;
 template<typename T>
 class MPSCQueue {
 public:
-    MPSCQueue() : head_(new NodeT), tail_(head_.load(std::memory_order_relaxed))
+    MPSCQueue() : head_(new(std::nothrow) NodeT), tail_(head_.load(std::memory_order_relaxed))
     {
         NodeT *front = head_.load(std::memory_order_relaxed);
+        if (front == nullptr) {
+            MSPTI_LOGE("MPSC head_ new buffer failed.");
+            return;
+        }
         front->next.store(nullptr, std::memory_order_relaxed);
     }
 
@@ -41,7 +46,11 @@ public:
 
     void Push(const T &input)
     {
-        NodeT *node = new NodeT;
+        NodeT *node = new(std::nothrow) NodeT;
+        if (node == nullptr) {
+            MSPTI_LOGE("MPSC queue new buffer failed.");
+            return;
+        }
         node->data = input;
         node->next.store(nullptr, std::memory_order_relaxed);
 
@@ -57,6 +66,10 @@ public:
     bool Pop(T &output)
     {
         NodeT *tail = tail_.load(std::memory_order_relaxed);
+        if (tail == nullptr) {
+            MSPTI_LOGE("MPSC queue tail is nullptr.");
+            return false;
+        }
         NodeT *next = tail->next.load(std::memory_order_acquire);
 
         if (next == nullptr) {
@@ -73,6 +86,10 @@ public:
     bool Peek(T &output) const
     {
         NodeT *tail = tail_.load(std::memory_order_acquire);
+        if (tail == nullptr) {
+            MSPTI_LOGE("MPSC queue tail is nullptr.");
+            return false;
+        }
         NodeT *next = tail->next.load(std::memory_order_acquire);
 
         if (next == nullptr) {
@@ -86,6 +103,10 @@ public:
     bool IsEmpty() const
     {
         NodeT *tail = tail_.load(std::memory_order_acquire);
+        if (tail == nullptr) {
+            MSPTI_LOGE("MPSC queue tail is nullptr.");
+            return true;
+        }
         NodeT *next = tail->next.load(std::memory_order_acquire);
         return (next == nullptr);
     }

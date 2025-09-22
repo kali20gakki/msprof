@@ -11,6 +11,8 @@
  */
 #include "analysis/csrc/infrastructure/dump_tools/json_tool/include/json_writer.h"
 
+#include "analysis/csrc/infrastructure/utils/utils.h"
+
 using namespace rapidjson;
 
 namespace Analysis {
@@ -18,7 +20,7 @@ namespace Analysis {
 namespace Infra {
 
 JsonWriter::JsonWriter()
-    : stream_(new StringBuffer), writer_(new PrettyWriter<StringBuffer>(*stream_))
+    : stream_(Utils::MAKE_UNIQUE_PTR<StringBuffer>()), writer_(Utils::MAKE_UNIQUE_PTR<PrettyWriter<StringBuffer>>(*stream_))
 {
 }
 
