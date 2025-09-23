@@ -44,6 +44,14 @@ public:
         delete front;
     }
 
+    void CheckOverflow()
+    {
+        if (count_.load(std::memory_order_relaxed) > DEFAULT_CAPCAITY && !isOverFlow_.load(std::memory_order_relaxed)) {
+            isOverFlow_.store(true);
+            MSPTI_LOGW("MPSC queue length exceeded the maximum threshold! current lenght: %u", count_.load());
+        }
+    }
+
     void Push(const T &input)
     {
         NodeT *node = new(std::nothrow) NodeT;
@@ -57,10 +65,23 @@ public:
         NodeT *prevhead_ = head_.exchange(node, std::memory_order_acq_rel);
         prevhead_->next.store(node, std::memory_order_release);
         count_.fetch_add(1, std::memory_order_relaxed);
-        if (count_.load(std::memory_order_relaxed) > DEFAULT_CAPCAITY && !isOverFlow_.load(std::memory_order_relaxed)) {
-            isOverFlow_.store(true);
-            MSPTI_LOGW("MPSC queue length exceeded the maximum threshold! current lenght: %u", count_.load());
+        CheckOverflow();
+    }
+
+    void Push(T &&input)
+    {
+        NodeT *node = new(std::nothrow) NodeT;
+        if (node == nullptr) {
+            MSPTI_LOGE("MPSC queue new buffer failed.");
+            return;
         }
+        node->data = std::move(input);
+        node->next.store(nullptr, std::memory_order_relaxed);
+
+        NodeT *prevhead = head_.exchange(node, std::memory_order_acq_rel);
+        prevhead->next.store(node, std::memory_order_release);
+        count_.fetch_add(1, std::memory_order_relaxed);
+        CheckOverflow();
     }
 
     bool Pop(T &output)
@@ -76,7 +97,7 @@ public:
             return false;
         }
 
-        output = next->data;
+        output = std::move(next->data);
         tail_.store(next, std::memory_order_release);
         count_.fetch_sub(1, std::memory_order_relaxed);
         delete tail;
