@@ -241,7 +241,7 @@ bool MstxParser::IsInnerMarker(uint64_t markId)
 
 msptiResult MstxParser::InnerDeviceStartA(RtStreamT stream, uint64_t& markId)
 {
-    markId = gMarkId_++;
+    markId = ++gMarkId_;
     if (stream != nullptr && rtProfilerTraceEx(markId,
                                                static_cast<uint64_t>(MSPTI_ACTIVITY_FLAG_MARKER_START_WITH_DEVICE),
                                                MARK_TAG_ID, stream) != MSPTI_SUCCESS) {
