@@ -30,3 +30,29 @@ class TestPathManager(unittest.TestCase):
         PathManager.del_summary_and_timeline_dir([os.path.join(PROF_DIR, DEVICE_DIR), os.path.join(PROF_DIR, HOST_DIR)])
         shutil.rmtree(PROF_DIR, ignore_errors=True)
 
+    def test_walk_with_depth_success_when_directory_exists(self):
+        shutil.rmtree(PROF_DIR, ignore_errors=True)
+        os.mkdir(PROF_DIR, 0o777)
+        os.mkdir(os.path.join(PROF_DIR, "level1"), 0o777)
+        os.mkdir(os.path.join(PROF_DIR, "level1", "level2"), 0o777)
+        os.mkdir(os.path.join(PROF_DIR, "level1", "level2", "level3"), 0o777)
+        open(os.path.join(PROF_DIR, "root_file.txt"), 'w').close()
+        open(os.path.join(PROF_DIR, "level1", "level1_file.txt"), 'w').close()
+        open(os.path.join(PROF_DIR, "level1", "level2", "level2_file.txt"), 'w').close()
+        open(os.path.join(PROF_DIR, "level1", "level2", "level3", "level3_file.txt"), 'w').close()
+        results = list(PathManager.safe_os_walk(PROF_DIR, max_depth=3))
+        self.assertEqual(len(results), 3)
+        paths = [result[0] for result in results]
+        expected_paths = [
+            PROF_DIR,
+            os.path.join(PROF_DIR, "level1"),
+            os.path.join(PROF_DIR, "level1", "level2")
+        ]
+        for expected_path in expected_paths:
+            self.assertIn(expected_path, paths)
+        level3_path = os.path.join(PROF_DIR, "level1", "level2", "level3")
+        self.assertNotIn(level3_path, paths)
+        shutil.rmtree(PROF_DIR, ignore_errors=True)
+
+
+
