@@ -75,7 +75,7 @@ class PipelineOverlapViewer:
             logging.warning("Both task data and hccl data are missing, no need to calculate the overlap.")
             return []
         latest_time = latest_task.start_time + latest_task.duration if latest_task else 0
-        earliest_time = earliest_task.start_time if latest_task else float('inf')
+        earliest_time = earliest_task.start_time if earliest_task else float('inf')
         pure_communication_section, free_time_section = SectionCalculator.compute_pipeline_overlap(communication_data,
                                                                                                    compute_data,
                                                                                                    latest_time,
