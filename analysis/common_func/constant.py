@@ -527,6 +527,17 @@ class Constant:
     HCCL_LEVEL = 4  # ge node sub level
     TASK_LEVEL = 5
 
+    # Host Task Type
+    PROFILING_ENABLE = "PROFILING_ENABLE"
+    PROFILING_DISABLE = "PROFILING_DISABLE"
+    KERNEL_FFTS_PLUS_TASK_TYPE = "FFTS_PLUS"
+    KERNEL_AICPU = "KERNEL_AICPU"
+    KERNEL_AICORE = "KERNEL_AICORE"
+    KERNEL_AIVEC = "KERNEL_AIVEC"
+    KERNEL_MIX_AIC = "KERNEL_MIX_AIC"
+    KERNEL_MIX_AIV = "KERNEL_MIX_AIV"
+    COMP_TASK_TYPE = [KERNEL_AICORE, KERNEL_AIVEC, KERNEL_FFTS_PLUS_TASK_TYPE, KERNEL_MIX_AIC, KERNEL_MIX_AIV]
+
     def get_constant_class_name(self: any) -> any:
         """
         get constant class name

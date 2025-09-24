@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023. All rights reserved.
 import decimal
-import json
 import logging
 import os
 from enum import Enum
@@ -10,14 +9,15 @@ from enum import Enum
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
-from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.path_manager import PathManager
 from common_func.section_calculator import SectionCalculator
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
+from mscalculate.ascend_task.ascend_task import TopDownTask
 from msmodel.hccl.hccl_model import HcclViewModel
 from msmodel.stars.op_summary_model import OpSummaryModel
+from msmodel.task_time.ascend_task_model import AscendTaskViewModel
 
 
 class OverlapType(Enum):
@@ -34,6 +34,7 @@ class PipelineOverlapViewer:
         "COMMUNICATION_NOT_OVERLAPPED": "Communication(Not Overlapped)",
         "FREE_TIME": "Free"
     }
+    FILTER_TYPE = Constant.COMP_TASK_TYPE + [Constant.PROFILING_ENABLE, Constant.PROFILING_DISABLE]
 
     def __init__(self, configs: dict, params: dict):
         self._configs = configs
@@ -52,6 +53,9 @@ class PipelineOverlapViewer:
             }
             with OpSummaryModel(sample_config) as _model:
                 compute_data = _model.get_operator_data_separated_by_kfc_stream()
+
+        with AscendTaskViewModel(self._project_path, [DBNameConstant.TABLE_ASCEND_TASK]) as _model:
+            latest_task, earliest_task = _model.get_ascend_task_time_extremes(self.FILTER_TYPE)
         compute_data = SectionCalculator.merge_continuous_intervals(compute_data)
         result.extend(self._format_timeline_data(OverlapType.COMPUTE_TIME, data) for data in compute_data)
 
@@ -70,8 +74,12 @@ class PipelineOverlapViewer:
         if not result:
             logging.warning("Both task data and hccl data are missing, no need to calculate the overlap.")
             return []
+        latest_time = latest_task.start_time + latest_task.duration if latest_task else 0
+        earliest_time = earliest_task.start_time if latest_task else float('inf')
         pure_communication_section, free_time_section = SectionCalculator.compute_pipeline_overlap(communication_data,
-                                                                                                   compute_data)
+                                                                                                   compute_data,
+                                                                                                   latest_time,
+                                                                                                   earliest_time)
         result.extend(
             self._format_timeline_data(OverlapType.COMMUNICATION_NOT_OVERLAPPED, data)
             for data in pure_communication_section

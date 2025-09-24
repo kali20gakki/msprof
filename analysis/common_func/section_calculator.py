@@ -58,11 +58,13 @@ class SectionCalculator:
         return master_time_section_list
 
     @classmethod
-    def compute_pipeline_overlap(cls, communication_section, compute_section):
+    def compute_pipeline_overlap(cls, communication_section, compute_section, latest_time, earliest_time):
         """
-        calculate  pure communication and free time section.
+        calculate pure communication and free time section.
         :param compute_section:|---------|    |-----XXX|
         :param communication_section:              |XXX----|
+        :param latest_time: The latest time to consider for free time calculation
+        :param earliest_time: The earliest time to consider for free time calculation
         pure communication section:                    |---|
         free time section:               |----|
         """
@@ -70,6 +72,11 @@ class SectionCalculator:
         pure_communication_section = []
         time_section_list = sorted(communication_section + compute_section, key=lambda x: x.start_time)
 
+        # If no sections, return empty results
+        if not time_section_list:
+            return pure_communication_section, free_time_section
+
+        # Process all time sections
         min_section = time_section_list.pop(0)
         for time_section in time_section_list:
             if min_section.end_time - time_section.start_time < 0:  # without overlapping
@@ -97,4 +104,11 @@ class SectionCalculator:
                     min_section = cls._generate_time_section(time_section.end_time, min_section.end_time)
         if isinstance(min_section, CommunicationTimeSection):
             pure_communication_section.append(min_section)
+        # 补充首尾free
+        max_end_time = max(section.end_time for section in (communication_section + compute_section))
+        min_start_time = min(section.start_time for section in (communication_section + compute_section))
+        if max_end_time < latest_time:
+            free_time_section.append(cls._generate_time_section(max_end_time, latest_time))
+        if min_start_time > earliest_time:
+            free_time_section.append(cls._generate_time_section(earliest_time, min_start_time))
         return pure_communication_section, free_time_section

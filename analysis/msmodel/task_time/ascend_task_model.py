@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
-from typing import List
+from typing import List, Tuple
 from collections import namedtuple
 
 from common_func.constant import Constant
@@ -83,3 +83,28 @@ class AscendTaskViewModel(ViewModel):
             .format(DBNameConstant.TABLE_ASCEND_TASK, stream_id_condition=stream_id_condition)
         ascend_task_data = DBManager.fetch_all_data(self.cur, sql)
         return [self.ASCEND_TASK_TYPE(*data) for data in ascend_task_data]
+
+    def get_ascend_task_time_extremes(self: any, filter_type: list) -> Tuple[TopDownTask, TopDownTask]:
+        if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_ASCEND_TASK):
+            return (None, None)
+        type_condition = "host_task_type not in ({})".format(
+            ",".join(map(lambda x: f"'{x}'", filter_type))
+        )
+
+        latest_sql = f"SELECT * FROM {DBNameConstant.TABLE_ASCEND_TASK} " \
+                     f"WHERE {type_condition} " \
+                     f"AND device_task_type != '{Constant.TASK_TYPE_UNKNOWN}'" \
+                     f"ORDER BY (start_time + duration) DESC " \
+                     f"LIMIT 1"
+        latest_result = DBManager.fetch_all_data(self.cur, latest_sql, dto_class=TopDownTask)
+        latest_task = latest_result[0] if latest_result else None
+
+        earliest_sql = f"SELECT * FROM {DBNameConstant.TABLE_ASCEND_TASK} " \
+                       f"WHERE {type_condition} " \
+                       f"AND device_task_type != '{Constant.TASK_TYPE_UNKNOWN}'" \
+                       f"ORDER BY start_time ASC " \
+                       f"LIMIT 1"
+        earliest_result = DBManager.fetch_all_data(self.cur, earliest_sql, dto_class=TopDownTask)
+        earliest_task = earliest_result[0] if earliest_result else None
+
+        return latest_task, earliest_task

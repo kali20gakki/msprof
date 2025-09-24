@@ -37,3 +37,12 @@ class TestAscendTaskModel(TestDirCRBaseModel):
                 )
                 self.assertEqual(0, len(data))
 
+    def test_get_ascend_task_time_extremes_should_return_none_when_no_data(self):
+        with mock.patch(NAMESPACE + ".DBManager.judge_table_exist", return_value=True), \
+                mock.patch(NAMESPACE + ".AscendTaskViewModel.attach_to_db", return_value=True), \
+                mock.patch(NAMESPACE + ".DBManager.fetch_all_data", return_value=[]):
+            with AscendTaskViewModel(self.PROF_HOST_DIR, [DBNameConstant.TABLE_ASCEND_TASK]) as model:
+                data = model.get_ascend_task_time_extremes(
+                    ["PROFILING_DISABLE","PROFILING_ENABLE"]
+                )
+                self.assertEqual((None, None), data)

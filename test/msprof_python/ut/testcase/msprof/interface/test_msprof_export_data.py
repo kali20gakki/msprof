@@ -594,8 +594,11 @@ class TestMsProfExportDataUtils(unittest.TestCase):
     def test_get_bulk_data_1(self):
         sample_configs = {"test": 2}
         params = {"export_type": "timeline"}
+        task_viewer_model = 'viewer.pipeline_overlap_viewer.AscendTaskViewModel'
         with mock.patch('msinterface.msprof_timeline.StepTraceViewer.get_one_iter_timeline_data',
-                        return_value=json.dumps({'a': 1})):
+                        return_value=json.dumps({'a': 1})), \
+                mock.patch(task_viewer_model + '.init', return_value=True), \
+                mock.patch(task_viewer_model + '.get_ascend_task_time_extremes', return_value=(None, None)):
             InfoConfReader()._info_json = {"pid": 123}
             key = MsProfExportDataUtils()
             result = key._get_bulk_data(sample_configs, params)

@@ -36,7 +36,9 @@ class TestPipelineOverlapViewer(unittest.TestCase):
 
     def test_get_timeline_data_should_return_empty_data_when_db_not_exist(self):
         InfoJsonReaderManager(info_json=InfoJson(pid=1000)).process()
-        with mock.patch('os.path.exists', return_value=False):
+        with mock.patch('os.path.exists', return_value=False), \
+                mock.patch(NAMESPACE + '.AscendTaskViewModel.init', return_value=True), \
+                mock.patch(NAMESPACE + '.AscendTaskViewModel.get_ascend_task_time_extremes', return_value=(None, None)):
             check = PipelineOverlapViewer({}, {
                 StrConstant.SAMPLE_CONFIG_PROJECT_PATH: os.path.join(self.DIR_PATH, 'PROF1', 'device_0')})
             ret = check.get_timeline_data()

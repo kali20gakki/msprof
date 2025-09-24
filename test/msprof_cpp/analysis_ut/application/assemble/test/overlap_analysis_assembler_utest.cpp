@@ -246,7 +246,8 @@ const std::string SCENARIOS5_JSON =
     "{\"name\":\"thread_name\",\"pid\":10330016,\"tid\":2,\"ph\":\"M\",\"args\":{\"name\":\"Computing\"}},"
     "{\"name\":\"thread_sort_index\",\"pid\":10330016,\"tid\":2,\"ph\":\"M\",\"args\":{\"sort_index\":2}},"
     "{\"name\":\"thread_name\",\"pid\":10330016,\"tid\":3,\"ph\":\"M\",\"args\":{\"name\":\"Free\"}},"
-    "{\"name\":\"thread_sort_index\",\"pid\":10330016,\"tid\":3,\"ph\":\"M\",\"args\":{\"sort_index\":3}},";
+    "{\"name\":\"thread_sort_index\",\"pid\":10330016,\"tid\":3,\"ph\":\"M\",\"args\":{\"sort_index\":3}},"
+    "{\"name\":\"Free\",\"pid\":10330016,\"tid\":3,\"ts\":\"0.001\",\"dur\":0.035,\"ph\":\"X\",\"args\":{}},";
 }
 
 class OverlapAnalysisAssemblerUTest : public testing::Test {
@@ -676,7 +677,7 @@ static void CheckScenarios5Data(DataInventory &dataInventory)
 
 TEST_F(OverlapAnalysisAssemblerUTest, AssembleDataShouldContainCompleteDataInScenarios5)
 {
-    // 场景5 只有调度类任务(无taskInfo类) 对齐python逻辑 不生成overlap
+    // 场景5 只有调度类任务(无taskInfo类) 对齐python逻辑 overlap生成free
     // 但是会有meta头,不影响呈现
     // 其中 [A,B]表示三类任务中的某一类，(A,B) 表示非计算非通信的任务, {A, B}表示图模式中一个算子跑多次
 

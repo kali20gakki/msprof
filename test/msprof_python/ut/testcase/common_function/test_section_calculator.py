@@ -6,7 +6,7 @@ import unittest
 
 from common_func.section_calculator import SectionCalculator
 from common_func.msprof_object import CustomizedNamedtupleFactory
-from profiling_bean.db_dto.time_section_dto import TimeSectionDto
+from profiling_bean.db_dto.time_section_dto import TimeSectionDto, CommunicationTimeSection
 
 TimeSectionDtoTuple = CustomizedNamedtupleFactory.generate_named_tuple_from_dto(TimeSectionDto, [])
 
@@ -42,3 +42,33 @@ class TestSectionCalculator(unittest.TestCase):
         self.assertEqual(result[0].overlap_time, 3)
         self.assertEqual(result[1].overlap_time, 1)
         self.assertEqual(result[2].overlap_time, 0)
+
+    def test_compute_pipeline_overlap_should_return_empty_when_no_time_sections(self):
+        communication_section = []
+        compute_section = []
+        latest_time = 1000
+        earliest_time = 0
+
+        pure_communication_section, free_time_section = SectionCalculator.compute_pipeline_overlap(
+            communication_section, compute_section, latest_time, earliest_time)
+
+        self.assertEqual(pure_communication_section, [])
+        self.assertEqual(free_time_section, [])
+
+    def test_compute_pipeline_overlap_should_return_free_time_when_max_end_time_less_than_latest_time(self):
+        communication_section = [SectionCalculator._generate_time_section(100, 200, CommunicationTimeSection)]
+        compute_section = [SectionCalculator._generate_time_section(300, 400)]
+        latest_time = 500
+        earliest_time = 0
+
+        pure_communication_section, free_time_section = SectionCalculator.compute_pipeline_overlap(
+            communication_section, compute_section, latest_time, earliest_time)
+
+        self.assertEqual(len(pure_communication_section), 1)
+        self.assertEqual(len(free_time_section), 3)
+        self.assertEqual(free_time_section[0].start_time, 200)
+        self.assertEqual(free_time_section[0].end_time, 300)
+        self.assertEqual(free_time_section[1].start_time, 400)
+        self.assertEqual(free_time_section[1].end_time, 500)
+        self.assertEqual(free_time_section[2].start_time, 0)
+        self.assertEqual(free_time_section[2].end_time, 100)
