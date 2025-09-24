@@ -204,9 +204,33 @@ class PathManager:
         :param del_path:
         :return:
         """
-        for dir_path, _, file_list in os.walk(del_path):
+        for dir_path, _, file_list in cls.safe_os_walk(del_path):
             for file in file_list:
                 file_path = os.path.join(dir_path, file)
                 os.chmod(file_path, stat.S_IWUSR)  # 这里解决删除不了的权限问题
                 os.remove(file_path)
         shutil.rmtree(del_path, ignore_errors=True)
+
+    @classmethod
+    def safe_os_walk(cls, path, max_depth=10, *args, **kwargs):
+        """
+        带深度限制的目录遍历器，类似os.walk但限制最大递归深度
+        :param path: 根目录路径
+        :param max_depth: 最大递归深度
+        :param args: 传递给os.walk的位置参数
+        :param kwargs: 传递给os.walk的关键字参数
+        :yield: (dir_path, dirs, files) 与os.walk相同的元组
+              - dir_path: 当前目录的绝对路径
+              - dirs: 当前目录下的子目录列表（可修改以控制遍历行为）
+              - files: 当前目录下的文件列表
+        """
+        if not isinstance(path, str):
+            return
+        base_depth = path.count(os.sep)
+        if path.endswith(os.sep):
+            base_depth -= 1
+        for root, dirs, files in os.walk(path, *args, **kwargs):
+            if root.count(os.sep) - base_depth >= max_depth:
+                dirs.clear()
+                continue
+            yield root, dirs, files

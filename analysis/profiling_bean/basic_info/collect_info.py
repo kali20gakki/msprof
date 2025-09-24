@@ -8,6 +8,7 @@ from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
+from common_func.path_manager import PathManager
 from profiling_bean.basic_info.base_info import BaseInfo
 
 
@@ -50,7 +51,7 @@ class CollectInfo(BaseInfo):
         :return: the size of the project
         """
         size = 0
-        for dir_path, _, file_names in os.walk(project_path):
+        for dir_path, _, file_names in PathManager.safe_os_walk(project_path):
             for file_name in file_names:
                 file_path = os.path.join(dir_path, file_name)
                 size += os.path.getsize(file_path)
