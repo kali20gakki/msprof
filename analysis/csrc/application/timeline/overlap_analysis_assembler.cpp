@@ -23,6 +23,15 @@ const std::string COMP_NAME = "Computing";
 const std::string COMM_NAME = "Communication";
 const std::string COMM_NOT_OVERLAP_COMP_NAME = "Communication(Not Overlapped)";
 const std::string FREE_NAME = "Free";
+const std::set<std::string> FILTER_TYPE = {
+    "KERNEL_AICORE",
+    "KERNEL_AIVEC",
+    "FFTS_PLUS",
+    "KERNEL_MIX_AIC",
+    "KERNEL_MIX_AIV",
+    "PROFILING_ENABLE",
+    "PROFILING_DISABLE"
+};
 const std::vector<std::string> THREAD_ARGS_NAMES = {COMM_NAME, COMM_NOT_OVERLAP_COMP_NAME, COMP_NAME, FREE_NAME};
 const std::vector<uint32_t> TIDS = {static_cast<uint32_t>(OverlapType::COMMUNICATION),
                                     static_cast<uint32_t>(OverlapType::COMM_NOT_OVERLAP_COMP),
@@ -168,6 +177,7 @@ void OverlapAnalysisAssembler::RecordCompAndCommTaskTime(
     std::unordered_map<uint16_t, std::vector<TimeDuration>> tradCommSections;
     GetCommTaskSections(tradCommSections, commOps);
     GetCommTaskSections(tradCommSections, kfcOps);
+    UpdateTaskTimeExtremes(ascendTasks);
 
     for (auto &pair : tradCommSections) {
         TimeLogger logger(
@@ -415,8 +425,6 @@ void OverlapAnalysisAssembler::AssembleOneDevice(uint16_t deviceId, JsonWriter &
         commTaskRecords_.find(deviceId) == commTaskRecords_.end() ? std::vector<TimeDuration>()
                                                                   : commTaskRecords_[deviceId];
 
-    begin_[deviceId] = UINT64_MAX;
-    end_[deviceId] = 0;
     auto compEvents = GenerateComputeEvents(compSections, deviceId);
     auto commEvents = GenerateCommEvents(commSections, deviceId);
     auto commNotOverlapCompEvents = GenerateCommNotOverlapCompEvents(compSections, commSections, deviceId);
@@ -438,6 +446,26 @@ void OverlapAnalysisAssembler::AssembleOneDevice(uint16_t deviceId, JsonWriter &
         }
         for (const auto &node : freeEvents) {
             node->DumpJson(ostream);
+        }
+    }
+}
+void OverlapAnalysisAssembler::UpdateTaskTimeExtremes(const std::shared_ptr<std::vector<AscendTaskData>>& ascendTasks)
+{
+    for (const AscendTaskData& task : *ascendTasks) {
+        // 检查任务类型是否在过滤集合中
+        if (FILTER_TYPE.find(task.hostType) != FILTER_TYPE.end()) {
+            continue;
+        }
+        uint64_t taskStartTime = task.timestamp;
+        uint64_t taskEndTime = task.timestamp + static_cast<uint64_t>(task.duration);
+        uint16_t deviceId = task.deviceId;
+        // 更新最晚结束时间
+        if (end_.find(deviceId) == end_.end() || taskEndTime > end_[deviceId]) {
+            end_[deviceId] = taskEndTime;
+        }
+        // 更新最早开始时间
+        if (begin_.find(deviceId) == begin_.end() || taskStartTime < begin_[deviceId]) {
+            begin_[deviceId] = taskStartTime;
         }
     }
 }

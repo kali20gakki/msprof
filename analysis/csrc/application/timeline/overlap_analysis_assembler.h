@@ -43,6 +43,7 @@ private:
     template<typename T>
     void GetCommTaskSections(std::unordered_map<uint16_t, std::vector<TimeDuration>> &commOpSections,
                              const std::shared_ptr<std::vector<T>> &commOps);
+    void UpdateTaskTimeExtremes(const std::shared_ptr<std::vector<AscendTaskData>> &ascendTasks);
     std::vector<std::shared_ptr<TraceEvent>> GenerateComputeEvents(
         std::vector<TimeDuration> &compSections, uint16_t deviceId);
     std::vector<std::shared_ptr<TraceEvent>> GenerateCommEvents(
