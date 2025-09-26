@@ -93,28 +93,3 @@ class DataManager:
             headers.append("memory_bound")
             for index, row in enumerate(data):
                 data[index] = add_mem_bound(list(row), vec_index, mac_index, mte2_index)
-
-    @classmethod
-    def add_iter_id(cls: any, *args: any, task_type_index: int = None, iter_id: int = 1) -> bool:
-        """
-        add iteration id
-        """
-        data, task_id_index, stream_id_index = args
-        iter_id_record = {}
-        for row_num, row in enumerate(data):
-            if len(row) < task_id_index or len(row) < stream_id_index:
-                return False
-            if task_type_index is not None and str(task_type_index).isdigit() \
-                    and row[int(task_type_index)] not in (cls.AI_CORE_TASK_TYPE,
-                                                          cls.AI_CPU_TASK_TYPE,
-                                                          cls.AI_VECTOR_CORE_TASK_TYPE):
-                data[row_num] = list(row)
-                data[row_num].append(0)
-                continue
-            iter_id_tag = "{}-{}".format(row[task_id_index], row[stream_id_index])
-            iter_id_record[iter_id_tag] = iter_id_record.get(iter_id_tag, 0) + 1
-            if iter_id_record.get(iter_id_tag) > iter_id:
-                iter_id = iter_id_record.get(iter_id_tag)
-            data[row_num] = list(row)
-            data[row_num].append(iter_id)
-        return True

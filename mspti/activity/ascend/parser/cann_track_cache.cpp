@@ -152,6 +152,10 @@ msptiResult CannTrackCache::CannTrackCacheImpl::Run()
         }
         for (auto threadId : threads) {
             auto cache = GetOrCreateCache(threadId);
+            if (cache == nullptr) {
+                MSPTI_LOGE("Get thread cache data failed! threadId is %u", threadId);
+                continue;
+            }
             Analysis(cache);
         }
     }
@@ -165,18 +169,18 @@ msptiResult CannTrackCache::CannTrackCacheImpl::AppendTsTrack(bool agingFlag, co
     }
     auto cache = GetOrCreateCache(data->threadId);
     if (cache == nullptr) {
-        MSPTI_LOGE("copy MsprofCompactInfo data failed");
+        MSPTI_LOGE("Get ts track data failed! threadId is %u", data->threadId);
         return MSPTI_ERROR_INNER;
     }
     std::unique_ptr<MsprofCompactInfo> copy;
     Mspti::Common::MsptiMakeUniquePtr(copy);
     if (UNLIKELY(copy == nullptr)) {
-        MSPTI_LOGE("copy MsprofCompactInfo data failed");
+        MSPTI_LOGE("copy MsprofCompactInfo data failed! threadId is %u", data->threadId);
         return MSPTI_ERROR_INNER;
     }
     errno_t res = memcpy_s(copy.get(), sizeof(MsprofCompactInfo), data, sizeof(MsprofCompactInfo));
     if (res != EOK) {
-        MSPTI_LOGE("memcpy MsprofCompactInfo failed! threadId is %d", data->threadId);
+        MSPTI_LOGE("memcpy MsprofCompactInfo failed! threadId is %u", data->threadId);
         return MSPTI_ERROR_INNER;
     }
     std::unique_ptr<Tag<MsprofCompactInfo>> agingCopy;
@@ -199,18 +203,19 @@ msptiResult CannTrackCache::CannTrackCacheImpl::AppendNodeLunch(bool agingFlag, 
     }
     auto cache = GetOrCreateCache(data->threadId);
     if (cache == nullptr) {
+        MSPTI_LOGE("Get NodeLunch MsprofApi data failed! threadId is %u", data->threadId);
         return MSPTI_ERROR_INNER;
     }
     {
         std::unique_ptr<MsprofApi> copy;
         Mspti::Common::MsptiMakeUniquePtr(copy);
         if (UNLIKELY(copy == nullptr)) {
-            MSPTI_LOGE("copy NodeLunch MsprofApi data failed");
+            MSPTI_LOGE("copy NodeLunch MsprofApi data failed! threadId is %u", data->threadId);
             return MSPTI_ERROR_INNER;
         }
         errno_t res = memcpy_s(copy.get(), sizeof(MsprofApi), data, sizeof(MsprofApi));
         if (res != EOK) {
-            MSPTI_LOGE("memcpy nodeLaunch MsprofApi failed! threadId is %d", data->threadId);
+            MSPTI_LOGE("memcpy NodeLunch MsprofApi failed! threadId is %u", data->threadId);
             return MSPTI_ERROR_INNER;
         }
         std::unique_ptr<Tag<MsprofApi>> agingCopy;
@@ -241,17 +246,18 @@ msptiResult CannTrackCache::CannTrackCacheImpl::AppendCommunication(bool agingFl
     }
     auto cache = GetOrCreateCache(data->threadId);
     if (cache == nullptr) {
+        MSPTI_LOGE("Get Communication MsprofApi data failed! threadId is %u", data->threadId);
         return MSPTI_ERROR_INNER;
     }
     std::unique_ptr<MsprofApi> copy;
     Mspti::Common::MsptiMakeUniquePtr(copy);
     if (UNLIKELY(copy == nullptr)) {
-        MSPTI_LOGE("copy Communication MsprofApi data failed");
+        MSPTI_LOGE("copy Communication MsprofApi data failed! threadId is %u", data->threadId);
         return MSPTI_ERROR_INNER;
     }
     errno_t res = memcpy_s(copy.get(), sizeof(MsprofApi), data, sizeof(MsprofApi));
     if (res != EOK) {
-        MSPTI_LOGE("memcpy nodeLaunch MsprofApi failed! threadId is %d", data->threadId);
+        MSPTI_LOGE("memcpy Communication MsprofApi failed! threadId is %u", data->threadId);
         return MSPTI_ERROR_INNER;
     }
     std::shared_ptr<Tag<MsprofApi>> agingCopy;

@@ -595,7 +595,7 @@ bool ParamValidation::CheckPythonPathIsValid(const std::string &pythonPath) cons
 
 bool ParamValidation::CheckParamLengthIsValid(const std::string &paramPath) const
 {
-    std::string errReason = paramPath + "should be a valid file path and path length should be shorter than 1024.";
+    std::string errReason = paramPath + " should be a valid file path and path length should be shorter than 1024.";
     if (paramPath.size() > MAX_PATH_LENGTH) {
         MSPROF_LOGE("Argument %s is invalid because of exceeds"
                     " the maximum length of %d", paramPath.c_str(), MAX_PATH_LENGTH);
@@ -652,7 +652,7 @@ bool ParamValidation::CheckExportTypeIsValid(const std::string &exportType) cons
 
 bool ParamValidation::CheckExportIdIsValid(const std::string &exportId, const std::string &exportIdType) const
 {
-    std::string errReason = exportIdType + "should be a valid natural number.";
+    std::string errReason = exportIdType + " should be a valid natural number.";
     if (exportId.empty()) {
         MSPROF_LOGE("Argument --%s: expected one argument", exportIdType.c_str());
         MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
