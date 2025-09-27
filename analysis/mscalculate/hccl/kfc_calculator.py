@@ -175,21 +175,16 @@ class KfcCalculator(ICalculator, MsMultiProcess):
         kfc_comm_task_data = self.process_kfc_info_data(kfc_comm_task_data, kfc_info)
         kfc_comm_task_data.sort(key=lambda x: x.start_time + x.duration)
         kfc_op_data_stream_id_table = {}
-        mismatch_stream_id_set = set()
         for data in kfc_op_data:
             # kfc大算子流
             if data.host_task_type in self.BLACK_KFC_OP_TYPE or data.op_name in self.BLACK_KFC_OP_NAME:
                 continue
-            group_name = kfc_stream_id_group_table.get(data.stream_id)
-            if group_name is None:
-                mismatch_stream_id_set.add(data.stream_id)
-                continue
+            # 图模式下拿不到对应的streamId，这里代码实际功能废弃 无效代码
+            group_name = kfc_stream_id_group_table.get(data.stream_id, "N/A")
             kfc_op_data_stream_id_table.setdefault(data.stream_id, []).append(
                 self.KFC_OP_DATA(data, group_name, "N/A", 0, 1, "N/A",
                                  -1, -1, "N/A", "N/A", -1, -1, DeviceHcclSource.INVALID.value)
             )
-        if mismatch_stream_id_set:
-            logging.error(f"Can not match any group name for these stream ids: {mismatch_stream_id_set}")
         master_stream_task = self.get_master_stream_task_in_hccl_op(kfc_comm_task_data, aicpu_task_flip)
         for data in kfc_comm_task_data:
             # kfc小算子流
@@ -299,8 +294,13 @@ class KfcCalculator(ICalculator, MsMultiProcess):
                     continue
                 source = self._source.get(stream_id, DeviceHcclSource.INVALID.value)
                 host_hccl_op = kfc_hccl_op_map.get(data.connection_id, None)
+
+                # 实际的kfc op 在这里从host拿到对应的op算子，然后做数据替换
                 if source == DeviceHcclSource.HCCL.value and host_hccl_op:
                     op_name = host_hccl_op.op_name
+                else:
+                    logging.error("Can not match host hccl op, "
+                                  f"stream id is {stream_id}, connection id is {data.connection_id}")
                 if curr_hccl_op_info:
                     kfc_op_data[i] = op_data.replace(op_name=op_name, first_timestamp=first_timestamp,
                                                      iter_id=iter_id, op_type=op_type,
