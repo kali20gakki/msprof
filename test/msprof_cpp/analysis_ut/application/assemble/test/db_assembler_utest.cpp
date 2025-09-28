@@ -1144,7 +1144,7 @@ TEST_F(DBAssemblerUTest, TestRunNpuDataShouldReturnTrueWhenProcessorRunSuccess)
     EXPECT_EQ(expectRankDeviceMapData, checkRankDeviceMapData);
 }
 
-TEST_F(DBAssemblerUTest, TestRunNpuInfoDataShouldReturnTrueWhenNoDevice)
+TEST_F(DBAssemblerUTest, TestRunNpuDataShouldReturnTrueWhenNoDevice)
 {
     auto assembler = DBAssembler(PROF, OUTPUT_PATH);
     auto dataInventory = DataInventory();

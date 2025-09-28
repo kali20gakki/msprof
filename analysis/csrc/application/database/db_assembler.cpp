@@ -53,6 +53,7 @@ using namespace Analysis::Domain::Environment;
 using IdPool = Analysis::Application::Credential::IdPool;
 
 namespace {
+const std::string UNKNOWN = "UNKNOWN";
 const size_t EXPECT_TIME_LEN = 14;
 const std::string TASK_INDEX_NAME = "TaskIndex";
 const std::vector<std::string> TASK_INDEX_COL_NAMES = {"startNs", "globalTaskId"};
@@ -508,8 +509,8 @@ bool SaveMsprofTxData(DataInventory& dataInventory, DBInfo& msprofDB, const std:
 }
 
 void UpdateNpuData(const std::string& profPath, const std::string& deviceDir,
-                   std::vector<std::tuple<uint16_t, std::string>>& npuInfoData,
-                   std::vector<std::tuple<int16_t, uint16_t>>& rankDeviceMapData)
+                   std::vector<std::tuple<int16_t, std::string>>& npuInfoData,
+                   std::vector<std::tuple<int16_t, int16_t>>& rankDeviceMapData)
 {
     uint16_t deviceId = Utils::GetDeviceIdByDevicePath(deviceDir);
     uint16_t chip = Context::GetInstance().GetPlatformVersion(deviceId, profPath);
@@ -517,12 +518,12 @@ void UpdateNpuData(const std::string& profPath, const std::string& deviceDir,
     auto it = CHIP_TABLE.find(chip);
     if (it == CHIP_TABLE.end()) {
         ERROR("Unknown chip type key: % in %", chip, deviceDir);
-        chipName = "UNKNOWN";
+        chipName = UNKNOWN;
     } else {
         chipName = it->second;
     }
-    npuInfoData.emplace_back(deviceId, chipName);
-    rankDeviceMapData.emplace_back(-1, deviceId);
+    npuInfoData.emplace_back(static_cast<int16_t>(deviceId), chipName);
+    rankDeviceMapData.emplace_back(-1, static_cast<int16_t>(deviceId));
 }
 
 bool SaveNpuData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
@@ -534,18 +535,19 @@ bool SaveNpuData(DataInventory& dataInventory, DBInfo& msprofDB, const std::stri
 
     auto deviceDirs = Utils::File::GetFilesWithPrefix(profPath, DEVICE_PREFIX);
     // device_id, npu_name
-    using NpuInfoDataFormat = std::vector<std::tuple<uint16_t, std::string>>;
+    using NpuInfoDataFormat = std::vector<std::tuple<int16_t, std::string>>;
     NpuInfoDataFormat npuInfoData;
     // rank_id, device_id
-    using RankDeviceMapDataFormat = std::vector<std::tuple<int16_t, uint16_t>>;
+    using RankDeviceMapDataFormat = std::vector<std::tuple<int16_t, int16_t>>;
     RankDeviceMapDataFormat rankDeviceMapData;
 
     for (const auto& deviceDir : deviceDirs) {
         UpdateNpuData(profPath, deviceDir, npuInfoData, rankDeviceMapData);
     }
-    if (npuInfoData.empty() || rankDeviceMapData.empty()) {
-        WARN("No device info in %.", profPath);
-        return true;
+    if (deviceDirs.empty()) {
+        WARN("No device info in %, will save default data.", profPath);
+        npuInfoData.emplace_back(-1, UNKNOWN);
+        rankDeviceMapData.emplace_back(-1, -1);
     }
     return SaveData(npuInfoData, TABLE_NAME_NPU_INFO, msprofDB) &&
             SaveData(rankDeviceMapData, TABLE_NAME_RANK_DEVICE_MAP, msprofDB);
