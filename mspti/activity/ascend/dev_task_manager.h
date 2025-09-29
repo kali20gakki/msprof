@@ -45,7 +45,8 @@ private:
     explicit DevTaskManager(DevTaskManager &&obj) = delete;
     DevTaskManager& operator=(DevTaskManager &&obj) = delete;
     void InitDeviceList();
-    msptiResult StartAllDevKindProfTask(std::vector<std::unique_ptr<DevProfTask>>& profTasks);
+    msptiResult StartAllDevKindProfTask(std::vector<std::unique_ptr<DevProfTask>>& profTasks,
+                                        std::vector<std::unique_ptr<DevProfTask>>& successTasks);
     msptiResult StopAllDevKindProfTask(std::vector<std::unique_ptr<DevProfTask>>& profTasks);
 
     msptiResult StartCannProfTask(uint32_t deviceId, const ActivitySwitchType& kinds);
