@@ -36,6 +36,21 @@ std::shared_ptr<MsprofApi> CreateMsprofApi(const MsprofEvent *startEvent, const 
     apiData->itemId = startEvent->itemId;
     return apiData;
 }
+
+void ClearStartEventMap(std::map<std::tuple<uint16_t, uint32_t, uint32_t, uint32_t, uint64_t>,
+                        MsprofEvent*>& startEventMap)
+{
+    if (startEventMap.empty()) {
+        return;
+    }
+    ERROR("There is remaining start event.");
+    for (auto &startEvent : startEventMap) {
+        delete startEvent.second;
+        startEvent.second = nullptr;
+    }
+    startEventMap.clear();
+}
+
 }  // namespace
 
 ApiEventParser::ApiEventParser(const std::string &path) : BaseParser(path, "ApiEventParser")
@@ -69,6 +84,7 @@ int ApiEventParser::ProduceData()
         auto event = ReinterpretConvert<MsprofEvent*>(chunkProducer_->Pop());
         if (!event) {
             ERROR("%: Pop chunk failed.", parserName_);
+            ClearStartEventMap(startEventMap);
             return ANALYSIS_ERROR;
         }
         if (event->magicNumber != MSPROF_DATA_HEAD_MAGIC_NUM) {
@@ -95,13 +111,12 @@ int ApiEventParser::ProduceData()
         delete event;
         if (!apiData) {
             ERROR("Api data is null.");
+            ClearStartEventMap(startEventMap);
             return ANALYSIS_ERROR;
         }
         apiData_.emplace_back(apiData);
     }
-    if (!startEventMap.empty()) {
-        ERROR("There is remaining start event.");
-    }
+    ClearStartEventMap(startEventMap);
     return ANALYSIS_OK;
 }
 }  // namespace Cann
