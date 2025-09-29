@@ -759,7 +759,7 @@ int ProfHostService::KillToolAndWaitHostProcess() const
     argsV.push_back("kill");
     argsV.push_back(std::to_string(hostProcess_));
     int exitCode = analysis::dvvp::common::utils::VALID_EXIT_CODE;
-    static const std::string CMD = "sudo";
+    static const std::string CMD = "";
     MmProcess appProcess = MSVP_MMPROCESS;
     ExecCmdParams execCmdParams(CMD, false, "");
     int ret = analysis::dvvp::common::utils::Utils::ExecCmd(execCmdParams, argsV, envV, exitCode, appProcess);
@@ -834,7 +834,6 @@ int ProfHostService::GetCollectSysCallsCmd(int pid, std::string &profHostCmd)
     }
     std::string profHostOutDir = profHostOutDir_ + std::to_string(outDataNumber_);
     std::stringstream ssPerfHostCmd;
-    ssPerfHostCmd << "sudo ";
     ssPerfHostCmd << PROF_SCRIPT_FILE_PATH;
     ssPerfHostCmd << " perf ";
     ssPerfHostCmd << pid;
@@ -853,7 +852,6 @@ int ProfHostService::GetCollectPthreadsCmd(int pid, std::string &profHostCmd)
     }
     std::string profHostOutDir = profHostOutDir_ + std::to_string(outDataNumber_);
     std::stringstream ssPerfHostCmd;
-    ssPerfHostCmd << "sudo ";
     ssPerfHostCmd << PROF_SCRIPT_FILE_PATH;
     ssPerfHostCmd << " ltrace ";
     ssPerfHostCmd << pid;
@@ -871,7 +869,6 @@ int ProfHostService::GetCollectIOTopCmd(int pid, std::string &profHostCmd)
         return PROFILING_FAILED;
     }
     std::stringstream ssPerfHostCmd;
-    ssPerfHostCmd << "sudo ";
     ssPerfHostCmd << PROF_SCRIPT_FILE_PATH;
     ssPerfHostCmd << " iotop ";
     ssPerfHostCmd << pid;
