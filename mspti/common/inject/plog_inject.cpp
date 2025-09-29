@@ -19,7 +19,7 @@ enum PlogFunctionIndex {
     FUNC_PLOG_COUNT
 };
 
-pthread_once_t g_once;
+pthread_once_t g_once = PTHREAD_ONCE_INIT;
 void* g_plogFuncArray[FUNC_PLOG_COUNT];
 
 void LoadPlogFunction()

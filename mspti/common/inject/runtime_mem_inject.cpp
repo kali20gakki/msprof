@@ -49,7 +49,7 @@ enum RuntimeMemFuncIndex {
     FUNC_COUNT
 };
 
-pthread_once_t g_once;
+pthread_once_t g_once = PTHREAD_ONCE_INIT;
 void *g_runtimeMemFuncArray[FUNC_COUNT];
 
 void LoadRuntimeMemFunction()

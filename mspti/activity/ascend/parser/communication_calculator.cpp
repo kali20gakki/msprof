@@ -145,16 +145,21 @@ void AssembleTaskInfo(msptiActivityCommunication& communication, const Communica
                       const CommunicationOpDesc *OpTaskDesc)
 {
     communication.kind = MSPTI_ACTIVITY_KIND_COMMUNICATION;
-    communication.dataType = static_cast<msptiCommunicationDataType>(addationOpDesc->dataType);
-    communication.count = addationOpDesc->count;
-    communication.ds.deviceId = OpTaskDesc->deviceId;
-    communication.ds.streamId = OpTaskDesc->streamId;
-    communication.start = OpTaskDesc->startTime;
-    communication.end = OpTaskDesc->endTime;
-    communication.algType = CannHashCache::GetInstance().GetHashInfo(addationOpDesc->algTypeHash).c_str();
-    communication.name = CannHashCache::GetInstance().GetHashInfo(OpTaskDesc->opNameHash).c_str();
-    communication.commName = CannHashCache::GetInstance().GetHashInfo(addationOpDesc->groupNameHash).c_str();
-    communication.correlationId = OpTaskDesc->correlationId;
+    if (addationOpDesc != nullptr) {
+        communication.dataType = static_cast<msptiCommunicationDataType>(addationOpDesc->dataType);
+        communication.count = addationOpDesc->count;
+        communication.algType = CannHashCache::GetInstance().GetHashInfo(addationOpDesc->algTypeHash).c_str();
+        communication.commName = CannHashCache::GetInstance().GetHashInfo(addationOpDesc->groupNameHash).c_str();
+    }
+
+    if (OpTaskDesc != nullptr) {
+        communication.ds.deviceId = OpTaskDesc->deviceId;
+        communication.ds.streamId = OpTaskDesc->streamId;
+        communication.start = OpTaskDesc->startTime;
+        communication.end = OpTaskDesc->endTime;
+        communication.name = CannHashCache::GetInstance().GetHashInfo(OpTaskDesc->opNameHash).c_str();
+        communication.correlationId = OpTaskDesc->correlationId;
+    }
 }
 
 msptiResult CommunicationCalculator::ReportCommunication(const DstType& dstKey,
@@ -177,7 +182,7 @@ msptiResult CommunicationCalculator::ReportCommunication(const DstType& dstKey,
             }
         }
     }
-    msptiActivityCommunication record;
+    msptiActivityCommunication record{};
     AssembleTaskInfo(record, addationOpDesc.get(), commOp.get());
     Mspti::Activity::ActivityManager::GetInstance()->Record(
         Common::ReinterpretConvert<msptiActivity *>(&record), sizeof(msptiActivityCommunication));

@@ -40,7 +40,7 @@ enum HcclFunctionIndex {
     FUNC_HCCL_COUNT
 };
 
-pthread_once_t g_once;
+pthread_once_t g_once = PTHREAD_ONCE_INIT;
 void *g_hcclFuncArray[FUNC_HCCL_COUNT];
 
 void LoadHcclFunction()

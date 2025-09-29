@@ -29,7 +29,7 @@ enum DriverFunctionIndex {
     FUNC_DRIVER_COUNT
 };
 
-pthread_once_t g_once;
+pthread_once_t g_once = PTHREAD_ONCE_INIT;
 void *g_driverFuncArray[FUNC_DRIVER_COUNT];
 
 void LoadDriverFunction()
