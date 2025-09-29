@@ -296,11 +296,11 @@ class KfcCalculator(ICalculator, MsMultiProcess):
                 host_hccl_op = kfc_hccl_op_map.get(data.connection_id, None)
 
                 # 实际的kfc op 在这里从host拿到对应的op算子，然后做数据替换
+                # 当前aicpu展开算子的streamId匹配不上，取用host数据
+                # mc2算子的streamId能正常匹配，取用device数据。但是在chip 5 场景中， device kfc op数据未上报，保持默认值，始终无数据
                 if source == DeviceHcclSource.HCCL.value and host_hccl_op:
                     op_name = host_hccl_op.op_name
-                else:
-                    logging.error("Can not match host hccl op, "
-                                  f"stream id is {stream_id}, connection id is {data.connection_id}")
+
                 if curr_hccl_op_info:
                     kfc_op_data[i] = op_data.replace(op_name=op_name, first_timestamp=first_timestamp,
                                                      iter_id=iter_id, op_type=op_type,
