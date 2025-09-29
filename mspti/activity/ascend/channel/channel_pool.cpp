@@ -98,6 +98,7 @@ void ChannelPool::Run()
     static constexpr size_t channel_info_size = CHANNEL_POOL_NUM * sizeof(struct ProfPollInfo);
     struct ProfPollInfo channels[CHANNEL_POOL_NUM];
     if (memset_s(channels, channel_info_size, 0, channel_info_size) != EOK) {
+        MSPTI_LOGE("Init channels failed, channelInfoSize is %zu", channel_info_size);
         return;
     }
 

@@ -247,6 +247,7 @@ msptiResult MsptiAdapter::Start()
             bufferPool.Clear();
             if (!(bufferPool.SetBufferSize(bufferSize) && bufferPool.SetPoolSize(MAX_BUFFER_SIZE / bufferSize))) {
                 MSPTI_LOGE("Mspti adapter init buffer pool failed");
+                msptiUnsubscribe(subscriber_);
                 return MSPTI_ERROR_INNER;
             }
             return msptiActivityRegisterCallbacks(UserBufferRequest, UserBufferComplete);

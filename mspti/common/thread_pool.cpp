@@ -49,8 +49,10 @@ int ThreadPool::Start()
         if (!thread) {
             return -1;
         }
-        thread->Start();
         threads_.push_back(thread);
+    }
+    for (auto& unstartedThread : threads_) {
+        unstartedThread->Start();
     }
     isStarted_ = true;
     return 0;

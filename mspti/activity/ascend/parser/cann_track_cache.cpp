@@ -338,8 +338,7 @@ bool CannTrackCache::CannTrackCacheImpl::MountCompactInfo(ApiEvent &apiEvent, co
     }
     auto startRuntimeTask = cache->taskQueue.lower_bound(apiEvent.api.beginTime);
     auto endRuntimeTask = cache->taskQueue.upper_bound(apiEvent.api.endTime);
-    if (startRuntimeTask == endRuntimeTask || startRuntimeTask == cache->taskQueue.end() ||
-        endRuntimeTask == cache->taskQueue.end()) {
+    if (startRuntimeTask == endRuntimeTask || startRuntimeTask == cache->taskQueue.end()) {
         return false;
     }
     apiEvent.agingFlag = startRuntimeTask->second->agingFlag;

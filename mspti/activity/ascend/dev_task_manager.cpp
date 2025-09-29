@@ -51,15 +51,18 @@ DevTaskManager::DevTaskManager()
     RegisterReportCallback();
 }
 
-msptiResult DevTaskManager::StartAllDevKindProfTask(std::vector<std::unique_ptr<DevProfTask>>& profTasks)
+msptiResult DevTaskManager::StartAllDevKindProfTask(std::vector<std::unique_ptr<DevProfTask>>& profTasks,
+                                                    std::vector<std::unique_ptr<DevProfTask>>& successTasks)
 {
     msptiResult ret = MSPTI_SUCCESS;
     for (auto& profTask : profTasks) {
         if (profTask->Start() != MSPTI_SUCCESS) {
-            ret = MSPTI_ERROR_INNER;
+            return MSPTI_ERROR_INNER;
         }
+        successTasks.emplace_back(std::move(profTask));
     }
-    return ret;
+    profTasks.clear();
+    return MSPTI_SUCCESS;
 }
 
 msptiResult DevTaskManager::StopAllDevKindProfTask(std::vector<std::unique_ptr<DevProfTask>>& profTasks)
@@ -101,12 +104,13 @@ msptiResult DevTaskManager::StartDevProfTask(uint32_t deviceId,
         auto iter = task_map_.find({deviceId, kind});
         if (iter == task_map_.end()) {
             auto profTasks = Mspti::Ascend::DevProfTaskFactory::CreateTasks(deviceId, kind);
-            auto ret = StartAllDevKindProfTask(profTasks);
+            decltype(profTasks) successTasks;
+            auto ret = StartAllDevKindProfTask(profTasks, successTasks);
+            task_map_.insert({{deviceId, kind}, std::move(successTasks)});
             if (ret != MSPTI_SUCCESS) {
                 MSPTI_LOGE("The device %u start DevProfTask failed.", deviceId);
                 return ret;
             }
-            task_map_.insert({{deviceId, kind}, std::move(profTasks)});
         } else {
             MSPTI_LOGW("The device: %u, kind: %d is already running.", deviceId, kind);
         }
