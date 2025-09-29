@@ -1072,6 +1072,7 @@ int ProfAclMgr::StartDeviceTask(const uint32_t devId, SHARED_PTR_ALIA<analysis::
         MSPROF_LOGE("Failed to start profiling on device %u", devId);
         MSPROF_INNER_ERROR("EK9999", "Failed to start profiling on device %u", devId);
         HandleResponse(devId);
+        UploaderMgr::instance()->DelUploader(devIdStr);
         return ACL_ERROR_PROFILING_FAILURE;
     }
 

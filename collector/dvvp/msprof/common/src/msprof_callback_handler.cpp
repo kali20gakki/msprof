@@ -181,12 +181,7 @@ int MsprofCallbackHandler::StopReporter()
         MSPROF_LOGW("ProfReporter is not started, module: %s", module_.c_str());
         return PROFILING_SUCCESS;
     }
-    auto profReport = std::dynamic_pointer_cast<Msprof::Engine::ProfReporter>(reporter_);
-    if (profReport == nullptr) {
-        MSPROF_LOGE("Failed to call dynamic_pointer_cast.");
-        return PROFILING_FAILED;
-    }
-    profReport->Flush();
+    (std::dynamic_pointer_cast<Msprof::Engine::ProfReporter>(reporter_))->Flush();
     if (Utils::IsDynProfMode()) {
         return PROFILING_SUCCESS;
     }
