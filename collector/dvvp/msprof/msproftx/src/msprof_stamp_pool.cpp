@@ -59,6 +59,8 @@ int MsprofStampPool::Init(int size)
         (struct MsprofStampInstance*) calloc(1, size * sizeof(struct MsprofStampInstance));
     if (g_stampPoolHandle->memPool == nullptr) {
         MSPROF_LOGE("Init Stamp Pool Failed, Memory Not Enough.");
+        delete g_stampPoolHandle;
+        g_stampPoolHandle = nullptr;
         return PROFILING_FAILED;
     }
     g_stampPoolHandle->instanceSize = static_cast<uint32_t>(size);

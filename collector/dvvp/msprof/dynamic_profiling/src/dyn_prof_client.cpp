@@ -33,6 +33,7 @@ DyncProfMsgProcCli::DyncProfMsgProcCli() : cliStarted_(false), cliSockFd_(-1)
 
 DyncProfMsgProcCli::~DyncProfMsgProcCli()
 {
+    Stop();
 }
 
 int DyncProfMsgProcCli::Start()

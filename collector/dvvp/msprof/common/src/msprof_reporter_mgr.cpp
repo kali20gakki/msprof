@@ -112,12 +112,22 @@ int32_t MsprofReporterMgr::StartReporters()
     }
     
     MSPROF_LOGI("ProfReporterMgr start reporters");
-    for (auto &repoter : reporters_) {
-        if (repoter.StartReporter() != PROFILING_SUCCESS) {
-            MSPROF_LOGE("ProfReporterMgr start reporters failed.");
-            return PROFILING_FAILED;
+    std::vector<size_t> failReporterIds;
+    for (size_t idx = 0; idx < reporters_.size(); idx++) {
+        if (reporters_[idx].StartReporter() != PROFILING_SUCCESS) {
+            MSPROF_LOGE("ProfReporterMgr start reporters %zu failed.", idx);
+            failReporterIds.emplace_back(idx);
         }
     }
+    if (!failReporterIds.empty()) {
+        for (auto &id : failReporterIds) {
+            if (reporters_[id].StopReporter() != PROFILING_SUCCESS) {
+                MSPROF_LOGE("ProfReporterMgr stop reporters %zu failed.", id);
+            }
+        }
+        return PROFILING_FAILED;
+    }
+
     for (auto &level : DEFAULT_TYPE_INFO) {
         for (auto &type : level.second) {
             RegReportTypeInfo(level.first, type.first, type.second);

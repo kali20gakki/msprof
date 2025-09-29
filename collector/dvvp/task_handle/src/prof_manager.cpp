@@ -307,13 +307,13 @@ int ProfManager::LaunchTask(SHARED_PTR_ALIA<ProfTask> task, const std::string &j
 
     do {
         MSPROF_LOGI("Profiling has %d tasks are running on the host, add new task(%s)", _tasks.size(), jobId.c_str());
-        _tasks.insert(std::make_pair(jobId, task));
         task->SetThreadName(MSVP_PROF_TASK_THREAD_NAME);
         ret = task->Start();
         if (ret != PROFILING_SUCCESS) {
             info = "start task failed";
             return ret;
         }
+        _tasks.insert(std::make_pair(jobId, task));
         ret = PROFILING_SUCCESS;
     } while (0);
 
