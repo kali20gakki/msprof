@@ -213,7 +213,7 @@ class MsprofTimeline:
     def set_connection_list(self, result_dir: str):
         # 入参设置result_dir 避免依赖成员变量
         host_to_device_obj = HostToDevice(result_dir)
-        self.connect_list.setdefault("host_to_device", host_to_device_obj)
+        self.connect_list["host_to_device"] = host_to_device_obj
 
     def set_iteration_info(self: any, result_dir: str, iter_range: IterationRange) -> None:
         """
