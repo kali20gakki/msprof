@@ -126,33 +126,32 @@ class MsprofQueryData:
         Get the iteration info under the profiling job data: model id and index id.
         :return: list of the iteration data.
         """
-        db_path_ge = PathManager.get_db_path(self.project_path, DBNameConstant.DB_GE_INFO)
-        conn_ge, curs_ge = DBManager.check_connect_db_path(db_path_ge)
-
         db_path = PathManager.get_db_path(self.project_path, DBNameConstant.DB_STEP_TRACE)
         conn, curs = DBManager.check_connect_db_path(db_path)
-
         if not conn or not curs or not DBManager.judge_table_exist(
                 curs, DBNameConstant.TABLE_STEP_TRACE_DATA):
-            DBManager.destroy_db_connect(conn_ge, curs_ge)
             DBManager.destroy_db_connect(conn, curs)
             return []
 
+
+        db_path_ge = PathManager.get_db_path(self.project_path, DBNameConstant.DB_GE_INFO)
+        conn_ge, curs_ge = DBManager.check_connect_db_path(db_path_ge)
         if not conn_ge or not curs_ge or not DBManager.judge_table_exist(
                 curs_ge, DBNameConstant.TABLE_GE_TASK):
-            DBManager.destroy_db_connect(conn_ge, curs_ge)
             model_ids_set = self._get_model_id_set_without_ge(curs)
         else:
             model_ids_set = self._get_model_id_set(curs_ge)
 
         if not model_ids_set:
+            DBManager.destroy_db_connect(conn_ge, curs_ge)
+            DBManager.destroy_db_connect(conn, curs)
             return []
+
         iteration_infos = self._get_iteration_infos(curs)
         # filter model which contains no compute op
-        iteration_infos_filtered = list(
-            filter(lambda model_index: model_index[0] in model_ids_set, iteration_infos))
-
+        iteration_infos_filtered = list(filter(lambda model_index: model_index[0] in model_ids_set, iteration_infos))
         iteration_infos_result = self._update_top_iteration_info(iteration_infos_filtered, model_ids_set, curs)
+
         DBManager.destroy_db_connect(conn_ge, curs_ge)
         DBManager.destroy_db_connect(conn, curs)
 

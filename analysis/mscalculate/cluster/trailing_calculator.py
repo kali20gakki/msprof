@@ -31,6 +31,7 @@ class TrailingCalculator:
         if DBManager.check_tables_in_db(sql_path, DBNameConstant.TABLE_TRAINING_TRACE):
             avg_time = DBManager.fetch_all_data(curs, "select avg(data_aug_bound) from {}".format(
                 DBNameConstant.TABLE_TRAINING_TRACE))
+        DBManager().destroy_db_connect(conn, curs)
         return avg_time
 
     def run(self: any) -> dict:

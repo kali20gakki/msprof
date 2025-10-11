@@ -100,19 +100,20 @@ class TestNpuOpMemCalculator(unittest.TestCase):
         self.assertEqual(check._memory_record, [['GE', 111, 1, 0, "NPU:0"], ['GE', 112, 1, 0, "NPU:0"]])
 
     def test__judge_should_calculate_should_return_true_when_no_calculated_table_exist_in_task_memory_db(self):
-        with mock.patch(NAMESPACE + ".DBManager.check_tables_in_db", return_value=False), \
+        with mock.patch("os.path.exists", return_value=True), \
+                mock.patch(NAMESPACE + ".DBManager.check_tables_in_db", return_value=False), \
                 mock.patch(NAMESPACE + ".DBManager.check_connect_db_path", return_value=['test', 'test']):
             check = NpuOpMemCalculator({}, CONFIG)
             self.assertTrue(check._judge_should_calculate())
 
     def test__judge_should_calculate_should_return_false_when_calculated_table_exist_in_task_memory_db(self):
-        with mock.patch(NAMESPACE + ".DBManager.check_tables_in_db", return_value=True), \
+        with mock.patch("os.path.exists", return_value=True), \
+                mock.patch(NAMESPACE + ".DBManager.check_tables_in_db", return_value=True), \
                 mock.patch(NAMESPACE + ".DBManager.check_connect_db_path", return_value=['test', 'test']):
             check = NpuOpMemCalculator({}, CONFIG)
             self.assertFalse(check._judge_should_calculate())
 
     def test__judge_should_calculate_should_return_false_when_task_memory_db_not_exist(self):
-        with mock.patch(NAMESPACE + ".DBManager.check_tables_in_db", return_value=False), \
-                mock.patch(NAMESPACE + ".DBManager.check_connect_db_path", return_value=[None, None]):
+        with mock.patch("os.path.exists", return_value=False):
             check = NpuOpMemCalculator({}, CONFIG)
             self.assertFalse(check._judge_should_calculate())

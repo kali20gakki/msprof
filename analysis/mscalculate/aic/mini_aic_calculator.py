@@ -57,20 +57,12 @@ class MiniAicCalculator(PmuCalculator, MsMultiProcess):
         :return:
         """
         try:
-            self.creat_metrics_summary_db()
-        except ValueError:
-            logging.warning("creat metrics summary db failed")
-            return
-        try:
+            self.create_metrics_summary_db()
             create_metric_table(self.conn, self.metrics_head, DBNameConstant.TABLE_METRIC_SUMMARY)
-        except ValueError:
-            logging.warning("creat metrics summary table failed")
-            return
-        try:
             DBManager.insert_data_into_table(self.conn, DBNameConstant.TABLE_METRIC_SUMMARY, self.metrics_datas)
         except ValueError:
-            logging.warning("insert metrics summary data failed")
-            return
+            # 目前看只有create阶段会抛异常
+            logging.warning("create metrics summary db failed")
         finally:
             DBManager().destroy_db_connect(self.conn, self.cur)
 
@@ -96,7 +88,7 @@ class MiniAicCalculator(PmuCalculator, MsMultiProcess):
         self.calculate()
         self.save()
 
-    def creat_metrics_summary_db(self: any) -> None:
+    def create_metrics_summary_db(self: any) -> None:
         self.conn, self.cur = DBManager.create_connect_db(
             PathManager.get_db_path(self._project_path, DBNameConstant.DB_METRICS_SUMMARY))
         if not self.conn or not self.cur:
@@ -107,28 +99,27 @@ class MiniAicCalculator(PmuCalculator, MsMultiProcess):
         get_metric_summary_data
         :return: []
         """
-        if ProfilingScene().is_all_export():
-            have_step_info = False
-        else:
-            have_step_info = True
+        have_step_info = not ProfilingScene().is_all_export()
         conn, curs = DBManager.check_connect_db_path(PathManager.get_db_path(self._project_path,
                                                                              DBNameConstant.DB_RUNTIME))
-        if not conn or not curs or not DBManager.judge_table_exist(curs, DBNameConstant.TABLE_EVENT_COUNT):
-            logging.warning("unable to get metrics data, because it can't find the event_count table")
-            return []
-
-        sql = self.get_metric_summary_sql(freq, have_step_info)
-        device_id = InfoConfReader().get_device_id()
-        if have_step_info:
-            limit_and_offset = get_limit_and_offset(self._project_path, self._iter_range)
-            if not limit_and_offset:
+        try:
+            if not conn or not curs or not DBManager.judge_table_exist(curs, DBNameConstant.TABLE_EVENT_COUNT):
+                logging.warning("unable to get metrics data, because it can't find the event_count table")
                 return []
-            metric_results = DBManager.fetch_all_data(curs, sql, (device_id, limit_and_offset[0], limit_and_offset[1]))
-        else:
-            metric_results = DBManager.fetch_all_data(curs, sql, (device_id,))
-        if not metric_results:
-            return []
-        return metric_results
+
+            sql = self.get_metric_summary_sql(freq, have_step_info)
+            device_id = InfoConfReader().get_device_id()
+            if have_step_info:
+                limit_and_offset = get_limit_and_offset(self._project_path, self._iter_range)
+                if not limit_and_offset:
+                    return []
+                metric_results = DBManager.fetch_all_data(curs, sql,
+                                                          (device_id, limit_and_offset[0], limit_and_offset[1]))
+            else:
+                metric_results = DBManager.fetch_all_data(curs, sql, (device_id,))
+            return metric_results
+        finally:
+            DBManager.destroy_db_connect(conn, curs)
  
     def get_metric_summary_sql(self, freq: float, have_step_info: bool) -> "":
         algos = []

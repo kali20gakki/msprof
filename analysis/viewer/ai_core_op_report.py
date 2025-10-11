@@ -536,6 +536,7 @@ class ReportOPCounter:
         """
         conn, curs = DBManager.check_connect_db_path(db_path)
         if not cls.check_param(conn, curs):
+            DBManager.destroy_db_connect(conn, curs)
             return MsvpConstant.MSVP_EMPTY_DATA
         sql = cls._get_op_report_sql_network_scene()
         if ProfilingScene().is_all_export() or ProfilingScene().is_step_export():

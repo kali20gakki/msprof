@@ -11,6 +11,7 @@ from unittest import mock
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ExportMode
 from constant.constant import CONFIG
 from mscalculate.aic.mini_aic_calculator import MiniAicCalculator
 from profiling_bean.prof_enum.data_tag import DataTag
@@ -119,4 +120,47 @@ class TestMiniMiniAicCalculator(unittest.TestCase):
         test_sql[0].commit()
         ProfilingScene().init("")
         db_manager.destroy(test_sql)
+
+    def test_save_should_run_success_when_normal(self):
+        with mock.patch(NAMESPACE + '.MiniAicCalculator.create_metrics_summary_db'), \
+                mock.patch('viewer.calculate_rts_data.create_metric_table'), \
+                mock.patch('common_func.db_manager.DBManager.insert_data_into_table'):
+            check = MiniAicCalculator(self.file_list, CONFIG)
+            check.save()
+
+    def test_save_should_catch_exception_when_raise(self):
+        with mock.patch(NAMESPACE + '.MiniAicCalculator.create_metrics_summary_db', side_effect=ValueError), \
+                mock.patch('viewer.calculate_rts_data.create_metric_table'), \
+                mock.patch('common_func.db_manager.DBManager.insert_data_into_table'):
+            check = MiniAicCalculator(self.file_list, CONFIG)
+            check.save()
+
+    def test_get_metric_summary_data_should_return_empty_when_no_table(self):
+        check = MiniAicCalculator(self.file_list, CONFIG)
+        self.assertEqual(check.get_metric_summary_data(1800), [])
+
+
+    def test_get_metric_summary_data_should_return_data_when_is_ALLEXPORT(self):
+        with mock.patch('common_func.db_manager.DBManager.check_connect_db_path', return_value=(True, True)), \
+                mock.patch('common_func.db_manager.DBManager.judge_table_exist', return_value=True), \
+                mock.patch('common_func.db_manager.DBManager.fetch_all_data', return_value=[(1,2,3)]):
+            check = MiniAicCalculator(self.file_list, CONFIG)
+            InfoConfReader()._info_json = {'devices': '0'}
+            self.assertEqual(check.get_metric_summary_data(1800), [(1,2,3)])
+            InfoConfReader()._info_json.clear()
+
+    def test_get_metric_summary_data_should_return_data_when_is_not_ALLEXPORT(self):
+        with mock.patch('common_func.db_manager.DBManager.check_connect_db_path', return_value=(True, True)), \
+                mock.patch('common_func.db_manager.DBManager.judge_table_exist', return_value=True):
+
+            check = MiniAicCalculator(self.file_list, CONFIG)
+            InfoConfReader()._info_json = {'devices': '0'}
+            ProfilingScene().set_mode(ExportMode.STEP_EXPORT)
+            self.assertEqual(check.get_metric_summary_data(1800), [])
+            with mock.patch('viewer.calculate_rts_data._query_limit_and_offset', return_value=[1, 2]), \
+                    mock.patch('common_func.db_manager.DBManager.get_table_headers', return_value=["ai_core_num"]), \
+                    mock.patch('common_func.db_manager.DBManager.fetch_all_data', return_value=[(1, 2, 3)]):
+                self.assertEqual(check.get_metric_summary_data(1800), [(1, 2, 3)])
+            InfoConfReader()._info_json.clear()
+            ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
 

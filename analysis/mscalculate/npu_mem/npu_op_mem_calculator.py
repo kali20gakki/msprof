@@ -3,6 +3,7 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
 
 import logging
+import os
 from collections import namedtuple
 
 from common_func.db_manager import DBManager
@@ -67,8 +68,7 @@ class NpuOpMemCalculator(ICalculator, MsMultiProcess):
 
     def _judge_should_calculate(self):
         npu_op_mem_db_path = PathManager.get_db_path(self._project_path, DBNameConstant.DB_MEMORY_OP)
-        conn, curs = DBManager.check_connect_db_path(npu_op_mem_db_path)
-        if not conn or not curs:
+        if not os.path.exists(npu_op_mem_db_path):
             return False
         if DBManager.check_tables_in_db(npu_op_mem_db_path,
                                         DBNameConstant.TABLE_NPU_OP_MEM,

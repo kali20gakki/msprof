@@ -89,9 +89,9 @@ def add_ts_opname(report_task_data: list, result_dir: str) -> list:
     """
     add op name for task scheduler
     """
-
     conn_ge, curs_ge = DBManager.check_connect_db(result_dir, DBNameConstant.DB_GE_INFO)
     if not conn_ge or not curs_ge or not DBManager.judge_table_exist(curs_ge, DBNameConstant.TABLE_GE_TASK):
+        DBManager.destroy_db_connect(conn_ge, curs_ge)
         conn_ge, curs_ge = DBManager.check_connect_db(result_dir, DBNameConstant.DB_RTS_TRACK)
     if not conn_ge or not curs_ge:
         logging.warning('Can not get op_name, maybe framework data or task_track data not collected.')
