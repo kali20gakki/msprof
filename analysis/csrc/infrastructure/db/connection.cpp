@@ -45,9 +45,8 @@ Connection::Connection(const std::string &path)
 
 Connection::~Connection()
 {
-    if (stmt_) {
-        sqlite3_finalize(stmt_);
-    }
+    // 先释放sqlite3_stmt,再释放sqlite3
+    FinalizeStmt();
     if (db_) {
         int rc = sqlite3_close(db_);
         if (rc != SQLITE_OK) {
@@ -65,11 +64,7 @@ bool Connection::ExecuteSql(const std::string &sql, const std::string &sqlType)
     int rc = sqlite3_exec(db_, sql.c_str(), nullptr, nullptr, &errMsg);
     if (rc != SQLITE_OK) {
         std::string errorMsg = "Failed to " + sqlType +": " + std::string(errMsg);
-        if (sqlType == CHECK) {
-            WARN("sqlite3_exec return %, %", rc, errorMsg);
-        } else {
-            ERROR("sqlite3_exec return %, %", rc, errorMsg);
-        }
+        ERROR("sqlite3_exec return %, %", rc, errorMsg);
         sqlite3_free(errMsg);
         return false;
     }
@@ -78,8 +73,9 @@ bool Connection::ExecuteSql(const std::string &sql, const std::string &sqlType)
 
 bool Connection::CheckTableExists(const std::string &tableName)
 {
-    std::string checkSql = "SELECT COUNT(1) FROM " + tableName + ";";
-    return ExecuteSql(checkSql, CHECK);
+    std::string sql{"SELECT 1 FROM sqlite_master WHERE type='table' AND name='" + tableName + "' LIMIT 1"};
+    std::vector<std::tuple<int32_t>> result;
+    return ExecuteQuery(sql, result) && !result.empty();
 }
 
 bool Connection::ExecuteCreateTable(const std::string &sql)
@@ -112,6 +108,8 @@ std::vector<TableColumn> Connection::ExecuteGetTableColumns(const std::string &t
     std::vector <TableColumn> cols;
     std::string sql = "PRAGMA table_info(" + tableName + ");";
     sqlite3_busy_timeout(db_, TIMEOUT);
+    // prepare前需要保证stmt是nullptr
+    FinalizeStmt();
     bool rc = sqlite3_prepare_v2(db_, sql.c_str(), -1, &stmt_, nullptr);
     if (rc != SQLITE_OK) {
         std::string errorMsg = std::string(sqlite3_errmsg(db_));
@@ -138,6 +136,8 @@ bool Connection::InsertCmd(const std::string &tableName, const uint32_t &colNum)
     valueStr = "(" + valueStr + "?)";
     std::string sql = "INSERT INTO " + tableName + " VALUES" + valueStr;
     sqlite3_busy_timeout(db_, TIMEOUT);
+    // prepare前需要保证stmt是nullptr
+    FinalizeStmt();
     bool rc = sqlite3_prepare_v2(db_, sql.c_str(), -1, &stmt_, nullptr);
     if (rc != SQLITE_OK) {
         std::string errorMsg = std::string(sqlite3_errmsg(db_));
@@ -149,6 +149,8 @@ bool Connection::InsertCmd(const std::string &tableName, const uint32_t &colNum)
 
 bool Connection::QueryCmd(const std::string &sql)
 {
+    // prepare前需要保证stmt是nullptr
+    FinalizeStmt();
     int rc = sqlite3_prepare_v2(db_, sql.c_str(), -1, &stmt_, nullptr);
     if (rc != SQLITE_OK) {
         std::string errorMsg = "Failed to bind parameter: " + std::string(sqlite3_errmsg(db_));
@@ -156,6 +158,14 @@ bool Connection::QueryCmd(const std::string &sql)
         return false;
     }
     return true;
+}
+
+void Connection::FinalizeStmt()
+{
+    if (stmt_) {
+        sqlite3_finalize(stmt_);
+        stmt_ = nullptr;
+    }
 }
 
 void Connection::BindParameters(int64_t value)
