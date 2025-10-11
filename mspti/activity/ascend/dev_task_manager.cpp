@@ -54,7 +54,6 @@ DevTaskManager::DevTaskManager()
 msptiResult DevTaskManager::StartAllDevKindProfTask(std::vector<std::unique_ptr<DevProfTask>>& profTasks,
                                                     std::vector<std::unique_ptr<DevProfTask>>& successTasks)
 {
-    msptiResult ret = MSPTI_SUCCESS;
     for (auto& profTask : profTasks) {
         if (profTask->Start() != MSPTI_SUCCESS) {
             return MSPTI_ERROR_INNER;

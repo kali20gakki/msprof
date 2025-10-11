@@ -84,6 +84,7 @@ public:
 
 private:
     bool InsertCmd(const std::string &tableName, const uint32_t &colNum);
+    void FinalizeStmt();
     void BindParameters(int64_t value);
     void BindParameters(uint64_t value);
     void BindParameters(int32_t value);
