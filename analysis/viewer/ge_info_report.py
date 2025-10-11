@@ -73,6 +73,7 @@ def get_ge_model_name_dict(project_path: str) -> dict:
         return {}
     sql = "select model_id, model_name from {}".format(DBNameConstant.TABLE_MODEL_NAME)
     data = model_view.get_sql_data(sql)
+    model_view.finalize()
     hash_dict = get_ge_hash_dict(project_path)
     model_name_list = []
     for _data in data:

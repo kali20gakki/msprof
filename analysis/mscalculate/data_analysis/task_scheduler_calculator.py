@@ -100,6 +100,7 @@ class TaskSchedulerCalculator(MsMultiProcess):
         runtime_conn, runtime_curs = DBManager.check_connect_db_path(db_path)
         if not runtime_conn or not runtime_curs \
                 or not DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_RUNTIME_TASK_TIME):
+            DBManager.destroy_db_connect(runtime_conn, runtime_curs)
             return
         self._create_report_task_table(runtime_conn)
         self._insert_report_task_data(runtime_conn, runtime_curs, device_id)
