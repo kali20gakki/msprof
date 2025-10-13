@@ -15,6 +15,7 @@
 #include "common/inject/mstx_inject.h"
 #include "activity/activity_manager.h"
 #include "activity/ascend/dev_task_manager.h"
+#include "activity/ascend/channel/channel_pool_manager.h"
 #include "common/plog_manager.h"
 #include "common/context_manager.h"
 #include "common/utils.h"
@@ -92,6 +93,7 @@ msptiResult CallbackManager::Init(msptiSubscriberHandle *subscriber, msptiCallba
     Mspti::Ascend::DevTaskManager::GetInstance()->RegisterReportCallback();
     Mspti::Common::ContextManager::GetInstance()->StartSyncTime();
     MsptiMstxApi::MsptiEnableMstxFunc();
+    Mspti::Ascend::Channel::ChannelPoolManager::GetInstance()->Init();
     MSPTI_LOGI("CallbackManager Init success.");
     return MSPTI_SUCCESS;
 }
@@ -111,6 +113,7 @@ msptiResult CallbackManager::UnInit(msptiSubscriberHandle subscriber)
     }
     init_.store(false);
     Mspti::Common::ContextManager::GetInstance()->StopSyncTime();
+    Mspti::Ascend::Channel::ChannelPoolManager::GetInstance()->UnInit();
     MSPTI_LOGI("CallbackManager UnInit success.");
     return MSPTI_SUCCESS;
 }
