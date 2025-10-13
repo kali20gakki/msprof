@@ -41,12 +41,10 @@ DevTaskManager::~DevTaskManager()
         StopAllDevKindProfTask(iter->second);
     }
     task_map_.clear();
-    Mspti::Ascend::Channel::ChannelPoolManager::GetInstance()->UnInit();
 }
 
 DevTaskManager::DevTaskManager()
 {
-    Mspti::Ascend::Channel::ChannelPoolManager::GetInstance()->Init();
     Mspti::Common::ContextManager::GetInstance()->InitHostTimeInfo();
     RegisterReportCallback();
 }

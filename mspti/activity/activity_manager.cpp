@@ -338,7 +338,7 @@ msptiResult ActivityManager::SetDevice(uint32_t deviceId)
         }
         devices_.insert(deviceId);
     }
-    if (!std::find(activity_switch_.begin(), activity_switch_.end(), true)) {
+    if (std::find(activity_switch_.begin(), activity_switch_.end(), true) == activity_switch_.end()) {
         return MSPTI_SUCCESS;
     }
     return Mspti::Ascend::DevTaskManager::GetInstance()->StartDevProfTask(deviceId, activity_switch_);
