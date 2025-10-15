@@ -5,6 +5,7 @@ from unittest import mock
 import pytest
 
 from analyzer.communication_matrix_analyzer import CommunicationMatrixAnalyzer
+from common_func.info_conf_reader import InfoConfReader
 from msparser.cluster.communication_matrix_parser import CommunicationMatrixParser
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_exception import ProfException
@@ -116,12 +117,15 @@ class TestCommunicationMatrixAnalyzer(unittest.TestCase):
         expected_result = {
             'hcom_allReduce__1@group_name': events
         }
+        InfoConfReader()._start_info = {'collectionTimeBegin': 0}
+        InfoConfReader()._end_info = {}
         with mock.patch(NAMESPACE + ".CommunicationModel.check_table", return_value=True), \
                 mock.patch(NAMESPACE + ".CommunicationModel.get_all_events_from_db", return_value=events):
             analyzer = CommunicationMatrixAnalyzer(self.collection_path, 'text')
             analyzer._get_hccl_data_from_db(os.path.join(self.collection_path, "device_1"))
 
             self.assertEqual(analyzer.hccl_op_data, expected_result)
+        InfoConfReader()._start_info.clear()
 
     def test_process_dict_should_return_correct_dict_when_process_analyzed_data(self):
         analyzer = CommunicationMatrixAnalyzer(self.collection_path, 'text')
@@ -136,19 +140,25 @@ class TestCommunicationMatrixAnalyzer(unittest.TestCase):
             self.assertEqual(ProfException.PROF_INVALID_DATA_ERROR, err.value.code)
 
     def test_get_hccl_data_from_db_should_raise_exception_when_no_hccl_data(self):
+        InfoConfReader()._start_info = {'collectionTimeBegin': 0}
+        InfoConfReader()._end_info = {}
         with mock.patch(NAMESPACE + ".CommunicationModel.check_db", return_value=True), \
                 mock.patch(NAMESPACE + ".CommunicationModel.get_all_events_from_db", return_value=[]), \
                 pytest.raises(ProfException) as err:
             analyzer = CommunicationMatrixAnalyzer(self.collection_path, 'text')
             analyzer._get_hccl_data_from_db(os.path.join(self.collection_path, "device_1"))
             self.assertEqual(ProfException.PROF_INVALID_DATA_ERROR, err.value.code)
+        InfoConfReader()._start_info.clear()
 
     def test_get_hccl_data_from_db_should_raise_exception_when_no_hccl_allReduce_table(self):
+        InfoConfReader()._start_info = {'collectionTimeBegin': 0}
+        InfoConfReader()._end_info = {}
         with mock.patch(NAMESPACE + ".CommunicationModel.check_table", return_value=False), \
                 pytest.raises(ProfException) as err:
             analyzer = CommunicationMatrixAnalyzer(self.collection_path, 'text')
             analyzer._get_hccl_data_from_db(os.path.join(self.collection_path, "device_1"))
             self.assertEqual(ProfException.PROF_INVALID_CONNECT_ERROR, err.value.code)
+        InfoConfReader()._start_info.clear()
 
     def test_dump_dict_to_db_should_flush_correct_data_to_db(self):
         with mock.patch("msmodel.cluster_info.communication_analyzer_model.CommunicationAnalyzerModel."

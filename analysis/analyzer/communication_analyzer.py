@@ -12,6 +12,7 @@ from common_func.common import warn
 from common_func.constant import Constant
 from common_func.data_check_manager import DataCheckManager
 from common_func.db_name_constant import DBNameConstant
+from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import OpBandWidthType
 from common_func.ms_constant.str_constant import StrConstant
@@ -61,8 +62,10 @@ class CommunicationAnalyzer:
         get op events of all rank by iteration start and end time
         """
         with CommunicationModel(rank_path) as _model:
+            start_ts, _ = InfoConfReader().get_collect_time()
+            start_time_raw_timestamp = InfoConfReader().trans_from_local_time_into_dev_raw_time(start_ts)
             conditions = {
-                'iter_start': NumberConstant.DEFAULT_START_TIME,
+                'iter_start': start_time_raw_timestamp,
                 'iter_end': NumberConstant.DEFAULT_END_TIME
             }
             events_all = _model.get_all_events_from_db(conditions)
@@ -137,6 +140,7 @@ class CommunicationAnalyzer:
             if sub_dir != StrConstant.TIMELINE_PATH and sub_dir != self.HOST_PATH:
                 sub_path = get_valid_sub_path(collect_path, sub_dir, False)
                 if DataCheckManager.contain_info_json_data(sub_path):
+                    LoadInfoManager.load_info(sub_path)
                     self._communication_analyze(sub_path)
                 elif sub_path and is_cluster:
                     warn(self.FILE_NAME, 'Invalid parsing dir("%s"), -dir must be profiling data dir '
