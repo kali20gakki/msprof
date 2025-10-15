@@ -37,7 +37,7 @@ class NpuOpMemCalculator(ICalculator, MsMultiProcess):
                                           DBNameConstant.TABLE_NPU_OP_MEM,
                                           DBNameConstant.TABLE_NPU_OP_MEM_REC])
         self._memory_record = []
-        self._opeartor_memory = []
+        self._operator_memory = []
 
     def calculate(self: any) -> None:
         with self._model as _model:
@@ -49,11 +49,11 @@ class NpuOpMemCalculator(ICalculator, MsMultiProcess):
         """
         save data
         """
-        if not self._memory_record or not self._opeartor_memory:
+        if not self._memory_record or not self._operator_memory:
             return
         with self._model as _model:
             _model.flush(DBNameConstant.TABLE_NPU_OP_MEM_REC, self._memory_record)
-            _model.flush(DBNameConstant.TABLE_NPU_OP_MEM, self._opeartor_memory)
+            _model.flush(DBNameConstant.TABLE_NPU_OP_MEM, self._operator_memory)
             return
 
     def ms_run(self: any) -> None:
@@ -105,11 +105,11 @@ class NpuOpMemCalculator(ICalculator, MsMultiProcess):
                         item_value.total_allocate_memory, item_value.total_reserve_memory,
                         item_key.device_type
                     ]
-                    self._opeartor_memory.append(op_mem)
+                    self._operator_memory.append(op_mem)
                     allocated_data.pop(item_key)
         if len(allocated_data) > 0:
             for key, value in allocated_data.items():
-                self._opeartor_memory.append([key.operator, value.size, value.timestamp,
+                self._operator_memory.append([key.operator, value.size, value.timestamp,
                                               NumberConstant.NULL_NUMBER, NumberConstant.NULL_NUMBER,
                                               value.total_allocate_memory, value.total_reserve_memory,
                                               NumberConstant.NULL_NUMBER, NumberConstant.NULL_NUMBER, key.device_type])
@@ -122,7 +122,7 @@ class NpuOpMemCalculator(ICalculator, MsMultiProcess):
     def _reformat_data(self: any) -> list:
         hash_dict_data = HashDictData(self._project_path)
         ge_dict = hash_dict_data.get_ge_hash_dict()
-        for item in self._opeartor_memory:
+        for item in self._operator_memory:
             name = ''
             if item[0] in ge_dict:
                 name = ge_dict[item[0]]

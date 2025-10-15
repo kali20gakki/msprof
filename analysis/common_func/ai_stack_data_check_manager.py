@@ -319,7 +319,7 @@ class AiStackDataCheckManager(DataCheckManager):
     @classmethod
     def contain_mem_rec_data(cls: any, result_dir: str, device_id: int = None) -> bool:
         """
-        The data path contain momory record data or not
+        The data path contain memory record data or not
         """
         return AiStackDataCheckManager._check_output(result_dir, device_id) and \
             DBManager.check_tables_in_db(PathManager.get_db_path(result_dir, DBNameConstant.DB_MEMORY_OP),

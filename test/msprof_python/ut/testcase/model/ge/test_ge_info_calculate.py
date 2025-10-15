@@ -79,7 +79,7 @@ class TestGeInfoModel(unittest.TestCase):
             res = check.get_batch_dict()
         self.assertEqual(expect_res, res)
 
-    def test_get_all_ge_static_shape_data_when_single_op_scence(self):
+    def test_get_all_ge_static_shape_data_when_single_op_scene(self):
         with mock.patch(NAMESPACE + ".Utils.is_step_scene", return_value=False):
             check = GeInfoModel("")
             res = check.get_ge_data(Constant.GE_STATIC_SHAPE)
@@ -122,7 +122,7 @@ class TestGeInfoModel(unittest.TestCase):
             res = check.get_ge_data(Constant.GE_STATIC_SHAPE)
         self.assertEqual([{1: 0, 2: 0}, {0: {'7'}, 1: {'2'}}], res)
 
-    def test_get_all_ge_dynamic_shape_data_when_single_op_scence(self):
+    def test_get_all_ge_dynamic_shape_data_when_single_op_scene(self):
         with mock.patch(NAMESPACE + ".Utils.is_step_scene", return_value=False):
             check = GeInfoModel("")
             res = check.get_ge_data(Constant.GE_DYNAMIC_SHAPE)

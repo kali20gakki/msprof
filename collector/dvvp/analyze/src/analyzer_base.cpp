@@ -33,7 +33,7 @@ std::mutex AnalyzerBase::geThreadMtx_;
 void AnalyzerBase::AppendToBufferedData(CONST_CHAR_PTR data, uint32_t len)
 {
     if (buffer_.empty()) {
-        // no buffered data, use data directorly
+        // no buffered data, use data directly
         dataPtr_ = data;
         dataLen_ = len;
     } else {
@@ -65,10 +65,10 @@ int32_t AnalyzerBase::InitFrequency()
     }
     frequency_ = freq / 1000;   // 1000: mhz to ghz, syscnt * (1 / ghz) = ns
     if (frequency_ <= 0) {
-        MSPROF_LOGE("init freqency failed. freq %f", freq);
+        MSPROF_LOGE("init frequency failed. freq %f", freq);
         return PROFILING_FAILED;
     } else {
-        MSPROF_EVENT("InitFrequency success. freqency: %f", frequency_);
+        MSPROF_EVENT("InitFrequency success. frequency: %f", frequency_);
         return PROFILING_SUCCESS;
     }
 }

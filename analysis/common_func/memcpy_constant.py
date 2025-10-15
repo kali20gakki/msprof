@@ -43,7 +43,7 @@ class MemoryCopyConstant:
     H2D_NAME = "host to device"
     D2H_NAME = "device to host"
     D2D_NAME = "device to device"
-    DEFAULTE_NAME = "other"
+    DEFAULT_NAME = "other"
 
     @staticmethod
     def syscnt_to_micro() -> int:
@@ -77,4 +77,4 @@ class MemoryCopyConstant:
             cls.D2D_TAG: cls.D2D_NAME,
             cls.H2H_TAG: cls.H2H_NAME
         }
-        return direction_dict.get(tag, cls.DEFAULTE_NAME)
+        return direction_dict.get(tag, cls.DEFAULT_NAME)

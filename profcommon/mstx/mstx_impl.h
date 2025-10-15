@@ -68,7 +68,7 @@ mstxRangeId MstxDomainRangeStartAImpl(mstxDomainHandle_t domain, const char *mes
     aclrtStream stream);
 void MstxDomainRangeEndImpl(mstxDomainHandle_t domain, mstxRangeId id);
 int GetModuleTableFunc(MstxGetModuleFuncTableFunc getFuncTable);
-void ProfRegisteMstxFunc(MstxInitInjectionFunc mstxInitFunc, ProfModule module);
+void ProfRegisterMstxFunc(MstxInitInjectionFunc mstxInitFunc, ProfModule module);
 void EnableMstxFunc(ProfModule module);
 int MsptiMstxGetModuleFuncTable(MstxFuncModule module, MstxFuncTable* outTable, unsigned int* outSize);
 int ProfMstxGetModuleFuncTable(MstxFuncModule module, MstxFuncTable* outTable, unsigned int* outSize);

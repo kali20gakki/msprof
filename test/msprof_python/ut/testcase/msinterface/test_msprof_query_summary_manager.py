@@ -20,7 +20,7 @@ class TestMsprofQuerySummaryManager(unittest.TestCase):
     DIR_PATH = os.path.join(os.path.dirname(__file__), 'DT_MsprofQuerySummaryManager')
 
     def setUp(self) -> None:
-        os.makedirs(os.path.join(self.DIR_PATH, 'PROF1', 'devie_0'))
+        os.makedirs(os.path.join(self.DIR_PATH, 'PROF1', 'device_0'))
 
     def tearDown(self) -> None:
         clear_dt_project(self.DIR_PATH)
@@ -112,7 +112,7 @@ class TestMsprofQuerySummaryManager(unittest.TestCase):
                     "iteration_id": 1}
         args = Namespace(**args_dic)
         with mock.patch(NAMESPACE + ".MsprofQuerySummaryManager._check_collection_dir_valid", return_value=True),\
-                mock.patch(NAMESPACE + '.StepTraceSummay.process'):
+                mock.patch(NAMESPACE + '.StepTraceSummary.process'):
             check = MsprofQuerySummaryManager(args)
             check.process()
 

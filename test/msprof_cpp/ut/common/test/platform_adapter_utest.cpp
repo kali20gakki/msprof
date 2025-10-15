@@ -179,7 +179,7 @@ TEST_F(PlatformAdapterUtest, PlatformAdapterInterfaceModule3)
     std::string llcMode = "read";
     PlatformAdapterInterfaceMgr->SetParamsForDeviceHardwareMem(samplingInterval, llcMode);
     PlatformAdapterInterfaceMgr->SetParamsForDeviceIO(samplingInterval);
-    PlatformAdapterInterfaceMgr->SetParamsForDeviceIntercommection(samplingInterval);
+    PlatformAdapterInterfaceMgr->SetParamsForDeviceInterconnection(samplingInterval);
     PlatformAdapterInterfaceMgr->SetParamsForDeviceDVPP(samplingInterval);
     int biuFreq = 100;
     PlatformAdapterInterfaceMgr->SetParamsForDeviceInstr(biuFreq);
@@ -347,7 +347,7 @@ TEST_F(PlatformAdapterUtest, SetParamsForStorageLimitWillSetStorageLimitWhenInpu
     EXPECT_EQ(true, params->storageLimit.empty());
 }
 
-TEST_F(PlatformAdapterUtest, SetParamsForStorageLimitWillSetEmptyWhenNotSetLimitAndGetVolumnSizeNotAvaiable)
+TEST_F(PlatformAdapterUtest, SetParamsForStorageLimitWillSetEmptyWhenNotSetLimitAndGetVolumeSizeNotAvailable)
 {
     std::shared_ptr<PlatformAdapterInterface> mgr;
     MSVP_MAKE_SHARED0_VOID(mgr, PlatformAdapterInterface);

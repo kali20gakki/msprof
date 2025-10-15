@@ -148,7 +148,7 @@ class TraceViewManager:
         if layer_info.general_layer == TraceViewHeaderConstant.GENERAL_LAYER_CPU or \
                 not is_number(InfoConfReader().get_device_id()):
             # host device_id is 31, we cannot use NumberConstant.HOST_ID,
-            # cause this value is alse been used in record time.
+            # cause this value is also been used in record time.
             device_id = TraceViewManager.HOST_ID_FOR_PID
         else:
             device_id = int(InfoConfReader().get_device_id())

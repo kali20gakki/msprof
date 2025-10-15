@@ -230,7 +230,7 @@ msptiResult DevTaskManager::StartCannProfTask(uint32_t deviceId, const ActivityS
     command.type = PROF_COMMANDHANDLE_TYPE_START;
     auto ret = Mspti::Inject::profSetProfCommand(static_cast<VOID_PTR>(&command), sizeof(CommandHandle));
     if (ret != MSPTI_SUCCESS) {
-        MSPTI_LOGE("Start Profiling Commond failed.");
+        MSPTI_LOGE("Start Profiling Command failed.");
         return MSPTI_ERROR_INNER;
     }
     return MSPTI_SUCCESS;

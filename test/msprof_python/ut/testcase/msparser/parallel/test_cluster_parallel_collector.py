@@ -18,7 +18,7 @@ NAMESPACE = "msparser.parallel.cluster_parallel_collector"
 
 class TestClusterParallelCollector(unittest.TestCase):
     DIR_PATH = os.path.join(os.path.dirname(__file__), 'DT_ClusterParallelCollector')
-    CLUSTRER_INFO = [ClusterRankDto()]
+    CLUSTER_INFO = [ClusterRankDto()]
     DATA_PARALLEL_DATA = [[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]]
     MODEL_PARALLEL_DATA = [[1, 2, 3, 4, 5, 6, 7, 8]]
     PIPELINE_PARALLEL_DATA = [[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]]
@@ -32,12 +32,12 @@ class TestClusterParallelCollector(unittest.TestCase):
         clear_dt_project(self.DIR_PATH)
 
     def test_parse(self) -> None:
-        self.CLUSTRER_INFO[0].rank_id = 0
-        self.CLUSTRER_INFO[0].dir_name = "PROF1/device_0"
+        self.CLUSTER_INFO[0].rank_id = 0
+        self.CLUSTER_INFO[0].dir_name = "PROF1/device_0"
         with mock.patch(NAMESPACE + ".ClusterInfoViewModel.check_table", return_value=True), \
                 mock.patch(NAMESPACE + ".os.path.exists", return_value=True), \
                 mock.patch(NAMESPACE + ".ClusterInfoViewModel.get_all_cluster_rank_info",
-                           return_value=self.CLUSTRER_INFO), \
+                           return_value=self.CLUSTER_INFO), \
                 mock.patch(NAMESPACE + ".ParallelViewModel.get_parallel_table_name",
                            return_value="ClusterDataParallel"), \
                 mock.patch(NAMESPACE + ".ClusterParallelCollector.get_device_parallel_data"):
@@ -45,13 +45,13 @@ class TestClusterParallelCollector(unittest.TestCase):
             check.parse()
 
     def test_ms_run_data_parallel(self) -> None:
-        self.CLUSTRER_INFO[0].rank_id = 1
-        self.CLUSTRER_INFO[0].dir_name = "PROF1/device_0"
+        self.CLUSTER_INFO[0].rank_id = 1
+        self.CLUSTER_INFO[0].dir_name = "PROF1/device_0"
         InfoJsonReaderManager(info_json=InfoJson(DeviceInfo=[DeviceInfo(hwts_frequency=100).device_info])).process()
         with mock.patch(NAMESPACE + ".ClusterInfoViewModel.check_table", return_value=True), \
                 mock.patch(NAMESPACE + ".os.path.exists", return_value=True), \
                 mock.patch(NAMESPACE + ".ClusterInfoViewModel.get_all_cluster_rank_info",
-                           return_value=self.CLUSTRER_INFO), \
+                           return_value=self.CLUSTER_INFO), \
                 mock.patch(NAMESPACE + ".ParallelViewModel.get_parallel_table_name",
                            return_value="ClusterDataParallel"), \
                 mock.patch(NAMESPACE + ".ParallelViewModel.get_parallel_index_data",
@@ -65,14 +65,14 @@ class TestClusterParallelCollector(unittest.TestCase):
                 self.assertEqual(not DBManager.fetch_all_data(_model.cur, sql), False)
 
     def test_ms_run_model_parallel(self) -> None:
-        self.CLUSTRER_INFO[0].rank_id = 1
-        self.CLUSTRER_INFO[0].device_id = 1
-        self.CLUSTRER_INFO[0].dir_name = "PROF1/device_0"
+        self.CLUSTER_INFO[0].rank_id = 1
+        self.CLUSTER_INFO[0].device_id = 1
+        self.CLUSTER_INFO[0].dir_name = "PROF1/device_0"
         InfoJsonReaderManager(info_json=InfoJson(DeviceInfo=[DeviceInfo(hwts_frequency=100).device_info])).process()
         with mock.patch(NAMESPACE + ".ClusterInfoViewModel.check_table", return_value=True), \
                 mock.patch(NAMESPACE + ".os.path.exists", return_value=True), \
                 mock.patch(NAMESPACE + ".ClusterInfoViewModel.get_all_cluster_rank_info",
-                           return_value=self.CLUSTRER_INFO), \
+                           return_value=self.CLUSTER_INFO), \
                 mock.patch(NAMESPACE + ".ParallelViewModel.get_parallel_table_name",
                            return_value="ClusterModelParallel"), \
                 mock.patch(NAMESPACE + ".ParallelViewModel.get_parallel_index_data",
@@ -86,13 +86,13 @@ class TestClusterParallelCollector(unittest.TestCase):
                 self.assertEqual(not DBManager.fetch_all_data(_model.cur, sql), False)
 
     def test_ms_run_pipeline_parallel(self) -> None:
-        self.CLUSTRER_INFO[0].rank_id = 1
-        self.CLUSTRER_INFO[0].dir_name = "PROF1/device_0"
+        self.CLUSTER_INFO[0].rank_id = 1
+        self.CLUSTER_INFO[0].dir_name = "PROF1/device_0"
         InfoJsonReaderManager(info_json=InfoJson(DeviceInfo=[DeviceInfo(hwts_frequency=100).device_info])).process()
         with mock.patch(NAMESPACE + ".ClusterInfoViewModel.check_table", return_value=True), \
                 mock.patch(NAMESPACE + ".os.path.exists", return_value=True), \
                 mock.patch(NAMESPACE + ".ClusterInfoViewModel.get_all_cluster_rank_info",
-                           return_value=self.CLUSTRER_INFO), \
+                           return_value=self.CLUSTER_INFO), \
                 mock.patch(NAMESPACE + ".ParallelViewModel.get_parallel_table_name",
                            return_value="ClusterPipelineParallel"), \
                 mock.patch(NAMESPACE + ".ParallelViewModel.get_parallel_index_data",

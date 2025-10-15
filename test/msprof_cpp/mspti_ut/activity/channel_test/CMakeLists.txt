@@ -1,4 +1,4 @@
-file(GLOB_RECURSE COMMOM_FILE
+file(GLOB_RECURSE COMMON_FILE
     ${TOP_DIR}/mspti/common/*.cpp
 )
 
@@ -6,10 +6,10 @@ file(GLOB_RECURSE REMOVE_SOURCES
     ${TOP_DIR}/mspti/common/inject/*.cpp
 )
 
-list(REMOVE_ITEM COMMOM_FILE ${REMOVE_SOURCES})
+list(REMOVE_ITEM COMMON_FILE ${REMOVE_SOURCES})
 
 set(SRC_FILE
-    ${COMMOM_FILE}
+    ${COMMON_FILE}
     ${TOP_DIR}/mspti/activity/ascend/channel/channel_reader.cpp
     ${TOP_DIR}/mspti/activity/ascend/parser/parser_manager.cpp
     ${TOP_DIR}/mspti/activity/ascend/parser/cann_hash_cache.cpp

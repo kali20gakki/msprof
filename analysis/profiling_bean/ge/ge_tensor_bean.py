@@ -46,7 +46,7 @@ class GeTensorBean(GeTensorBaseBean):
     @property
     def batch_id(self: any) -> int:
         """
-        for bacth id
+        for batch id
         """
         return self._batch_id
 

@@ -232,7 +232,7 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvAicpuStartWillReturnSuccWhenDrvStartSucc)
 }
 
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvFftsProfileStart) {
-    analysis::dvvp::driver::AI_DRV_CHANNEL prof_channel = analysis::dvvp::driver::PROF_CHANNEL_FFTS_PROFILIE_TASK;
+    analysis::dvvp::driver::AI_DRV_CHANNEL prof_channel = analysis::dvvp::driver::PROF_CHANNEL_FFTS_PROFILE_TASK;
     std::vector<int>  prof_cores;
     std::vector<std::string> prof_events;
     std::vector<int>  prof_aivCores;

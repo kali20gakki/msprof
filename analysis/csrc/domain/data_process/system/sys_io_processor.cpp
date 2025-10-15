@@ -348,5 +348,5 @@ NicTimelineProcessor::NicTimelineProcessor(const std::string &profPath)
 RoCETimelineProcessor::RoCETimelineProcessor(const std::string &profPath)
     : SysIOTimelineProcessor(profPath, PROCESSOR_NAME_ROCE_TIMELINE) {}
 
-} // Doamin
+} // Domain
 } // Analysis

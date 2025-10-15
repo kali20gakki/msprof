@@ -29,7 +29,7 @@ COMMON_DIR="common_script"
 
 function backup_product() {
     get_cann_package_name
-	prepar_backup_path ${backup_path}
+	prepare_backup_path ${backup_path}
 
 	if [ "$cann_package_name" = "ascend-toolkit" ]; then
 		copy_product ${install_path}/${MSPROF_PATH}/${MSPROF} ${MSPROF}
@@ -53,7 +53,7 @@ function get_cann_package_name() {
 	exit 1
 }
 
-function prepar_backup_path() {
+function prepare_backup_path() {
 	if [ -d ${backup_path} ]; then
 		return
 	fi

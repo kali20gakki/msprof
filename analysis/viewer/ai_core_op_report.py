@@ -224,16 +224,16 @@ class AiCoreOpReport:
                            [DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE]) as hccl_model:
             if not hccl_model.check_table():
                 return []
-            hccl_comunication_data = hccl_model.get_hccl_op_data_by_group()
-        if not hccl_comunication_data:
+            hccl_communication_data = hccl_model.get_hccl_op_data_by_group()
+        if not hccl_communication_data:
             return []
 
         model_name = []
         index_id = []
         model_name_and_id_dict = get_ge_model_name_dict(project_path)
-        hccl_data = [0] * len(hccl_comunication_data)
+        hccl_data = [0] * len(hccl_communication_data)
         # hccl data for op summary
-        for index, _hccl_op in enumerate(hccl_comunication_data):
+        for index, _hccl_op in enumerate(hccl_communication_data):
             if ProfilingScene().is_graph_export():
                 model_name = [model_name_and_id_dict.get(_hccl_op.model_id, Constant.NA)]
                 index_id = [_hccl_op.index_id]

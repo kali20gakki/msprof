@@ -52,13 +52,13 @@ protected:
     }
 };
 
-TEST_F(KernelParserWorkerUtest, TestKernalParserWorkerShouldReturnSuccessWhenAllFunctionWell)
+TEST_F(KernelParserWorkerUtest, TestKernelParserWorkerShouldReturnSuccessWhenAllFunctionWell)
 {
     KernelParserWorker kernelParserWorker(TEST_HOST_FILE_PATH);
     auto res = kernelParserWorker.Run();
     EXPECT_EQ(res, 0);
 }
-TEST_F(KernelParserWorkerUtest, TestKernalParserWorkerShouldReturnFailedWhenHostTraceWorkerReturnFailed)
+TEST_F(KernelParserWorkerUtest, TestKernelParserWorkerShouldReturnFailedWhenHostTraceWorkerReturnFailed)
 {
     KernelParserWorker kernelParserWorker(TEST_HOST_FILE_PATH);
     MOCKER_CPP(&HostTraceWorker::Run).reset();
@@ -67,7 +67,7 @@ TEST_F(KernelParserWorkerUtest, TestKernalParserWorkerShouldReturnFailedWhenHost
     EXPECT_EQ(res, 1);
 }
 
-TEST_F(KernelParserWorkerUtest, TestKernalParserWorkerShouldReturnFailedWhenDumpHashFailed)
+TEST_F(KernelParserWorkerUtest, TestKernelParserWorkerShouldReturnFailedWhenDumpHashFailed)
 {
     KernelParserWorker kernelParserWorker(TEST_HOST_FILE_PATH);
     MOCKER_CPP(&DBRunner::CreateTable).stubs().will(returnValue(false));
@@ -75,7 +75,7 @@ TEST_F(KernelParserWorkerUtest, TestKernalParserWorkerShouldReturnFailedWhenDump
     EXPECT_EQ(res, 1);
 }
 
-TEST_F(KernelParserWorkerUtest, TestKernalParserWorkerShouldReturnFailedWhenTypeInfoDumpFailed)
+TEST_F(KernelParserWorkerUtest, TestKernelParserWorkerShouldReturnFailedWhenTypeInfoDumpFailed)
 {
     KernelParserWorker kernelParserWorker(TEST_HOST_FILE_PATH);
     MOCKER_CPP(&DBRunner::CreateTable).stubs().will(returnValue(false));
@@ -83,7 +83,7 @@ TEST_F(KernelParserWorkerUtest, TestKernalParserWorkerShouldReturnFailedWhenType
     EXPECT_EQ(res, 1);
 }
 
-TEST_F(KernelParserWorkerUtest, TestKernalParserWorkerShouldReturnErrorWhenContextLoadFailed)
+TEST_F(KernelParserWorkerUtest, TestKernelParserWorkerShouldReturnErrorWhenContextLoadFailed)
 {
     KernelParserWorker kernelParserWorker(TEST_HOST_FILE_PATH);
     MOCKER_CPP(&Analysis::Domain::Environment::Context::Load).stubs().will(returnValue(false));

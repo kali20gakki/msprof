@@ -125,13 +125,13 @@ public:
                                   std::pair<uint32_t, uint32_t> ctxRange)
     {
         EventInfo testInfo{EventType::EVENT_TYPE_CONTEXT_ID, MSPROF_REPORT_NODE_LEVEL, dot, dot};
-        auto addtionInfo = std::make_shared<MsprofAdditionalInfo>();
+        auto additionInfo = std::make_shared<MsprofAdditionalInfo>();
         uint32_t num = ctxRange.second - ctxRange.first + 1;
         if (num > MSPROF_CTX_ID_MAX_NUM) {
             throw std::runtime_error("ctx id num is illegal");
         }
-        addtionInfo->timeStamp = dot;
-        addtionInfo->dataLen = num;
+        additionInfo->timeStamp = dot;
+        additionInfo->dataLen = num;
 
         MsprofContextIdInfo ctxId;
         ctxId.opName = dot;
@@ -141,9 +141,9 @@ public:
             ids[i] = ctxRange.first + i;
         }
         std::memcpy(ctxId.ctxIds, &ids, sizeof(uint32_t) * num);
-        std::memcpy(addtionInfo->data, &ctxId, sizeof(ctxId));
+        std::memcpy(additionInfo->data, &ctxId, sizeof(ctxId));
 
-        auto eventPtr = std::make_shared<Event>(addtionInfo, testInfo);
+        auto eventPtr = std::make_shared<Event>(additionInfo, testInfo);
         eventQueue->Push(eventPtr);
     }
 
@@ -152,11 +152,11 @@ public:
                                   uint32_t endCtx, uint32_t startCtx = 0)
     {
         EventInfo testInfo{EventType::EVENT_TYPE_CONTEXT_ID, MSPROF_REPORT_HCCL_NODE_LEVEL, dot, dot};
-        auto addtionInfo = std::make_shared<MsprofAdditionalInfo>();
+        auto additionInfo = std::make_shared<MsprofAdditionalInfo>();
         uint32_t num = 2;
 
-        addtionInfo->timeStamp = dot;
-        addtionInfo->dataLen = num;
+        additionInfo->timeStamp = dot;
+        additionInfo->dataLen = num;
 
         MsprofContextIdInfo ctxId;
         ctxId.opName = dot;
@@ -165,9 +165,9 @@ public:
         ids[0] = startCtx;
         ids[1] = endCtx;
         std::memcpy(ctxId.ctxIds, &ids, sizeof(uint32_t) * num);
-        std::memcpy(addtionInfo->data, &ctxId, sizeof(ctxId));
+        std::memcpy(additionInfo->data, &ctxId, sizeof(ctxId));
 
-        auto eventPtr = std::make_shared<Event>(addtionInfo, testInfo);
+        auto eventPtr = std::make_shared<Event>(additionInfo, testInfo);
         eventQueue->Push(eventPtr);
     }
 

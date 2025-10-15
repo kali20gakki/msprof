@@ -17,7 +17,7 @@ class MemcpyRecorder:
 
     def __init__(self: any, stream_id: int, task_id: int) -> None:
         self.tag_to_state = {
-            MemoryCopyConstant.RECEIVE_TAG: RecieveState(self),
+            MemoryCopyConstant.RECEIVE_TAG: ReceiveState(self),
             MemoryCopyConstant.START_TAG: StartState(self),
             MemoryCopyConstant.END_TAG: EndState(self)
         }
@@ -39,7 +39,7 @@ class MemcpyRecorder:
     def process_state_tag(self: any, tag: int, timestamp: int) -> None:
         """
         process state tag
-        :param tag: recieve tag, start tag and end tag
+        :param tag: receive tag, start tag and end tag
         :param timestamp: timestamp
         :return: None
         """
@@ -49,14 +49,14 @@ class MemcpyRecorder:
 
 class MemcpyState:
     """
-    class for reading memory copy state, including recieving, starting, ending
+    class for reading memory copy state, including receiving, starting, ending
     """
 
     NEWEST_BATCH_INDEX = -1
 
     def __init__(self: any, memcpy_recorder: any) -> None:
         self.tag_to_func = {
-            MemoryCopyConstant.RECEIVE_TAG: self.process_recieve_tag,
+            MemoryCopyConstant.RECEIVE_TAG: self.process_receive_tag,
             MemoryCopyConstant.START_TAG: self.process_start_tag,
             MemoryCopyConstant.END_TAG: self.process_end_tag
         }
@@ -65,7 +65,7 @@ class MemcpyState:
     def process_state_tag(self: any, tag: int, timestamp: int) -> None:
         """
         process state tag according to tag_to_func
-        :param tag: recieve tag, start tag and end tag
+        :param tag: receive tag, start tag and end tag
         :param timestamp: timestamp
         :return: None
         """
@@ -82,9 +82,9 @@ class MemcpyState:
                       timestamp)
 
     @abstractmethod
-    def process_recieve_tag(self: any, timestamp: int) -> None:
+    def process_receive_tag(self: any, timestamp: int) -> None:
         """
-        process recieve tag
+        process receive tag
         :param timestamp: timestamp
         """
 
@@ -103,12 +103,12 @@ class MemcpyState:
         """
 
 
-class RecieveState(MemcpyState):
+class ReceiveState(MemcpyState):
     """
-    class for recieving state
+    class for receiving state
     """
 
-    def process_recieve_tag(self: any, timestamp: int) -> None:
+    def process_receive_tag(self: any, timestamp: int) -> None:
         logging.warning("The state tag %d of stream %d task %d is repeating.",
                         MemoryCopyConstant.RECEIVE_TAG,
                         self.memcpy_recorder.stream_id,
@@ -134,7 +134,7 @@ class StartState(MemcpyState):
     class for starting state
     """
 
-    def process_recieve_tag(self: any, timestamp: int) -> None:
+    def process_receive_tag(self: any, timestamp: int) -> None:
         logging.warning("Miss state tag %d of stream %d task %d.",
                         MemoryCopyConstant.END_TAG,
                         self.memcpy_recorder.stream_id,
@@ -161,7 +161,7 @@ class EndState(MemcpyState):
     class for ending state
     """
 
-    def process_recieve_tag(self: any, timestamp: int) -> None:
+    def process_receive_tag(self: any, timestamp: int) -> None:
         self.memcpy_recorder.start_new_batch()
         self.memcpy_recorder.each_batch_timestamp[self.NEWEST_BATCH_INDEX][
             MemoryCopyConstant.STATES_TIMESTAMPS_RECEIVE_INDEX] = InfoConfReader().time_from_syscnt(

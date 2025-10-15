@@ -209,11 +209,11 @@ class HCCLExport:
             if _hccl_data.plane_id == self.INVALID_PLANE:
                 continue
             thread_id = self.hccl_groups.get(_hccl_data.group_name)[group_type].start_index + _hccl_data.plane_id + 1
-            _hccl_data_pice = [
+            _hccl_data_piece = [
                 _hccl_data.hccl_name, self.pid_value, thread_id,
                 InfoConfReader().trans_into_local_time(raw_timestamp=_hccl_data.timestamp),
                 _hccl_data.duration / NumberConstant.NS_TO_US, hccl_args
             ]
-            _hccl_format_data[index] = _hccl_data_pice
+            _hccl_format_data[index] = _hccl_data_piece
             index += 1
         return _hccl_format_data[:index]

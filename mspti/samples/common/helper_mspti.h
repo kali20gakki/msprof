@@ -101,7 +101,7 @@ static const char* GetActivityMemcpyKindString(msptiActivityMemcpyKind memcpyKin
     return it != STRING_MAP.end() ? it->second : "<unknown>";
 }
 
-static const char* GetExternalCorrelationKindString(msptiExternalCorrelationKind corrleationKind)
+static const char* GetExternalCorrelationKindString(msptiExternalCorrelationKind correlationKind)
 {
     static const std::unordered_map<msptiExternalCorrelationKind, const char*> STRING_MAP = {
         {MSPTI_EXTERNAL_CORRELATION_KIND_INVALID, "INVALID"},
@@ -111,7 +111,7 @@ static const char* GetExternalCorrelationKindString(msptiExternalCorrelationKind
         {MSPTI_EXTERNAL_CORRELATION_KIND_CUSTOM2, "CUSTOM2"}
     };
 
-    auto it = STRING_MAP.find(corrleationKind);
+    auto it = STRING_MAP.find(correlationKind);
     return it != STRING_MAP.end() ? it->second : "<unknown>";
 }
 

@@ -28,7 +28,7 @@ struct ApiEvent {
     uint64_t correlationId;
     MsprofApi api;
     MsprofCompactInfo compactInfo;
-    std::vector<std::unique_ptr<ApiEvent>> childs;
+    std::vector<std::unique_ptr<ApiEvent>> children;
 };
 
 class ProfTask {

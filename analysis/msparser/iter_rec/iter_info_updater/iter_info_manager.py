@@ -24,7 +24,7 @@ class IterInfoManager:
     @classmethod
     def check_parallel(cls: any, result_dir: str) -> bool:
         """
-        check parallel by num of items satisifed condition
+        check parallel by num of items satisfied condition
         """
         if not DBManager.check_tables_in_db(PathManager.get_db_path(result_dir, DBNameConstant.DB_STEP_TRACE),
                                             DBNameConstant.TABLE_STEP_TRACE_DATA):
@@ -45,13 +45,13 @@ class IterInfoManager:
 
     def initial_iter_to_info(self: any) -> None:
         """
-        get behind parallel iter of each iter and aicore info, then regist them to each iter
+        get behind parallel iter of each iter and aicore info, then register them to each iter
         """
         if not self._ts_track_model.check_table():
             return
         with self._ts_track_model:
             step_trace_data = self._ts_track_model.get_step_trace_data(ProfilingScene().get_step_table_name())
-        self.regist_parallel_set(step_trace_data)
+        self.register_parallel_set(step_trace_data)
 
         if not DBManager.check_tables_in_db(PathManager.get_db_path(self.project_path, DBNameConstant.DB_GE_INFO),
                                             DBNameConstant.TABLE_GE_TASK):
@@ -59,9 +59,9 @@ class IterInfoManager:
         with self._ge_model:
             static_task_dict = self._ge_model.get_ge_task_data(Constant.GE_STATIC_SHAPE)
             dynamic_task_dict = self._ge_model.get_ge_task_data(Constant.GE_DYNAMIC_SHAPE)
-        self.regist_aicore_set(static_task_dict, dynamic_task_dict)
+        self.register_aicore_set(static_task_dict, dynamic_task_dict)
 
-    def regist_parallel_set(self: any, step_trace_data: list) -> None:
+    def register_parallel_set(self: any, step_trace_data: list) -> None:
         """
         get behind parallel iter of each iter by two for loops
         """
@@ -86,7 +86,7 @@ class IterInfoManager:
                 if behind_iter_info.start_time < iter_info.end_time <= behind_iter_info.end_time:
                     iter_info.behind_parallel_iter.add(behind_datum.iter_id)
 
-    def regist_aicore_set(self: any, static_task_dict: dict, dynamic_task_dict: dict) -> None:
+    def register_aicore_set(self: any, static_task_dict: dict, dynamic_task_dict: dict) -> None:
         """
         get aicore info for each task
         """

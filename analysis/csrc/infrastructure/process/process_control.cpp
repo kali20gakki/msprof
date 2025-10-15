@@ -34,7 +34,7 @@ void GetDepProcessNames(const RegProcessInfo& procInfo, const ProcessCollection&
     }
 }
 
-void FillStatisticianDependence(const ProcessCollection& regProcess, std::vector<ProcessStatistcs>& stat)
+void FillStatisticianDependence(const ProcessCollection& regProcess, std::vector<ProcessStatistics>& stat)
 {
     for (auto& node : stat) {
         for (const auto& regPair : regProcess) {
@@ -96,7 +96,7 @@ private:
         size_t levelIndex = 0;
         auto preparedProcess = TakeAwayPreparedProcess(chipRelatedProcess);
         while (!preparedProcess.empty()) {
-            std::vector<ProcessStatistcs> stat(preparedProcess.size());
+            std::vector<ProcessStatistics> stat(preparedProcess.size());
             Analysis::Utils::ThreadPool pool(preparedProcess.size());
             pool.Start();
             RunPreparedProcess(preparedProcess, stat, pool, dataInventory, context);
@@ -121,7 +121,7 @@ private:
         return true;
     }
 
-    void RunPreparedProcess(ProcessCollection &preparedProcess, std::vector<ProcessStatistcs> &stat,
+    void RunPreparedProcess(ProcessCollection &preparedProcess, std::vector<ProcessStatistics> &stat,
                             Analysis::Utils::ThreadPool &pool, DataInventory& dataInventory,
                             const Context& context) const
     {
@@ -155,18 +155,18 @@ private:
         }
     }
 
-    bool GetStatistician(std::vector<ProcessStatistcs>&& statistics, bool& dfxStop)
+    bool GetStatistician(std::vector<ProcessStatistics>&& statistics, bool& dfxStop)
     {
-        auto generalResult = std::all_of(statistics.begin(), statistics.end(), [](ProcessStatistcs& node) {
+        auto generalResult = std::all_of(statistics.begin(), statistics.end(), [](ProcessStatistics& node) {
             return (node.returnCode == 0 || !node.mandatory);
         });
-        dfxStop = std::any_of(statistics.begin(), statistics.end(), [](ProcessStatistcs& node) {
+        dfxStop = std::any_of(statistics.begin(), statistics.end(), [](ProcessStatistics& node) {
             return node.dfxStop;
         });
         stat_.allLevelStat.emplace_back();
         auto& oneLevelStat = stat_.allLevelStat.back();
         oneLevelStat.generalResult = generalResult;
-        oneLevelStat.processStatistcs = std::move(statistics);
+        oneLevelStat.processStatistics = std::move(statistics);
         return generalResult; // Stop on error  这里是否停止还与Process类注册时，注册宏中mandatory字段确定
     }
 
@@ -232,9 +232,9 @@ void RecordProcessStat(const ExecuteProcessStat& stat, const std::string& subDir
         const auto& node = stat.allLevelStat[i];
         ss << "-------------------------------------------------------------------------------" << std::endl;
         ss << "level[" << i << "] generalResult:" << std::boolalpha << node.generalResult << std::noboolalpha
-            << ", process num:" << node.processStatistcs.size() << std::endl;
+            << ", process num:" << node.processStatistics.size() << std::endl;
         size_t j = 0;
-        for (const auto& proc : node.processStatistcs) {
+        for (const auto& proc : node.processStatistics) {
             ss << "\tprocess" << j++ << "[" << proc.processName << "]:" << "return: 0x"
                 << std::hex << proc.returnCode << std::dec << ", mandatory:"
                 << std::boolalpha << proc.mandatory << std::noboolalpha << std::endl;

@@ -82,7 +82,7 @@ std::shared_ptr<CommunicationOpDesc> TransApiEvent2CommOpDesc(const ApiEvent *ap
     desc->hostEndTime = api2TaskInfo->api.endTime;
     desc->threadId = api2TaskInfo->api.threadId;
     desc->opNameHash = api2TaskInfo->api.itemId;
-    for (auto &communicationTask : api2TaskInfo->childs) {
+    for (auto &communicationTask : api2TaskInfo->children) {
         if (communicationTask->level == MSPROF_REPORT_HCCL_NODE_LEVEL) {
             auto commTask = TransApiEvent2CommTask(communicationTask.get());
             if (UNLIKELY(commTask == nullptr)) {
@@ -98,7 +98,7 @@ std::shared_ptr<CommunicationOpDesc> TransApiEvent2CommOpDesc(const ApiEvent *ap
 
 msptiResult CommunicationCalculator::AppendApi2TaskInfo(const std::unique_ptr<ApiEvent>& api2TaskInfo)
 {
-    if (api2TaskInfo->childs.empty()) {
+    if (api2TaskInfo->children.empty()) {
         MSPTI_LOGW("target Api has not communication tasks");
         return MSPTI_SUCCESS;
     }
@@ -141,15 +141,15 @@ msptiResult CommunicationCalculator::AppendApi2TaskInfo(const std::unique_ptr<Ap
     return MSPTI_SUCCESS;
 }
 
-void AssembleTaskInfo(msptiActivityCommunication& communication, const CommunicationOpDesc *addationOpDesc,
+void AssembleTaskInfo(msptiActivityCommunication& communication, const CommunicationOpDesc *additionOpDesc,
                       const CommunicationOpDesc *OpTaskDesc)
 {
     communication.kind = MSPTI_ACTIVITY_KIND_COMMUNICATION;
-    if (addationOpDesc != nullptr) {
-        communication.dataType = static_cast<msptiCommunicationDataType>(addationOpDesc->dataType);
-        communication.count = addationOpDesc->count;
-        communication.algType = CannHashCache::GetInstance().GetHashInfo(addationOpDesc->algTypeHash).c_str();
-        communication.commName = CannHashCache::GetInstance().GetHashInfo(addationOpDesc->groupNameHash).c_str();
+    if (additionOpDesc != nullptr) {
+        communication.dataType = static_cast<msptiCommunicationDataType>(additionOpDesc->dataType);
+        communication.count = additionOpDesc->count;
+        communication.algType = CannHashCache::GetInstance().GetHashInfo(additionOpDesc->algTypeHash).c_str();
+        communication.commName = CannHashCache::GetInstance().GetHashInfo(additionOpDesc->groupNameHash).c_str();
     }
 
     if (OpTaskDesc != nullptr) {
@@ -165,25 +165,25 @@ void AssembleTaskInfo(msptiActivityCommunication& communication, const Communica
 msptiResult CommunicationCalculator::ReportCommunication(const DstType& dstKey,
                                                          const std::shared_ptr<CommunicationOpDesc>& commOp)
 {
-    std::shared_ptr<CommunicationOpDesc> addationOpDesc;
+    std::shared_ptr<CommunicationOpDesc> additionOpDesc;
     {
         std::lock_guard<std::mutex> lk(communicationOpInfoMutex_);
-        if (!commOp->agingFlag && taskId2AddationInfo.count(dstKey)) {
+        if (!commOp->agingFlag && taskId2AdditionInfo.count(dstKey)) {
             // 拿DstKey查一遍unordered_map，如果没有走正常逻辑
-            addationOpDesc = taskId2AddationInfo[dstKey];
+            additionOpDesc = taskId2AdditionInfo[dstKey];
         } else {
             auto& it =  communicationOpInfoQueue_[commOp->threadId];
             if (!it.empty()) {
-                addationOpDesc = communicationOpInfoQueue_[commOp->threadId].front();
+                additionOpDesc = communicationOpInfoQueue_[commOp->threadId].front();
                 communicationOpInfoQueue_[commOp->threadId].pop();
             }
-            if (!commOp->agingFlag && addationOpDesc != nullptr) {
-                taskId2AddationInfo.emplace(dstKey, addationOpDesc);
+            if (!commOp->agingFlag && additionOpDesc != nullptr) {
+                taskId2AdditionInfo.emplace(dstKey, additionOpDesc);
             }
         }
     }
     msptiActivityCommunication record{};
-    AssembleTaskInfo(record, addationOpDesc.get(), commOp.get());
+    AssembleTaskInfo(record, additionOpDesc.get(), commOp.get());
     Mspti::Activity::ActivityManager::GetInstance()->Record(
         Common::ReinterpretConvert<msptiActivity *>(&record), sizeof(msptiActivityCommunication));
     return MSPTI_SUCCESS;

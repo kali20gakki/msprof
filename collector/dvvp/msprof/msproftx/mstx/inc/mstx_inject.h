@@ -26,7 +26,7 @@ uint64_t MstxDomainRangeStartAFunc(mstxDomainHandle_t domain, const char* msg, a
 void MstxDomainRangeEndFunc(mstxDomainHandle_t domain, uint64_t id);
 int GetModuleTableFunc(MstxGetModuleFuncTableFunc getFuncTable);
 int InitInjectionMstx(MstxGetModuleFuncTableFunc getFuncTable);
-void MstxRegistMstxFunc();
+void MstxRegisterMstxFunc();
 void EnableMstxFunc();
 }
 

@@ -713,7 +713,7 @@ TEST_F(PROF_TIMER_TEST, Start) {
     EXPECT_EQ(PROFILING_SUCCESS, timerHandler.Start());
     //start succ
     EXPECT_EQ(PROFILING_FAILED, timerHandler.Start());
-    //stop faile setitimer failed
+    //stop failed setitimer failed
     EXPECT_EQ(PROFILING_SUCCESS, timerHandler.Stop());
     //stop succ
     std::shared_ptr<ProcAllPidsFileHandler> allPidsHandler(
@@ -879,11 +879,11 @@ TEST_F(NETDEV_STATS_HANDLER_TEST, Execute)
     // register task failed when GetDcmiCardDevId failed
     EXPECT_EQ(PROFILING_FAILED, handler.RegisterDevTask(devId));
     EXPECT_EQ(PROFILING_SUCCESS, handler.RegisterDevTask(devId));
-    // collet data failed
+    // collect data failed
     handler.prevTimeStamp_ = 1;
     handler.sampleIntervalNs_= 1;
     EXPECT_EQ(PROFILING_SUCCESS, handler.Execute());
-    // collet data succ
+    // collect data succ
     handler.prevTimeStamp_ = 1;
     EXPECT_EQ(PROFILING_SUCCESS, handler.Execute());
     EXPECT_EQ(PROFILING_SUCCESS, handler.Uinit());
@@ -915,7 +915,7 @@ TEST_F(NETDEV_STATS_HANDLER_TEST, StoreData)
     handler.StoreData(devId, data);
 
     data = "hello msprof";
-    // device task not reigstered
+    // device task not registered
     handler.StoreData(devId, data);
     EXPECT_EQ(PROFILING_SUCCESS, handler.RegisterDevTask(devId));
     // memcpy_s failed

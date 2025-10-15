@@ -222,19 +222,19 @@ std::shared_ptr<EventQueue> GenTaskTrackEventQueue(const std::vector<std::pair<u
 std::shared_ptr<Event> GenCtxIdEvent(uint64_t dot, uint16_t level, uint32_t ctxIdNum)
 {
     EventInfo testInfo{EventType::EVENT_TYPE_CONTEXT_ID, level, dot, dot};
-    auto addtionInfo = std::make_shared<MsprofAdditionalInfo>();
+    auto additionInfo = std::make_shared<MsprofAdditionalInfo>();
     uint32_t dataLen = 2;
-    addtionInfo->timeStamp = dot;
-    addtionInfo->dataLen = dataLen;
+    additionInfo->timeStamp = dot;
+    additionInfo->dataLen = dataLen;
 
     MsprofContextIdInfo ctxId;
     ctxId.opName = dot;
     ctxId.ctxIdNum = ctxIdNum;
     uint32_t ids[2] = {0, 1};
     std::memcpy(ctxId.ctxIds, &ids, sizeof(ids));
-    std::memcpy(addtionInfo->data, &ctxId, sizeof(ctxId));
+    std::memcpy(additionInfo->data, &ctxId, sizeof(ctxId));
 
-    auto eventPtr = std::make_shared<Event>(addtionInfo, testInfo);
+    auto eventPtr = std::make_shared<Event>(additionInfo, testInfo);
     return eventPtr;
 }
 

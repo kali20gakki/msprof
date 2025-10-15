@@ -471,7 +471,7 @@ void PlatformAdapterInterface::SetParamsForDeviceIO(int samplingInterval)
     }
 }
 
-void PlatformAdapterInterface::SetParamsForDeviceIntercommection(int samplingInterval)
+void PlatformAdapterInterface::SetParamsForDeviceInterconnection(int samplingInterval)
 {
     bool setFlag = false;
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_DEVICE_HCCS) != supportSwitch_.end()) {

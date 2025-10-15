@@ -575,7 +575,7 @@ int ProfAclMgr::ProfAclGetDataTypeConfig(const uint32_t devId, uint64_t &dataTyp
 int ProfAclMgr::GetDataTypeConfigFromParams(uint64_t &dataTypeConfig)
 {
     if (!params_) {
-        MSPROF_LOGE("[GetDataTypeConfigFromParams]params's  memory was empty.");
+        MSPROF_LOGE("[GetDataTypeConfigFromParams]params'  memory was empty.");
         return PROFILING_FAILED;
     }
     dataTypeConfig = params_->dataTypeConfig;
@@ -694,7 +694,7 @@ int ProfAclMgr::ProfAclModelSubscribe(const uint32_t modelId, const uint32_t dev
         dataTypeConfig | PROF_OP_DETAIL | PROF_MODEL_LOAD);
 }
 
-int ProfAclMgr::CancleSubScribeDevTask(const uint32_t devId, const uint32_t modelId)
+int ProfAclMgr::CancelSubScribeDevTask(const uint32_t devId, const uint32_t modelId)
 {
     int ret = ACL_SUCCESS;
     auto iterDev = devTasks_.find(devId);
@@ -749,7 +749,7 @@ int ProfAclMgr::ProfAclModelUnSubscribe(const uint32_t modelId)
     int ret = ACL_SUCCESS;
     std::vector<uint32_t> devIdList = {iter->second.devId, DEFAULT_HOST_ID};
     for (auto id : devIdList) {
-        ret = CancleSubScribeDevTask(id, modelId);
+        ret = CancelSubScribeDevTask(id, modelId);
         if (ret != ACL_SUCCESS) {
             MSPROF_LOGE("Failed to stop device %u task for model %u", id, modelId);
             return ret;
@@ -1319,7 +1319,7 @@ int32_t ProfAclMgr::MsprofResultPathAdapter(const std::string &dir, std::string 
         return PROFILING_FAILED;
     }
     resultPath = result;
-    MSPROF_LOGI("MsprofResultPathAdapter canonicalized path: %s", Utils::BaseName(result).c_str());
+    MSPROF_LOGI("MsprofResultPathAdapter canonical path: %s", Utils::BaseName(result).c_str());
 
     return PROFILING_SUCCESS;
 }

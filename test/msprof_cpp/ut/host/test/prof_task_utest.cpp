@@ -50,7 +50,7 @@ public:
     std::shared_ptr<analysis::dvvp::message::ProfileParams> param_;
 };
 
-TEST_F(HOST_PROF_TASK_TEST, destrcutor) {
+TEST_F(HOST_PROF_TASK_TEST, destructor) {
     GlobalMockObject::verify();
 
     std::shared_ptr<analysis::dvvp::host::ProfTask> task(new analysis::dvvp::host::ProfTask(_devices, param_));
@@ -133,9 +133,9 @@ TEST_F(HOST_PROF_TASK_TEST, GetHostAndDeviceInfo) {
     EXPECT_EQ(PROFILING_FAILED, task->GetHostAndDeviceInfo());
     MOCKER(analysis::dvvp::common::utils::Utils::JoinPath)
         .stubs()
-        .will(returnValue(std::string("/tmp/profing_utest/profiling_utest_info.xml.done")))
-        .then(returnValue(std::string("/tmp/profing_utest/profiling_utest_info.xml.done")))
-        .then(returnValue(std::string("/tmp/profing_utest/profiling_utest_info.xml.done")))
+        .will(returnValue(std::string("/tmp/profiling_utest/profiling_utest_info.xml.done")))
+        .then(returnValue(std::string("/tmp/profiling_utest/profiling_utest_info.xml.done")))
+        .then(returnValue(std::string("/tmp/profiling_utest/profiling_utest_info.xml.done")))
         .then(returnValue(std::string("/tmp/profiling_utest_info.xml.done")));
     EXPECT_EQ(PROFILING_FAILED, task->GetHostAndDeviceInfo());
     EXPECT_EQ(PROFILING_FAILED, task->GetHostAndDeviceInfo());
@@ -371,7 +371,7 @@ TEST_F(HOST_PROF_TASK_TEST, ProcessDefMode) {
     task->ProcessDefMode();
 }
 
-TEST_F(HOST_PROF_TASK_TEST, ProcessSyetemWide) {
+TEST_F(HOST_PROF_TASK_TEST, ProcessSystemWide) {
     GlobalMockObject::verify();
     std::shared_ptr<analysis::dvvp::host::ProfTask> task(new analysis::dvvp::host::ProfTask(_devices, param_));
     EXPECT_NE(nullptr, task);

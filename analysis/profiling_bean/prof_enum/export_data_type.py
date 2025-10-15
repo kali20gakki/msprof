@@ -9,7 +9,7 @@ from enum import unique
 @unique
 class ExportDataType(Enum):
     """
-    data type for sumamry and timeline.
+    data type for summary and timeline.
     """
     INVALID = -1
     MSPROF_TX = 0

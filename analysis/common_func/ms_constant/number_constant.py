@@ -82,7 +82,7 @@ class NumberConstant:
     # string max length, no more than 8 MB
     MAX_STR_LENGTH = 8 * 1024 * 1024
 
-    # llc capacity num tracelate to MB
+    # llc capacity num translate to MB
     LLC_CAPACITY_CONVERT_MB = 64.0 / (1024 * 1024)
     USAGE_PLACES = Decimal(10) ** -6
     SEC_TO_US = 10 ** 6

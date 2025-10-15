@@ -46,7 +46,7 @@ class TestFileSliceHelper(unittest.TestCase):
         check = FileSliceHelper(PARAMS_SUMMARY, [], [])
         self.assertTrue(check.check_header_is_empty())
 
-    def test_insert_data_when_sumary_then_pass(self):
+    def test_insert_data_when_summary_then_pass(self):
         with mock.patch(NAMESPACE + '.FileSliceHelper.dump_csv_data'):
             check = FileSliceHelper(PARAMS_SUMMARY, [], [])
             check.insert_data(["1"])
@@ -87,7 +87,7 @@ class TestFileSliceHelper(unittest.TestCase):
         self.assertEqual(check.data_list, json_data)
         self.assertEqual(check.header, [])
 
-    def test_data_deduplication_when_exsist_data_with_cann_then_return_all_data(self):
+    def test_data_deduplication_when_exist_data_with_cann_then_return_all_data(self):
         json_data = [
             {"name": "acl@qwer", "args": {"connection_id": 1}},
             {"name": "acl@yuio", "args": {"connection_id": 2}},

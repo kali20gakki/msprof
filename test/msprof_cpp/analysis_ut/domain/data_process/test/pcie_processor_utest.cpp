@@ -102,7 +102,7 @@ TEST_F(PCIeProcessorUTest, TestRunShouldReturnTrueWhenRunSuccess)
 TEST_F(PCIeProcessorUTest, TestProcessShouldReturnFalseWhenGetRecordOrCheckPathFailed)
 {
     DataInventory dataInventory = DataInventory();
-    // CheckPathAndTable dailed
+    // CheckPathAndTable failed
     MOCKER_CPP(&DataProcessor::CheckPathAndTable).stubs().will(returnValue(CHECK_FAILED));
     auto processor1 = PCIeProcessor(PROF);
     EXPECT_FALSE(processor1.Run(dataInventory, PROCESSOR_NAME_PCIE));

@@ -59,7 +59,7 @@ bool CheckPathAndTableExists(const std::string &path, DBRunner& dbRunner, const 
     return true;
 }
 
-uint32_t ReadHostGeinfo(DataInventory& dataInventory, const DeviceContext& deviceContext)
+uint32_t ReadHostGEInfo(DataInventory& dataInventory, const DeviceContext& deviceContext)
 {
     GEInfoDB geInfoDb;
     DeviceInfo deviceInfo{};
@@ -98,7 +98,7 @@ uint32_t ReadHostGeinfo(DataInventory& dataInventory, const DeviceContext& devic
             noExistCNt++;
         }
     }
-    INFO("Read host geinfo % not in table.", noExistCNt);
+    INFO("Read host GE info % not in table.", noExistCNt);
     return ANALYSIS_OK;
 }
 
@@ -249,7 +249,7 @@ uint32_t LoadHostData::ProcessEntry(DataInventory& dataInventory, const Infra::C
         return ANALYSIS_ERROR;
     }
     const auto& deviceContext = dynamic_cast<const DeviceContext&>(context);
-    return ReadHostRuntime(dataInventory, deviceContext) | ReadHostGeinfo(dataInventory, deviceContext)
+    return ReadHostRuntime(dataInventory, deviceContext) | ReadHostGEInfo(dataInventory, deviceContext)
            | ReadHcclTask(dataInventory, deviceContext) | ReadHcclOp(dataInventory, deviceContext);
 }
 

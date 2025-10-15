@@ -51,7 +51,7 @@ class ApiDataViewModel(ViewModel):
                                                             where_condition=self._get_where_condition())
         return DBManager.fetch_all_data(self.cur, search_data_sql)
 
-    def get_earliests_api(self):
+    def get_earliest_api(self):
         search_data_sql = "select * from {} ORDER BY " \
             "start LIMIT 1".format(DBNameConstant.TABLE_API_DATA)
         return DBManager.fetch_all_data(self.cur, search_data_sql, dto_class=ApiDataDto)

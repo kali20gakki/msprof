@@ -3,7 +3,7 @@
 *
 * Copyright (c) Huawei Technologies Co., Ltd. 2025-2025. All rights reserved.
 *
-* Sample to demonstrate the usage of the Mstx API wuth domain.
+* Sample to demonstrate the usage of the Mstx API with domain.
 */
 
 // System header
@@ -73,7 +73,7 @@ int DoAclAdd(aclrtContext context, aclrtStream stream)
     ACL_CALL(CreateAclTensor(selfHostData, selfShape, &selfDeviceAddr, aclDataType::ACL_FLOAT, &self));
     ACL_CALL(CreateAclTensor(otherHostData, otherShape, &otherDeviceAddr, aclDataType::ACL_FLOAT, &other));
 
-    // mrak with "DoAclAdd_Inner" domain
+    // mark with "DoAclAdd_Inner" domain
     mstxDomainMarkA(domainRange, "Create alpha aclScalar", stream);
 
     alpha = aclCreateScalar(&alphaValue, aclDataType::ACL_FLOAT);

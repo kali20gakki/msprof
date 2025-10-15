@@ -61,20 +61,20 @@ TEST_F(RUNNING_MODE_UTEST, CheckForbiddenParams)
     EXPECT_EQ(PROFILING_SUCCESS, rMode.CheckForbiddenParams());
 }
 
-TEST_F(RUNNING_MODE_UTEST, CheckNeccessaryParams)
+TEST_F(RUNNING_MODE_UTEST, CheckNecessaryParams)
 {
     std::shared_ptr<analysis::dvvp::message::ProfileParams> params(
     new analysis::dvvp::message::ProfileParams);
     Collector::Dvvp::Msprofbin::AppMode rMode("app", params);
-    EXPECT_EQ(PROFILING_FAILED, rMode.CheckNeccessaryParams());
+    EXPECT_EQ(PROFILING_FAILED, rMode.CheckNecessaryParams());
     params->app = "123";
-    EXPECT_EQ(PROFILING_FAILED, rMode.CheckNeccessaryParams());
+    EXPECT_EQ(PROFILING_FAILED, rMode.CheckNecessaryParams());
     params->usedParams = {1, 2, 3};
-    rMode.neccessarySet_ = {1, 5 ,6};
-    EXPECT_EQ(PROFILING_FAILED, rMode.CheckNeccessaryParams());
+    rMode.necessarySet_ = {1, 5 ,6};
+    EXPECT_EQ(PROFILING_FAILED, rMode.CheckNecessaryParams());
     params->usedParams.clear();
     params->usedParams = {1, 5, 6, 0};
-    EXPECT_EQ(PROFILING_SUCCESS, rMode.CheckNeccessaryParams());
+    EXPECT_EQ(PROFILING_SUCCESS, rMode.CheckNecessaryParams());
 }
 
 TEST_F(RUNNING_MODE_UTEST, OutputUselessParams)
@@ -704,7 +704,7 @@ TEST_F(RUNNING_MODE_UTEST, SystemModeModeParamsCheck){
     Collector::Dvvp::Msprofbin::SystemMode rMode("system", nullptr);
     EXPECT_EQ(PROFILING_FAILED, rMode.ModeParamsCheck());
     rMode.params_ = params;
-    MOCKER_CPP(&SystemMode::CheckNeccessaryParams)
+    MOCKER_CPP(&SystemMode::CheckNecessaryParams)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));

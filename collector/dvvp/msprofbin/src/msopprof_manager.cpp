@@ -40,15 +40,15 @@ MsopprofManager::MsopprofManager()
 
 bool MsopprofManager::CheckInputDataValidity(int argc, CONST_CHAR_PTR argv[]) const
 {
-    if (argc > INPUT_MAX_LENTH || argv == nullptr) {
+    if (argc > INPUT_MAX_LENGTH || argv == nullptr) {
         CmdLog::instance()->CmdErrorLog("input data is invalid,"
-            "please input argc less than %d and argv is not null", INPUT_MAX_LENTH);
+            "please input argc less than %d and argv is not null", INPUT_MAX_LENGTH);
         return false;
     }
     for (int i = 0; i < argc; i++) {
-        if (strnlen(argv[i], INPUT_MAX_LENTH) == INPUT_MAX_LENTH) {
+        if (strnlen(argv[i], INPUT_MAX_LENGTH) == INPUT_MAX_LENGTH) {
             CmdLog::instance()->CmdErrorLog("input data is invalid,"
-                "please input the len of every argv less than %d", INPUT_MAX_LENTH);
+                "please input the len of every argv less than %d", INPUT_MAX_LENGTH);
             return false;
         }
     }
@@ -74,7 +74,7 @@ int MsopprofManager::MsopprofProcess(int argc, CONST_CHAR_PTR argv[])
 bool MsopprofManager::CheckMsopprofIfExist(int argc, CONST_CHAR_PTR argv[], std::vector<std::string> &op_argv) const
 {
     bool ret = false;
-    if (argc > 1 && strncmp(argv[1], "op", INPUT_MAX_LENTH) == 0) {
+    if (argc > 1 && strncmp(argv[1], "op", INPUT_MAX_LENGTH) == 0) {
         ret = true;
     }
     if (ret) {

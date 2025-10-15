@@ -82,7 +82,7 @@ function check_username(){
     echo "${command_param}" | grep -q -E '^[ 0-9a-zA-Z./:]*$'
     result=$?
     if [ "$result" -ne 0 ]; then
-        echo "Parameter:${command_param} is invalied!"
+        echo "Parameter:${command_param} is invalid!"
         exit 1
     fi
     if ! id -u "${command_param}" >/dev/null 2>&1 ; then

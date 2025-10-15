@@ -17,7 +17,7 @@ from msparser.interface.iparser import IParser
 from profiling_bean.prof_enum.data_tag import DataTag
 
 
-class HCCLOperatiorParser(IParser, MsMultiProcess):
+class HCCLOperatorParser(IParser, MsMultiProcess):
     END_TAG = 1
 
     def __init__(self: any, file_list: dict, sample_config: dict):

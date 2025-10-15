@@ -126,7 +126,7 @@ class BiuCubeParser(BiuCoreParser):
             cycles_bean = CyclesBean.decode(cycles_chunk)
             flow_bean = FlowBean.decode(flow_chunk)
 
-            # timestamp of ai cube monitor 1 is invalid, so it is repalced by monitor 0
+            # timestamp of ai cube monitor 1 is invalid, so it is replaced by monitor 0
             cycles_bean.timestamp = flow_bean.timestamp
             self.add_cycles_data(cycles_bean)
             self.add_flow_data(flow_bean)

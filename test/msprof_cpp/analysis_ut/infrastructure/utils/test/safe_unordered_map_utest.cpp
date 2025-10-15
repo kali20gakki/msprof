@@ -34,7 +34,7 @@ protected:
 };
 
 /* 验证 SafeUnorderedMap Iterate遍历正确性 */
-TEST_F(SafeUnorderedMapUTest, TestIterateShouldTraverseAllItermsCorrectlyWhenMultiThreadCall)
+TEST_F(SafeUnorderedMapUTest, TestIterateShouldTraverseAllItemsCorrectlyWhenMultiThreadCall)
 {
     SafeUnorderedMap<std::string, int> testMap;
     const int insertNum = 10;
@@ -119,8 +119,8 @@ TEST_F(SafeUnorderedMapUTest, MultiThreadInsertMultiValueToMultiKey)
 
     using std::chrono::system_clock;
     std::time_t timeT = system_clock::to_time_t(system_clock::now());
-    const int timeOffest = 2;
-    timeT += timeOffest;
+    const int timeOffset = 2;
+    timeT += timeOffset;
     for (int i = 0; i < threadsNum; ++i) {
         threads[i] =
             std::thread(lamfuncInsert, std::ref(testMap), std::to_string(i), i, system_clock::from_time_t(timeT));

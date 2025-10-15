@@ -219,7 +219,7 @@ class StrConstant:
         "80": "L1 fusion dump set task",
         "81": "add model exit graph task",
         "82": "mdc profiling task",
-        "83": "devcie ring buff set task",
+        "83": "device ring buff set task",
         "84": "stream overflow debug register task",
         "85": "stream overflow debug unregister task",
         "86": "timeout set task",
@@ -408,12 +408,12 @@ class StrConstant:
     RDMA_SEND = "RDMASend"
     SDMA_TRANSIT_ITEMS = ["Memcpy", "Reduce_Inline"]
     COMMUNICATION_TIME_INFO = "Communication Time Info"
-    COMMNUNICATION_BANDWIDTH_INFO = "Communication Bandwidth Info"
+    COMMUNICATION_BANDWIDTH_INFO = "Communication Bandwidth Info"
     SLOW_RANK_SUGGESTION = "Slow Rank Suggestion"
     SLOW_LINK_SUGGESTION = "Slow Link Suggestion"
     MATRIX_SUGGESTION = "Matrix Suggestion"
     SUGGESTION = "Suggestion"
-    SUGGESTION_HAEDER = "Suggestion: "
+    SUGGESTION_HEADER = "Suggestion: "
     OP_NAME = "op_name"
     LINK_INFO = "link_info"
     TIME_RATIO = "Time Ratio"

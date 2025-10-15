@@ -42,7 +42,7 @@ class FunctionRegister {
 public:
     static FunctionRegister *GetInstance();
     FunctionHandle Get(const std::string& soName, const std::string& funcName);
-    void RegisteFunction(const std::string& soName, const std::string& funcName);
+    void RegisterFunction(const std::string& soName, const std::string& funcName);
 
 private:
     FunctionRegister() = default;

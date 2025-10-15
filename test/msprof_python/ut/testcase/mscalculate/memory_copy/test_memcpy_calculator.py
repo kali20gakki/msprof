@@ -15,23 +15,23 @@ from mscalculate.memory_copy.memcpy_calculator import MemcpyCalculator
 from msconfig.config_manager import ConfigManager
 from profiling_bean.db_dto.step_trace_dto import IterationRange
 
-NAMESAPCE = "common_func.msprof_iteration"
+NAMESPACE = "common_func.msprof_iteration"
 
 
-def prepar_step_trace_db(db_path):
+def prepare_step_trace_db(db_path):
     conn, curs = DBManager.create_connect_db(db_path)
     columns = ["index_id", "model_id", "step_start", "step_end", "iter_id", "ai_core_num"]
     sql = "create table if not exists {0} ({1})".format(DBNameConstant.TABLE_STEP_TRACE_DATA,
                                                         ",".join(columns))
     conn.execute(sql)
 
-    prepar_step_trace_data(conn, curs)
-    prepar_ts_memcpy_data(conn, curs)
+    prepare_step_trace_data(conn, curs)
+    prepare_ts_memcpy_data(conn, curs)
 
     DBManager.destroy_db_connect(conn, curs)
 
 
-def prepar_step_trace_data(conn, curs):
+def prepare_step_trace_data(conn, curs):
     columns = ["index_id", "model_id", "step_start", "step_end", "iter_id", "ai_core_num"]
     sql = "create table if not exists {0} ({1})".format(DBNameConstant.TABLE_STEP_TRACE_DATA,
                                                         ",".join(columns))
@@ -46,7 +46,7 @@ def prepar_step_trace_data(conn, curs):
         DBManager.executemany_sql(conn, sql, step_trace_data)
 
 
-def prepar_ts_memcpy_data(conn, curs):
+def prepare_ts_memcpy_data(conn, curs):
     sql = DBManager.sql_create_general_table(DBNameConstant.TABLE_TS_MEMCPY + "Map", DBNameConstant.TABLE_TS_MEMCPY,
                                              ConfigManager.TABLES)
     curs.execute(sql)
@@ -65,7 +65,7 @@ class TestMemcpyModel(unittest.TestCase):
     def setUp(self):
         os.makedirs(os.path.join(self.DIR_PATH, "sqlite"))
         db_path = os.path.join(self.DIR_PATH, "sqlite", DBNameConstant.DB_STEP_TRACE)
-        prepar_step_trace_db(db_path)
+        prepare_step_trace_db(db_path)
 
     def tearDown(self):
         clear_dt_project(self.DIR_PATH)

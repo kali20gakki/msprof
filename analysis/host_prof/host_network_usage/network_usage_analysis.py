@@ -16,7 +16,7 @@ from host_prof.host_network_usage.presenter.host_network_usage_presenter import 
 
 class NetworkUsageAnalysis(MsMultiProcess):
     """
-    analysii network usage
+    analysis network usage
     """
 
     def __init__(self: any, sample_config: dict) -> None:

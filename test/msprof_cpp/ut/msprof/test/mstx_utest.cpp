@@ -159,7 +159,7 @@ TEST_F(MstxUtest, MstxDataHandlerWillSaveDataWhileRunSucc)
     }
 }
 
-TEST_F(MstxUtest, MstxDataHandlerStartWillReturnSuccWhileRepeateStart)
+TEST_F(MstxUtest, MstxDataHandlerStartWillReturnSuccWhileRepeatStart)
 {
     GlobalMockObject::verify();
     MstxManager::instance()->Start(emptyMstxDomainInclude, emptyMstxDomainExclude);
@@ -170,8 +170,8 @@ TEST_F(MstxUtest, MstxDataHandlerStartWillReturnSuccWhileRepeateStart)
 TEST_F(MstxUtest, MstxDataHandlerReturnFailWhileSaveInvalidRangeEndId)
 {
     GlobalMockObject::verify();
-    uint64_t invaildId = 10;
-    EXPECT_EQ(PROFILING_FAILED, MstxManager::instance()->SaveMstxData("test", invaildId,
+    uint64_t invalidId = 10;
+    EXPECT_EQ(PROFILING_FAILED, MstxManager::instance()->SaveMstxData("test", invalidId,
         MstxDataType::DATA_RANGE_END));
 }
 

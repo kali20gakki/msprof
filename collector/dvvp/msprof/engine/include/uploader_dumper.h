@@ -30,7 +30,7 @@ public:
     /**
     * @brief Report: API for user to report data to profiling
     * @param [in] rData: the data from user
-    * @return : success return PROFILING_SUCCESS, failed return PROFIING_FAILED
+    * @return : success return PROFILING_SUCCESS, failed return PROFILING_FAILED
     */
     int Report(CONST_REPORT_DATA_PTR rData) override;
 

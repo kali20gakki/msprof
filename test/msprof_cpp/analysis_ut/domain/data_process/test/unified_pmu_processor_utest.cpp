@@ -29,7 +29,7 @@ using OSSFormat = std::vector<std::tuple<std::string, double, uint32_t>>;
 // Original Task Format: 只取id + 对应字段的value
 // stream_id, task_id, subtask_id, batch_id, value
 using OTFormat = std::vector<std::tuple<uint32_t, uint32_t, uint32_t, uint32_t, double>>;
-// 手动设置task-based pmu表Foramt
+// 手动设置task-based pmu表Format
 // aic_total_time, aic_total_cycles, aic_mac_time, aic_mac_ratio_extra,
 // aiv_total_time, aiv_total_cycles, aiv_vec_time, aiv_vec_ratio, task_id, stream_id, subtask_id,
 // start_time, end_time, batch_id

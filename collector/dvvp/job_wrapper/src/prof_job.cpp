@@ -415,12 +415,12 @@ int ProfFftsProfileJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
         collectionJobCfg_->comParams->params->aiv_profiling_mode.compare("sample-based") == 0) {
         aicMode_ = 1 << FFTS_PROF_TYPE_SAMPLE_BASE;
         aivMode_ = 1 << FFTS_PROF_TYPE_SAMPLE_BASE;
-        channelId_ = PROF_CHANNEL_FFTS_PROFILIE_SAMPLE;
+        channelId_ = PROF_CHANNEL_FFTS_PROFILE_SAMPLE;
     } else {
         /* default mode - task based */
         aicMode_ = 1 << FFTS_PROF_TYPE_TASK_BASE;
         aivMode_ = 1 << FFTS_PROF_TYPE_TASK_BASE;
-        channelId_ = PROF_CHANNEL_FFTS_PROFILIE_TASK;
+        channelId_ = PROF_CHANNEL_FFTS_PROFILE_TASK;
     }
     // set sub task on
     aicMode_ = aicMode_ | (1 << FFTS_PROF_TYPE_SUBTASK);
@@ -974,7 +974,7 @@ int ProfCtrlcpuJob::GetCollectCtrlCpuEventCmd(const std::vector<std::string> &ev
     ssCombined << "}";
     std::stringstream ssPerfCmd;
 
-    int cpuProfilingInterval = 10; // Profile deltas every 10ms defaultly
+    int cpuProfilingInterval = 10; // Profile deltas every 10ms default
     if (collectionJobCfg_->comParams->params->cpu_sampling_interval > 0) {
         cpuProfilingInterval = collectionJobCfg_->comParams->params->cpu_sampling_interval;
     }
@@ -1800,7 +1800,7 @@ void PerfExtraTask::Run(const struct error_message::Context &errorContext)
     MsprofErrorManager::instance()->SetErrorContext(errorContext);
     while (!IsQuit()) {
         MSPROF_LOGI("PerfExtraTask running");
-        analysis::dvvp::common::utils::Utils::UsleepInterupt(1000000); // 1000000 : sleep 1s
+        analysis::dvvp::common::utils::Utils::UsleepInterrupt(1000000); // 1000000 : sleep 1s
         PerfScriptTask();
     }
 

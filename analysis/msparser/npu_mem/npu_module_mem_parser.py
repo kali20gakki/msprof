@@ -94,7 +94,7 @@ class NpuModuleMemParser(DataParser, MsMultiProcess):
                     # negative reversed
                     logging.warning(
                         "The total_size %d greater than integer maximum of sqlite,"
-                        " please confirm wheather the total_size is reversed.",
+                        " please confirm whether the total_size is reversed.",
                         npu_module_mem_data_bean.total_size)
                     self._npu_module_mem_data.append([
                         npu_module_mem_data_bean.module_id,

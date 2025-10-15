@@ -3,7 +3,7 @@
             Copyright, 2025, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : fuision_op_processor.h
+ * File Name          : fusion_op_processor.h
  * Description        : fusion_op，处理ge_fusion_op_info表数据
  * Author             : msprof team
  * Creation Date      : 2025/5/12

@@ -33,7 +33,7 @@ class ImportCommand:
 
     def __init__(self: any, args: any) -> None:
         self.collection_path = os.path.realpath(args.collection_path)
-        self.is_cluster_scence = args.cluster_flag
+        self.is_cluster_scene = args.cluster_flag
         self.device_cluster_basic_info = {}
         self.device_or_rank_ids = set()
         self.have_rank_id = {}
@@ -57,7 +57,7 @@ class ImportCommand:
         :return: None
         """
         check_path_valid(self.collection_path, False)
-        if not self.is_cluster_scence:
+        if not self.is_cluster_scene:
             self._process_parse()
         else:
             _unresolved_dirs = self._find_unresolved_dirs()

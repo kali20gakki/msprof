@@ -23,13 +23,13 @@ bool HCCSProcessor::Process(DataInventory &dataInventory)
 {
     bool flag = true;
     std::vector<HccsData> allProcessedData;
-    std::vector<HccsSummaryData> allSumaryData;
+    std::vector<HccsSummaryData> allSummaryData;
     auto deviceList = File::GetFilesWithPrefix(profPath_, DEVICE_PREFIX);
     for (const auto& devicePath: deviceList) {
-        flag = ProcessSingleDevice(devicePath, allProcessedData, allSumaryData) && flag;
+        flag = ProcessSingleDevice(devicePath, allProcessedData, allSummaryData) && flag;
     }
     if (!SaveToDataInventory<HccsData>(std::move(allProcessedData), dataInventory, PROCESSOR_NAME_HCCS) ||
-        !SaveToDataInventory<HccsSummaryData>(std::move(allSumaryData), dataInventory, PROCESSOR_NAME_HCCS)) {
+        !SaveToDataInventory<HccsSummaryData>(std::move(allSummaryData), dataInventory, PROCESSOR_NAME_HCCS)) {
         flag = false;
         ERROR("Save HCCS Data To DataInventory failed, profPath is %.", profPath_);
     }

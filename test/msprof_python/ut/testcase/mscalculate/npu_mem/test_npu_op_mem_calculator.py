@@ -25,7 +25,7 @@ class TestNpuOpMemCalculator(unittest.TestCase):
                 mock.patch(NAMESPACE + '.NpuAiStackMemModel.flush'), \
                 mock.patch(NAMESPACE + '.NpuAiStackMemModel.finalize'):
             check = NpuOpMemCalculator({}, CONFIG)
-            setattr(check, "_opeartor_memory", ['a', 1, '0', '1', '1', 0, 1, 0, 1, "NPU:0", "a"])
+            setattr(check, "_operator_memory", ['a', 1, '0', '1', '1', 0, 1, 0, 1, "NPU:0", "a"])
             result = check.save()
 
     def test_ms_run(self):
@@ -63,9 +63,9 @@ class TestNpuOpMemCalculator(unittest.TestCase):
         npu_op_mem_dto_2.device_type = "NPU:0"
 
         setattr(check, "_op_data", [npu_op_mem_dto_1, npu_op_mem_dto_2])
-        setattr(check, "_opeartor_memory", [])
+        setattr(check, "_operator_memory", [])
         check._calc_operator_memory()
-        self.assertEqual(check._opeartor_memory, [['1', 1, 111, 112, 1, 0, 1, 0, 1, "NPU:0", '']])
+        self.assertEqual(check._operator_memory, [['1', 1, 111, 112, 1, 0, 1, 0, 1, "NPU:0", '']])
 
     def test_calc_memory_record(self):
         check = NpuOpMemCalculator({}, CONFIG)

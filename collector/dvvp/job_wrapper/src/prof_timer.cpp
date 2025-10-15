@@ -1,7 +1,6 @@
 /*
  * Copyright (c) Huawei Technologies Co., Ltd. 2019-2019. All rights reserved.
  * Description: class timer
- * Author: lixubo
  * Create: 2019-04-23
  */
 
@@ -1270,7 +1269,7 @@ void ProfTimer::Run(const struct error_message::Context &errorContext)
     MsprofErrorManager::instance()->SetErrorContext(errorContext);
     do {
         Handler();
-        analysis::dvvp::common::utils::Utils::UsleepInterupt(timerParam_->intervalUsec);
+        analysis::dvvp::common::utils::Utils::UsleepInterrupt(timerParam_->intervalUsec);
     } while (isStarted_);
 }
 

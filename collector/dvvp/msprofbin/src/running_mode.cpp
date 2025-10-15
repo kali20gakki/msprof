@@ -42,7 +42,7 @@ using namespace analysis::dvvp::common::validation;
 
 RunningMode::RunningMode(std::string preCheckParams, std::string modeName, SHARED_PTR_ALIA<ProfileParams> params)
     : isQuit_(false), modeName_(modeName), taskPid_(MSVP_MMPROCESS), preCheckParams_(preCheckParams),
-      blackSet_(), whiteSet_(), neccessarySet_(), params_(params), taskMap_()
+      blackSet_(), whiteSet_(), necessarySet_(), params_(params), taskMap_()
 {}
 
 RunningMode::~RunningMode() {}
@@ -79,13 +79,13 @@ int RunningMode::CheckForbiddenParams() const
     return PROFILING_SUCCESS;
 }
 
-int RunningMode::CheckNeccessaryParams() const
+int RunningMode::CheckNecessaryParams() const
 {
     if (params_ == nullptr || params_->usedParams.empty()) {
         return PROFILING_FAILED;
     }
     std::set<int> moreReqParams;
-    set_difference(neccessarySet_.begin(), neccessarySet_.end(),
+    set_difference(necessarySet_.begin(), necessarySet_.end(),
         params_->usedParams.begin(), params_->usedParams.end(),
         inserter(moreReqParams, moreReqParams.begin()));
     if (!moreReqParams.empty()) {
@@ -591,7 +591,7 @@ int RunningMode::WaitRunningProcess(std::string processUsage) const
     bool isExited = false;
     int exitCode = 0;
     int ret = PROFILING_SUCCESS;
-    static const int sleepIntevalUs = 1000000;
+    static const int sleepIntervalUs = 1000000;
 
     for (;;) {
         ret = analysis::dvvp::common::utils::Utils::WaitProcess(taskPid_, isExited, exitCode, false);
@@ -609,7 +609,7 @@ int RunningMode::WaitRunningProcess(std::string processUsage) const
             }
             return PROFILING_SUCCESS;
         }
-        analysis::dvvp::common::utils::Utils::UsleepInterupt(sleepIntevalUs);
+        analysis::dvvp::common::utils::Utils::UsleepInterrupt(sleepIntervalUs);
     }
 }
 
@@ -656,7 +656,7 @@ int RunningMode::CheckAnalysisEnv()
             Utils::BaseName(analysisPath_).c_str());
         return PROFILING_FAILED;
     }
-    MSPROF_LOGI("Found avaliable analysis script, script path: %s", Utils::BaseName(analysisPath_).c_str());
+    MSPROF_LOGI("Found available analysis script, script path: %s", Utils::BaseName(analysisPath_).c_str());
 
     return PROFILING_SUCCESS;
 }
@@ -666,7 +666,7 @@ AppMode::AppMode(std::string preCheckParams, SHARED_PTR_ALIA<ProfileParams> para
 {
     whiteSet_ = {
         ARGS_OUTPUT, ARGS_STORAGE_LIMIT, ARGS_APPLICATION, ARGS_ENVIRONMENT, ARGS_AIC_MODE,
-        ARGS_AIC_METRICE, ARGS_AIV_MODE, ARGS_AIV_METRICS, ARGS_LLC_PROFILING, ARGS_DYNAMIC_PROF, ARGS_DYNAMIC_PROF_PID,
+        ARGS_AIC_METRICS, ARGS_AIV_MODE, ARGS_AIV_METRICS, ARGS_LLC_PROFILING, ARGS_DYNAMIC_PROF, ARGS_DYNAMIC_PROF_PID,
         ARGS_ASCENDCL, ARGS_AI_CORE, ARGS_AIV, ARGS_MODEL_EXECUTION, ARGS_EXPORT_TYPE,
         ARGS_RUNTIME_API, ARGS_TASK_TIME, ARGS_AICPU, ARGS_CPU_PROFILING, ARGS_SYS_PROFILING,
         ARGS_PID_PROFILING, ARGS_HARDWARE_MEM, ARGS_IO_PROFILING, ARGS_INTERCONNECTION_PROFILING,
@@ -810,7 +810,7 @@ SystemMode::SystemMode(std::string preCheckParams, SHARED_PTR_ALIA<ProfileParams
 {
     whiteSet_ = {
         ARGS_OUTPUT, ARGS_STORAGE_LIMIT, ARGS_AIC_MODE, ARGS_SYS_DEVICES,
-        ARGS_AIC_METRICE, ARGS_AIV_MODE, ARGS_AIV_METRICS, ARGS_LLC_PROFILING,
+        ARGS_AIC_METRICS, ARGS_AIV_MODE, ARGS_AIV_METRICS, ARGS_LLC_PROFILING,
         ARGS_AI_CORE, ARGS_AIV, ARGS_CPU_PROFILING, ARGS_SYS_PROFILING, ARGS_EXPORT_TYPE,
         ARGS_PID_PROFILING, ARGS_HARDWARE_MEM, ARGS_IO_PROFILING, ARGS_INTERCONNECTION_PROFILING,
         ARGS_DVPP_PROFILING, ARGS_L2_PROFILING, ARGS_AIC_FREQ, ARGS_AIV_FREQ, ARGS_INSTR_PROFILING_FREQ,
@@ -819,7 +819,7 @@ SystemMode::SystemMode(std::string preCheckParams, SHARED_PTR_ALIA<ProfileParams
         ARGS_HOST_SYS, ARGS_HOST_SYS_USAGE, ARGS_HOST_SYS_USAGE_FREQ, ARGS_SYS_PERIOD,
         ARGS_HOST_SYS_PID, ARGS_PYTHON_PATH
     };
-    neccessarySet_ = {ARGS_OUTPUT, ARGS_SYS_PERIOD};
+    necessarySet_ = {ARGS_OUTPUT, ARGS_SYS_PERIOD};
 }
 
 SystemMode::~SystemMode() {}
@@ -894,7 +894,7 @@ bool SystemMode::DataWillBeCollected() const
     }
     std::set<int> unneccessaryParams;
     set_difference(params_->usedParams.begin(), params_->usedParams.end(),
-        neccessarySet_.begin(), neccessarySet_.end(),
+        necessarySet_.begin(), necessarySet_.end(),
         inserter(unneccessaryParams, unneccessaryParams.begin()));
     set_intersection(params_->usedParams.begin(), params_->usedParams.end(),
         unneccessaryParams.begin(), unneccessaryParams.end(),
@@ -913,7 +913,7 @@ int SystemMode::ModeParamsCheck()
         return PROFILING_FAILED;
     }
 
-    if (CheckNeccessaryParams() != PROFILING_SUCCESS) {
+    if (CheckNecessaryParams() != PROFILING_SUCCESS) {
         MSPROF_LOGE("[System Mode] Check neccessary params failed!");
         return PROFILING_FAILED;
     }
@@ -1071,7 +1071,7 @@ int SystemMode::WaitSysTask() const
         cycles = (unsigned int)(params_->profiling_period * US_TO_SECOND_TIMES(PROCESS_WAIT_TIME));
     }
     while ((times < cycles) && (!isQuit_)) {
-        analysis::dvvp::common::utils::Utils::UsleepInterupt(PROCESS_WAIT_TIME);
+        analysis::dvvp::common::utils::Utils::UsleepInterrupt(PROCESS_WAIT_TIME);
         times++;
     }
     return PROFILING_SUCCESS;
@@ -1327,7 +1327,7 @@ ParseMode::ParseMode(std::string preCheckParams, SHARED_PTR_ALIA<ProfileParams> 
     : RunningMode(preCheckParams, "parse", params)
 {
     whiteSet_ = {ARGS_OUTPUT, ARGS_PARSE, ARGS_PYTHON_PATH};
-    neccessarySet_ = {ARGS_OUTPUT, ARGS_PARSE};
+    necessarySet_ = {ARGS_OUTPUT, ARGS_PARSE};
     blackSet_ = {ARGS_QUERY, ARGS_EXPORT, ARGS_ANALYZE, ARGS_RULE, ARGS_CLEAR};
 }
 
@@ -1340,7 +1340,7 @@ int ParseMode::ModeParamsCheck()
         return PROFILING_FAILED;
     }
     if (CheckForbiddenParams() != PROFILING_SUCCESS ||
-        CheckNeccessaryParams() != PROFILING_SUCCESS) {
+        CheckNecessaryParams() != PROFILING_SUCCESS) {
         return PROFILING_FAILED;
     }
     OutputUselessParams();
@@ -1382,7 +1382,7 @@ AnalyzeMode::AnalyzeMode(std::string preCheckParams, SHARED_PTR_ALIA<ProfilePara
     : RunningMode(preCheckParams, "analyze", params)
 {
     whiteSet_ = {ARGS_OUTPUT, ARGS_ANALYZE, ARGS_PYTHON_PATH, ARGS_RULE, ARGS_CLEAR, ARGS_EXPORT_TYPE};
-    neccessarySet_ = {ARGS_OUTPUT, ARGS_ANALYZE};
+    necessarySet_ = {ARGS_OUTPUT, ARGS_ANALYZE};
     blackSet_ = {ARGS_QUERY, ARGS_EXPORT, ARGS_PARSE};
 }
 
@@ -1395,7 +1395,7 @@ int AnalyzeMode::ModeParamsCheck()
         return PROFILING_FAILED;
     }
     if (CheckForbiddenParams() != PROFILING_SUCCESS ||
-        CheckNeccessaryParams() != PROFILING_SUCCESS) {
+        CheckNecessaryParams() != PROFILING_SUCCESS) {
         return PROFILING_FAILED;
     }
     OutputUselessParams();
@@ -1437,7 +1437,7 @@ QueryMode::QueryMode(std::string preCheckParams, SHARED_PTR_ALIA<ProfileParams> 
     : RunningMode(preCheckParams, "query", params)
 {
     whiteSet_ = {ARGS_OUTPUT, ARGS_QUERY, ARGS_PYTHON_PATH};
-    neccessarySet_ = {ARGS_OUTPUT, ARGS_QUERY};
+    necessarySet_ = {ARGS_OUTPUT, ARGS_QUERY};
     blackSet_ = {ARGS_PARSE, ARGS_EXPORT, ARGS_ANALYZE, ARGS_RULE, ARGS_CLEAR};
 }
 
@@ -1450,7 +1450,7 @@ int QueryMode::ModeParamsCheck()
         return PROFILING_FAILED;
     }
     if (CheckForbiddenParams() != PROFILING_SUCCESS ||
-        CheckNeccessaryParams() != PROFILING_SUCCESS) {
+        CheckNecessaryParams() != PROFILING_SUCCESS) {
         return PROFILING_FAILED;
     }
     OutputUselessParams();
@@ -1492,7 +1492,7 @@ ExportMode::ExportMode(std::string preCheckParams, SHARED_PTR_ALIA<ProfileParams
         ARGS_EXPORT_MODEL_ID, ARGS_SUMMARY_FORMAT, ARGS_PYTHON_PATH, ARGS_CLEAR,
         ARGS_REPORTS
     };
-    neccessarySet_ = {ARGS_OUTPUT, ARGS_EXPORT};
+    necessarySet_ = {ARGS_OUTPUT, ARGS_EXPORT};
     blackSet_ = {ARGS_QUERY, ARGS_PARSE, ARGS_ANALYZE, ARGS_RULE};
 }
 
@@ -1509,13 +1509,13 @@ int ExportMode::ModeParamsCheck()
         whiteSet_ = {
             ARGS_OUTPUT, ARGS_EXPORT, ARGS_EXPORT_TYPE, ARGS_PYTHON_PATH
         };
-        neccessarySet_ = {ARGS_OUTPUT, ARGS_EXPORT, ARGS_EXPORT_TYPE};
+        necessarySet_ = {ARGS_OUTPUT, ARGS_EXPORT, ARGS_EXPORT_TYPE};
         blackSet_ = {ARGS_QUERY, ARGS_PARSE, ARGS_ANALYZE, ARGS_RULE,
                      ARGS_EXPORT_ITERATION_ID, ARGS_EXPORT_MODEL_ID,
                      ARGS_SUMMARY_FORMAT, ARGS_CLEAR, ARGS_REPORTS};
     }
     if (CheckForbiddenParams() != PROFILING_SUCCESS ||
-        CheckNeccessaryParams() != PROFILING_SUCCESS) {
+        CheckNecessaryParams() != PROFILING_SUCCESS) {
         return PROFILING_FAILED;
     }
     OutputUselessParams();

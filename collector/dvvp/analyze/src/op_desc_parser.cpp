@@ -149,7 +149,7 @@ int32_t OpDescParser::GetOpType(CONST_VOID_PTR data, uint32_t len, CHAR_PTR opTy
         return ACL_ERROR_INVALID_PARAM;
     }
     if (iter->second.size() >= opTypeLen) {
-        MSPROF_LOGE("Input opTypeLen %lu shuold be larger than current optype len %zu", opTypeLen, iter->second.size());
+        MSPROF_LOGE("Input opTypeLen %lu should be larger than current optype len %zu", opTypeLen, iter->second.size());
         return ACL_ERROR_INVALID_PARAM;
     }
     errno_t err = memcpy_s(opType, opTypeLen, iter->second.c_str(), iter->second.size());

@@ -378,10 +378,10 @@ int InitInjectionMstx(MstxGetModuleFuncTableFunc getFuncTable)
     return MSTX_SUCCESS;
 }
 
-void MstxRegistMstxFunc()
+void MstxRegisterMstxFunc()
 {
-    MSPROF_LOGI("profiler registeMstxFunc to profcommon.so");
-    Collector::Dvvp::Plugin::ProfCommonPlugin::instance()->MsprofProfRegisteMstxFunc(InitInjectionMstx, PROF_MODULE_MSPROF);
+    MSPROF_LOGI("profiler registerMstxFunc to profcommon.so");
+    Collector::Dvvp::Plugin::ProfCommonPlugin::instance()->MsprofProfRegisterMstxFunc(InitInjectionMstx, PROF_MODULE_MSPROF);
 }
 
 void EnableMstxFunc()

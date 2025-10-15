@@ -529,7 +529,7 @@ enum devdrv_process_type {
     DEVDRV_PROCESS_DEV_ONLY,  /* TDT */
     DEVDRV_PROCESS_QS,        /* queue_scheduler */
     DEVDRV_PROCESS_HCCP,      /* hccp server */
-    DEVDRV_PROCESS_USER,      /* user proc, can bind many on host or device. not surport quert from host pid */
+    DEVDRV_PROCESS_USER,      /* user proc, can bind many on host or device. not support query from host pid */
     DEVDRV_PROCESS_CPTYPE_MAX,
 };
 

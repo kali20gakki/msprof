@@ -35,7 +35,7 @@ public:
     void RemoveRecordFile(const std::string &fileName) const;
     SHARED_PTR_ALIA<Analysis::Dvvp::Msprof::ProfTask> GetRunningTask(const std::string &jobId);
 
-    // marked when unexcepted quit
+    // marked when unexpected quit
     bool isQuit_;
     std::string jobResultDir_;
     std::set<std::string> jobResultDirList_;
@@ -44,7 +44,7 @@ protected:
         SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
     virtual ~RunningMode();
     int CheckForbiddenParams() const;
-    int CheckNeccessaryParams() const;
+    int CheckNecessaryParams() const;
     void OutputUselessParams() const;
     int StartParseTask();
     int StartQueryTask();
@@ -73,7 +73,7 @@ protected:
     std::set<int> blackSet_;
     // useful params
     std::set<int> whiteSet_;
-    std::set<int> neccessarySet_;
+    std::set<int> necessarySet_;
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params_;
     std::map<std::string, SHARED_PTR_ALIA<Analysis::Dvvp::Msprof::ProfTask>> taskMap_;
 

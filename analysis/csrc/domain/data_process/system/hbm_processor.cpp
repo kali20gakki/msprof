@@ -23,13 +23,13 @@ bool HBMProcessor::Process(DataInventory &dataInventory)
 {
     bool flag = true;
     std::vector<HbmData> allProcessedData;
-    std::vector<HbmSummaryData> allSumaryData;
+    std::vector<HbmSummaryData> allSummaryData;
     auto deviceList = File::GetFilesWithPrefix(profPath_, DEVICE_PREFIX);
     for (const auto& devicePath: deviceList) {
-        flag = ProcessSingleDevice(devicePath, allProcessedData, allSumaryData) && flag;
+        flag = ProcessSingleDevice(devicePath, allProcessedData, allSummaryData) && flag;
     }
     if (!SaveToDataInventory<HbmData>(std::move(allProcessedData), dataInventory, PROCESSOR_NAME_HBM) ||
-        !SaveToDataInventory<HbmSummaryData>(std::move(allSumaryData), dataInventory, PROCESSOR_NAME_HBM)) {
+        !SaveToDataInventory<HbmSummaryData>(std::move(allSummaryData), dataInventory, PROCESSOR_NAME_HBM)) {
         flag = false;
         ERROR("Save memory on chip Data To DataInventory failed, profPath is %.", profPath_);
     }

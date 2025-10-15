@@ -48,7 +48,7 @@ TEST_F(ParserUtest, ShouldRetSuccessWhenReportApiSuccess)
     EXPECT_EQ(MSPTI_SUCCESS, instance->ReportApi(&data));
 }
 
-TEST_F(ParserUtest, ShouldRetSccessWhenReportKernelInfo)
+TEST_F(ParserUtest, ShouldRetSuccessWhenReportKernelInfo)
 {
     auto& instance = Mspti::Parser::KernelParser::GetInstance();
     constexpr uint16_t flipId = 0;
@@ -87,7 +87,7 @@ TEST_F(ParserUtest, ShouldRetSccessWhenReportKernelInfo)
         reinterpret_cast<StarsSocHeader*>(&socLogEnd)));
 }
 
-TEST_F(ParserUtest, ShouldRetSccessWhenReportMstxData)
+TEST_F(ParserUtest, ShouldRetSuccessWhenReportMstxData)
 {
     GlobalMockObject::verify();
     MOCKER_CPP(rtProfilerTraceEx)
@@ -128,7 +128,7 @@ TEST_F(ParserUtest, ShouldRecordKernelNameWhenReportRtTaskTrack)
     constexpr uint32_t deviceId = 0;
     constexpr uint32_t streamId = 3;
     constexpr uint32_t BIT_NUM = 16;
-    const std::string kernelName = "test_kernalName";
+    const std::string kernelName = "test_kernelName";
     auto kernelNameHash = Mspti::Parser::CannHashCache::GetInstance().GenHashId(kernelName);
     MsprofCompactInfo compactInfo;
     (void)memset_s(&compactInfo, sizeof(compactInfo), 0, sizeof(compactInfo));

@@ -30,7 +30,7 @@ using HcclOpFormat = std::tuple<uint32_t, std::string, int32_t, int32_t, std::st
     std::string, std::string, uint32_t, uint16_t>;
 using OriOpDataFormat = std::vector<HcclOpFormat>;
 
-// 该类用于依据HCCLSingelDevice库生成COMMUNICATION_TASK_INFO(通信小算子)和COMMUNICATION_OP表(通信大算子)
+// 该类用于依据HCCLSingleDevice库生成COMMUNICATION_TASK_INFO(通信小算子)和COMMUNICATION_OP表(通信大算子)
 class CommunicationInfoProcessor : public DataProcessor {
 public:
     struct CommunicationData {

@@ -103,7 +103,7 @@ msptiResult DevProfTask::Stop()
 
 void DevProfTask::Run()
 {
-    pthread_setname_np(pthread_self(), "DevProfTsak");
+    pthread_setname_np(pthread_self(), "DevProfTask");
     {
         std::unique_lock<std::mutex> lk(cv_mtx_);
         cv_.wait(lk, [&] () {

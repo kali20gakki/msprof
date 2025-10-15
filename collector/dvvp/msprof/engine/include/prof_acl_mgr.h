@@ -201,8 +201,8 @@ private:
     int CancelHostAndDevTasks();
     int StartSubscribeDeviceTask(const uint32_t devId, const uint32_t modelId,
         PROF_SUB_CONF_CONST_PTR profSubscribeConfig);
-    int CancleSubscribeDeviceTask(const uint32_t devId, const uint32_t modelId);
-    int CancleSubScribeDevTask(const uint32_t devId, const uint32_t modelId);
+    int CancelSubscribeDeviceTask(const uint32_t devId, const uint32_t modelId);
+    int CancelSubScribeDevTask(const uint32_t devId, const uint32_t modelId);
     int LaunchSubscribeDevTask(const uint32_t devId, const uint32_t modelId,
                                PROF_SUB_CONF_CONST_PTR profSubscribeConfig);
     int CheckSubscribeConfigIfValid(PROF_SUB_CONF_CONST_PTR profSubscribeConfig) const;

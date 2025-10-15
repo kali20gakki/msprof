@@ -12,7 +12,7 @@
 
 ## 操作指导
 
-1. 请在使用前执行source \${install_path}/set_env.sh以保证用例正常执行，\${install_path}为CANN的安装路径，以root安装为例，默认路径为/usr/local/Ascend/ascend-tookit。
+1. 请在使用前执行source \${install_path}/set_env.sh以保证用例正常执行，\${install_path}为CANN的安装路径，以root安装为例，默认路径为/usr/local/Ascend/ascend-toolkit。
 
 2. 切换目录至用例所在位置，例如/usr/local/Ascend/ascend-toolkit/8.x.x/tools/mstx/samples。
 

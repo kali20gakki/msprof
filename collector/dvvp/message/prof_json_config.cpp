@@ -115,7 +115,7 @@ int32_t JsonStringToAclCfg(const std::string &cfg, SHARED_PTR_ALIA<ProfAclConfig
             jsonFromCfg.at("switch").get_to(inputCfgPb->profSwitch);
         }
     } catch (std::exception &e) {
-        MSPROF_LOGE("parse inputCfgPb faild:%s", e.what());
+        MSPROF_LOGE("parse inputCfgPb failed:%s", e.what());
         return PROFILING_FAILED;
     }
     return PROFILING_SUCCESS;

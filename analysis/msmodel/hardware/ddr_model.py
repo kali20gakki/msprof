@@ -75,9 +75,9 @@ class DdrModel(BaseModel, ABC):
         return []
 
     @classmethod
-    def _cal_ddr_bandwidth(cls: any, metric: any, ddr_detal_time: any) -> any:
+    def _cal_ddr_bandwidth(cls: any, metric: any, ddr_delta_time: any) -> any:
         return metric * ConfigMgr.get_ddr_bit_width() / \
-               (ddr_detal_time * NumberConstant.KILOBYTE * NumberConstant.KILOBYTE * cls.DDR_EVENT) * \
+               (ddr_delta_time * NumberConstant.KILOBYTE * NumberConstant.KILOBYTE * cls.DDR_EVENT) * \
                Constant.TIME_RATE
 
     def flush(self: any, data_list: list) -> None:

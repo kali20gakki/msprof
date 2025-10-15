@@ -48,7 +48,7 @@ class FusionOpAssemblerUTest : public testing::Test {
     }
 };
 
-static std::vector<FusionOpInfo> GeneratefusionOpData()
+static std::vector<FusionOpInfo> GenerateFusionOpData()
 {
     std::vector<FusionOpInfo> res;
     FusionOpInfo data;
@@ -97,7 +97,7 @@ TEST_F(FusionOpAssemblerUTest, ShouldReturnTrueWhenFusionOpExist)
     std::shared_ptr<std::vector<ModelName>> modelNameTaskS;
     std::shared_ptr<std::unordered_map<std::string, std::string>> hashTaskS;
 
-    auto task = GeneratefusionOpData();
+    auto task = GenerateFusionOpData();
     auto modelNameTask = GenerateModelNameData();
     auto hashTask = GenerateHashData();
 

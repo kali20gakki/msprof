@@ -276,19 +276,19 @@ TEST_F(TreeBuilderUTest, TestAddLevelEventsShouldMatchCorrectNodeWhenInputNotEmp
     /* 因为存在没有匹配上的元素，范围值应为false */
     EXPECT_EQ(false, checkFalse);
 
-    std::vector<uint64_t> vaild;
+    std::vector<uint64_t> valid;
     for (auto node: levelNodes) {
         if (!node->records.empty()) {
             for (const auto &e: node->records) {
-                vaild.emplace_back(e->info.start);
+                valid.emplace_back(e->info.start);
             }
         }
     }
 
     /* 首先需要保证size相等，然后检查每个元素是否相等 */
-    EXPECT_EQ(ans.size(), vaild.size());
-    for (size_t i = 0; i < vaild.size(); ++i) {
-        EXPECT_EQ(ans[i], vaild[i]);
+    EXPECT_EQ(ans.size(), valid.size());
+    for (size_t i = 0; i < valid.size(); ++i) {
+        EXPECT_EQ(ans[i], valid[i]);
     }
 }
 

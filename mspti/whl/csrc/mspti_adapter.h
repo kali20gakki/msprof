@@ -3,7 +3,7 @@
             Copyright, 2024, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : mspti_adpter.h
+ * File Name          : mspti_adapter.h
  * Description        : Mspti python adapter.
  * Author             : msprof team
  * Creation Date      : 2024/11/19

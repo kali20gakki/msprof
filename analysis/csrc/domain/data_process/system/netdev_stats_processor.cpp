@@ -149,5 +149,5 @@ std::vector<NetDevStatsEventData> NetDevStatsProcessor::ComputeEventData(
     }
     return rstEventData;
 }
-} // naemspace Domain
-} // naemspace Analysis
+} // namespace Domain
+} // namespace Analysis

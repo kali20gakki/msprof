@@ -50,8 +50,8 @@ class InterConnectionView:
             sql = "select timestamp, device_id, tx_p_bandwidth_min," \
                   "tx_p_bandwidth_max, tx_p_bandwidth_avg, tx_np_bandwidth_min," \
                   "tx_np_bandwidth_max, tx_np_bandwidth_avg, tx_cpl_bandwidth_min," \
-                  "tx_cpl_bandwidth_max, tx_cpl_bandwidth_avg, tx_np_lantency_min," \
-                  "tx_np_lantency_max, tx_np_lantency_avg, rx_p_bandwidth_min," \
+                  "tx_cpl_bandwidth_max, tx_cpl_bandwidth_avg, tx_np_latency_min," \
+                  "tx_np_latency_max, tx_np_latency_avg, rx_p_bandwidth_min," \
                   "rx_p_bandwidth_max, rx_p_bandwidth_avg, rx_np_bandwidth_min," \
                   "rx_np_bandwidth_max, rx_np_bandwidth_avg, rx_cpl_bandwidth_min," \
                   "rx_cpl_bandwidth_max, rx_cpl_bandwidth_avg from PcieOriginalData order by timestamp desc limit 1"
@@ -63,9 +63,9 @@ class InterConnectionView:
                   "), {accuracy}),round(AVG(tx_np_bandwidth_avg), {accuracy})" \
                   ",round(AVG(tx_cpl_bandwidth_min), {accuracy}),round(AVG(" \
                   "tx_cpl_bandwidth_max), {accuracy}),round(AVG(tx_cpl_bandwidth_avg)" \
-                  ", {accuracy}),round(AVG(tx_np_lantency_min), {accuracy})" \
-                  ",round(AVG(tx_np_lantency_max), {accuracy})" \
-                  ",round(AVG(tx_np_lantency_avg), {accuracy})" \
+                  ", {accuracy}),round(AVG(tx_np_latency_min), {accuracy})" \
+                  ",round(AVG(tx_np_latency_max), {accuracy})" \
+                  ",round(AVG(tx_np_latency_avg), {accuracy})" \
                   ",round(AVG(rx_p_bandwidth_min), {accuracy}),round(AVG(rx_p_bandwidth_max)" \
                   ", {accuracy}),round(AVG(rx_p_bandwidth_avg), {accuracy})," \
                   "round(AVG(rx_np_bandwidth_min), {accuracy})" \

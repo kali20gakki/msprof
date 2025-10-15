@@ -75,9 +75,9 @@ const std::unordered_map<std::string, AivMetricsEventsType> aivMetricsMap = {
 enum class ProfilingMode {
     PROFILING_MODE_SAMPLE_BASED = 0, // "sample-based"
     PROFILING_MODE_TASK_BASED,  // "task-based"
-    PROFILING_UNKOWN
+    PROFILING_UNKNOWN
 };
-const std::unordered_map<std::string, ProfilingMode> proflingMap = {
+const std::unordered_map<std::string, ProfilingMode> profilingMap = {
     {"sample-based", ProfilingMode::PROFILING_MODE_SAMPLE_BASED},
     {"task-based",   ProfilingMode::PROFILING_MODE_TASK_BASED}
 };
@@ -103,7 +103,7 @@ struct SampleInfo {
     std::string aiCoreProfilingEventsStr;
     std::vector<uint32_t> aiCoreProfilingEvents;
     uint32_t aiCoreProfilingCnt = 0;
-    ProfilingMode aiCoreProfilingMode = ProfilingMode::PROFILING_UNKOWN;
+    ProfilingMode aiCoreProfilingMode = ProfilingMode::PROFILING_UNKNOWN;
     uint32_t aiCoreSamplingInterval = 0;
 
     // aiv sample info
@@ -111,7 +111,7 @@ struct SampleInfo {
     AivMetricsEventsType aivMetrics = AivMetricsEventsType::AIV_METRICS_UNKNOWN;
     std::string aivProfilingEventsStr;
     std::vector<uint32_t> aivProfilingEvents;
-    ProfilingMode aivProfilingMode = ProfilingMode::PROFILING_UNKOWN;
+    ProfilingMode aivProfilingMode = ProfilingMode::PROFILING_UNKNOWN;
     uint32_t aivSamplingInterval = 0;
 
     // dynamic

@@ -76,7 +76,7 @@ void AnalyzerFfts::ParseOptimizeFftsData(CONST_CHAR_PTR data, uint32_t len)
 }
 
 /*
- * @berif  : parse op info with acsq task info
+ * @brief  : parse op info with acsq task info
  * @param  : None
  * @return : None
  */
@@ -109,7 +109,7 @@ void AnalyzerFfts::ParseOptimizeAcsqTaskData(const FftsLogHead *data, uint32_t l
 }
 
 /*
- * @berif  : parse op info with sub task thead info
+ * @brief  : parse op info with sub task thead info
  * @param  : None
  * @return : None
  */

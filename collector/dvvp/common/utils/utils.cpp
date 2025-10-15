@@ -821,7 +821,7 @@ std::string Utils::Trim(const std::string &value)
     return result;
 }
 
-int Utils::UsleepInterupt(unsigned long usec)
+int Utils::UsleepInterrupt(unsigned long usec)
 {
     // here we don't need accurate sleep time, so we don't check error code
     const int changeFormUsToMs = 1000;
@@ -1389,7 +1389,7 @@ std::string Utils::CreateTaskId(uint64_t index)
     result = result + timeStr + "_";
 
     const int letterNum = 26; // A - Z
-    int taskIdLen = 32; // 32 : the lenght of the task id
+    int taskIdLen = 32; // 32 : the length of the task id
     srand(time(nullptr));
     taskId.str("");
     for (int idx = 0; idx < taskIdLen; idx++) {
@@ -1401,7 +1401,7 @@ std::string Utils::CreateTaskId(uint64_t index)
         std::to_string(std::chrono::duration_cast<std::chrono::nanoseconds>(timeSinceEpoch).count()) +
         std::to_string(analysis::dvvp::common::utils::Utils::GetClockMonotonicRaw()));
     taskId.str("");
-    taskIdLen = 16; // 16 : the lenght of the task id
+    taskIdLen = 16; // 16 : the length of the task id
     const int hashMod = 18; // change hashId to [A-R]
     for (int idx = 0; idx < taskIdLen; idx++) {
         taskId << static_cast<unsigned char>(65 + hashId % hashMod); // 65 - 'A'
@@ -1519,8 +1519,8 @@ bool Utils::IsDynProfMode()
         return false;
     }
     std::string profModeValue = GetEnvString(PROFILING_MODE_ENV);
-    if (profModeValue != DAYNAMIC_PROFILING_VALUE &&
-        profModeValue != DELAY_DURARION_PROFILING_VALUE) {
+    if (profModeValue != DYNAMIC_PROFILING_VALUE &&
+        profModeValue != DELAY_DURATION_PROFILING_VALUE) {
         MSPROF_LOGI("Dynamic profiling is not enable, the current profiling mode value is null");
         return false;
     }

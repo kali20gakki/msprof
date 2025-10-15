@@ -27,7 +27,7 @@
 
 ## 构建用例执行
 1. 将目录切换到对应用例下
-2. 请在使用前执行source {ASCEND_HOME}/set_env.sh以保证用例正常执行, ascend-toolkit的默认安装路径为/usr/local/Ascend/ascend-tookit
+2. 请在使用前执行source {ASCEND_HOME}/set_env.sh以保证用例正常执行, ascend-toolkit的默认安装路径为/usr/local/Ascend/ascend-toolkit
 3. 执行对应用例目录下的sample_run.sh即可
 
 ## 用例约束

@@ -126,7 +126,7 @@ public:
     virtual void SetParamsForDeviceAiCpuCtrlCpuTSCpuHotFuncPMU(int samplingInterval);
     virtual void SetParamsForDeviceHardwareMem(int samplingInterval, std::string llcMode);
     virtual void SetParamsForDeviceIO(int samplingInterval);
-    virtual void SetParamsForDeviceIntercommection(int samplingInterval);
+    virtual void SetParamsForDeviceInterconnection(int samplingInterval);
     virtual void SetParamsForDeviceDVPP(int samplingInterval);
     virtual void SetParamsForDeviceInstr(int instrFreq);
     virtual void SetParamsForDevicePower();

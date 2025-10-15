@@ -77,16 +77,16 @@ class TestAiCoreFreqViewer(TestDirCRBaseModel):
             self.assertEqual(result[1], (1950, 3))
             self.assertEqual(result[2], (2000, 4))
 
-    def test_api_data_viewer_model_earliests_start_timet_return_ok(self):
+    def test_api_data_viewer_model_earliest_start_time_return_ok(self):
         """
-        目的：覆盖api_data_viewer_model。py 文件get_earliests_api方法
+        目的：覆盖api_data_viewer_model。py 文件get_earliest_api方法
         UT设计意图：获取api_event.db 中的ApiData表格中最好的事件开始时间，作为aicore频率起始时间戳。m
         具体操作：插入几条数据，获取其中的最早的开始时间
         """
         with ApiDataViewModel(self.params) as model:
             model.create_table()
             model.insert_data_to_db(DBNameConstant.TABLE_API_DATA, self.apis_data)
-            result = model.get_earliests_api()
+            result = model.get_earliest_api()
             self.assertEqual(result[0].start, 4)
 
 
@@ -98,7 +98,7 @@ class TestAiCoreFreqViewer(TestDirCRBaseModel):
         """
         ChipManager().chip_id = ChipModel.CHIP_V4_1_0
         freqs_data = [
-            # syscnt INTEGER, freqency INTEGER
+            # syscnt INTEGER, frequency INTEGER
             [10, 1850],
             [100000, 1600],
             [150000000, 1600],
@@ -111,7 +111,7 @@ class TestAiCoreFreqViewer(TestDirCRBaseModel):
             api_model.create_table()
             api_model.insert_data_to_db(DBNameConstant.TABLE_API_DATA, self.apis_data)
             query_freqs = freq_model.get_data()
-            query_api_start_time = api_model.get_earliests_api()
+            query_api_start_time = api_model.get_earliest_api()
             self.assertEqual(len(query_freqs), 3)
             self.assertEqual(query_api_start_time[0].start, 4)
             freqs_list = AiCoreFreqViewer(self.params).get_all_data()
@@ -137,7 +137,7 @@ class TestAiCoreFreqViewer(TestDirCRBaseModel):
         """
         ChipManager().chip_id = ChipModel.CHIP_V4_1_0
         freqs_data = [
-            # freqency INTEGER, syscnt INTEGER
+            # frequency INTEGER, syscnt INTEGER
             [2, 1850]
         ]
 
@@ -150,7 +150,7 @@ class TestAiCoreFreqViewer(TestDirCRBaseModel):
             api_model.create_table()
             api_model.insert_data_to_db(DBNameConstant.TABLE_API_DATA, self.apis_data)
             query_freqs = freq_model.get_data()
-            query_api_start_time = api_model.get_earliests_api()
+            query_api_start_time = api_model.get_earliest_api()
             self.assertEqual(len(query_freqs), 1)
             self.assertEqual(query_api_start_time[0].start, 4)
             freqs_list = AiCoreFreqViewer(self.params).get_all_data()

@@ -148,7 +148,7 @@ protected:
     }
 };
 
-TEST_F(MetricProcessorUTest, TestTaskRunShouldReturnTrueWhenRunA1SuccessToOnlyChceckMemoryBound)
+TEST_F(MetricProcessorUTest, TestTaskRunShouldReturnTrueWhenRunA1SuccessToOnlyCheckMemoryBound)
 {
     nlohmann::json record = {
         {"startCollectionTimeBegin", "1701069323851824"},

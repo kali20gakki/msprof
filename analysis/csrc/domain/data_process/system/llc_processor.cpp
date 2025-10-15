@@ -35,13 +35,13 @@ bool LLcProcessor::Process(DataInventory &dataInventory)
     }
     bool flag = true;
     std::vector<LLcData> allProcessedData;
-    std::vector<LLcSummaryData> allSumaryData;
+    std::vector<LLcSummaryData> allSummaryData;
     auto deviceList = File::GetFilesWithPrefix(profPath_, DEVICE_PREFIX);
     for (const auto& devicePath: deviceList) {
-        flag = ProcessSingleDevice(devicePath, allProcessedData, allSumaryData) && flag;
+        flag = ProcessSingleDevice(devicePath, allProcessedData, allSummaryData) && flag;
     }
     if (!SaveToDataInventory<LLcData>(std::move(allProcessedData), dataInventory, PROCESSOR_NAME_LLC) ||
-        !SaveToDataInventory<LLcSummaryData>(std::move(allSumaryData), dataInventory, PROCESSOR_NAME_LLC)) {
+        !SaveToDataInventory<LLcSummaryData>(std::move(allSummaryData), dataInventory, PROCESSOR_NAME_LLC)) {
         flag = false;
         ERROR("Save LLC Data To DataInventory failed, profPath is %.", profPath_);
     }

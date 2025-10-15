@@ -110,7 +110,7 @@ class HostProfDataBase:
 
     def get_recommend_value(self: any, value_name: str, table_name: str) -> list:
         """
-        param: values's key, table name
+        param: value's key, table name
         get recommend value
         :return: [peak value, recommend value]
         """

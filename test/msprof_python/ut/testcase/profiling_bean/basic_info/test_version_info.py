@@ -15,7 +15,7 @@ class TestVersionInfo(unittest.TestCase):
         checker.run("")
         self.assertEqual(0, checker.drv_version)
 
-    def test_run_when_driver_update_then_return_acltual_driver_version(self):
+    def test_run_when_driver_update_then_return_actual_driver_version(self):
         InfoJsonReaderManager(info_json=InfoJson(drvVersion=467731)).process()
         checker = VersionInfo()
         checker.run("")

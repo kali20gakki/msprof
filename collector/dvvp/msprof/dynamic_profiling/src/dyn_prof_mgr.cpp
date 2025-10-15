@@ -36,14 +36,14 @@ int DynProfMgr::StartDynProf()
     }
     MSPROF_EVENT("Start dynamic profiling task");
     std::string dynProfModeEnv = Utils::GetEnvString(PROFILING_MODE_ENV);
-    if (dynProfModeEnv == DAYNAMIC_PROFILING_VALUE) { // 命令行设置dynamic，创建server端，与命令行client端建联交互
+    if (dynProfModeEnv == DYNAMIC_PROFILING_VALUE) { // 命令行设置dynamic，创建server端，与命令行client端建联交互
         MSVP_MAKE_SHARED0_RET(dynProfSrv_, DynProfServer, PROFILING_FAILED);
         if (dynProfSrv_->Start() != PROFILING_SUCCESS) {
             MSPROF_LOGE("Dynamic profiling start server fail");
             dynProfSrv_.reset();
             return PROFILING_FAILED;
         }
-    } else if (dynProfModeEnv == DELAY_DURARION_PROFILING_VALUE) { // 命令行设置delay或duration，起线程按设置时间启停
+    } else if (dynProfModeEnv == DELAY_DURATION_PROFILING_VALUE) { // 命令行设置delay或duration，起线程按设置时间启停
         MSVP_MAKE_SHARED0_RET(dynProfThread_, DynProfThread, PROFILING_FAILED);
         if (dynProfThread_->Start() != PROFILING_SUCCESS) {
             MSPROF_LOGE("Dynamic profiling start thread fail");
@@ -66,13 +66,13 @@ void DynProfMgr::StopDynProf()
         return;
     }
     if (dynProfSrv_ != nullptr) {
-        dynProfSrv_->NotifyClientDisconnet("Dynamic profiling Server exit");
+        dynProfSrv_->NotifyClientDisconnect("Dynamic profiling Server exit");
         dynProfSrv_->Stop();
     } else if (dynProfThread_ != nullptr) {
         dynProfThread_->Stop();
     }
     isStarted_ = false;
-    MSPROF_EVENT("Dynamic profiling task stoped");
+    MSPROF_EVENT("Dynamic profiling task stopped");
 }
 
 void DynProfMgr::SaveDevicesInfo(ProfSetDevPara data)

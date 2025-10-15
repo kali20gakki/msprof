@@ -22,10 +22,10 @@ int InitInjectionMstx(MstxGetModuleFuncTableFunc getFuncTable)
     return Common::Mstx::GetModuleTableFunc(getFuncTable);
 }
 
-void ProfRegisteMstxFunc(MstxInitInjectionFunc mstxInitFunc, ProfModule module)
+void ProfRegisterMstxFunc(MstxInitInjectionFunc mstxInitFunc, ProfModule module)
 {
     if (mstxInitFunc != nullptr) {
-        Common::Mstx::ProfRegisteMstxFunc(mstxInitFunc, module);
+        Common::Mstx::ProfRegisterMstxFunc(mstxInitFunc, module);
     }
     return;
 }

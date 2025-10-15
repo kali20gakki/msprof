@@ -384,7 +384,7 @@ int32_t MsprofilerInit()
         MSPROF_LOGE("Failed to register enable typeId callback");
         return PROFILING_FAILED;
     }
-    MsprofMstxApi::MstxRegistMstxFunc();
+    MsprofMstxApi::MstxRegisterMstxFunc();
     return PROFILING_SUCCESS;
 }
 

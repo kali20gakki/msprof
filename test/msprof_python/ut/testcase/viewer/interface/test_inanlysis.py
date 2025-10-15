@@ -19,8 +19,8 @@ class UTAnalysis(IAnalysisModel):
         pass
 
 
-class TestInanlysis(unittest.TestCase):
-    def test_ianalysis(self):
+class TestAnalysis(unittest.TestCase):
+    def test_analysis(self):
         check = UTAnalysis()
         check.get_timeline_data()
         check.get_summary_data()

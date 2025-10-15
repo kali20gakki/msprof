@@ -1,7 +1,6 @@
 /*
  * Copyright (c) Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
  * Description: msprof dlog
- * Author: dml
  * Create: 2018-06-13
  */
 #ifndef MSPROF_DLOG_H

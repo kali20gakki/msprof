@@ -43,7 +43,7 @@ protected:
         EXPECT_TRUE(File::RemoveDir(FFTS_PROFILE_PATH, 0));
     }
 
-    ContextPmu GenerateInvaidPmu()
+    ContextPmu GenerateInvalidPmu()
     {
         ContextPmu contextPmu;
         contextPmu.funcType = 39; // 39为异常funcType
@@ -117,7 +117,7 @@ TEST_F(FftsProfileParserUTest, TestParseShouldReturnNoDataWhenDataFuncTypeIsInva
     FftsProfileParser parser;
     DeviceContext context;
     context.deviceContextInfo.deviceFilePath = FFTS_PROFILE_PATH;
-    std::vector<ContextPmu> pmu{GenerateInvaidPmu()};
+    std::vector<ContextPmu> pmu{GenerateInvalidPmu()};
     WriteBin(pmu, File::PathJoin({FFTS_PROFILE_PATH, "data"}), "ffts_profile.data.0.slice_0");
     ASSERT_EQ(ANALYSIS_OK, parser.Run(dataInventory_, context));
     auto pmuData = dataInventory_.GetPtr<std::vector<HalPmuData>>();

@@ -30,7 +30,7 @@ TEST_F(UtilsUtest, ShouldGetRealPathWhenInputRelativePath)
     EXPECT_STREQ(targetPath.c_str(), realPath.c_str());
 }
 
-TEST_F(UtilsUtest, ShouldGetRealPathWhenInputAbsoultePath)
+TEST_F(UtilsUtest, ShouldGetRealPathWhenInputAbsolutePath)
 {
     char buf[PATH_MAX];
     getcwd(buf, PATH_MAX);

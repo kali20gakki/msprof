@@ -44,7 +44,7 @@ class TaskDispatchModelIndex:
         """
         dispatch model id and index id for each task
         """
-        # only mix and model id is op model id sence, model id and index id for each task might be different
+        # only mix and model id is op model id scene, model id and index id for each task might be different
         # the last element of iteration info list is op model id and its index id
         for iter_info in self.iteration_info_list:
             if iter_info.step_start < end_time <= iter_info.step_end:

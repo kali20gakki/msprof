@@ -161,7 +161,7 @@ class L2CacheCalculator(ICalculator, MsMultiProcess):
 
     def _pre_check(self: any) -> bool:
         """
-        check if flatform and l2 cache events in info.json is legal
+        check if platform and l2 cache events in info.json is legal
         :return: basic info is legal for l2 cache calculating
         """
         # get job platform info from info.json

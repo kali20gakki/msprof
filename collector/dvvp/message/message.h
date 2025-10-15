@@ -72,7 +72,7 @@ namespace message {
     } while (0)
 
 
-enum COLLECTON_STATUS {
+enum COLLECTION_STATUS {
     SUCCESS = 0,
     ERR = 1
 };

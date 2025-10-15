@@ -33,7 +33,7 @@ uint16_t Flip::GetTaskId(const MsprofCompactInfo &task)
 
 uint16_t Flip::GetBatchId(const MsprofCompactInfo &task)
 {
-    return task.data.runtimeTrack.taskId >> BIT_NUM;  // batchId/filpNum是高16位
+    return task.data.runtimeTrack.taskId >> BIT_NUM;  // batchId/flipNum是高16位
 }
 
 void Flip::SetBatchId(MsprofCompactInfo &task, uint32_t batchId)

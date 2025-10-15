@@ -16,7 +16,7 @@ SHARED_PTR_ALIA<PluginHandle> ProfCommonPlugin::pluginHandle_ = nullptr;
 
 void ProfCommonPlugin::GetAllFunction()
 {
-    pluginHandle_->GetFunction<void, MstxInitInjectionFunc, ProfModule>("ProfRegisteMstxFunc", profRegisteMstxFunc_);
+    pluginHandle_->GetFunction<void, MstxInitInjectionFunc, ProfModule>("ProfRegisterMstxFunc", profRegisterMstxFunc_);
     pluginHandle_->GetFunction<void, ProfModule>("EnableMstxFunc", enableMstxFunc_);
 }
 
@@ -45,14 +45,14 @@ bool ProfCommonPlugin::IsFuncExist(const std::string &funcName) const
     return pluginHandle_->IsFuncExist(funcName);
 }
 
-void ProfCommonPlugin::MsprofProfRegisteMstxFunc(MstxInitInjectionFunc injectFunc, ProfModule module)
+void ProfCommonPlugin::MsprofProfRegisterMstxFunc(MstxInitInjectionFunc injectFunc, ProfModule module)
 {
     PthreadOnce(&loadFlag_, []()->void {ProfCommonPlugin::instance()->LoadProfCommonSo();});
-    if (profRegisteMstxFunc_ == nullptr) {
-        MSPROF_LOGW("ProfCommonPlugin ProfRegisteMstxFunc function is null.");
+    if (profRegisterMstxFunc_ == nullptr) {
+        MSPROF_LOGW("ProfCommonPlugin ProfRegisterMstxFunc function is null.");
         return;
     }
-    profRegisteMstxFunc_(injectFunc, module);
+    profRegisterMstxFunc_(injectFunc, module);
 }
 
 void ProfCommonPlugin::MsprofEnableMstxFunc(ProfModule module)

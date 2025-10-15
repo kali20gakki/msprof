@@ -158,7 +158,7 @@ class DataParsersConfig(MetaConfig):
             ('path', 'msparser.aicpu.data_preparation_parser'),
             ('chip_model', '0,1,2,3,4,5')
         ],
-        'HCCLOperatiorParser': [
+        'HCCLOperatorParser': [
             ('path', 'msparser.parallel.hccl_operator_parser'),
             ('chip_model', '1,2,3,4,5'),
             ('level', '3')

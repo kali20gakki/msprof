@@ -365,10 +365,10 @@ int GetModuleTableFunc(MstxGetModuleFuncTableFunc getFuncTable)
     return retVal;
 }
 
-msptiResult MstxRegistMstxFunc()
+msptiResult MstxRegisterMstxFunc()
 {
-    MSPTI_LOGI("mspti registeMstxFunc to profcommon.so");
-    ProfRegisteMstxFunc(InitInjectionMstx, PROF_MODULE_MSPTI);
+    MSPTI_LOGI("mspti registerMstxFunc to profcommon.so");
+    ProfRegisterMstxFunc(InitInjectionMstx, PROF_MODULE_MSPTI);
     return MSPTI_SUCCESS;
 }
 
@@ -393,7 +393,7 @@ int InitInjectionMstx(MstxGetModuleFuncTableFunc getFuncTable)
 }
 
 using namespace MsptiMstxApi;
-static msptiResult res = MstxRegistMstxFunc();
+static msptiResult res = MstxRegisterMstxFunc();
 
 msptiResult msptiActivityEnableMarkerDomain(const char* name)
 {

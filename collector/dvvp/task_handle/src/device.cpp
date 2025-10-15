@@ -1,7 +1,6 @@
 /*
  * Copyright (c) Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
  * Description: handle profiling request
- * Author: hufengwei
  * Create: 2018-06-13
  */
 #include "device.h"
@@ -46,7 +45,7 @@ Device::Device(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params,
       isQuited_(false),
       isStopReplayReady_(false),
       isInited_(false),
-      deviceResponseCallack_(nullptr),
+      deviceResponseCallback_(nullptr),
       jobAdapter_(nullptr)
 {
     MSPROF_LOGI("Constructor Device (%s).", indexIdStr_.c_str());
@@ -54,7 +53,7 @@ Device::Device(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params,
 
 Device::~Device()
 {
-    MSPROF_LOGI("Destory Device (%d).", indexId_);
+    MSPROF_LOGI("Destroy Device (%d).", indexId_);
     StopNoWait();
     PostStopReplay();
 }
@@ -123,7 +122,7 @@ int Device::SetResponseCallback(DeviceCallback callback)
         return PROFILING_FAILED;
     }
     MSPROF_LOGI("Device SetResponseCallback");
-    deviceResponseCallack_ = callback;
+    deviceResponseCallback_ = callback;
     return PROFILING_SUCCESS;
 }
 
@@ -148,9 +147,9 @@ void Device::Run(const struct error_message::Context &errorContext)
     int ret = PROFILING_SUCCESS;
     do {
         ret = jobAdapter_->StartProf(params_);
-        if (deviceResponseCallack_ != nullptr) {  // call cloud response when start profiling
+        if (deviceResponseCallback_ != nullptr) {  // call cloud response when start profiling
             MSPROF_LOGI("Send response Device(%d)", indexId_);
-            deviceResponseCallack_(indexId_);
+            deviceResponseCallback_(indexId_);
         }
         if (ret != PROFILING_SUCCESS) {
             status_->info = "Start failed";
@@ -187,8 +186,8 @@ int Device::Wait()
     MSPROF_LOGI("Device(%d) wait begin", indexId_);
     isQuited_ = true;
     Join();
-    if (deviceResponseCallack_ != nullptr) {
-        deviceResponseCallack_(indexId_);
+    if (deviceResponseCallback_ != nullptr) {
+        deviceResponseCallback_(indexId_);
     }
     MSPROF_LOGI("Device(%d) wait end", indexId_);
     return 0;

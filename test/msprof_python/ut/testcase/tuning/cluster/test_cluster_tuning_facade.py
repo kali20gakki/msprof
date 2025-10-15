@@ -191,8 +191,8 @@ class TestClusterTuningFacade(unittest.TestCase):
         compute_op_events = [GeOp()]
         with mock.patch(NAMESPACE + '.CriticalPathAnalysisParserFactory.generate_parser',
                         return_value=CriticalPathParser(compute_op_events, hccl_op_events)):
-            test_tuning_facede = ClusterTuningFacade(self.params)
-            top_hccl_ops = test_tuning_facede.critical_path_analysis()
+            test_tuning_facade = ClusterTuningFacade(self.params)
+            top_hccl_ops = test_tuning_facade.critical_path_analysis()
             self.assertEqual(top_hccl_ops, ('all_Reduce',))
 
     def test__check_params_valid_should_success_when_not_enable_critical_path(self):

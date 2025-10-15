@@ -137,7 +137,7 @@ class LlcModel(BaseModel, ABC):
 
     def insert_metrics_data(self: any) -> None:
         """
-        Insert metrics value into mertics table
+        Insert metrics value into metrics table
         :return: None
         """
         self.calculate_metrics()

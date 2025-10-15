@@ -100,7 +100,7 @@ private:
 
 namespace MsptiMstxApi {
 int InitInjectionMstx(MstxGetModuleFuncTableFunc getFuncTable);
-msptiResult MstxRegistMstxFunc();
+msptiResult MstxRegisterMstxFunc();
 void MsptiEnableMstxFunc();
 }
 

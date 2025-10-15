@@ -107,7 +107,7 @@ def generate_function(header_files, inc_dir):
         includes.append(include_str)
 
     content = includes
-    log_info("include concent build success")
+    log_info("include content build success")
     total = 0
     content.append('\n')
     # generate implement
@@ -127,7 +127,7 @@ def generate_function(header_files, inc_dir):
             content.append("\n")
         if header_base_name == "ge_prof.h":
             content.append("} //ge\n")
-    log_info("implement concent build success")
+    log_info("implement content build success")
     log_info('total functions number is {}'.format(total))
     return content
 

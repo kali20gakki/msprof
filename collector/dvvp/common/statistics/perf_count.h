@@ -27,7 +27,7 @@ public:
     /**
     * @brief UpdatePerfInfo: update the perf data according the received data info
     * @param [in] startTime: data received time(ns)
-    * @param [in] endTime: the time of data has been dealed
+    * @param [in] endTime: The time at which the data has been dealt with
     * @param [in] dataLen: the length of the received data
     */
     void UpdatePerfInfo(uint64_t startTime, uint64_t endTime, size_t dataLen);

@@ -1,7 +1,6 @@
 /*
  * Copyright (c) Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
  * Description: handle profiling request
- * Author: lixubo
  * Create: 2018-06-13
  */
 
@@ -28,7 +27,7 @@ using namespace Analysis::Dvvp::Common::Platform;
 using namespace Analysis::Dvvp::Common::Config;
 
 /*
- * @berif  : Collect Peripheral profiling data
+ * @brief  : Collect Peripheral profiling data
  */
 ProfPeripheralJob::ProfPeripheralJob()
     : samplePeriod_(analysis::dvvp::common::config::DEFAULT_INTERVAL),
@@ -38,8 +37,8 @@ ProfPeripheralJob::ProfPeripheralJob()
 ProfPeripheralJob::~ProfPeripheralJob() {}
 
 /*
- * @berif  : Collect Peripheral profiling data Default Init
- * @param  : cfg : Collect data config infomation
+ * @brief  : Collect Peripheral profiling data Default Init
+ * @param  : cfg : Collect data config information
  * @return : PROFILING_FAILED(-1) :failed
  *       : PROFILING_SUCCESS(0) : success
  */
@@ -56,7 +55,7 @@ int ProfPeripheralJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 }
 
 /*
- * @berif  : Collect Peripheral profiling Set Default peripheral Config
+ * @brief  : Collect Peripheral profiling Set Default peripheral Config
  * @param  : None
  * @return : PROFILING_FAILED(-1) :failed
  *       : PROFILING_SUCCESS(0) : success
@@ -69,7 +68,7 @@ int ProfPeripheralJob::SetPeripheralConfig()
 }
 
 /*
- * @berif  : Collect Peripheral start profiling with default
+ * @brief  : Collect Peripheral start profiling with default
  * @param  : None
  * @return : PROFILING_FAILED(-1) :failed
  *       : PROFILING_SUCCESS(0) : success
@@ -116,7 +115,7 @@ int ProfPeripheralJob::Process()
 }
 
 /*
- * @berif  : Collect Peripheral stop profiling with default
+ * @brief  : Collect Peripheral stop profiling with default
  * @param  : None
  * @return : PROFILING_FAILED(-1) :failed
  *       : PROFILING_SUCCESS(0) : success
@@ -147,7 +146,7 @@ int ProfPeripheralJob::Uninit()
 }
 
 /*
- * @berif  : Collect DDR profiling data
+ * @brief  : Collect DDR profiling data
  */
 ProfDdrJob::ProfDdrJob()
 {
@@ -157,7 +156,7 @@ ProfDdrJob::ProfDdrJob()
 ProfDdrJob::~ProfDdrJob() {}
 
 /*
- * @berif  : DDR Peripheral Init profiling
+ * @brief  : DDR Peripheral Init profiling
  * @param  : cfg : Collect data config infomation
  * @return : PROFILING_FAILED(-1) :failed
  *       : PROFILING_SUCCESS(0) : success
@@ -181,7 +180,7 @@ int ProfDdrJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 }
 
 /*
- * @berif  : DDR Peripheral Set Config to Driver
+ * @brief  : DDR Peripheral Set Config to Driver
  * @param  : None
  * @return : PROFILING_FAILED(-1) :failed
  *       : PROFILING_SUCCESS(0) : success
@@ -208,7 +207,7 @@ int ProfDdrJob::SetPeripheralConfig()
     }
 
     configP->period   = samplePeriod_;
-    configP->masterId = DEAFULT_MASTER_ID;
+    configP->masterId = DEFAULT_MASTER_ID;
 
     for (uint32_t i = 0; i < (uint32_t)collectionJobCfg_->jobParams.events->size(); i++) {
         if ((*collectionJobCfg_->jobParams.events)[i].compare("read") == 0) {
@@ -228,7 +227,7 @@ int ProfDdrJob::SetPeripheralConfig()
 }
 
 /*
- * @berif  : Collect HBM profiling data
+ * @brief  : Collect HBM profiling data
  */
 ProfHbmJob::ProfHbmJob()
 {
@@ -239,7 +238,7 @@ ProfHbmJob::~ProfHbmJob()
 }
 
 /*
- * @berif  : HBM Peripheral Init profiling
+ * @brief  : HBM Peripheral Init profiling
  * @param  : cfg : Collect data config infomation
  * @return : PROFILING_FAILED(-1) :failed
  *       : PROFILING_SUCCESS(0) : success
@@ -264,7 +263,7 @@ int ProfHbmJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 }
 
 /*
- * @berif  : HBM Peripheral Set Config to Driver
+ * @brief  : HBM Peripheral Set Config to Driver
  * @param  : None
  * @return : PROFILING_FAILED(-1) :failed
  *       : PROFILING_SUCCESS(0) : success
@@ -294,7 +293,7 @@ int ProfHbmJob::SetPeripheralConfig()
     }
 
     configP->period = samplePeriod_;
-    configP->masterId = DEAFULT_MASTER_ID;
+    configP->masterId = DEFAULT_MASTER_ID;
 
     for (uint32_t i = 0; i < (uint32_t)collectionJobCfg_->jobParams.events->size(); i++) {
         if ((*collectionJobCfg_->jobParams.events)[i].compare("read") == 0) {
@@ -312,7 +311,7 @@ int ProfHbmJob::SetPeripheralConfig()
 }
 
 /*
- * @berif  : Collect Npu Application Memory profiling data
+ * @brief  : Collect Npu Application Memory profiling data
  */
 ProfNpuAppMemJob::ProfNpuAppMemJob()
 {
@@ -322,7 +321,7 @@ ProfNpuAppMemJob::ProfNpuAppMemJob()
 ProfNpuAppMemJob::~ProfNpuAppMemJob() {}
  
 /*
- * @berif  : Npu Application Memory Peripheral Init profiling
+ * @brief  : Npu Application Memory Peripheral Init profiling
  * @param  : cfg : Collect data config infomation
  * @return : PROFILING_FAILED(-1) :failed
  *       : PROFILING_SUCCESS(0) : success
@@ -345,7 +344,7 @@ int ProfNpuAppMemJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 }
  
 /*
- * @berif  : Npu Application Memory Peripheral Set Config to Driver
+ * @brief  : Npu Application Memory Peripheral Set Config to Driver
  * @param  : None
  * @return : PROFILING_FAILED(-1) : failed
  *         : PROFILING_SUCCESS(0) : success
@@ -371,7 +370,7 @@ int32_t ProfNpuAppMemJob::SetPeripheralConfig()
 }
  
 /*
- * @berif  : Collect Npu Memory profiling data
+ * @brief  : Collect Npu Memory profiling data
  */
 ProfNpuMemJob::ProfNpuMemJob()
 {
@@ -381,7 +380,7 @@ ProfNpuMemJob::ProfNpuMemJob()
 ProfNpuMemJob::~ProfNpuMemJob() {}
  
 /*
- * @berif  : Npu Memory Peripheral Init profiling
+ * @brief  : Npu Memory Peripheral Init profiling
  * @param  : cfg : Collect data config information
  * @return : PROFILING_FAILED(-1) : failed
  *         : PROFILING_SUCCESS(0) : success
@@ -406,7 +405,7 @@ int32_t ProfNpuMemJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 }
  
 /*
- * @berif  : Npu Memory Peripheral Set Config to Driver
+ * @brief  : Npu Memory Peripheral Set Config to Driver
  * @param  : None
  * @return : PROFILING_FAILED(-1) : failed
  *         : PROFILING_SUCCESS(0) : success
@@ -432,7 +431,7 @@ int32_t ProfNpuMemJob::SetPeripheralConfig()
 }
 
 /*
- * @berif  : Collect Npu Module Memory profiling data
+ * @brief  : Collect Npu Module Memory profiling data
  */
 ProfNpuModuleMemJob::ProfNpuModuleMemJob()
 {
@@ -442,7 +441,7 @@ ProfNpuModuleMemJob::ProfNpuModuleMemJob()
 ProfNpuModuleMemJob::~ProfNpuModuleMemJob() {}
 
 /*
- * @berif  : Npu Module Memory Peripheral Init profiling
+ * @brief  : Npu Module Memory Peripheral Init profiling
  * @param  : cfg : Collect data config infomation
  * @return : PROFILING_FAILED(-1) :failed
  *       : PROFILING_SUCCESS(0) : success
@@ -465,7 +464,7 @@ int ProfNpuModuleMemJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 }
 
 /*
- * @berif  : Npu Module Memory Peripheral Set Config to Driver
+ * @brief  : Npu Module Memory Peripheral Set Config to Driver
  * @param  : None
  * @return : PROFILING_FAILED(-1) : failed
  *         : PROFILING_SUCCESS(0) : success
@@ -492,7 +491,7 @@ int32_t ProfNpuModuleMemJob::SetPeripheralConfig()
 }
 
     /*
- * @berif  : Collect milan frequency conversion data
+ * @brief  : Collect milan frequency conversion data
  */
 ProfLpmFreqConvJob::ProfLpmFreqConvJob()
 {
@@ -502,7 +501,7 @@ ProfLpmFreqConvJob::ProfLpmFreqConvJob()
 ProfLpmFreqConvJob::~ProfLpmFreqConvJob() {}
 
 /*
- * @berif  : Frequency Peripheral Init profiling
+ * @brief  : Frequency Peripheral Init profiling
  * @param  : cfg : Collect data config information
  * @return : PROFILING_FAILED(-1) : failed
  *         : PROFILING_SUCCESS(0) : success
@@ -527,7 +526,7 @@ int32_t ProfLpmFreqConvJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 }
 
 /*
- * @berif  : Frequency Peripheral Set Config
+ * @brief  : Frequency Peripheral Set Config
  * @param  : None
  * @return : PROFILING_FAILED(-1) : failed
  *         : PROFILING_SUCCESS(0) : success
@@ -548,7 +547,7 @@ int32_t ProfLpmFreqConvJob::SetPeripheralConfig()
 }
 
 /*
- * @berif  : Collect HCCS profiling data
+ * @brief  : Collect HCCS profiling data
  */
 ProfHccsJob::ProfHccsJob()
 {
@@ -558,7 +557,7 @@ ProfHccsJob::ProfHccsJob()
 ProfHccsJob::~ProfHccsJob() {}
 
 /*
- * @berif  : HCCS Peripheral Init profiling
+ * @brief  : HCCS Peripheral Init profiling
  * @param  : cfg : Collect data config infomation
  * @return : PROFILING_FAILED(-1) :failed
  *       : PROFILING_SUCCESS(0) : success
@@ -591,7 +590,7 @@ int ProfHccsJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 }
 
 /*
- * @berif  : Collect PCIE profiling data
+ * @brief  : Collect PCIE profiling data
  */
 ProfPcieJob::ProfPcieJob()
 {
@@ -601,7 +600,7 @@ ProfPcieJob::ProfPcieJob()
 ProfPcieJob::~ProfPcieJob() {}
 
 /*
- * @berif  : PCIE Peripheral Init profiling
+ * @brief  : PCIE Peripheral Init profiling
  * @param  : cfg : Collect data config infomation
  * @return : PROFILING_FAILED(-1) :failed
  *       : PROFILING_SUCCESS(0) : success
@@ -633,7 +632,7 @@ int ProfPcieJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 }
 
 /*
- * @berif  : Collect NIC profiling data
+ * @brief  : Collect NIC profiling data
  */
 ProfNicJob::ProfNicJob()
 {
@@ -643,7 +642,7 @@ ProfNicJob::ProfNicJob()
 ProfNicJob::~ProfNicJob() {}
 
 /*
- * @berif  : NIC Peripheral Init profiling
+ * @brief  : NIC Peripheral Init profiling
  * @param  : cfg : Collect data config infomation
  * @return : PROFILING_FAILED(-1) :failed
  *       : PROFILING_SUCCESS(0) : success
@@ -676,7 +675,7 @@ int ProfNicJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 }
 
 /*
- * @berif  : Collect DVPP profiling data
+ * @brief  : Collect DVPP profiling data
  */
 ProfDvppJob::ProfDvppJob()
 {
@@ -689,7 +688,7 @@ ProfDvppJob::~ProfDvppJob()
 }
 
 /*
- * @berif  : DVPP Peripheral Init profiling
+ * @brief  : DVPP Peripheral Init profiling
  * @param  : cfg : Collect data config infomation
  * @return : PROFILING_FAILED(-1) :failed
  *       : PROFILING_SUCCESS(0) : success
@@ -796,7 +795,7 @@ int ProfDvppJob::Uninit()
 }
 
 /*
- * @berif  : Collect LLC profiling data
+ * @brief  : Collect LLC profiling data
  */
 ProfLlcJob::ProfLlcJob()
     : llcProcess_(MSVP_MMPROCESS)
@@ -807,7 +806,7 @@ ProfLlcJob::ProfLlcJob()
 ProfLlcJob::~ProfLlcJob() {}
 
 /*
- * @berif  : LLC Peripheral Init profiling
+ * @brief  : LLC Peripheral Init profiling
  * @param  : cfg : Collect data config infomation
  * @return : PROFILING_FAILED(-1) :failed
  *       : PROFILING_SUCCESS(0) : success
@@ -837,7 +836,7 @@ int ProfLlcJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 }
 
 /*
- * @berif  : LLC Peripheral Set Config to Driver
+ * @brief  : LLC Peripheral Set Config to Driver
  * @param  : None
  * @return : PROFILING_FAILED(-1) :failed
  *       : PROFILING_SUCCESS(0) : success
@@ -877,7 +876,7 @@ int ProfLlcJob::SetPeripheralConfig()
 }
 
 /*
- * @berif  : LLC Collect Peripheral start profiling
+ * @brief  : LLC Collect Peripheral start profiling
  * @param  : None
  * @return : PROFILING_FAILED(-1) :failed
  *       : PROFILING_SUCCESS(0) : success
@@ -931,7 +930,7 @@ int ProfLlcJob::Process()
 }
 
 /*
- * @berif  : LLC Collect Peripheral stop profiling
+ * @brief  : LLC Collect Peripheral stop profiling
  * @param  : None
  * @return : PROFILING_FAILED(-1) :failed
  *       : PROFILING_SUCCESS(0) : success
@@ -1036,7 +1035,7 @@ void ProfLlcJob::SendData()
 }
 
 /*
- * @berif  : Get LLC Collect Peripheral Command of start profiling
+ * @brief  : Get LLC Collect Peripheral Command of start profiling
  * @param  : None
  * @return : PROFILING_FAILED(-1) :failed
  *       : PROFILING_SUCCESS(0) : success
@@ -1099,7 +1098,7 @@ ProfRoceJob::ProfRoceJob()
 ProfRoceJob::~ProfRoceJob() {}
 
 /*
- * @berif  : ROCE Peripheral Init profiling
+ * @brief  : ROCE Peripheral Init profiling
  * @param  : cfg : Collect data config infomation
  * @return : PROFILING_FAILED(-1) :failed
  *       : PROFILING_SUCCESS(0) : success
@@ -1208,7 +1207,7 @@ struct QosProfileConfig {
     uint8_t mpamId[QOS_STREAM_MAX_NUM];
 };
 /*
- * @berif  : Collect qos data
+ * @brief  : Collect qos data
  */
 ProfQosJob::ProfQosJob()
 {
@@ -1218,7 +1217,7 @@ ProfQosJob::ProfQosJob()
 ProfQosJob::~ProfQosJob() {}
 
 /*
- * @berif  : Qos profiling init
+ * @brief  : Qos profiling init
  * @param  : cfg : Collect data config information
  * @return : PROFILING_FAILED(-1) : failed
  *         : PROFILING_SUCCESS(0) : success
@@ -1245,7 +1244,7 @@ int32_t ProfQosJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 }
 
 /*
- * @berif  : Qos set config
+ * @brief  : Qos set config
  * @param  : None
  * @return : PROFILING_FAILED(-1) : failed
  *         : PROFILING_SUCCESS(0) : success

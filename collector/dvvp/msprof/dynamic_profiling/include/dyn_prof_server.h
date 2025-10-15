@@ -22,7 +22,7 @@ public:
     ~DynProfServer() override;
     int Start() override;
     int Stop() override;
-    void NotifyClientDisconnet(const std::string &detailInfo);
+    void NotifyClientDisconnect(const std::string &detailInfo);
     void SaveDevicesInfo(ProfSetDevPara data);
 
 private:

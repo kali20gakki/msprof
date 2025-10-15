@@ -54,7 +54,7 @@ TEST_F(CommunicationCalculatorUtest, ShouldReturnSuccess)
     std::unique_ptr<Mspti::Parser::ApiEvent> subApi2TaskInfo = std::make_unique<Mspti::Parser::ApiEvent>();
     subApi2TaskInfo->api.beginTime = subBeginTime;
     subApi2TaskInfo->api.endTime = subEndTime;
-    api2TaskInfo->childs.push_back(std::move(subApi2TaskInfo));
+    api2TaskInfo->children.push_back(std::move(subApi2TaskInfo));
     auto &instance = Mspti::Parser::CommunicationCalculator::GetInstance();
     EXPECT_EQ(instance.AppendApi2TaskInfo(api2TaskInfo), MSPTI_SUCCESS);
 }

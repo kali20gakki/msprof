@@ -36,7 +36,7 @@ int MsprofTxReporter::UnInit()
         return PROFILING_FAILED;
     }
     isInit_ = false;
-    MSPROF_LOGI("[UnInit]ReporetCallback UnInit success.");
+    MSPROF_LOGI("[UnInit]ReportCallback UnInit success.");
     return PROFILING_SUCCESS;
 }
 
@@ -61,7 +61,7 @@ int MsprofTxReporter::Report(MsprofTxInfo &data) const
     info.level = MSPROF_REPORT_TX_LEVEL;
     info.type = MSPROF_REPORT_TX_BASE_TYPE;
     info.dataLen = sizeof(data);
-    auto ret = memcpy_s(info.data, MSPROF_ADDTIONAL_INFO_DATA_LENGTH, &data, sizeof(MsprofTxInfo));
+    auto ret = memcpy_s(info.data, MSPROF_ADDITIONAL_INFO_DATA_LENGTH, &data, sizeof(MsprofTxInfo));
     if (ret != EOK) {
         MSPROF_LOGE("[TxReport]Failed to memcpy for tx info data.");
         return PROFILING_FAILED;

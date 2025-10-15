@@ -1365,7 +1365,7 @@ TEST_F(ParamValidationUtest, CheckExportTypeIsValidWillReturnTrueWhenInputValidT
     EXPECT_EQ(true, ParamValidation::instance()->CheckExportTypeIsValid("db"));
 }
 
-TEST_F(ParamValidationUtest, CheckProfilingIntervalIsValidTWOWillReturnFalseWhenInputNullPatams)
+TEST_F(ParamValidationUtest, CheckProfilingIntervalIsValidTWOWillReturnFalseWhenInputNullParams)
 {
     EXPECT_EQ(false, ParamValidation::instance()->CheckProfilingIntervalIsValidTWO(nullptr));
 }

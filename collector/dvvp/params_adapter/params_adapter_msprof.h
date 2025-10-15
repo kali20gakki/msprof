@@ -51,7 +51,7 @@ private:
     int CheckMsprofMode(const std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> &argvMap);
     void SetCollectParams();
     void SetAnalysisParams();
-    void SpliteAppPath(const std::string &appParams);
+    void SplitAppPath(const std::string &appParams);
     int SetModeDefaultParams(MsprofMode modeType);
     int SystemToolsIsExist() const;
     int GenMsprofContainer(const std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> &argvMap);

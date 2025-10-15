@@ -24,7 +24,7 @@ namespace Analysis {
 
 namespace Infra {
 
-struct ProcessStatistcs {
+struct ProcessStatistics {
     std::string processName;  // 以后升级到C++17或更高版本，可以使用std::string_view代替std::string
     std::vector<std::string> dependProcessNames;
     uint32_t returnCode;
@@ -36,7 +36,7 @@ struct ProcessStatistcs {
 
 struct OneLevelStat {
     bool generalResult;
-    std::vector<ProcessStatistcs> processStatistcs;
+    std::vector<ProcessStatistics> processStatistics;
 };
 
 struct ExecuteProcessStat {

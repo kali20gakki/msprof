@@ -243,7 +243,7 @@ class TestAiCoreOpReport(unittest.TestCase):
         DataManager.add_cube_usage(headers, data)
         self.assertEqual(data, [[1, 0.668, 401282788, 11437780, 97.455], [2, 0.624, 341282228, 10237240, 92.604]])
 
-    def test_add_cube_usage_failed_when_info_json_data_invaild(self):
+    def test_add_cube_usage_failed_when_info_json_data_invalid(self):
         InfoConfReader()._info_json = {'DeviceInfo': [{'ai_core_num': 0, 'aic_frequency': 18}]}
         headers = ["id", "mac_ratio", "total_cycles", "Task Duration(us)"]
         data = [[1, 0.668, 401282788, 11437780], [2, 0.624, 341282228, 10237240]]

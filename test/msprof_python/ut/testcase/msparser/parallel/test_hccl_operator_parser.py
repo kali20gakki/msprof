@@ -8,17 +8,17 @@ from unittest import mock
 
 from constant.constant import clear_dt_project
 from msmodel.parallel.cluster_hccl_model import ClusterHCCLViewModel
-from msparser.parallel.hccl_operator_parser import HCCLOperatiorParser
+from msparser.parallel.hccl_operator_parser import HCCLOperatorParser
 from profiling_bean.db_dto.step_trace_ge_dto import StepTraceGeDto
 from profiling_bean.prof_enum.data_tag import DataTag
 
 NAMESPACE = "msparser.parallel.hccl_operator_parser"
 
 
-class TestHCCLOperatiorParser(unittest.TestCase):
+class TestHCCLOperatorParser(unittest.TestCase):
     FILE_LIST_1 = {1: ["test"]}
     FILE_LIST_2 = {DataTag.PARALLEL_STRATEGY: ["test"]}
-    DIR_PATH = os.path.join(os.path.dirname(__file__), 'DT_HCCLOperatiorParser')
+    DIR_PATH = os.path.join(os.path.dirname(__file__), 'DT_HCCLOperatorParser')
     SAMPLE_CONFIG = {"result_dir": DIR_PATH}
 
     def setUp(self) -> None:
@@ -39,7 +39,7 @@ class TestHCCLOperatiorParser(unittest.TestCase):
                         return_value=[hccl_data1, hccl_data2]), \
             mock.patch(NAMESPACE + ".ParallelViewModel.get_parallel_table_name", return_value="cluster"), \
                 mock.patch(NAMESPACE + ".GeHashViewModel.get_ge_hash_data", return_value={}):
-            check = HCCLOperatiorParser(self.FILE_LIST_2, self.SAMPLE_CONFIG)
+            check = HCCLOperatorParser(self.FILE_LIST_2, self.SAMPLE_CONFIG)
             check.ms_run()
         with ClusterHCCLViewModel(self.DIR_PATH) as _model:
             data = _model.get_hccl_op_data()

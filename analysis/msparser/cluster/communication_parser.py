@@ -107,7 +107,7 @@ class CommunicationParser(MetaParser):
                     float(InfoConfReader().trans_into_local_time(
                         min(events, key=lambda x: x.timestamp).timestamp))
                 # choose all stream for Bandwidth analysis parser
-                self.op_info[hccl_name][rank_id][StrConstant.COMMNUNICATION_BANDWIDTH_INFO] \
+                self.op_info[hccl_name][rank_id][StrConstant.COMMUNICATION_BANDWIDTH_INFO] \
                     = self.op_bandwidth_parser(events)
             else:
                 logging.error("Fail to get no.%s rank events info, communication parser is interrupted", str(rank_id))
@@ -134,7 +134,7 @@ class CommunicationParser(MetaParser):
                     values = [value for key, value in OpAnalysisType.__dict__.items() if '__' not in key]
                     total_ops_dict[com_info] = HcclAnalysisTool.init_dict(values)
                 self.combine_ops_time_info(com_info_dict, total_ops_dict[com_info])
-            if com_info == StrConstant.COMMNUNICATION_BANDWIDTH_INFO:
+            if com_info == StrConstant.COMMUNICATION_BANDWIDTH_INFO:
                 if com_info not in total_ops_dict:
                     total_ops_dict[com_info] = HcclAnalysisTool.init_bandwidth_dict()
                 self.combine_ops_bandwidth_info(com_info_dict, total_ops_dict[com_info])

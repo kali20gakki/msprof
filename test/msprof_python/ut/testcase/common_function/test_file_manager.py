@@ -41,7 +41,7 @@ class TestFileManager(unittest.TestCase):
         self.assertEqual(True, FileManager.is_analyzed_data("test_file_manager"))
         shutil.rmtree("test_file_manager")
 
-    def test_check_db_path_vaild(self):
+    def test_check_db_path_valid(self):
         with mock.patch("common_func.return_code_checker.ReturnCodeCheck.print_and_return_status"), \
                 mock.patch("os.path.exists", return_value=True), \
                 mock.patch("os.path.getsize", return_value=2):

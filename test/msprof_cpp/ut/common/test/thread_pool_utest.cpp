@@ -65,10 +65,10 @@ TEST_F(COMMON_THREAD_POOL_TEST, stop) {
     pool.reset();
 }
 
-TEST_F(COMMON_THREAD_POOL_TEST, InnnerThread_run) {
+TEST_F(COMMON_THREAD_POOL_TEST, InnerThread_run) {
     GlobalMockObject::verify();
 
-    std::shared_ptr<ThreadPool::InnnerThread> thread(new ThreadPool::InnnerThread(64));
+    std::shared_ptr<ThreadPool::InnerThread> thread(new ThreadPool::InnerThread(64));
     EXPECT_NE(nullptr, thread);
 
     MOCKER_CPP(&Thread::IsQuit)

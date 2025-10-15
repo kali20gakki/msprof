@@ -902,12 +902,12 @@ TEST_F(DynProfMgrUtest, StartDynProfSrv_WithDynamicProfilingMode)
     auto dynProfMgr = DynProfMgr::instance();
     MOCKER_CPP(&Utils::GetEnvString)
         .stubs()
-        .will(returnValue(DAYNAMIC_PROFILING_VALUE));
+        .will(returnValue(DYNAMIC_PROFILING_VALUE));
     MOCKER_CPP(&DynProfServer::DynProfServerCreateSock)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
-    MOCKER_CPP(&DynProfServer::NotifyClientDisconnet)
+    MOCKER_CPP(&DynProfServer::NotifyClientDisconnect)
         .stubs();
     MOCKER_CPP(&MmUnlink)
         .stubs()
@@ -935,7 +935,7 @@ TEST_F(DynProfMgrUtest, StartDynProfThread_WithDelayOrDurationProfilingMode)
     auto dynProfMgr = DynProfMgr::instance();
     MOCKER_CPP(&Utils::GetEnvString)
         .stubs()
-        .will(returnValue(DELAY_DURARION_PROFILING_VALUE));
+        .will(returnValue(DELAY_DURATION_PROFILING_VALUE));
     MOCKER_CPP(&DynProfThread::GetDelayAndDurationTime)
         .stubs()
         .will(returnValue(PROFILING_FAILED))

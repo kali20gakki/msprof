@@ -159,7 +159,7 @@ class GetNextTagHandler(StepTraceTagHandler):
         :param record: contain model_id, tag_id, timestamp
         :return: void
         """
-        # contineous 2 tags represent getnext start and end
+        # continuous 2 tags represent getnext start and end
         self.collect_data.setdefault(record[StepTraceConstant.TAG_ID] // 2, []).append(record)
 
     def clear(self: any) -> None:

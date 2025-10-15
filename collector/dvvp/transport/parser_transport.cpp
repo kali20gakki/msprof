@@ -123,7 +123,7 @@ int PipeTransport::SendBuffer(CONST_VOID_PTR buffer, int length)
             if (count++ % 1000 == 0) {  // record log every 1000 times
                 MSPROF_LOGW("Pipe is full, count: %d", count);
             }
-            analysis::dvvp::common::utils::Utils::UsleepInterupt(PIPE_FULL_SLEEP_US);
+            analysis::dvvp::common::utils::Utils::UsleepInterrupt(PIPE_FULL_SLEEP_US);
         } else {
             analysis::dvvp::common::utils::Utils::PrintSysErrorMsg();
             break;

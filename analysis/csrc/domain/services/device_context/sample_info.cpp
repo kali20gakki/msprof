@@ -60,7 +60,7 @@ AivMetricsEventsType GetAivMetricsEventsTypeFromStr(const std::string &aivMetric
     if (it != aivMetricsMap.end()) {
         return it->second;
     } else {
-        // 如果找不到对应的枚举值，返回AicMetricsUnkown
+        // 如果找不到对应的枚举值，返回AicMetricsUnknown
         return AivMetricsEventsType::AIV_METRICS_UNKNOWN;
     }
 }
@@ -71,19 +71,19 @@ AicMetricsEventsType GetAicMetricsEventsTypeFromStr(const std::string &aicMetric
     if (it != aicMetricsMap.end()) {
         return it->second;
     } else {
-        // 如果找不到对应的枚举值，返回AicMetricsUnkown
+        // 如果找不到对应的枚举值，返回AicMetricsUnknown
         return AicMetricsEventsType::AIC_METRICS_UNKNOWN;
     }
 }
 
 ProfilingMode GetProfilingModeFromStr(const std::string &profilingStr)
 {
-    auto it = proflingMap.find(profilingStr);
-    if (it != proflingMap.end()) {
+    auto it = profilingMap.find(profilingStr);
+    if (it != profilingMap.end()) {
         return it->second;
     } else {
-        // 如果找不到对应的枚举值，PROFILING_UNKOWN
-        return ProfilingMode::PROFILING_UNKOWN;
+        // 如果找不到对应的枚举值，PROFILING_UNKNOWN
+        return ProfilingMode::PROFILING_UNKNOWN;
     }
 }
 

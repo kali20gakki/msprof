@@ -832,10 +832,10 @@ TEST_F(COMMON_UTILS_UTILS_TEST, ToLower) {
     EXPECT_STREQ("", Utils::ToLower("").c_str());
 }
 
-TEST_F(COMMON_UTILS_UTILS_TEST, UsleepInterupt) {
+TEST_F(COMMON_UTILS_UTILS_TEST, UsleepInterrupt) {
     GlobalMockObject::verify();
 
-    EXPECT_EQ(0, Utils::UsleepInterupt(1));
+    EXPECT_EQ(0, Utils::UsleepInterrupt(1));
 }
 
 TEST_F(COMMON_UTILS_UTILS_TEST, UtilsStringBuilder) {

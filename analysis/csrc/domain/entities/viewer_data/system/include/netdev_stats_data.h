@@ -59,7 +59,7 @@ struct NetDevStatsEventData {
     uint64_t nicRxByte = 0;         // NIC接收字节数
     double nicRxBandwidth = 0;      // NIC接收数据带宽
 };
-} // namepsace Domain
-} // namspace Analysis
+} // namespace Domain
+} // namespace Analysis
 
 #endif // ANALYSIS_DOMAIN_NETDEV_STATS_DATA_H

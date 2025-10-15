@@ -1,7 +1,6 @@
 /*
  * Copyright (c) Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
  * Description: handle profiling request
- * Author: lixubo
  * Create: 2018-06-13
  */
 #include "uploader.h"
@@ -161,7 +160,7 @@ void Uploader::Flush() const
 {
     while (queue_->size() != 0) {
         const unsigned long uploaderSleepTimeInUs = 10000;
-        analysis::dvvp::common::utils::Utils::UsleepInterupt(uploaderSleepTimeInUs);
+        analysis::dvvp::common::utils::Utils::UsleepInterrupt(uploaderSleepTimeInUs);
     }
 }
 

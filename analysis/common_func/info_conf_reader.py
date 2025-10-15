@@ -183,7 +183,7 @@ class InfoConfReader:
 
     def is_all_export_version(self):
         """
-        check the version wheher support all data export
+        check the version whether support all data export
         """
         return self._info_json is not None and self.get_drv_version() >= self.ALL_EXPORT_VERSION
 

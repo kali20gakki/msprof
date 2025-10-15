@@ -1,7 +1,6 @@
 /*
  * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
  * Description: prof subscribe common function
- * Author: wangheng
  * Create: 2021-04-23
  */
 #include "prof_api_common.h"

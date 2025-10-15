@@ -40,7 +40,7 @@ class AI:
     @classmethod
     def project_preparation(cls: any, project_dir: str) -> None:
         """
-        peoject preparation before collect start
+        project preparation before collect start
         """
         try:
             cls.create_project_dirs(project_dir)
@@ -84,7 +84,7 @@ class AI:
         logging.info('Database process finished.')
         logging.info('Analysis finished.')
 
-    def formulat_list(self: any, data_class: any) -> None:
+    def formula_list(self: any, data_class: any) -> None:
         """
         use multi-processing to run data class
         :param data_class: class ready to be parsed
@@ -106,6 +106,6 @@ class AI:
         """
         # init data parsing object
         if InfoConfReader().is_host_profiling():
-            self.formulat_list([CpuUsageAnalysis, MemUsageAnalysis,
+            self.formula_list([CpuUsageAnalysis, MemUsageAnalysis,
                                 DiskUsageAnalysis, NetworkUsageAnalysis,
                                 HostSyscallAnalysis])

@@ -19,7 +19,7 @@ class MsvpConstant:
     @property
     def msvp_empty_data(self: any) -> tuple:
         """
-        default empty data stuct
+        default empty data struct
         :return:
         """
         return self.MSVP_EMPTY_DATA

@@ -18,7 +18,7 @@
 #include "securec.h"
 
 namespace {
-class DeivceTaskCalculatorUtest : public testing::Test {
+class DeviceTaskCalculatorUtest : public testing::Test {
 protected:
     virtual void SetUp()
     {
@@ -27,7 +27,7 @@ protected:
     virtual void TearDown() {}
 };
 
-TEST_F(DeivceTaskCalculatorUtest, ShouldReturnTaskWhenSocLogReport)
+TEST_F(DeviceTaskCalculatorUtest, ShouldReturnTaskWhenSocLogReport)
 {
     uint16_t deviceId = 1;
     uint16_t streamId = 1;
@@ -57,7 +57,7 @@ TEST_F(DeivceTaskCalculatorUtest, ShouldReturnTaskWhenSocLogReport)
     EXPECT_EQ(instance.ReportStarsSocLog(deviceId, reinterpret_cast<StarsSocHeader *>(&socLogEnd)), MSPTI_SUCCESS);
 }
 
-TEST_F(DeivceTaskCalculatorUtest, ShouldReturnTaskWhenFftsLogReport)
+TEST_F(DeviceTaskCalculatorUtest, ShouldReturnTaskWhenFftsLogReport)
 {
     uint16_t deviceId = 1;
     uint16_t streamId = 1;
@@ -105,7 +105,7 @@ TEST_F(DeivceTaskCalculatorUtest, ShouldReturnTaskWhenFftsLogReport)
     instance.ReportStarsSocLog(deviceId, reinterpret_cast<StarsSocHeader *>(&socLogEnd));
 }
 
-TEST_F(DeivceTaskCalculatorUtest, ShouldNotReturnTask)
+TEST_F(DeviceTaskCalculatorUtest, ShouldNotReturnTask)
 {
     uint16_t deviceId = 1;
     uint16_t streamId = 1;

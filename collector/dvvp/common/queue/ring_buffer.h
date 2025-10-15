@@ -1,7 +1,6 @@
 /*
  * Copyright (c) Huawei Technologies Co., Ltd. 2019-2019. All rights reserved.
  * Description: lock-free ring buffer
- * Author: hufengwei
  * Create: 2019-10-28
  */
 #ifndef ANALYSIS_DVVP_COMMON_QUEUE_RING_BUFFER_H

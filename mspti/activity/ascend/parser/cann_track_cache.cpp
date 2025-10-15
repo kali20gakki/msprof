@@ -325,7 +325,7 @@ void CannTrackCache::CannTrackCacheImpl::MountCommunicationNode(ApiEvent &apiEve
         communicationTask->api = *frontApi->data;
         communicationTask->level = communicationTask->api.level;
         if (MountCompactInfo(*communicationTask, cache)) {
-            apiEvent.childs.emplace_back(std::move(communicationTask));
+            apiEvent.children.emplace_back(std::move(communicationTask));
         }
     }
 }

@@ -19,7 +19,7 @@ from msmodel.cluster_info.cluster_info_model import ClusterInfoViewModel
 from msparser.cluster.cluster_data_preparation_parser import ClusterDataPreparationParser
 from msparser.cluster.fops_parser import FopsParser
 from msparser.cluster.host_sys_usage_parser import HostSysUsageParser
-from msparser.cluster.step_trace_summary import StepTraceSummay
+from msparser.cluster.step_trace_summary import StepTraceSummary
 from msparser.parallel.parallel_query.cluster_parallel_analysis_parser import ClusterParallelAnalysisParser
 from msparser.parallel.parallel_query.cluster_parallel_analysis_tuning import ClusterParallelAnalysisTuning
 from tuning.cluster.cluster_tuning_facade import ClusterTuningFacade
@@ -47,7 +47,7 @@ class MsprofQuerySummaryManager:
     NOT_CLUSTER_SCENE = '0'
     FILE_NAME = os.path.basename(__file__)
     QUERY_DATA_TYPE_PARSER = {
-        QueryDataType.STEP_TRACE: StepTraceSummay,
+        QueryDataType.STEP_TRACE: StepTraceSummary,
         QueryDataType.FOPS_ANALYSE: FopsParser,
         QueryDataType.DATA_PREPARATION: ClusterDataPreparationParser,
         QueryDataType.PARALLEL_TUNING: ClusterParallelAnalysisTuning,

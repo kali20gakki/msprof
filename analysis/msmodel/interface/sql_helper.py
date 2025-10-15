@@ -10,7 +10,7 @@ class SqlWhereCondition:
     def get_interval_intersection_condition(start: float, end: float, table_name: str,
                                             start_col_name: str, end_col_name: str) -> str:
         """
-        This function generates a conditon to filter the data that intersects the interval.
+        This function generates a condition to filter the data that intersects the interval.
         """
         condition = ""
         if start != float("-inf"):

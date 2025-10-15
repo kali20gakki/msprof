@@ -48,7 +48,7 @@ class TestBiuPerfViewer(unittest.TestCase):
         self.assertEqual(expect_res, res)
 
     def test_get_biu_flow_timeline(self) -> None:
-        expect_res = [OrderedDict([('name', 'bandawith'),
+        expect_res = [OrderedDict([('name', 'bandwidth'),
                       ('ts', '30.000'),
                       ('pid', 3),
                       ('tid', 4),
@@ -56,7 +56,7 @@ class TestBiuPerfViewer(unittest.TestCase):
                       ('ph', 'C')])]
 
         InfoConfReader()._local_time_offset = 10.0
-        biu_flow_data = [["bandawith", 20, 3, 4, 50]]
+        biu_flow_data = [["bandwidth", 20, 3, 4, 50]]
         with mock.patch(NAMESPACE + "BiuPerfModel.get_biu_flow_data", return_value=biu_flow_data):
             res = self.biu_perf_viewer.get_biu_flow_timeline()
         self.assertEqual(expect_res, res)

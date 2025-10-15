@@ -114,7 +114,7 @@ void TestActivityKernel()
     EXPECT_EQ(MSPTI_SUCCESS, msptiActivityDisable(MSPTI_ACTIVITY_KIND_KERNEL));
 }
 
-TEST_F(ActivityUtest, ShouleRetSuccessWhenSetAllKindWithCorrectApiInvocationSequence)
+TEST_F(ActivityUtest, ShouldRetSuccessWhenSetAllKindWithCorrectApiInvocationSequence)
 {
     MOCKER_CPP(&Mspti::Ascend::DevTaskManager::StartDevProfTask)
         .stubs()
@@ -174,7 +174,7 @@ TEST_F(ActivityUtest, IsActivityKindEnableWillReturnFalseWhenNotEnableMarkerKind
     EXPECT_EQ(false, Mspti::Activity::ActivityManager::GetInstance()->IsActivityKindEnable(MSPTI_ACTIVITY_KIND_MARKER));
 }
 
-TEST_F(ActivityUtest, ShouleRetSuccessWhenSetPeriodFlushTime)
+TEST_F(ActivityUtest, ShouldRetSuccessWhenSetPeriodFlushTime)
 {
     MOCKER_CPP(&Mspti::Ascend::DevTaskManager::StartDevProfTask)
         .stubs()
@@ -222,7 +222,7 @@ TEST_F(ActivityUtest, ShouleRetSuccessWhenSetPeriodFlushTime)
     EXPECT_EQ(MSPTI_SUCCESS, msptiActivityFlushAll(1));
 }
 
-TEST_F(ActivityUtest, ShouleRetSuccessWhenPushAndPopExternalCorrelationId)
+TEST_F(ActivityUtest, ShouldRetSuccessWhenPushAndPopExternalCorrelationId)
 {
     MOCKER_CPP(&Mspti::Ascend::DevTaskManager::StartDevProfTask).stubs().will(returnValue(MSPTI_SUCCESS));
     MOCKER_CPP(&Mspti::Ascend::DevTaskManager::StopDevProfTask).stubs().will(returnValue(MSPTI_SUCCESS));

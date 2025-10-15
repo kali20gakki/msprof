@@ -167,7 +167,7 @@ TEST_F(ModelNameProcessorUTest, TestRunShouldReturnFalseWhenFileOverMaxSize)
     MOCKER_CPP(&FileReader::Check).reset();
 }
 
-TEST_F(ModelNameProcessorUTest, TestLodaDataShouldReturnEmptyWhenDbRunnerFailed)
+TEST_F(ModelNameProcessorUTest, TestLoadDataShouldReturnEmptyWhenDbRunnerFailed)
 {
     auto processor = ModelNameProcessor(PROF0);
     DBInfo modelNameDB("ge_model_info.db", "ModelName");
