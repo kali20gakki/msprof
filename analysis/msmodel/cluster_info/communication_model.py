@@ -37,13 +37,13 @@ class CommunicationModel(ViewModel):
         data = []
         if DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE):
             data = DBManager.fetch_all_data(self.cur, sql.format(DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE),
-                                            (conditions.get('iter_end', 0) * NumberConstant.NS_TO_US,
-                                             conditions.get('iter_start', float('inf')) * NumberConstant.NS_TO_US),
+                                            (conditions.get('iter_end', 0),
+                                             conditions.get('iter_start', float('inf'))),
                                             dto_class=HcclTask)
         if DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_KFC_TASK):
             data += DBManager.fetch_all_data(self.cur, sql.format(DBNameConstant.TABLE_KFC_TASK),
-                                             (conditions.get('iter_end', 0) * NumberConstant.NS_TO_US,
-                                              conditions.get('iter_start', float('inf')) * NumberConstant.NS_TO_US),
+                                             (conditions.get('iter_end', 0),
+                                              conditions.get('iter_start', float('inf'))),
                                              dto_class=HcclTask)
         if not data:
             logging.error("Fail to connect %s, hccl parser is interrupted", DBNameConstant.DB_HCCL_SINGLE_DEVICE)

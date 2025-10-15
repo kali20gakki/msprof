@@ -81,8 +81,8 @@ class ClusterParserFactory:
         """
         with CommunicationModel(rank_path) as _model:
             conditions = {
-                'iter_start': iter_start_end[0][0],
-                'iter_end': iter_start_end[0][1]
+                'iter_start': iter_start_end[0][0] * NumberConstant.NS_TO_US,
+                'iter_end': iter_start_end[0][1] * NumberConstant.NS_TO_US
             }
             events_all = _model.get_all_events_from_db(conditions, top_hccl_ops)
             if not events_all:
