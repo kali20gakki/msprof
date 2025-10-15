@@ -272,19 +272,19 @@ bool ParamsAdapterAclJson::CheckInstrAndTaskParamBothSet(SHARED_PTR_ALIA<ProfAcl
         {!aclCfg->aicMetrics.empty(), " aic_metrics "},
         {!aclCfg->aivMetrics.empty(), " aiv_metrics "}
     };
-    bool anyComflict = std::any_of(ARG_VEC.begin(), ARG_VEC.end(), [](std::pair<bool, std::string> arg) {
+    bool anyConflict = std::any_of(ARG_VEC.begin(), ARG_VEC.end(), [](std::pair<bool, std::string> arg) {
         return arg.first;
     });
-    if (anyComflict) {
-        std::string comflictStr = "";
+    if (anyConflict) {
+        std::string conflictStr = "";
         for (auto arg : ARG_VEC) {
             if (arg.first) {
-                comflictStr.append(arg.second);
+                conflictStr.append(arg.second);
             }
         }
         MSPROF_LOGE("[Acl json] Profiling fails to start because instrProfilingFreq is set,"
             " Params %s not allowed to set in single operator model if instrProfilingFreq is set.",
-            comflictStr.c_str());
+            conflictStr.c_str());
         return true;
     }
     return false;

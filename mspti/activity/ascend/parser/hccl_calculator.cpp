@@ -42,7 +42,7 @@ msptiResult CalculateP2pBandWidth(HcclOpDesc* hcclOpDesc)
     auto p2pOpDesc = static_cast<P2pOpDesc*>(hcclOpDesc);
     const auto& dataType = dataType2Size.find(p2pOpDesc->dataType);
     if (dataType == dataType2Size.end()) {
-        MSPTI_LOGW("unknow p2p op type, cannot calculate bandwidth");
+        MSPTI_LOGW("unknown p2p op type, cannot calculate bandwidth");
         return MSPTI_ERROR_INNER;
     }
     uint64_t dataSize = dataType->second * p2pOpDesc->count;

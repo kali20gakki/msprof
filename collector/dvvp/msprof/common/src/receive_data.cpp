@@ -225,7 +225,7 @@ void ReceiveData::WaitBufferEmptyEvent(uint64_t us)
 
 /**
 * @brief Flush: wait the buffer is empty
-* @return : success return PROFILING_SUCCESS, failed return PROFIING_FAILED
+* @return : success return PROFILING_SUCCESS, failed return PROFILING_FAILED
 */
 int ReceiveData::Flush()
 {
@@ -311,7 +311,7 @@ int ReceiveData::DoReport(CONST_REPORT_DATA_PTR rData)
 void ReceiveData::DoReportRun()
 {
     std::vector<SHARED_PTR_ALIA<ProfileFileChunk> > fileChunks;
-    unsigned long sleepIntevalNs = 50000000; // 50,000,000 : 50ms
+    unsigned long sleepIntervalNs = 50000000; // 50,000,000 : 50ms
     timeStamp_ = analysis::dvvp::common::utils::Utils::GetClockMonotonicRaw();
 
     for (;;) {
@@ -329,9 +329,9 @@ void ReceiveData::DoReportRun()
                 MSPROF_LOGI("Exit the Run thread");
                 break;
             }
-            analysis::dvvp::common::utils::Utils::UsleepInterupt(SLEEP_INTEVAL_US);
+            analysis::dvvp::common::utils::Utils::UsleepInterrupt(SLEEP_INTERVAL_US);
             unsigned long long curTimeStamp = analysis::dvvp::common::utils::Utils::GetClockMonotonicRaw();
-            if ((curTimeStamp - timeStamp_) >= sleepIntevalNs || (timeStamp_ == 0)) {
+            if ((curTimeStamp - timeStamp_) >= sleepIntervalNs || (timeStamp_ == 0)) {
                 TimedTask();
                 timeStamp_ = curTimeStamp;
             }
@@ -543,7 +543,7 @@ int32_t ReceiveData::DumpData(std::vector<T> &message, SHARED_PTR_ALIA<ProfileFi
                 tag = "data";
             }
             if (tag.empty()) {
-                MSPROF_LOGW("This dump data cann't found message level[%u], type[%u].",
+                MSPROF_LOGW("This dump data can't found message level[%u], type[%u].",
                     message[i].level, message[i].type);
                 tag = "invalid";
             }

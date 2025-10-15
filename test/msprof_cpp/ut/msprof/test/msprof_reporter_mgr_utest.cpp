@@ -144,7 +144,7 @@ TEST_F(MsprofReporterMgrUtest, StopReporters)
     EXPECT_EQ(PROFILING_SUCCESS, MsprofReporterMgr::instance()->StopReporters());
 }
 
-TEST_F(MsprofReporterMgrUtest, StopReportersWillReturnFaildWhenThrowsException)
+TEST_F(MsprofReporterMgrUtest, StopReportersWillReturnFailedWhenThrowsException)
 {
     GlobalMockObject::verify();
     // stop after start

@@ -178,12 +178,12 @@ TEST_F(INPUT_PARSER_UTEST, CheckInstrAndTaskParamBothSetWillReturnTrueWhenSetIns
     info.args[ARGS_TASK_TIME] = "on";
     info.args[ARGS_AIC_FREQ] = "10";
     info.args[ARGS_AIC_MODE] = "task-based";
-    info.args[ARGS_AIC_METRICE] = "PipeUtilization";
+    info.args[ARGS_AIC_METRICS] = "PipeUtilization";
     argvMap.insert(std::make_pair(ARGS_INSTR_PROFILING, std::make_pair(info, "instr-profiling")));
     argvMap.insert(std::make_pair(ARGS_TASK_TIME, std::make_pair(info, "task-time")));
     argvMap.insert(std::make_pair(ARGS_AIC_FREQ, std::make_pair(info, "aic-freq")));
     argvMap.insert(std::make_pair(ARGS_AIC_MODE, std::make_pair(info, "aic-mode")));
-    argvMap.insert(std::make_pair(ARGS_AIC_METRICE, std::make_pair(info, "aic-metrics")));
+    argvMap.insert(std::make_pair(ARGS_AIC_METRICS, std::make_pair(info, "aic-metrics")));
     EXPECT_EQ(true, parser.CheckInstrAndTaskParamBothSet(argvMap));
 }
 
@@ -204,7 +204,7 @@ TEST_F(INPUT_PARSER_UTEST, CheckInputDataValidityWillReturnFalseWhenInputInvalid
     InputParser parser = InputParser();
     const char* myArray[] = {"msprof"};
     const char** argv = myArray;
-    int argc = INPUT_MAX_LENTH + 1;
+    int argc = INPUT_MAX_LENGTH + 1;
     EXPECT_EQ(false, parser.CheckInputDataValidity(argc, argv));
 }
 
@@ -221,12 +221,12 @@ TEST_F(INPUT_PARSER_UTEST, CheckInputDataValidityWillReturnFalseWhenInputInvalid
     GlobalMockObject::verify();
     InputParser parser = InputParser();
     int argc = 1;
-    int invalidLen = INPUT_MAX_LENTH + 1;
+    int invalidLen = INPUT_MAX_LENGTH + 1;
     char invalid[1025] = {};
     for (int i = 0; i < invalidLen; i++) {
         invalid[i] = 'x';
     }
-    invalid[INPUT_MAX_LENTH] = '\0';
+    invalid[INPUT_MAX_LENGTH] = '\0';
     const char* myArray[] = {invalid};
     const char** argv = myArray;
     EXPECT_EQ(false, parser.CheckInputDataValidity(argc, argv));

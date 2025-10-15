@@ -21,7 +21,7 @@ class TestHcclOpInfoParser(unittest.TestCase):
     file_list = {
         DataTag.HCCL_OP_INFO: [
             'aging.compact.hccl_op_info.slice_0',
-            'unaging.compact.hcll_op_info.slice_0'
+            'unaging.compact.hccl_op_info.slice_0'
         ]
     }
 

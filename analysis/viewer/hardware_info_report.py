@@ -67,7 +67,7 @@ def get_ddr_data(db_path: str, device_id: str, configs: dict) -> tuple:
 def cal_llc_band_res(llc_data: list, max_time: float) -> tuple:
     """
     calculate llc bandwidth result
-    :param llc_data: llc orginal data
+    :param llc_data: llc original data
     :param max_time: time range
     :return: ['Metric', 'l3c_rd', 'l3c_wr'], result_data, 3# 3 is the count of summary items
     """

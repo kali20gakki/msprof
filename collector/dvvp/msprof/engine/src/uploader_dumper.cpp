@@ -44,7 +44,7 @@ UploaderDumper::~UploaderDumper()
 /**
 * @brief Start: init variables of UploaderDumper for can receive data from user plugin
 *               start a new thread to check the data from user and write data to local files
-* @return : success return PROFILING_SUCCESS, failed return PROFIING_FAILED
+* @return : success return PROFILING_SUCCESS, failed return PROFILING_FAILED
 */
 int UploaderDumper::Start()
 {

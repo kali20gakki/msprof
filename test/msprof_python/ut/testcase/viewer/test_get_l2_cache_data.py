@@ -27,10 +27,10 @@ class TestL2Cache(unittest.TestCase):
                      "memory_total, task_num, task_ids)"
         data = (("resnet50", 1, 0, 118433101720, 118540073322, "conv1conv1_relu", 4,
                  "scale_conv1,bn_conv1,conv1,conv1_relu", 5, 1706208, 1605664, 100544, 0, 3412416, 1, 4),)
-        insert_moudel_sql = "insert into {0} values ({value})".format(
+        insert_model_sql = "insert into {0} values ({value})".format(
             "L2cacheSummary", value="?," * (len(data[0]) - 1) + "?")
         db_manager = DBManager()
-        test_sql = db_manager.create_table(DBNameConstant.DB_L2CACHE, create_sql, insert_moudel_sql, data)
+        test_sql = db_manager.create_table(DBNameConstant.DB_L2CACHE, create_sql, insert_model_sql, data)
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=test_sql), \
                 mock.patch(NAMESPACE + '.DBManager.get_filtered_table_headers', return_value=columns), \
                 mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'), \

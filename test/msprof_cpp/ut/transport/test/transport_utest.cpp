@@ -111,7 +111,7 @@ TEST_F(TRANSPORT_TRANSPORT_ITRANSPORT_TEST, SendBuffer_without_protobuf) {
     trans->perfCount_ = perfCount;
     trans->Init();
 
-    // test the normal procests, fileChunkReq datamodule is PROFILING_IS_FROM_DEVICE
+    // test the normal protests, fileChunkReq datamodule is PROFILING_IS_FROM_DEVICE
     std::shared_ptr<analysis::dvvp::ProfileFileChunk> message(
         new analysis::dvvp::ProfileFileChunk());
     message->extraInfo = "null.64";

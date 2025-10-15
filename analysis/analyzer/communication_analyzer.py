@@ -49,7 +49,7 @@ class CommunicationAnalyzer:
             proc_dict[op_name] = op_data.get(Constant.DEFAULT_INVALID_VALUE)
             for transport_type in [StrConstant.RDMA, StrConstant.SDMA, StrConstant.PCIE, StrConstant.HCCS,
                                    StrConstant.SIO]:
-                proc_dict[op_name].get(StrConstant.COMMNUNICATION_BANDWIDTH_INFO).get(transport_type) \
+                proc_dict[op_name].get(StrConstant.COMMUNICATION_BANDWIDTH_INFO).get(transport_type) \
                     .pop(OpBandWidthType.BANDWIDTH_UTILIZATION)
         return proc_dict
 

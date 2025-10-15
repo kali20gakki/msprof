@@ -67,7 +67,7 @@ void MsprofManager::StopNoWait() const
     if (rMode_ == nullptr) {
         return;
     }
-    CmdLog::instance()->CmdWarningLog("Receive stop singal.");
+    CmdLog::instance()->CmdWarningLog("Receive stop signal.");
     rMode_->StopRunningTasks();
     rMode_->UpdateOutputDirInfo();
     rMode_->isQuit_ = true;

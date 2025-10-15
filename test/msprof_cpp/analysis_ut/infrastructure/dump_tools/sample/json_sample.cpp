@@ -50,9 +50,9 @@ JsonWriter& operator<<(JsonWriter& stream, const DumpToolSampleStruct& sample)
         colNames[i] = sample.columns[i].c_str();
     }
 
-    for (const auto& oneDatium : sample.data) {
+    for (const auto& oneDatum : sample.data) {
         stream.StartObject();
-        DumpInJsonFormat(stream, colNames, oneDatium);
+        DumpInJsonFormat(stream, colNames, oneDatum);
         stream.EndObject();
     }
 

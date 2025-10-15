@@ -781,7 +781,7 @@ def get_msprof_json_compiles() -> tuple:
 def get_msprof_json_without_slice_compiles() -> tuple:
     """
     get msprof json files without slice regex compiles
-    :retuen: msprof json files regex
+    :return: msprof json files regex
     """
     return (re.compile(FileNameManagerConstant.MSPROF_JSON_WITHOUT_SLICE_PATTERN),)
 

@@ -35,7 +35,7 @@ private:
         bool isNeedPair;
         bool isPaired;
         uint64_t fileSize;
-        uint64_t doneFizeSize;
+        uint64_t doneFileSize;
         std::string fileName;
         std::string doneFileName;
         std::string filePath;

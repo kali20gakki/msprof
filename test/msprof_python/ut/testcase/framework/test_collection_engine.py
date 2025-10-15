@@ -26,13 +26,13 @@ class TestCollectionEngine(unittest.TestCase):
 
     def test_data_analysis(self):
         InfoConfReader()._info_json = {}
-        with mock.patch(NAMESPACE + '.AI.formulat_list'):
+        with mock.patch(NAMESPACE + '.AI.formula_list'):
             check = AI(CONFIG)
             check.data_analysis()
 
     def test_data_analysis_2(self):
         InfoConfReader()._info_json = INFO_JSON
-        with mock.patch(NAMESPACE + '.AI.formulat_list'):
+        with mock.patch(NAMESPACE + '.AI.formula_list'):
             check = AI(CONFIG)
             check.data_analysis()
 

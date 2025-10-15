@@ -69,7 +69,7 @@ class SlowLinkCalculatorFactory(ClusterCalculatorFactory):
             for rank_id, com_dict in rank_dict.items():
                 if StrConstant.SUGGESTION not in str(rank_id):
                     self.op_rank_list.append((op_name, rank_id))
-                    self.calculate_data.append(com_dict[StrConstant.COMMNUNICATION_BANDWIDTH_INFO])
+                    self.calculate_data.append(com_dict[StrConstant.COMMUNICATION_BANDWIDTH_INFO])
 
     def generate_calculator(self):
         self.data_dispatch()

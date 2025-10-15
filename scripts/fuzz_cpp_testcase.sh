@@ -112,9 +112,9 @@ while getopts "t:m:h" opt; do
         h )
             echo "[INFO] Description for msprof fuzz testcase shell..."
             echo "[INFO] Options:"
-            echo "[INFO] -t------------Fuzz exection time, default time: 1000000"
-            echo "[INFO] -m------------Fuzz exection module, can be set in [all(default)|collector|mspti|analysis]"
-            echo "[INFO] -h------------Fuzz exection shell help"
+            echo "[INFO] -t------------Fuzz execution time, default time: 1000000"
+            echo "[INFO] -m------------Fuzz execution module, can be set in [all(default)|collector|mspti|analysis]"
+            echo "[INFO] -h------------Fuzz execution shell help"
             exit 0
             ;;
         \? )

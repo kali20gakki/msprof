@@ -36,7 +36,7 @@ using namespace Analysis::Utils;
     建树过程中需要记录 a.各个层级的api
 
 2. 向核心树的各个level的节点上挂附加信息event
-3. 向核心树的节点上添加tacktrack event
+3. 向核心树的节点上添加tasktrack event
 */
 std::shared_ptr<TreeNode> TreeBuilder::Build()
 {

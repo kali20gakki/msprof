@@ -159,7 +159,7 @@ void Analyzer::UploadAppOpModeStaticShape(std::multimap<std::string, OpTime> &op
             }
         }
     } else {
-        MSPROF_LOGD("Try to custruct Op info, is not all static");
+        MSPROF_LOGD("Try to construct Op info, is not all static");
         for (auto iter = opTimes.begin(); iter != opTimes.end();) {  // tmp solution, discard dynamic shape task
             uint32_t streamType;
             if (!analyzerGe_->GetStreamType(iter->second.streamId, streamType)) {
@@ -269,7 +269,7 @@ uint64_t Analyzer::GetOpIndexId(uint64_t opTimeStamp)
 void Analyzer::UpdateOpIndexId(std::multimap<std::string, OpTime> &opTimes)
 {
     if (profileMode_ == PROFILE_MODE_STATIC_SHAPE) {
-        MSPROF_LOGI("Static shape scen, no need to update op index");
+        MSPROF_LOGI("Static shape scene, no need to update op index");
         return;
     } else {
         uint64_t maxIndexId = 0;

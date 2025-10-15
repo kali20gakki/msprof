@@ -29,7 +29,7 @@ using namespace analysis::dvvp::message;
 using namespace Collector::Dvvp::DynProf;
 
 namespace {
-    std::set<MsprofArgsType> ALALYSIS_ARGS = {
+    std::set<MsprofArgsType> ANALYSIS_ARGS = {
         ARGS_OUTPUT, ARGS_PYTHON_PATH, ARGS_EXPORT_TYPE, ARGS_SUMMARY_FORMAT, ARGS_PARSE,
         ARGS_QUERY, ARGS_EXPORT, ARGS_CLEAR,
         ARGS_ANALYZE, ARGS_RULE, ARGS_EXPORT_ITERATION_ID, ARGS_EXPORT_MODEL_ID, ARGS_REPORTS};
@@ -50,7 +50,7 @@ int ParamsAdapterMsprof::Init()
     if (ret != PROFILING_SUCCESS) {
         CmdLog::instance()->CmdErrorLog("Running profiling failed."
             " Please check the driver package is correctly installed.");
-        MSPROF_LOGE("Init platform by driver faild.");
+        MSPROF_LOGE("Init platform by driver failed.");
         return PROFILING_FAILED;
     }
     ret = CheckListInit();
@@ -295,15 +295,15 @@ void ParamsAdapterMsprof::SetDefaultParamsExport() const
     return;
 }
 
-void ParamsAdapterMsprof::SpliteAppPath(const std::string &appParams)
+void ParamsAdapterMsprof::SplitAppPath(const std::string &appParams)
 {
     if (appParams.empty()) {
         return;
     }
-    std::string tmpAppParamers;
+    std::string tmpAppParameters;
     size_t index = appParams.find_first_of(" ");
     if (index != std::string::npos) {
-        tmpAppParamers = appParams.substr(index + 1);
+        tmpAppParameters = appParams.substr(index + 1);
     }
     auto tmpCmdPath = appParams.substr(0, index);
     cmdPath_ = Utils::IdeReplaceWaveWithHomedir(tmpCmdPath);
@@ -316,7 +316,7 @@ void ParamsAdapterMsprof::SpliteAppPath(const std::string &appParams)
         // ./main args...
         cmdPath_ = Utils::RelativePathToAbsolutePath(cmdPath_);
     }
-    appParameters_ = tmpAppParamers;
+    appParameters_ = tmpAppParameters;
     Utils::SplitPath(cmdPath_, appDir_, app_);
 }
 
@@ -415,7 +415,7 @@ int ParamsAdapterMsprof::AnalysisParamsAdapt(
 {
     paramContainer_.fill("");
     bool ret = false;
-    for (auto arg : ALALYSIS_ARGS) {
+    for (auto arg : ANALYSIS_ARGS) {
         if (argvMap.find(arg) == argvMap.end()) {
             continue;
         }
@@ -438,7 +438,7 @@ int ParamsAdapterMsprof::AnalysisParamsAdapt(
 
 int ParamsAdapterMsprof::CheckAnalysisParams()
 {
-    for (auto arg : ALALYSIS_ARGS) {
+    for (auto arg : ANALYSIS_ARGS) {
         std::string inputCfg = paramContainer_[ARGS_TRANS_MAP[arg]];
         if (inputCfg == "") {
             continue;
@@ -534,7 +534,7 @@ int ParamsAdapterMsprof::GetParamFromInputCfg(
         return PROFILING_FAILED;
     }
     if (msprofMode_ == MsprofMode::MSPROF_MODE_APP) {
-        SpliteAppPath(paramContainer_[INPUT_CFG_MSPROF_APPLICATION]);
+        SplitAppPath(paramContainer_[INPUT_CFG_MSPROF_APPLICATION]);
     }
     if (SetModeDefaultParams(msprofMode_) != PROFILING_SUCCESS) {
         MSPROF_LOGE("[GetParamFromInputCfg]msprof set default value failed.");
@@ -611,7 +611,7 @@ void ParamsAdapterMsprof::CreateCfgMap()
     std::unordered_map<MsprofArgsType, InputCfg>({
         {ARGS_OUTPUT, INPUT_CFG_COM_OUTPUT}, {ARGS_STORAGE_LIMIT, INPUT_CFG_COM_STORAGE_LIMIT},
         {ARGS_APPLICATION, INPUT_CFG_MSPROF_APPLICATION}, {ARGS_ENVIRONMENT, INPUT_CFG_MSPROF_ENVIRONMENT},
-        {ARGS_AIC_MODE, INPUT_CFG_COM_AIC_MODE}, {ARGS_AIC_METRICE, INPUT_CFG_COM_AIC_METRICS},
+        {ARGS_AIC_MODE, INPUT_CFG_COM_AIC_MODE}, {ARGS_AIC_METRICS, INPUT_CFG_COM_AIC_METRICS},
         {ARGS_AIV_MODE, INPUT_CFG_COM_AIV_MODE}, {ARGS_AIV_METRICS, INPUT_CFG_COM_AIV_METRICS},
         {ARGS_SYS_DEVICES, INPUT_CFG_COM_SYS_DEVICES}, {ARGS_LLC_PROFILING, INPUT_CFG_COM_LLC_MODE},
         {ARGS_PYTHON_PATH, INPUT_CFG_PYTHON_PATH}, {ARGS_GE_API, INPUT_CFG_COM_GE_API},

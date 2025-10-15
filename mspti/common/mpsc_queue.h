@@ -21,7 +21,7 @@
 
 namespace Mspti {
 namespace Common {
-constexpr size_t DEFAULT_CAPCAITY = 2048;
+constexpr size_t DEFAULT_CAPACITY = 2048;
 
 template<typename T>
 class MPSCQueue {
@@ -46,9 +46,9 @@ public:
 
     void CheckOverflow()
     {
-        if (count_.load(std::memory_order_relaxed) > DEFAULT_CAPCAITY && !isOverFlow_.load(std::memory_order_relaxed)) {
+        if (count_.load(std::memory_order_relaxed) > DEFAULT_CAPACITY && !isOverFlow_.load(std::memory_order_relaxed)) {
             isOverFlow_.store(true);
-            MSPTI_LOGW("MPSC queue length exceeded the maximum threshold! current lenght: %u", count_.load());
+            MSPTI_LOGW("MPSC queue length exceeded the maximum threshold! current length: %u", count_.load());
         }
     }
 

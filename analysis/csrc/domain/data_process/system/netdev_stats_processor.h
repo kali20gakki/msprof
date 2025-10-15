@@ -41,7 +41,7 @@ private:
     std::vector<NetDevStatsEventData> ComputeEventData(const std::vector<OriNetDevStatsData> &oriData,
                                                        uint16_t deviceId, const ProfTimeRecord &record);
 };
-} // namepace Domain
-} // namspace Analysis
+} // namespace Domain
+} // namespace Analysis
 
 #endif // ANALYSIS_DOMAIN_NETDEV_STATS_PROCESSOR_H

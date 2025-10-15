@@ -49,19 +49,19 @@ TEST_F(HcclCalculatorUtest, P2pOpDescShouldRetSuccessAndFailWhenBandWidth)
     double expectBandWidth = (double)(dataTypeSize * count) / (endTime - startTime);
     EXPECT_EQ(expectBandWidth, hcclOpDesc->bandWidth);
 
-    P2pOpDesc* unknowHcclOpDesc = new P2pOpDesc();
-    unknowHcclOpDesc->opName = "HcclAllReduce";
-    unknowHcclOpDesc->streamId = 1;
-    unknowHcclOpDesc->deviceId = 1;
-    unknowHcclOpDesc->end = endTime;
-    unknowHcclOpDesc->start = startTime;
-    unknowHcclOpDesc->count = count;
-    unknowHcclOpDesc->dataType = HCCL_DATA_TYPE_RESERVED;
+    P2pOpDesc* unknownHcclOpDesc = new P2pOpDesc();
+    unknownHcclOpDesc->opName = "HcclAllReduce";
+    unknownHcclOpDesc->streamId = 1;
+    unknownHcclOpDesc->deviceId = 1;
+    unknownHcclOpDesc->end = endTime;
+    unknownHcclOpDesc->start = startTime;
+    unknownHcclOpDesc->count = count;
+    unknownHcclOpDesc->dataType = HCCL_DATA_TYPE_RESERVED;
     
     Mspti::Parser::HcclCalculator::CalculateBandWidth((HcclOpDesc*)hcclOpDesc);
-    unknowHcclOpDesc->bandWidth = -1;
-    Mspti::Parser::HcclCalculator::CalculateBandWidth((HcclOpDesc*)unknowHcclOpDesc);
-    EXPECT_EQ(-1, unknowHcclOpDesc->bandWidth);
+    unknownHcclOpDesc->bandWidth = -1;
+    Mspti::Parser::HcclCalculator::CalculateBandWidth((HcclOpDesc*)unknownHcclOpDesc);
+    EXPECT_EQ(-1, unknownHcclOpDesc->bandWidth);
 }
 
 TEST_F(HcclCalculatorUtest, CollectiveOpDescShouldRetSuccessAndFailWhenBandWidth)
@@ -86,18 +86,18 @@ TEST_F(HcclCalculatorUtest, CollectiveOpDescShouldRetSuccessAndFailWhenBandWidth
     double expectBandWidth = (double)(dataTypeSize * count * rankSize) / (endTime - startTime);
     EXPECT_EQ(expectBandWidth, hcclOpDesc->bandWidth);
 
-    CollectiveOpDesc* unknowHcclOpDesc = new CollectiveOpDesc();
-    unknowHcclOpDesc->opName = "HcclReduceScatter";
-    unknowHcclOpDesc->streamId = 1;
-    unknowHcclOpDesc->deviceId = 1;
-    unknowHcclOpDesc->end = endTime;
-    unknowHcclOpDesc->start = startTime;
-    unknowHcclOpDesc->count = count;
-    unknowHcclOpDesc->dataType = HCCL_DATA_TYPE_RESERVED;
-    unknowHcclOpDesc->rankSize = rankSize;
-    unknowHcclOpDesc->bandWidth = -1;
-    Mspti::Parser::HcclCalculator::CalculateBandWidth((HcclOpDesc*)unknowHcclOpDesc);
-    EXPECT_EQ(-1, unknowHcclOpDesc->bandWidth);
+    CollectiveOpDesc* unknownHcclOpDesc = new CollectiveOpDesc();
+    unknownHcclOpDesc->opName = "HcclReduceScatter";
+    unknownHcclOpDesc->streamId = 1;
+    unknownHcclOpDesc->deviceId = 1;
+    unknownHcclOpDesc->end = endTime;
+    unknownHcclOpDesc->start = startTime;
+    unknownHcclOpDesc->count = count;
+    unknownHcclOpDesc->dataType = HCCL_DATA_TYPE_RESERVED;
+    unknownHcclOpDesc->rankSize = rankSize;
+    unknownHcclOpDesc->bandWidth = -1;
+    Mspti::Parser::HcclCalculator::CalculateBandWidth((HcclOpDesc*)unknownHcclOpDesc);
+    EXPECT_EQ(-1, unknownHcclOpDesc->bandWidth);
 }
 
 TEST_F(HcclCalculatorUtest, All2AllVOpDescShouldRetSuccessAndFailWhenBandWidth)

@@ -52,10 +52,10 @@ class BlockDimCalculator(ICalculator, MsMultiProcess):
         for ge_data in ge_task_data:
             search_key = (ge_data.stream_id, ge_data.task_id, ge_data.batch_id)
             if search_key in processed_block_dim_data:
-                tiling_blcok_dim = processed_block_dim_data.get(search_key).block_dim
-                self._data.append(ge_data.replace(block_dim=tiling_blcok_dim & self.INVALID_BLOCK_DIM_VALUE,
-                                                  mix_block_dim=(tiling_blcok_dim & self.INVALID_BLOCK_DIM_VALUE) * (
-                                                          tiling_blcok_dim >> self.BITS_FOR_BLOCK_DIM)))
+                tiling_block_dim = processed_block_dim_data.get(search_key).block_dim
+                self._data.append(ge_data.replace(block_dim=tiling_block_dim & self.INVALID_BLOCK_DIM_VALUE,
+                                                  mix_block_dim=(tiling_block_dim & self.INVALID_BLOCK_DIM_VALUE) * (
+                                                          tiling_block_dim >> self.BITS_FOR_BLOCK_DIM)))
             else:
                 self._data.append(ge_data)
 

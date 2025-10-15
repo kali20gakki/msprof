@@ -166,7 +166,7 @@ class MsprofEntrance:
         query_parser = subparsers.add_parser(
             'query', help='Query specified info.')
         analyzer_parser = subparsers.add_parser(
-            'analyze', help='Analyze prased profiling data and generate analysis report.'
+            'analyze', help='Analyze parsed profiling data and generate analysis report.'
         )
         self._query_parser(query_parser)
         self._export_parser(export_parser)
@@ -231,7 +231,7 @@ class MsprofEntrance:
         import_parser.add_argument(
             '--cluster', dest='cluster_flag',
             action='store_true', default=False,
-            help='<Optional> the cluster scence flag')
+            help='<Optional> the cluster scene flag')
 
     def _analyze_parser(self: any, analyze_parser: any) -> None:
         self._add_collect_path_argument(analyze_parser)

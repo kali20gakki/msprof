@@ -38,7 +38,7 @@ struct ProfileFileChunk {
     uint64_t chunkStartTime;
     uint64_t chunkEndTime;
     std::string chunk;                // chunk data
-    std::string fileName;             // fulsh chunk to disks by "fileName.tag"
+    std::string fileName;             // flush chunk to disks by "fileName.tag"
     std::string extraInfo;            // report data fill suffix enum "jobId.devId"
 };
 
@@ -374,7 +374,7 @@ using CONST_UINT32_T_PTR = const uint32_t *;
 using UINT32_T_PTR = uint32_t *;
 using SIZE_T_PTR = size_t *;
 
-constexpr int INPUT_MAX_LENTH = 1024; // 1024 : arg max length
+constexpr int INPUT_MAX_LENGTH = 1024; // 1024 : arg max length
 constexpr int INVALID_EXIT_CODE = -1;
 constexpr int VALID_EXIT_CODE = 0;
 constexpr int MSVP_MAX_DEV_NUM = 64; // 64 : dev max number
@@ -456,7 +456,7 @@ public:
     static std::string ToUpper(const std::string &value);
     static std::string ToLower(const std::string &value);
     static std::string Trim(const std::string &value);
-    static int UsleepInterupt(unsigned long usec);
+    static int UsleepInterrupt(unsigned long usec);
     static int MsleepInterruptible(unsigned long msec);
     static unsigned long long GetClockRealtime();
     static unsigned long long GetClockMonotonicRaw();

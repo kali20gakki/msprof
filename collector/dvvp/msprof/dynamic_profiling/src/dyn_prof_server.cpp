@@ -172,7 +172,7 @@ void DynProfServer::DynProfServerProcMsg()
         ssize_t recvLen = recv(cliSockFd_, &recvMsg, sizeof(recvMsg), 0);
         if (static_cast<size_t>(recvLen) != sizeof(recvMsg) && errno == EAGAIN) {
             if (IdleConnectOverTime(recvIdleTimes)) {
-                MSPROF_LOGW("Dynamic profiling disconnet client, recvIdleTimes=%u.", recvIdleTimes);
+                MSPROF_LOGW("Dynamic profiling disconnect client, recvIdleTimes=%u.", recvIdleTimes);
                 disconnTips = "Idle link too long time.";
                 break;
             }
@@ -201,7 +201,7 @@ void DynProfServer::DynProfServerProcMsg()
             disconnTips = "Client request quit.";
             break;
         } else {
-            MSPROF_LOGE("Dynamic profiling process message receve unknow message, msgType=%u.", recvMsg.msgType);
+            MSPROF_LOGE("Dynamic profiling process message receive unknown message, msgType=%u.", recvMsg.msgType);
             break;
         }
         if (++recvMsgNum > DYN_PROF_SERVER_PROC_MSG_MAX_NUM) {
@@ -210,7 +210,7 @@ void DynProfServer::DynProfServerProcMsg()
             break;
         }
     }
-    NotifyClientDisconnet(disconnTips);
+    NotifyClientDisconnect(disconnTips);
 }
 
 void DynProfServer::DynProfSrvProcStart()
@@ -329,7 +329,7 @@ int DynProfServer::DynProfServerRsqMsg(DynProfMsgType msgType, DynProfMsgProcRes
     return PROFILING_SUCCESS;
 }
 
-void DynProfServer::NotifyClientDisconnet(const std::string &detailInfo)
+void DynProfServer::NotifyClientDisconnect(const std::string &detailInfo)
 {
     (void)DynProfServerRsqMsg(DynProfMsgType::DISCONN_RSP, DynProfMsgProcRes::EXE_SUCC, detailInfo);
     DynProfSrvProcQuit();

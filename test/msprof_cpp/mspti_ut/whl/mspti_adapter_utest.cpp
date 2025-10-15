@@ -68,7 +68,7 @@ TEST_F(MsptiAdapterUtest, FlushPeriodWillSuccess)
     EXPECT_EQ(MSPTI_SUCCESS, MsptiAdapter::GetInstance()->FlushPeriod(timeMs));
 }
 
-TEST_F(MsptiAdapterUtest, SetBuferSizeFailedWhenExceedLimit)
+TEST_F(MsptiAdapterUtest, SetBufferSizeFailedWhenExceedLimit)
 {
     const size_t size = Mspti::Adapter::MAX_BUFFER_SIZE / Mspti::Adapter::MB + 1;
     EXPECT_EQ(MSPTI_ERROR_INVALID_PARAMETER, MsptiAdapter::GetInstance()->SetBufferSize(size));

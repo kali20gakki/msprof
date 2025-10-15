@@ -3,7 +3,7 @@
             Copyright, 2024, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : hccl_repoter.cpp
+ * File Name          : hccl_reporter.cpp
  * Description        : 上报记录hccl数据
  * Author             : msprof team
  * Creation Date      : 2024/11/18

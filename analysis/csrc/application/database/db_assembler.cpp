@@ -1064,9 +1064,9 @@ bool SaveQosData(DataInventory& dataInventory, DBInfo& msprofDB, const std::stri
     auto deviceList = File::GetFilesWithPrefix(profPath, DEVICE_PREFIX);
     for (const auto& devicePath: deviceList) {
         auto deviceId = GetDeviceIdByDevicePath(devicePath);
-        auto qosEnents = Context::GetInstance().GetQosEvents(deviceId, profPath);
+        auto qosEvents = Context::GetInstance().GetQosEvents(deviceId, profPath);
         std::vector<uint64_t> qosEventsIds;
-        for (const auto &event : qosEnents) {
+        for (const auto &event : qosEvents) {
             qosEventsIds.push_back(IdPool::GetInstance().GetUint64Id(QOS + event));
         }
         qosEventsMap[deviceId] = qosEventsIds;

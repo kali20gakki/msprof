@@ -28,7 +28,7 @@ CollectionRegisterMgr::~CollectionRegisterMgr()
 }
 
 /**
- * @berif  : jugde the job is exist or not
+ * @brief  : judge the job is exist or not
  * @param  : [in] devId   : device id
  * @param  : [in] jobTag : collection job Tag
  * @return : true : exist Job; false : not exist Job
@@ -63,7 +63,7 @@ bool CollectionRegisterMgr::CheckCollectionJobIsNoRegister(int &devId, const Pro
 }
 
 /**
- * @berif  : register the job and run the job
+ * @brief  : register the job and run the job
  * @param  : [in] devId   : device id
  * @param  : [in] jobTag : collection job Tag
  * @return : true : exist Job; false : not exist Job
@@ -76,7 +76,7 @@ int CollectionRegisterMgr::CollectionJobRegisterAndRun(int devId,
     }
     std::lock_guard<std::mutex> lk(collectionJobsMutex_);
     if (InsertCollectionJob(devId, jobTag, job)) {
-        MSPROF_LOGD("Collection Job Registeter, devId:%d jobTag:%d", devId, jobTag);
+        MSPROF_LOGD("Collection Job Register, devId:%d jobTag:%d", devId, jobTag);
         return job->Process();
     }
 
@@ -92,14 +92,14 @@ int CollectionRegisterMgr::CollectionJobRun(int32_t devId, const ProfCollectionJ
     std::lock_guard<std::mutex> lk(collectionJobsMutex_);
     if (collectionJobs_.find(devId) == collectionJobs_.end() ||
         collectionJobs_[devId].find(jobTag) == collectionJobs_[devId].end()) {
-        MSPROF_LOGI("Collection job not registeter, devId:%d jobTag:%d", devId, jobTag);
+        MSPROF_LOGI("Collection job not register, devId:%d jobTag:%d", devId, jobTag);
         return PROFILING_FAILED;
     }
     return collectionJobs_[devId][jobTag]->Process();
 }
 
 /**
- * @berif  : unregister the job and uninit the job
+ * @brief  : unregister the job and uninit the job
  * @param  : [in] devId   : device id
  * @param  : [in] jobTag : collection job Tag
  * @return : true : exist Job; false : not exist Job
@@ -112,7 +112,7 @@ int CollectionRegisterMgr::CollectionJobUnregisterAndStop(int devId, const ProfC
     SHARED_PTR_ALIA<ICollectionJob> job = nullptr;
     std::lock_guard<std::mutex> lk(collectionJobsMutex_);
     if (GetAndDelCollectionJob(devId, jobTag, job)) {
-        MSPROF_LOGD("Collection Job Unregisteter, devId:%d jobTag:%d", devId, jobTag);
+        MSPROF_LOGD("Collection Job Unregister, devId:%d jobTag:%d", devId, jobTag);
         if (job != nullptr) {
             return job->Uninit();
         }
@@ -122,7 +122,7 @@ int CollectionRegisterMgr::CollectionJobUnregisterAndStop(int devId, const ProfC
 }
 
 /**
- * @berif  : insert collection job
+ * @brief  : insert collection job
  * @param  : [in] devId   : device id
  * @param  : [in] jobTag : collection job Tag
  * @param  : [in] SHARED_PTR_ALIA<ICollectionJob> job : collection job
@@ -151,7 +151,7 @@ bool CollectionRegisterMgr::InsertCollectionJob(int devId,
 }
 
 /**
- * @berif  : get collection job and delete the job
+ * @brief  : get collection job and delete the job
  * @param  : [in] devId   : device id
  * @param  : [in] jobTag : collection job Tag
  * @param  : [out] SHARED_PTR_ALIA<ICollectionJob> job : collection job

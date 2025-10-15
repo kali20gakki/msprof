@@ -38,7 +38,7 @@ TEST_F(LogUTest, TestFormatShouldReplacePercentSignWhenArgs)
     ASSERT_EQ("test format key: 1", Format("test format %: %", "key", 1));
 }
 
-TEST_F(LogUTest, TestFormatShouldReturnPercentSignWhenDoubelPercentSign)
+TEST_F(LogUTest, TestFormatShouldReturnPercentSignWhenDoublePercentSign)
 {
     ASSERT_EQ("test format key: 1 %", Format("test format %: % %%", "key", 1));
 }

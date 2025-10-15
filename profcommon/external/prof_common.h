@@ -43,7 +43,7 @@ typedef int (*MstxGetModuleFuncTableFunc)(MstxFuncModule module, MstxFuncTable *
 
 typedef int(*MstxInitInjectionFunc)(MstxGetModuleFuncTableFunc);
 
-void ProfRegisteMstxFunc(MstxInitInjectionFunc mstxInitFunc, ProfModule module);
+void ProfRegisterMstxFunc(MstxInitInjectionFunc mstxInitFunc, ProfModule module);
 
 void EnableMstxFunc(ProfModule module);
 #if defined(__GNUC__)

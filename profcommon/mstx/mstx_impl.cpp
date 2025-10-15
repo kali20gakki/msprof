@@ -365,7 +365,7 @@ int MsptiMstxGetModuleFuncTable(MstxFuncModule module, MstxFuncTable* outTable, 
     return MstxContextManager::GetInstance().MstxGetModuleFuncTable(module, outTable, outSize, PROF_MODULE_MSPTI);
 }
 
-void ProfRegisteMstxFunc(MstxInitInjectionFunc mstxInitFunc, ProfModule module)
+void ProfRegisterMstxFunc(MstxInitInjectionFunc mstxInitFunc, ProfModule module)
 {
     if (mstxInitFunc) {
         if (module == PROF_MODULE_MSPROF) {

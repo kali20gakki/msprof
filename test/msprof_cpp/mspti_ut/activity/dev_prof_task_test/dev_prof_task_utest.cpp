@@ -80,7 +80,7 @@ TEST_F(DevProfTaskUtest, ShouldGetZeroProfTaskNumsWhenKindInvalid)
     EXPECT_EQ(ZERO_PROF_TASK_NUM, profTasks.size());
 }
 
-TEST_F(DevProfTaskUtest, ShouleRetSuccessWhenUseDevTaskManagerNormal)
+TEST_F(DevProfTaskUtest, ShouldRetSuccessWhenUseDevTaskManagerNormal)
 {
     GlobalMockObject::verify();
     MOCKER_CPP(&Mspti::Ascend::Channel::ChannelPoolManager::GetAllChannels)
@@ -97,7 +97,7 @@ TEST_F(DevProfTaskUtest, ShouleRetSuccessWhenUseDevTaskManagerNormal)
     EXPECT_EQ(MSPTI_SUCCESS, ret);
 }
 
-TEST_F(DevProfTaskUtest, ShouleRetErrorWhenDeviceOffline)
+TEST_F(DevProfTaskUtest, ShouldRetErrorWhenDeviceOffline)
 {
     GlobalMockObject::verify();
     MOCKER_CPP(&Mspti::Ascend::DevTaskManager::CheckDeviceOnline)
@@ -114,7 +114,7 @@ TEST_F(DevProfTaskUtest, ShouleRetErrorWhenDeviceOffline)
     EXPECT_EQ(MSPTI_ERROR_INNER, ret);
 }
 
-TEST_F(DevProfTaskUtest, ShouleRetErrorWhenGetChannelsError)
+TEST_F(DevProfTaskUtest, ShouldRetErrorWhenGetChannelsError)
 {
     GlobalMockObject::verify();
     MOCKER_CPP(&Mspti::Ascend::Channel::ChannelPoolManager::GetAllChannels)
@@ -128,7 +128,7 @@ TEST_F(DevProfTaskUtest, ShouleRetErrorWhenGetChannelsError)
     EXPECT_EQ(MSPTI_ERROR_INNER, ret);
 }
 
-TEST_F(DevProfTaskUtest, ShouleRetErrorWhenStartOrStopCannProfTaskFailed)
+TEST_F(DevProfTaskUtest, ShouldRetErrorWhenStartOrStopCannProfTaskFailed)
 {
     GlobalMockObject::verify();
     MOCKER_CPP(&Mspti::Ascend::DevTaskManager::CheckDeviceOnline)
@@ -151,7 +151,7 @@ TEST_F(DevProfTaskUtest, ShouleRetErrorWhenStartOrStopCannProfTaskFailed)
     EXPECT_EQ(MSPTI_ERROR_INNER, ret);
 }
 
-TEST_F(DevProfTaskUtest, ShouleRetSuccessWhenCannProfNotSupport)
+TEST_F(DevProfTaskUtest, ShouldRetSuccessWhenCannProfNotSupport)
 {
     GlobalMockObject::verify();
     MOCKER_CPP(&Mspti::Inject::profSetProfCommand)

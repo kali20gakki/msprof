@@ -55,7 +55,7 @@ private:
     void GetAllFunction();
 };
 
-} // namspace Plugin
-} // namspace Dvvp
-} // namspace Collector
+} // namespace Plugin
+} // namespace Dvvp
+} // namespace Collector
 #endif // DCMI_PLUGIN_H

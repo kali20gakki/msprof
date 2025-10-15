@@ -62,18 +62,18 @@ struct TestDataStruct {
 
 vector<DataInventory> GetDataInventory()
 {
-    static vector<DataInventory> dataInventorys;
+    static vector<DataInventory> dataInventory;
     DataInventory data;
     data.Inject(std::make_shared<int>(100));  // 测试数据100，可以换成其它值
     auto str = std::make_shared<string>("sample");
     data.Inject(str);
-    dataInventorys.push_back(move(data));
+    dataInventory.push_back(move(data));
 
     data.Inject(std::make_shared<int>(200));  // 测试数据200，可以换成其它值
     auto vec = std::make_shared<vector<int>>();
     vec->push_back(200);  // 测试数据200，可以换成其它值
     data.Inject(vec);
-    dataInventorys.push_back(move(data));
+    dataInventory.push_back(move(data));
 
     DataInventory dataNew;
     auto tds = make_shared<TestDataStruct>();
@@ -83,9 +83,9 @@ vector<DataInventory> GetDataInventory()
     tds->cc = "hello";
     dataNew.Inject(tds);
     dataNew.Inject(std::make_shared<int>(300));  // 测试数据300，可以换成其它值
-    dataInventorys.push_back(move(dataNew));
+    dataInventory.push_back(move(dataNew));
 
-    return move(dataInventorys);
+    return move(dataInventory);
 }
 
 TEST_F(DataInventoryUTest, ShouldGetDataInventoryFromFunctionReturnByMove)

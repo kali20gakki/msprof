@@ -168,7 +168,7 @@ TEST_F(DBRunnerUtest, DropTableShouldReturnTrueWhenDropTableSuccess)
     EXPECT_EQ(rc, true);
 }
 
-TEST_F(DBRunnerUtest, DropTableShouldReturnFasleWhenDropTableExecFailed)
+TEST_F(DBRunnerUtest, DropTableShouldReturnFalseWhenDropTableExecFailed)
 {
     std::string path = "./a.db";
     const std::string tableName = "tb4";

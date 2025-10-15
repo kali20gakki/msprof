@@ -55,13 +55,13 @@ bool KfcCommProcessor::ProcessSingleDevice(CommunicationInfoProcessor::Communica
         return false;
     }
     DBInfo KfcOPTable("hccl_single_device.db", "KfcOP");
-    DBInfo KfcTaksTable("hccl_single_device.db", "KfcTask");
+    DBInfo KfcTaskTable("hccl_single_device.db", "KfcTask");
     std::string dbPath = File::PathJoin({devicePath, SQLITE, KfcOPTable.dbName});
-    if (!KfcOPTable.ConstructDBRunner(dbPath) || !KfcTaksTable.ConstructDBRunner(dbPath)) {
+    if (!KfcOPTable.ConstructDBRunner(dbPath) || !KfcTaskTable.ConstructDBRunner(dbPath)) {
         return false;
     }
     auto commStatus = CheckPathAndTable(dbPath, KfcOPTable, false);
-    auto computeStatus = CheckPathAndTable(dbPath, KfcTaksTable, false);
+    auto computeStatus = CheckPathAndTable(dbPath, KfcTaskTable, false);
     if (commStatus != CHECK_SUCCESS && computeStatus != CHECK_SUCCESS) {
         if (commStatus == CHECK_FAILED || computeStatus == CHECK_FAILED) {
             return false;
@@ -69,7 +69,7 @@ bool KfcCommProcessor::ProcessSingleDevice(CommunicationInfoProcessor::Communica
         return true;
     }
     // db取出所有的数据
-    communicationData.oriTaskData = LoadTaskData(KfcTaksTable);
+    communicationData.oriTaskData = LoadTaskData(KfcTaskTable);
     communicationData.oriOpData = LoadOpData(KfcOPTable);
     std::vector<CommunicationTaskData> taskData;
     std::vector<CommunicationOpData> opData;

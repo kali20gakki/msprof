@@ -19,8 +19,8 @@ class PipelineParallelAnalysis:
             parallel_data = _model.get_pipeline_parallel_data(first_field_name, condition, query_params)
         return {"parallel_mode": "Pipeline Parallel",
                 "headers": [first_header_name, "Computation Time(us)",
-                            "Pure Communication Time(Only Receice Op Included)(us)",
-                            'Pure Communication Time(Receice Op Not Included)(us)', 'Stage Time(us)'],
+                            "Pure Communication Time(Only Receive Op Included)(us)",
+                            'Pure Communication Time(Receive Op Not Included)(us)', 'Stage Time(us)'],
                 "data": parallel_data}
 
     def get_tuning_suggestion(self: any) -> dict:

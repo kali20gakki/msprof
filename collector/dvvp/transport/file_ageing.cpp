@@ -263,7 +263,7 @@ void FileAgeing::RemoveFile(const ToBeAgedFile &file, uint64_t &removeFileSize)
     if (remove(file.doneFilePath.c_str()) != EOK) {
         MSPROF_LOGE("remove file:%s failed", Utils::BaseName(file.doneFilePath).c_str());
     } else {
-        removeFileSize += file.doneFizeSize;
+        removeFileSize += file.doneFileSize;
     }
     fileCount_[file.fileCountTag] -= 1;
     MSPROF_LOGD("remove fileName:%s, filePath:%s, fileCount_[%s]:%u",

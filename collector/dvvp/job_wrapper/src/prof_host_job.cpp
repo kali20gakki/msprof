@@ -828,8 +828,8 @@ int ProfHostService::Uninit()
 int ProfHostService::GetCollectSysCallsCmd(int pid, std::string &profHostCmd)
 {
     if (pid < 0) {
-        MSPROF_LOGE("ProfHostSysCallsJob pid: %d is not vaild", pid);
-        MSPROF_INNER_ERROR("EK9999", "ProfHostSysCallsJob pid: %d is not vaild", pid);
+        MSPROF_LOGE("ProfHostSysCallsJob pid: %d is not valid", pid);
+        MSPROF_INNER_ERROR("EK9999", "ProfHostSysCallsJob pid: %d is not valid", pid);
         return PROFILING_FAILED;
     }
     std::string profHostOutDir = profHostOutDir_ + std::to_string(outDataNumber_);
@@ -847,8 +847,8 @@ int ProfHostService::GetCollectSysCallsCmd(int pid, std::string &profHostCmd)
 int ProfHostService::GetCollectPthreadsCmd(int pid, std::string &profHostCmd)
 {
     if (pid < 0) {
-        MSPROF_LOGE("ProfHostPthreadJob pid: %d is not vaild", pid);
-        MSPROF_INNER_ERROR("EK9999", "ProfHostPthreadJob pid: %d is not vaild", pid);
+        MSPROF_LOGE("ProfHostPthreadJob pid: %d is not valid", pid);
+        MSPROF_INNER_ERROR("EK9999", "ProfHostPthreadJob pid: %d is not valid", pid);
         return PROFILING_FAILED;
     }
     std::string profHostOutDir = profHostOutDir_ + std::to_string(outDataNumber_);
@@ -866,8 +866,8 @@ int ProfHostService::GetCollectPthreadsCmd(int pid, std::string &profHostCmd)
 int ProfHostService::GetCollectIOTopCmd(int pid, std::string &profHostCmd)
 {
     if (pid < 0) {
-        MSPROF_LOGE("ProfHostDiskJob pid: %d is not vaild", pid);
-        MSPROF_INNER_ERROR("EK9999", "ProfHostDiskJob pid: %d is not vaild", pid);
+        MSPROF_LOGE("ProfHostDiskJob pid: %d is not valid", pid);
+        MSPROF_INNER_ERROR("EK9999", "ProfHostDiskJob pid: %d is not valid", pid);
         return PROFILING_FAILED;
     }
     std::stringstream ssPerfHostCmd;
@@ -908,7 +908,7 @@ int ProfHostService::Start()
         MSPROF_INNER_ERROR("EK9999", "ProfHostService not started, toolName:%s", toolName_.c_str());
         return PROFILING_FAILED;
     }
-    std::string threadName = "MSVP_PORF_HOST_TOOL_TIMER";
+    std::string threadName = "MSVP_PROF_HOST_TOOL_TIMER";
     analysis::dvvp::common::thread::Thread::SetThreadName(threadName);
     int ret = analysis::dvvp::common::thread::Thread::Start();
     if (ret != PROFILING_SUCCESS) {
@@ -974,8 +974,8 @@ int ProfHostService::Handler()
     MSPROF_LOGI("Run Handler start");
     int ret = Uninit();
     if (ret == PROFILING_FAILED) {
-        MSPROF_LOGE("The toolName:%s unint failed.", toolName_.c_str());
-        MSPROF_INNER_ERROR("EK9999", "The toolName:%s unint failed.", toolName_.c_str());
+        MSPROF_LOGE("The toolName:%s Uninit failed.", toolName_.c_str());
+        MSPROF_INNER_ERROR("EK9999", "The toolName:%s Uninit failed.", toolName_.c_str());
         return ret;
     }
     outDataNumber_++;

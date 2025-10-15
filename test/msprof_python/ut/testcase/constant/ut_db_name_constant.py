@@ -78,7 +78,7 @@ TABLE_HOST_MEM_USAGE = "MemUsage"
 # network usage
 TABLE_HOST_NETWORK_USAGE = "NetworkUsage"
 TABLE_HOST_PROCESS_USAGE = "ProcessUsage"
-# host syscal
+# host syscall
 TABLE_HOST_RUNTIME_API = "Syscall"
 # ffts_log
 TABLE_FFTS_THREAD_LOG = "FftsThreadLog"

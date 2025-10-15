@@ -1,7 +1,6 @@
 /*
  * Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
  * Description: test msopprof cpp
- * Author: zyb
  * Create: 2023-09-18
  */
 #include <string>

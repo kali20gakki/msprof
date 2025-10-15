@@ -148,7 +148,7 @@ function add_latest_link() {
 	fi
 }
 
-function regist_uninstall() {
+function register_uninstall() {
     if [ -f "${install_path}/cann_uninstall.sh" ]; then
         write_cann_uninstall
     else
@@ -175,6 +175,6 @@ execute_run
 if [ "${package_arch}" = "$(arch)" ]; then
 	store_uninstall_script
 	set_latest
-	regist_uninstall
+	register_uninstall
 fi
 print "INFO" "${MSPROF_RUN_NAME} package install success."

@@ -7,7 +7,7 @@ for dir in $(ls -d ${CURRENT_DIR}/*/); do
         "${dir}/rollback_precheck.sh"
         ret=$?
         if [ ${ret} -ne 0 ]; then
-            echo "[All] [$(date +"%Y-%m-%d %H:%M:%S")] [ERROR]: ${dir}/rollback_precheck.sh fialed !"
+            echo "[All] [$(date +"%Y-%m-%d %H:%M:%S")] [ERROR]: ${dir}/rollback_precheck.sh failed !"
             exit ${ret}
         fi
     fi

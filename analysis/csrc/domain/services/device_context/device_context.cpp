@@ -105,9 +105,9 @@ std::vector<DataInventory> DeviceContextEntry(const char *targetDir, const char 
     size_t i = 0;
     for (const auto &subdir: subdirs) {
         auto &processStat = processStats[i];
-        auto &prcessData = processDataVec[i];
+        auto &processData = processDataVec[i];
         ++i;
-        func = [subdir, &processStat, &prcessData, stopAt] {
+        func = [subdir, &processStat, &processData, stopAt] {
             DeviceContext &context = DeviceContext::Instance();
             if (!context.Init(subdir)) {
                 processStat = "Init failed, exit!";
@@ -120,7 +120,7 @@ std::vector<DataInventory> DeviceContextEntry(const char *targetDir, const char 
             auto regInfo = ProcessRegister::CopyProcessInfo();
             ProcessControl processControl(regInfo);
 
-            bool ret = processControl.ExecuteProcess(prcessData, context);
+            bool ret = processControl.ExecuteProcess(processData, context);
 
             auto stat = processControl.GetExecuteStat();
             RecordProcessStat(stat, subdir, processStat);

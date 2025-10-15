@@ -17,7 +17,7 @@ from msmodel.cluster_info.cluster_info_model import ClusterInfoViewModel
 from msmodel.step_trace.cluster_step_trace_model import ClusterStepTraceViewModel
 
 
-class StepTraceSummay:
+class StepTraceSummary:
     """
     The class for querying step trace summary data.
     """
@@ -53,7 +53,7 @@ class StepTraceSummay:
     def _storage_summary_data(self: any, data: list) -> None:
         output_file_name = "step_trace_{}_{}_{}.json".format(self.npu_id, self.model_id, self.iteration_id)
         output_file_path = PathManager.get_query_result_path(self.collection_path, output_file_name)
-        result = create_json(output_file_path, StepTraceSummay.HEADERS, data, save_old_file=False)
+        result = create_json(output_file_path, StepTraceSummary.HEADERS, data, save_old_file=False)
         result_json = json.loads(result)
         if result_json["status"] == NumberConstant.SUCCESS:
             print_msg(result)
@@ -77,24 +77,24 @@ class StepTraceSummay:
         return os.path.exists(db_file)
 
     def _check_query_all_devices(self: any) -> None:
-        self.all_devices = self.npu_id == StepTraceSummay.ID_NUM_FOR_ALL_DEVICES
+        self.all_devices = self.npu_id == StepTraceSummary.ID_NUM_FOR_ALL_DEVICES
 
     def _check_iteration_id_valid(self: any) -> None:
         if self.iteration_id is None:
-            self.iteration_id = StepTraceSummay.ID_NUM_FOR_ALL_ITERATIONS
-        if self.all_devices and self.iteration_id == StepTraceSummay.ID_NUM_FOR_ALL_ITERATIONS:
+            self.iteration_id = StepTraceSummary.ID_NUM_FOR_ALL_ITERATIONS
+        if self.all_devices and self.iteration_id == StepTraceSummary.ID_NUM_FOR_ALL_ITERATIONS:
             print_msg(json.dumps(
                 {'status': NumberConstant.ERROR,
                  'info': 'For querying all devices data, you should input a valid iteration id.', 'data': ''}))
             raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
-        if not self.all_devices and self.iteration_id != StepTraceSummay.ID_NUM_FOR_ALL_ITERATIONS:
+        if not self.all_devices and self.iteration_id != StepTraceSummary.ID_NUM_FOR_ALL_ITERATIONS:
             print_msg(json.dumps(
                 {'status': NumberConstant.ERROR,
                  'info': 'For querying single device data, you should not input a iteration id.', 'data': ''}))
             raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
 
     def _query_data_in_db(self: any, rank_or_device_ids: set) -> list:
-        data_colleciton = []
+        data_collection = []
         with self.cluster_step_trace_model as model:
             rank_or_device_ids_to_query = rank_or_device_ids if self.all_devices else set([self.npu_id])
             for rank_or_device_id in rank_or_device_ids_to_query:
@@ -109,8 +109,8 @@ class StepTraceSummay:
                 if not data:
                     logging.error("The query data in %s table doesn't exist.", table)
                     continue
-                data_colleciton.extend(data)
-        return data_colleciton
+                data_collection.extend(data)
+        return data_collection
 
     def _get_rank_or_device_ids(self: any) -> set:
         if not os.path.exists(PathManager.get_db_path(self.collection_path, DBNameConstant.DB_CLUSTER_RANK)):
@@ -136,7 +136,7 @@ class StepTraceSummay:
             rank_or_device_id,
             NumberConstant.DEFAULT_MODEL_ID,
             NumberConstant.NULL_NUMBER,
-            StepTraceSummay.NUMBER_0F_DECIMAL_PLACE,
+            StepTraceSummary.NUMBER_0F_DECIMAL_PLACE,
             table_name,
             self.model_id)
         return sql

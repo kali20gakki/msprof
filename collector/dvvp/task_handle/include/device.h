@@ -1,7 +1,6 @@
 /*
  * Copyright (c) Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
  * Description: handle profiling request
- * Author: hufengwei
  * Create: 2018-06-13
  */
 #ifndef ANALYSIS_DVVP_HOST_DEVICE_H
@@ -54,7 +53,7 @@ private:
     SHARED_PTR_ALIA<analysis::dvvp::message::StatusInfo> status_;
     // init
     bool isInited_;
-    DeviceCallback deviceResponseCallack_;
+    DeviceCallback deviceResponseCallback_;
     SHARED_PTR_ALIA<Analysis::Dvvp::JobWrapper::JobAdapter> jobAdapter_;
 };
 }  // namespace host

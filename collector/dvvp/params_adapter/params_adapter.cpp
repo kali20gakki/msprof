@@ -377,7 +377,7 @@ void ParamsAdapter::SetDeviceSysParams(std::array<std::string, INPUT_CFG_MAX> pa
     if (paramContainer[INPUT_CFG_COM_SYS_INTERCONNECTION].compare(MSVP_PROF_ON) == 0) {
         samplingInterval = GetStrToIntParam(paramContainer[INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ],
                                             DEFAULT_PROFILING_INTERVAL_20MS, true);
-        platformAdapter_->SetParamsForDeviceIntercommection(samplingInterval);
+        platformAdapter_->SetParamsForDeviceInterconnection(samplingInterval);
     }
     if (paramContainer[INPUT_CFG_COM_DVPP].compare(MSVP_PROF_ON) == 0) {
         samplingInterval = GetStrToIntParam(paramContainer[INPUT_CFG_COM_DVPP_FREQ],

@@ -419,7 +419,7 @@ TEST_F(HOST_PROF_MANAGER_TEST, launch_task_same_jobid) {
     EXPECT_EQ(PROFILING_FAILED, entry->LaunchTask(task, "1", status_info.info));
 }
 
-TEST_F(HOST_PROF_MANAGER_TEST, destrcutor) {
+TEST_F(HOST_PROF_MANAGER_TEST, destructor) {
     GlobalMockObject::verify();
 
     std::shared_ptr<analysis::dvvp::host::ProfManager> entry(

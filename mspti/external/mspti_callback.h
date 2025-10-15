@@ -167,14 +167,14 @@ typedef struct msptiSubscriber_st *msptiSubscriberHandle;
  * @note Only a single subscriber can be registered at a time. To ensure
  * that no other MSPTI client interrupts the profiling session, it's the
  * responsibility of all the MSPTI clients to call this function before
- * starting the profling session.
+ * starting the profiling session.
  * @note This function does not enable any callbacks.
  * @note @b Thread-safety: this function is thread safe.
  *
  * @param subscriber [in] handle to initialize subscriber
  * @param callback [in] The callback function
  * @param userdata [in] A pointer to user data. This data will be passed to
- * the callback function via the @p userdata paramater.
+ * the callback function via the @p userdata parameter.
  *
  * @return MSPTI_SUCCESS on success
  * @return MSPTI_ERROR_INNER if unable to initialize MSPTI

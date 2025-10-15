@@ -1,7 +1,6 @@
 /*
  * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
  * Description: handle acl request
- * Author: xiepeng
  * Create: 2020-07-30
  */
 #ifndef MSPROF_ENGINE_ACL_API_COMMON_H

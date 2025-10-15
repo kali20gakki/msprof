@@ -24,7 +24,7 @@ protected:
     virtual void TearDown() {}
 };
 
-TEST_F(HcclReporterUtest, ShouldRetSuccessWhenRecordUnknowMarker)
+TEST_F(HcclReporterUtest, ShouldRetSuccessWhenRecordUnknownMarker)
 {
     uint64_t startTime = 100;
     uint64_t endTime = 200;

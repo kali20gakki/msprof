@@ -1,7 +1,6 @@
 /*
  * Copyright (c) Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
  * Description: handle profiling request
- * Author: hufengwei
  * Create: 2018-06-13
  */
 #include "thread_pool.h"
@@ -49,8 +48,8 @@ int ThreadPool::Start()
     }
 
     for (unsigned int ii = 0; ii < threadNum_; ++ii) {
-        SHARED_PTR_ALIA<ThreadPool::InnnerThread> thread;
-        MSVP_MAKE_SHARED1_RET(thread, ThreadPool::InnnerThread, threadPoolQueueSize_, PROFILING_FAILED);
+        SHARED_PTR_ALIA<ThreadPool::InnerThread> thread;
+        MSVP_MAKE_SHARED1_RET(thread, ThreadPool::InnerThread, threadPoolQueueSize_, PROFILING_FAILED);
 
         std::string threadName = threadPoolNamePrefix_ + std::to_string(ii);
         thread->SetThreadName(threadName);

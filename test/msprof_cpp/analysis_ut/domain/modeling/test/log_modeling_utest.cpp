@@ -265,7 +265,7 @@ static std::vector<HalLogData> GetRightDeviceTaskDataWhenInputFlippedTasks()
     return logData;
 }
 
-static void CheckFilppedTasks(Infra::DataInventory& dataInventory)
+static void CheckFlippedTasks(Infra::DataInventory& dataInventory)
 {
     auto deviceData = dataInventory.GetPtr<std::map<TaskId, std::vector<Domain::DeviceTask>>>();
     ASSERT_TRUE(deviceData);
@@ -331,7 +331,7 @@ TEST_F(LogModelingUTest, ShouldGetRightDeviceTaskDataWhenInputFlippedTasks)
     DeviceContext context;
     ASSERT_EQ(modeling.Run(dataInventory_, context), Analysis::ANALYSIS_OK);
 
-    CheckFilppedTasks(dataInventory_);
+    CheckFlippedTasks(dataInventory_);
 }
 
 /*

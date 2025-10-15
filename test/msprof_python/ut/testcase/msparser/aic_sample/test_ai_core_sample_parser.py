@@ -141,7 +141,7 @@ class TestParsingAIVectorCoreSampleData(unittest.TestCase):
                 mock.patch(NAMESPACE + '.logging.error'):
             check = ParsingAIVectorCoreSampleData(self.file_list, CONFIG)
             check.start_parsing_data_file()
-        with mock.patch(NAMESPACE + '.is_valid_original_data', retuen_value=True), \
+        with mock.patch(NAMESPACE + '.is_valid_original_data', return_value=True), \
                 mock.patch(NAMESPACE + '.ParsingAIVectorCoreSampleData.read_binary_data'), \
                 mock.patch(NAMESPACE + '.logging.info'):
             check = ParsingAIVectorCoreSampleData(self.file_list, CONFIG)

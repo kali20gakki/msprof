@@ -4,7 +4,7 @@
 
 """
 The MsprofOutputSummary's function:
-1 search all file in summary/timeline dir,and save thier name in set
+1 search all file in summary/timeline dir,and save their name in set
 2 cyclically reads the file by the name in the set, with multiprocess
 3 dump by FileSliceHelper
 
@@ -92,7 +92,7 @@ class MsprofOutputSummary:
     @staticmethod
     def _get_file_name(file_name: str) -> str:
         """
-        get filemane like "op_summary"
+        get filename like "op_summary"
         """
         match = re.search(r'(_\d)?(_slice_\d+)?_\d+', file_name)
         if match and match.start() > 0:

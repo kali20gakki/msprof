@@ -81,8 +81,7 @@ void KernelParserWorker::DumpHashData()
     std::shared_ptr<HashDBDumper> hashDbDumper;
     MAKE_SHARED_RETURN_VOID(hashDbDumper, HashDBDumper, hostFilePath_);
     INFO("success get hashDbDumper");
-    auto dumpresult = hashDbDumper->DumpData(hashDataContent);
-    if (!dumpresult) {
+    if (!hashDbDumper->DumpData(hashDataContent)) {
         ERROR("Hash data parse failed");
         result_ = false;
     }

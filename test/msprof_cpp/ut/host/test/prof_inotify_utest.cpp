@@ -158,7 +158,7 @@ TEST_F(PROF_INOTIFY_UTEST, CloudTaskInit)
     EXPECT_EQ(PROFILING_FAILED, task->Init(cfg, ucfg));
     // Create jobDataPath failed
     EXPECT_EQ(PROFILING_FAILED, task->Init(cfg, ucfg));
-    // Craete dataPath failed
+    // Create dataPath failed
     EXPECT_EQ(PROFILING_FAILED, task->Init(cfg, ucfg));
     // ok
     EXPECT_EQ(PROFILING_SUCCESS, task->Init(cfg, ucfg));
@@ -296,7 +296,7 @@ TEST_F(PROF_INOTIFY_UTEST, InotifyGetDataStoreAbility)
     EXPECT_TRUE(inotify->InotifyGetDataStoreAbility());
 }
 
-TEST_F(PROF_INOTIFY_UTEST, ReadFileByPathVliadPath)
+TEST_F(PROF_INOTIFY_UTEST, ReadFileByPathValidPath)
 {
     std::shared_ptr<analysis::dvvp::host::ProfInotify> inotify
         (new analysis::dvvp::host::ProfInotify());
@@ -985,7 +985,7 @@ TEST_F(PROF_INOTIFY_UTEST, InotifySelfEventsProcess)
     EXPECT_EQ(PROFILING_SUCCESS, inotify->InotifySelfEventsProcess(*event));
 }
 
-TEST_F(PROF_INOTIFY_UTEST, InotifyUuidEventProcessFaild)
+TEST_F(PROF_INOTIFY_UTEST, InotifyUuidEventProcessFailed)
 {
     std::shared_ptr<analysis::dvvp::host::ProfInotify> inotify
         (new analysis::dvvp::host::ProfInotify());

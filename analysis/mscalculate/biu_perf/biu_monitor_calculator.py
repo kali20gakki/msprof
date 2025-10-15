@@ -169,7 +169,7 @@ class MonitorCyclesCalculator(BiuMonitorCalculator):
         if core_id > 24 and core_id % 2 == 0:
             return 4 * group_id + 3
 
-        logging.error("Core id %d is unknwon.", core_id)
+        logging.error("Core id %d is unknown.", core_id)
         return 0
 
     def create_data(self: any, pid: int, interval_start: int, unit_name: str, monitor_datum: any) -> None:

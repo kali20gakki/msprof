@@ -347,7 +347,7 @@ MSVP_PROF_API uint64_t aclprofGetOpEnd(const void *opInfo, size_t opInfoLen, uin
 
 /**
  * @ingroup AscendCL
- * @brief get excution time of specified op from subscription data
+ * @brief get execution time of specified op from subscription data
  *
  * @param  opInfo [IN]     pointer to subscription data
  * @param  opInfoLen [IN]  memory size of subscription data
@@ -411,7 +411,7 @@ MSVP_PROF_API void *aclprofCreateStamp();
 
 /**
 * @ingroup AscendCL
-* @brief destory stamp pointer
+* @brief destroy stamp pointer
 *
 *
 * @retval void

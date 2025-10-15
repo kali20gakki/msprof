@@ -1,7 +1,6 @@
 /*
  * Copyright (c) Huawei Technologies Co., Ltd. 2018-2021. All rights reserved.
  * Description: handle profiling request
- * Author: yutianqi
  * Create: 2018-06-13
  */
 #include "ai_drv_prof_api.h"
@@ -362,7 +361,7 @@ int DrvL2CacheTaskStart(int profDeviceId, AI_DRV_CHANNEL profChannel, const std:
     for (uint32_t i = 0; i < (uint32_t)profEvents.size(); i++) {
         configP->event[i] = (uint32_t)strtol(profEvents[i].c_str(), nullptr, STRING_TO_LONG_WEIGHT);
         eventStr.append(profEvents[i] + ",");
-        MSPROF_LOGI("Receice DrvL2CacheTaskEvent EventId=%d, EventCode=0x%x", i, configP->event[i]);
+        MSPROF_LOGI("Receive DrvL2CacheTaskEvent EventId=%d, EventCode=0x%x", i, configP->event[i]);
     }
     MSPROF_EVENT("Begin to start profiling DrvL2CacheTaskStart, profDeviceId=%d, profChannel=%d",
         profDeviceId, static_cast<int>(profChannel));

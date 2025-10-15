@@ -1,7 +1,6 @@
 /*
  * Copyright (c) Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
  * Description: handle profiling request
- * Author: hufengwei
  * Create: 2018-06-13
  */
 #include "application.h"
@@ -187,7 +186,7 @@ void Application::SetAppEnv(SHARED_PTR_ALIA<analysis::dvvp::message::ProfilePara
     envsV.push_back(paramEnv);
     envsV.push_back(DynProfMngCli::instance()->ConstructEnv());
     if (!params->delayTime.empty() || !params->durationTime.empty()) {
-        envsV.push_back(PROFILING_MODE_ENV + "=" + DELAY_DURARION_PROFILING_VALUE);
+        envsV.push_back(PROFILING_MODE_ENV + "=" + DELAY_DURATION_PROFILING_VALUE);
     }
 }
 }  // namespace app

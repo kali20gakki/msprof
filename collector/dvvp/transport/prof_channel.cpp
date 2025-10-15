@@ -1,7 +1,6 @@
 /*
  * Copyright (c) Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
  * Description: handle profiling request
- * Author: lixubo
  * Create: 2018-06-13
  */
 #include "prof_channel.h"
@@ -429,7 +428,7 @@ void ChannelPoll::Run(const struct error_message::Context &errorContext)
                 break;
             } else {
                 const unsigned long sleepTimeInUs = 1000; // 1000us
-                analysis::dvvp::common::utils::Utils::UsleepInterupt(sleepTimeInUs);
+                analysis::dvvp::common::utils::Utils::UsleepInterrupt(sleepTimeInUs);
                 continue;
             }
         }

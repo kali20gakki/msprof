@@ -54,7 +54,7 @@ class TestAicpuViewer(unittest.TestCase):
             ascend_task_dto.append(data_dto)
         return ascend_task_dto
 
-    def test_analysis_aicpu_when_noraml_then_pass(self):
+    def test_analysis_aicpu_when_normal_then_pass(self):
         project_path = 'home\\project'
         with mock.patch(NAMESPACE + '.ParseAiCpuData.get_ai_cpu_data'), \
                 mock.patch(NAMESPACE + '.ParseAiCpuData.get_ascend_task_ai_cpu_data'), \

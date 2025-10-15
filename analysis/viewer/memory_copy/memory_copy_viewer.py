@@ -41,7 +41,7 @@ class MemoryCopyViewer:
         """
         direction = MemoryCopyConstant.get_direction(sql_data[5])
         # if data size is not zero and direction is not 'other', the runtime belongs to memcpy
-        if sql_data[4] and direction != MemoryCopyConstant.DEFAULTE_NAME:
+        if sql_data[4] and direction != MemoryCopyConstant.DEFAULT_NAME:
             args.setdefault("data size", "{} byte".format(sql_data[4]))
             args.setdefault("memcpy direction", "{}".format(direction))
 

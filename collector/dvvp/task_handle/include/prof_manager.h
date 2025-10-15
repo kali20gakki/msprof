@@ -1,7 +1,6 @@
 /*
  * Copyright (c) Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
  * Description: handle profiling request
- * Author: hufengwei
  * Create: 2018-06-13
  */
 #ifndef ANALYSIS_DVVP_HOST_PROF_MANAGER_H

@@ -249,20 +249,20 @@ void CANNTraceDBDumper::AddTensorShapeInfo(const std::shared_ptr<ConcatTensorInf
     std::vector<std::string> outputShape;
     for (uint32_t i = 0; i < tensorNum; i++) {
         std::vector<std::string> shapes;
-        auto tenosrData = tensorDesc->tensorData[i];
-        for (const auto shape: tenosrData.shape) {
+        auto tensorData = tensorDesc->tensorData[i];
+        for (const auto shape: tensorData.shape) {
             if (shape == 0) {
                 break;
             }
             shapes.emplace_back(std::to_string(shape));
         }
-        if (tenosrData.tensorType == INPUT_FORMAT_INDEX) {
-            inputFormat.emplace_back(GetFormat(tenosrData.format));
-            inputDataType.emplace_back(NumberMapping::Get(MappingType::GE_DATA_TYPE, tenosrData.dataType));
+        if (tensorData.tensorType == INPUT_FORMAT_INDEX) {
+            inputFormat.emplace_back(GetFormat(tensorData.format));
+            inputDataType.emplace_back(NumberMapping::Get(MappingType::GE_DATA_TYPE, tensorData.dataType));
             inputShape.emplace_back(Utils::Join(shapes, ","));
-        } else if (tenosrData.tensorType == OUTPUT_FORMAT_INDEX) {
-            outputFormat.emplace_back(GetFormat(tenosrData.format));
-            outputDataType.emplace_back(NumberMapping::Get(MappingType::GE_DATA_TYPE, tenosrData.dataType));
+        } else if (tensorData.tensorType == OUTPUT_FORMAT_INDEX) {
+            outputFormat.emplace_back(GetFormat(tensorData.format));
+            outputDataType.emplace_back(NumberMapping::Get(MappingType::GE_DATA_TYPE, tensorData.dataType));
             outputShape.emplace_back(Utils::Join(shapes, ","));
         }
     }

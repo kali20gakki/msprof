@@ -43,7 +43,7 @@ class HccsModel(BaseModel, ABC):
 
     def insert_metrics(self: any, device_id: int) -> None:
         """
-        Insert metrics value into mertics table
+        Insert metrics value into metrics table
         :return:None
         """
         self._calculate_metrics(device_id)

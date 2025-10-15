@@ -78,7 +78,7 @@ void InputParser::MsprofCmdUsage(const std::string msg)
 
 bool InputParser::CheckInstrAndTaskParamBothSet(std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> &argvMap)
 {
-    std::string comflictStr = "";
+    std::string conflictStr = "";
     const std::map<int, std::string> INSTR_LIST = {
         {ARGS_AI_CORE, "ai-core"},
         {ARGS_TASK_TIME, "task-time"},
@@ -95,25 +95,25 @@ bool InputParser::CheckInstrAndTaskParamBothSet(std::unordered_map<int, std::pai
         for (auto &cfg : INSTR_LIST) {
             if (argvMap.count(cfg.first) != 0 && std::string(argvMap[cfg.first].first.args[cfg.first],
                 ON.size()) == "on") {
-                comflictStr += " ";
-                comflictStr += cfg.second;
+                conflictStr += " ";
+                conflictStr += cfg.second;
             }
         }
         if (argvMap.count(ARGS_AIC_FREQ) != 0) {
-            comflictStr += " aic-freq";
+            conflictStr += " aic-freq";
         }
         if (argvMap.count(ARGS_AIC_MODE) != 0) {
-            comflictStr += " aic-mode";
+            conflictStr += " aic-mode";
         }
-        if (argvMap.count(ARGS_AIC_METRICE) != 0) {
-            comflictStr += " aic-metrics";
+        if (argvMap.count(ARGS_AIC_METRICS) != 0) {
+            conflictStr += " aic-metrics";
         }
     }
 
-    if (!comflictStr.empty()) {
+    if (!conflictStr.empty()) {
         CmdLog::instance()->CmdErrorLog(" Profiling fails to start because instr_profiling is on,"
             " Params %s not allowed to set in single operator model if instr_profiling is on.",
-            comflictStr.c_str());
+            conflictStr.c_str());
         return true;
     }
     return false;
@@ -126,15 +126,15 @@ bool InputParser::CheckInputDataValidity(int argc, CONST_CHAR_PTR argv[])
         return false;
     }
 
-    if (argc > INPUT_MAX_LENTH || argv == nullptr) {
+    if (argc > INPUT_MAX_LENGTH || argv == nullptr) {
         CmdLog::instance()->CmdErrorLog("input data is invalid,"
-            "please input argc less than %d and argv is not null", INPUT_MAX_LENTH);
+            "please input argc less than %d and argv is not null", INPUT_MAX_LENGTH);
         return false;
     }
     for (int i = 0; i < argc; i++) {
-        if (strnlen(argv[i], INPUT_MAX_LENTH) == INPUT_MAX_LENTH) {
+        if (strnlen(argv[i], INPUT_MAX_LENGTH) == INPUT_MAX_LENGTH) {
             CmdLog::instance()->CmdErrorLog("input data is invalid,"
-                "please input the len of every argv less than %d", INPUT_MAX_LENTH);
+                "please input the len of every argv less than %d", INPUT_MAX_LENGTH);
             return false;
         }
     }

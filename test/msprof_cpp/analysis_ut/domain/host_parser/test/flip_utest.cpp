@@ -55,7 +55,7 @@ protected:
     }
 };
 
-TEST_F(FlipUTest, TestComputeBatchIdShoulReturnEmptyWhenTaskTrackIsEmpty)
+TEST_F(FlipUTest, TestComputeBatchIdShouldReturnEmptyWhenTaskTrackIsEmpty)
 {
     std::vector<std::shared_ptr<MsprofCompactInfo>> taskTrack {};
     std::vector<std::shared_ptr<FlipTask>> flipTask {};
@@ -93,7 +93,7 @@ TEST_F(FlipUTest, TestComputeBatchIdShoulDoNothingWhenMakeSharedFailed)
     EXPECT_EQ(1, Flip::GetBatchId(*taskTrack[1]));
 }
 
-TEST_F(FlipUTest, TestComputeBatchIdShoulSetBatchIdWithEachSreamWhenFlipSepTaskData)
+TEST_F(FlipUTest, TestComputeBatchIdShouldSetBatchIdWithEachStreamWhenFlipSepTaskData)
 {
     const uint32_t compactInfoDataNum = 10;
     const uint32_t flipDataNum = 4;

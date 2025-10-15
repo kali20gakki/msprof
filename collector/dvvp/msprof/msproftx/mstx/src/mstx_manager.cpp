@@ -90,7 +90,7 @@ void MstxManager::Run(const struct error_message::Context &errorContext)
             break;
         }
         ReportData();
-        Utils::UsleepInterupt(SLEEP_INTEVAL_US);
+        Utils::UsleepInterrupt(SLEEP_INTERVAL_US);
     }
     MSPROF_LOGI("mstx data handler thread stop");
 }

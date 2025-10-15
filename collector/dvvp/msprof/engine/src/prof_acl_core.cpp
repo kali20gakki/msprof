@@ -208,8 +208,8 @@ static bool IsValidDevId(CONST_UINT32_T_PTR deviceIdList, const uint32_t deviceN
             return false;
         }
         if (record.count(devId) > 0) {
-            MSPROF_LOGE("[IsValidProfConfig]Device id %u is duplicatedly set", devId);
-            std::string errorReason = "device id is duplicatedly set";
+            MSPROF_LOGE("[IsValidProfConfig]Device id %u is duplicate set", devId);
+            std::string errorReason = "device id is duplicate set";
             MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
                 std::vector<std::string>({std::to_string(devId), "device id", errorReason}));
             return false;
@@ -352,7 +352,7 @@ static aclError PreCheckProfConfig(ACL_PROF_CONFIG_CONST_PTR profilerConfig)
         return ACL_ERROR_PROF_MODULES_UNSUPPORTED;
     }
     if (profilerConfig->config.devNums > MSVP_MAX_DEV_NUM + 1) {
-        MSPROF_LOGE("Param prolilerConfig is invalid");
+        MSPROF_LOGE("Param profilerConfig is invalid");
         std::string devNumsStr = std::to_string(profilerConfig->config.devNums);
         return ACL_ERROR_INVALID_PARAM;
     }

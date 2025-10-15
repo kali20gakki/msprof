@@ -98,7 +98,7 @@ FunctionRegister *FunctionRegister::GetInstance()
     return &instance;
 }
 
-void FunctionRegister::RegisteFunction(const std::string& soName, const std::string& funcName)
+void FunctionRegister::RegisterFunction(const std::string& soName, const std::string& funcName)
 {
     std::lock_guard<std::mutex> lock(mu_);
     auto itr = registry_.find(soName);
@@ -129,7 +129,7 @@ FunctionHandle FunctionRegister::Get(const std::string &soName, const std::strin
 
 void* RegisterFunction(const std::string& soName, const std::string& funcName)
 {
-    FunctionRegister::GetInstance()->RegisteFunction(soName, funcName);
+    FunctionRegister::GetInstance()->RegisterFunction(soName, funcName);
     return FunctionRegister::GetInstance()->Get(soName, funcName);
 }
 }  // Common

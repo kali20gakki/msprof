@@ -1,7 +1,6 @@
 /*
  * Copyright (c) Huawei Technologies Co., Ltd. 2019-2019. All rights reserved.
  * Description: class timer
- * Author: lixubo
  * Create: 2019-04-23
  */
 #ifndef ANALYSIS_DVVP_JOB_WRAPPER_PROF_TIMER_H

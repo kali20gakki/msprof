@@ -127,7 +127,7 @@ class HostNetworkUsagePresenter(HostProfPresenterBase):
     def write_per_usage(self: any, curr_timestamp: float, curr_data: dict,
                         last_timestamp: float, last_data: dict) -> None:
         """
-        caculate usage then insert to db
+        calculate usage then insert to db
         """
         total_bytes = 0
         intf_num = 0
@@ -223,7 +223,7 @@ class HostNetworkUsagePresenter(HostProfPresenterBase):
         return MsvpConstant.EMPTY_LIST
 
     def _parse_network_usage(self: any, file: any) -> None:
-        # network intface info
+        # network interface info
         self.load_interface_speed()
 
         # loop all net stat sample

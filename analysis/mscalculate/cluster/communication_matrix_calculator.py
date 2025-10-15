@@ -38,7 +38,7 @@ class CommunicationMatrixCalculator(MetaCalculator):
 
     @staticmethod
     def matrix_slow_link_rule(utilization_ratio: float, large_packet_ratio: float, trans_type: str):
-        suggestion_header = StrConstant.SUGGESTION_HAEDER
+        suggestion_header = StrConstant.SUGGESTION_HEADER
         suggestion = SlowLinkCalculator.slow_link_rule(utilization_ratio, large_packet_ratio, trans_type)
         if not suggestion:
             suggestion = MatrixProf.PROF_GOOD_STATE.format(trans_type)

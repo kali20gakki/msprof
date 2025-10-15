@@ -57,7 +57,7 @@ TEST(TestParser, should_return_batch_id_when_compute)
     }
 }
 
-TEST(TestParser, should_return_batch_id_when_task_is_not_continuoes)
+TEST(TestParser, should_return_batch_id_when_task_is_not_continuous)
 {
     // 申请内存
     HalLogData log[2] = {};

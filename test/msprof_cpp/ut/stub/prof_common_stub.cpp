@@ -1,6 +1,6 @@
 #include "external/prof_common.h"
 
-void ProfRegisteMstxFunc(MstxInitInjectionFunc mstxInitFunc, ProfModule module)
+void ProfRegisterMstxFunc(MstxInitInjectionFunc mstxInitFunc, ProfModule module)
 {
 
 }

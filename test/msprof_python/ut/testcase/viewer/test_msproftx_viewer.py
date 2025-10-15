@@ -44,7 +44,7 @@ class TestMsprofTxViewer(unittest.TestCase):
     def tearDown(self):
         InfoConfReader()._info_json = None
 
-    def test_get_summary_data_return_vaild_data_with_get_summary_from_model(self):
+    def test_get_summary_data_return_valid_data_with_get_summary_from_model(self):
         valid_start_time = '10.001\t'
         with mock.patch('msmodel.msproftx.msproftx_model.MsprofTxModel.get_summary_data',
                         return_value=((0, 0, 0, 0, 0, 0, 0, 5, 0, 'test'), (0, 1, 0, 0, 1, 0, 1, 7, 0, 'test'))), \
@@ -127,7 +127,7 @@ class TestMsprofTxViewer(unittest.TestCase):
             result = MsprofTxViewer(self.configs, self.params).get_timeline_data()
             self.assertEqual(result, expect_timeline_data)
 
-    def test_get_device_summary_data_return_vaild_data_with_get_device_summary_from_model(self):
+    def test_get_device_summary_data_return_valid_data_with_get_device_summary_from_model(self):
         with mock.patch('msmodel.msproftx.msproftx_model.MsprofTxExModel.get_device_data',
                         return_value=[(0, 1, 0, 0, 0), (1, 2, 0, 0, 10)]):
             check = MsprofTxViewer(self.configs, self.params)

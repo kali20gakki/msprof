@@ -75,7 +75,7 @@ def get_dvpp_total_data(param: dict, conn: any) -> tuple:
 
 def get_result_data_for_dvpp(res: list, delta: float) -> tuple:
     """
-    method that provides resulta for get_dvpp_total_data
+    method that provides result for get_dvpp_total_data
     """
     data_time = []
     data_util = []

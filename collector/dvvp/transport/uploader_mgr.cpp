@@ -53,7 +53,7 @@ void UploaderMgr::AddMapByDevIdMode(int devId, const std::string &mode, const st
     std::lock_guard<std::mutex> lock(uploaderMutex_);
     auto mapIter = devModeJobMap_.find(devModeKey);
     if (mapIter != devModeJobMap_.end()) {
-        MSPROF_LOGI("Upadate devModeJobMap_");
+        MSPROF_LOGI("Update devModeJobMap_");
     } else {
         MSPROF_LOGI("Add to devModeJobMap_");
     }

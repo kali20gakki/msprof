@@ -148,8 +148,8 @@ class AiCoreSampleModel(BaseModel):
     def sql_insert_metric_summary_table(self: any, metrics: list, freq: float) -> str:
         """
         generate sql statement for inserting metric from EventCount
-        :param metrics: metrics to be calcualted
-        :param freq: running frequecy, which can be used to calculate aic metrics
+        :param metrics: metrics to be calculated
+        :param freq: running frequency, which can be used to calculate aic metrics
         :return: merged sql sentence
         """
         algos = []

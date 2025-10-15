@@ -57,3 +57,6 @@ class TestMemoryCopyViewer(unittest.TestCase):
             res = self.memcopy_viewer.get_memory_copy_non_chip0_summary()
 
         self.assertEqual(expect_res, res)
+
+    def test_get_direction_should_return_value(self):
+        self.assertEqual(MemoryCopyConstant.get_direction(MemoryCopyConstant.H2D_TAG), MemoryCopyConstant.H2D_NAME)

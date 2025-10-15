@@ -18,7 +18,7 @@ class TestParsingMemoryData(unittest.TestCase):
             check.flush([])
 
     def test_report_data(self):
-        devcie_list = ['5']
+        device_list = ['5']
         db_manager = DBManager()
         res = db_manager.create_table('nic.db')
         InfoConfReader()._info_json = {'devices': '0'}
@@ -31,14 +31,14 @@ class TestParsingMemoryData(unittest.TestCase):
                 mock.patch(NAMESPACE + '.NicModel.create_nicreceivesend_table'):
             check = NicModel('test', 'nic.db', ['NicOriginalData'])
             check.conn, check.cur = res[0], res[1]
-            result = check.report_data(devcie_list)
+            result = check.report_data(device_list)
         self.assertEqual(result, None)
         with mock.patch(NAMESPACE + '.DBManager.judge_table_exist',
                         side_effect=OSError), \
                 mock.patch(NAMESPACE + '.logging.error'):
             check = NicModel('test', 'nic.db', ['NicOriginalData'])
             check.conn, check.cur = res[0], res[1]
-            result = check.report_data(devcie_list)
+            result = check.report_data(device_list)
         self.assertEqual(result, None)
         db_manager.destroy(res)
 

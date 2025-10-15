@@ -1,7 +1,6 @@
 /*
  * Copyright (c) Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
  * Description: handle profiling request
- * Author: yutianqi
  * Create: 2018-06-13
  */
 #ifndef ANALYSIS_DVVP_PROFILER_MSPROF_CALLBACK_IMPL_H
@@ -19,16 +18,16 @@ namespace Dvvp {
 namespace ProfilerCommon {
 using namespace analysis::dvvp::common::utils;
 
-// defination of MsprofCtrlCallback, see prof_callback.h
+// definition of MsprofCtrlCallback, see prof_callback.h
 int32_t MsprofCtrlCallbackImpl(uint32_t type, VOID_PTR data, uint32_t len);
 
-// defination of MsprofSetDeviceCallback, see prof_callback.h
+// definition of MsprofSetDeviceCallback, see prof_callback.h
 int32_t MsprofSetDeviceCallbackImpl(VOID_PTR data, uint32_t len);
 
 // set device callback in dynamic profiling mode
 int32_t MsprofSetDeviceCallbackForDynProfImpl(VOID_PTR data, uint32_t len);
 
-// defination of MsprofReporterCallback, see prof_callback.h
+// definition of MsprofReporterCallback, see prof_callback.h
 int32_t MsprofReporterCallbackImpl(uint32_t moduleId, uint32_t type, VOID_PTR data, uint32_t len);
 
 // api data reporter call back

@@ -171,7 +171,7 @@ TEST_F(FileUTest, TestFileCheck)
     EXPECT_TRUE(File::DeleteFile("test_file_soft_link"));  // 删除test_file_soft_link软连接
 }
 
-TEST_F(FileUTest, TestFileCheckShouldReturnFalseWhenFileSizeToolarge)
+TEST_F(FileUTest, TestFileCheckShouldReturnFalseWhenFileSizeTooLarge)
 {
     const uint32_t maxReadBytes = 64 * 1024 * 1024;
     MOCKER_CPP(&File::Size).stubs()
@@ -229,14 +229,14 @@ TEST_F(FileUTest, TestFileReaderOpenShouldOpenWhenOpenedSuccess)
     EXPECT_TRUE(fd.IsOpen());
 }
 
-TEST_F(FileUTest, TestReadBinaryShouleReturnErrorWhenFileNotOpen)
+TEST_F(FileUTest, TestReadBinaryShouldReturnErrorWhenFileNotOpen)
 {
     FileReader fd;
     std::stringstream ss;
     EXPECT_EQ(ANALYSIS_ERROR, fd.ReadBinary(ss));
 }
 
-TEST_F(FileUTest, TestReadBinaryShouleReturnOKWhenReadSuccess)
+TEST_F(FileUTest, TestReadBinaryShouldReturnOKWhenReadSuccess)
 {
     FileReader fd;
     fd.Open("test_file");
@@ -244,14 +244,14 @@ TEST_F(FileUTest, TestReadBinaryShouleReturnOKWhenReadSuccess)
     EXPECT_EQ(ANALYSIS_OK, fd.ReadBinary(ss));
 }
 
-TEST_F(FileUTest, TestReadTextShouleReturnErrorWhenFileNotOpen)
+TEST_F(FileUTest, TestReadTextShouldReturnErrorWhenFileNotOpen)
 {
     FileReader fd;
     std::vector<std::string> text;
     EXPECT_EQ(ANALYSIS_ERROR, fd.ReadText(text));
 }
 
-TEST_F(FileUTest, TestReadTextShouleReturnOKWhenReadSuccess)
+TEST_F(FileUTest, TestReadTextShouldReturnOKWhenReadSuccess)
 {
     FileReader fd;
     fd.Open("test_file");
@@ -259,14 +259,14 @@ TEST_F(FileUTest, TestReadTextShouleReturnOKWhenReadSuccess)
     EXPECT_EQ(ANALYSIS_OK, fd.ReadText(text));
 }
 
-TEST_F(FileUTest, TestReadJsonShouleReturnErrorWhenFileNotOpen)
+TEST_F(FileUTest, TestReadJsonShouldReturnErrorWhenFileNotOpen)
 {
     FileReader fd;
     nlohmann::json content;
     EXPECT_EQ(ANALYSIS_ERROR, fd.ReadJson(content));
 }
 
-TEST_F(FileUTest, TestReadJsonShouleReturnErrorWhenParseJsonFailed)
+TEST_F(FileUTest, TestReadJsonShouldReturnErrorWhenParseJsonFailed)
 {
     FileReader fd;
     fd.Open("test_file");
@@ -274,7 +274,7 @@ TEST_F(FileUTest, TestReadJsonShouleReturnErrorWhenParseJsonFailed)
     EXPECT_EQ(ANALYSIS_ERROR, fd.ReadJson(content));
 }
 
-TEST_F(FileUTest, TestReadJsonShouleReturnOKWhenParseJsonSuccess)
+TEST_F(FileUTest, TestReadJsonShouldReturnOKWhenParseJsonSuccess)
 {
     FileReader fd;
     FileWriter jsonWriter("test_file");

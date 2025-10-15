@@ -3,7 +3,7 @@
             Copyright, 2024, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : memory_repoter.h
+ * File Name          : memory_reporter.h
  * Description        : 上报记录Device Memory数据
  * Author             : msprof team
  * Creation Date      : 2024/12/2

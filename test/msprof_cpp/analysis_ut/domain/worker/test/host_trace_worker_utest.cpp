@@ -33,14 +33,14 @@ protected:
 };
 
 
-TEST_F(HostTraceWorkerUtest, TestKernalHostTraceWorkerShouldReturnTrueWhenInputDirIsEmpty)
+TEST_F(HostTraceWorkerUtest, TestKernelHostTraceWorkerShouldReturnTrueWhenInputDirIsEmpty)
 {
     HostTraceWorker hostTraceWorker{TEST_HOST_FILE_PATH};
     auto ret = hostTraceWorker.Run();
     EXPECT_EQ(ret, true);
 }
 
-TEST_F(HostTraceWorkerUtest, TestKernalHostTraceWorkerShouldReturnTrueWhenGroupResultIsNotEmpty)
+TEST_F(HostTraceWorkerUtest, TestKernelHostTraceWorkerShouldReturnTrueWhenGroupResultIsNotEmpty)
 {
     HostTraceWorker hostTraceWorker{TEST_HOST_FILE_PATH};
     CANNWarehouses mockWarehouses;

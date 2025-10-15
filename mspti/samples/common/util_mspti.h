@@ -39,7 +39,7 @@
         auto ret = func; \
         if (ret != HCCL_SUCCESS) \
         { \
-            LOG_PRINT("hccl interface return errreturn err %s:%d, retcode: %d \n", __FILE__, __LINE__, ret); \
+            LOG_PRINT("hccl interface return err return err %s:%d, ret code: %d \n", __FILE__, __LINE__, ret); \
             return ret; \
         } \
     } while (0)

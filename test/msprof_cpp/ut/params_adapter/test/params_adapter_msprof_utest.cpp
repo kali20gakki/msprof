@@ -265,17 +265,17 @@ TEST_F(ParamsAdapterMsprofUtest, MsprofSetDefaultParams)
     MsprofParamAdapterMgr->SetDefaultParamsExport();
 }
 
-TEST_F(ParamsAdapterMsprofUtest, SpliteAppPath)
+TEST_F(ParamsAdapterMsprofUtest, SplitAppPath)
 {
     GlobalMockObject::verify();
     std::shared_ptr<ParamsAdapterMsprof> MsprofParamAdapterMgr;
     MSVP_MAKE_SHARED0_BREAK(MsprofParamAdapterMgr, ParamsAdapterMsprof);
     std::string appParam;
-    MsprofParamAdapterMgr->SpliteAppPath(appParam);
+    MsprofParamAdapterMgr->SplitAppPath(appParam);
     appParam = "./main 1";
-    MsprofParamAdapterMgr->SpliteAppPath(appParam);
+    MsprofParamAdapterMgr->SplitAppPath(appParam);
     appParam = "/bin/bash test.sh 1";
-    MsprofParamAdapterMgr->SpliteAppPath(appParam);
+    MsprofParamAdapterMgr->SplitAppPath(appParam);
 }
 
 TEST_F(ParamsAdapterMsprofUtest, CheckMsprofModeWillReturnFailWhenNotSetMsprofMode)

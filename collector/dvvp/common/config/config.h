@@ -130,7 +130,7 @@ const size_t THREAD_QUEUE_SIZE_DEFAULT = 64;
 
 // prof peripheral job config
 const uint32_t DEFAULT_INTERVAL            = 100;
-const uint32_t DEAFULT_MASTER_ID           = 0xFFFFFFFF;
+const uint32_t DEFAULT_MASTER_ID           = 0xFFFFFFFF;
 const uint32_t PERIPHERAL_EVENT_READ       = 0;
 const uint32_t PERIPHERAL_EVENT_WRITE      = 1;
 const uint32_t PERIPHERAL_EVENT_NPU_APP_MEM = 0;
@@ -175,7 +175,7 @@ const int PROF_MGR_TRACE_ID_DEFAULT_LEN  = 27;
 
 // receive data config
 const size_t MAX_LOOP_TIMES = 1400; // the max send package nums of once Dump()
-const int SLEEP_INTEVAL_US = 1000; // the interval of Run()
+const int SLEEP_INTERVAL_US = 1000; // the interval of Run()
 const size_t RING_BUFF_CAPACITY = 16384; // 16384:16K. Note:capacity value must be 2^n
 const size_t GE_RING_BUFF_CAPACITY = 262144; // 262144:256K. Note:capacity value must be 2^n
 const size_t MSPROF_RING_BUFF_CAPACITY = 16384; // 16384:16K. Note:capacity value must be 2^n
@@ -215,8 +215,8 @@ const std::string RANK_TABLE_FILE_ENV = "RANK_TABLE_FILE";
 const std::string RANK_ID_ENV = "RANK_ID";
 const std::string RANK_ENV = "RANK";
 const std::string PROFILING_MODE_ENV = "PROFILING_MODE";
-const std::string DAYNAMIC_PROFILING_VALUE = "dynamic";
-const std::string DELAY_DURARION_PROFILING_VALUE = "delay_or_duration";
+const std::string DYNAMIC_PROFILING_VALUE = "dynamic";
+const std::string DELAY_DURATION_PROFILING_VALUE = "delay_or_duration";
 
 // llc  profiling events type
 const std::string LLC_PROFILING_CAPACITY = "capacity";

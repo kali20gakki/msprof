@@ -4,7 +4,7 @@
 ****************************************************************************** */
 /* ******************************************************************************
  * File Name          : device_hccl_persistence.h
- * Description        : device 侧 hccl数据落盘，op，task，stastics
+ * Description        : device 侧 hccl数据落盘，op，task，statistic
  * Author             : msprof team
  * Creation Date      : 2024/6/3
  * *****************************************************************************

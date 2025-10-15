@@ -374,7 +374,7 @@ class ParsingRuntimeData(MsMultiProcess):
             if legacy_bytes is None:
                 legacy_bytes = bytes()
             binary_file_data = legacy_bytes + file_reader.file_reader.read(os.path.getsize(file_name))
-            # this offset record offset to func, caculate by bufsize
+            # this offset record offset to func, calculate by bufsize
             binary_data_size = len(binary_file_data)
             offset = 0
             while offset < binary_data_size:

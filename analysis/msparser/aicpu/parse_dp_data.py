@@ -69,8 +69,8 @@ class ParseDpData:
         action = dp_data[dp_data_length + 4].partition(b'\x00')[0].decode('utf-8', 'ignore')
         source = dp_data[dp_data_length + 5].partition(b'\x00')[0].decode('utf-8', 'ignore')
         size = dp_data[dp_data_length + 7]
-        dp_data_msaasge = (float(timestamp), action, source, size)
-        return dp_data_msaasge
+        dp_data_message = (float(timestamp), action, source, size)
+        return dp_data_message
 
     @classmethod
     def get_files(cls: any, path: str, tag: any, device_id: any) -> list:

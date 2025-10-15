@@ -140,7 +140,7 @@ struct MsprofStaticOpMem {
     uint64_t lifeEnd;    // serial number of op memory used
     uint64_t totalAllocateMemory; // static graph total allocate memory
     uint64_t dynOpName;  // 0: invalid， other： dynamic op name of root
-    uint32_t graphId;    // multipe model
+    uint32_t graphId;    // multiple model
 };
 
 /**
@@ -270,7 +270,7 @@ const uint32_t MSPROF_REPORT_MODEL_AICPU_BASE_TYPE      = 0x020000U;  /* type in
 /* Msprof report type of node(10000) level, offset: 0x000000 */
 const uint32_t MSPROF_REPORT_NODE_BASIC_INFO_TYPE       = 0;  /* type info: node_basic_info */
 const uint32_t MSPROF_REPORT_NODE_TENSOR_INFO_TYPE      = 1;  /* type info: tensor_info */
-const uint32_t MSPROF_REPORT_NODE_FUSION_OP_INFO_TYPE   = 2;  /* type info: funsion_op_info */
+const uint32_t MSPROF_REPORT_NODE_FUSION_OP_INFO_TYPE   = 2;  /* type info: fusion_op_info */
 const uint32_t MSPROF_REPORT_NODE_CONTEXT_ID_INFO_TYPE  = 4;  /* type info: context_id_info */
 const uint32_t MSPROF_REPORT_NODE_LAUNCH_TYPE           = 5;  /* type info: launch */
 const uint32_t MSPROF_REPORT_NODE_TASK_MEMORY_TYPE      = 6;  /* type info: task_memory_info */
@@ -433,7 +433,7 @@ struct MsprofCompactInfo {  // for MsprofReportCompactInfo buffer data
     } data;
 };
 
-const uint16_t MSPROF_ADDTIONAL_INFO_DATA_LENGTH = 232;
+const uint16_t MSPROF_ADDITIONAL_INFO_DATA_LENGTH = 232;
 struct MsprofAdditionalInfo {  // for MsprofReportAdditionalInfo buffer data
     uint16_t magicNumber = MSPROF_DATA_HEAD_MAGIC_NUM;
     uint16_t level;
@@ -442,7 +442,7 @@ struct MsprofAdditionalInfo {  // for MsprofReportAdditionalInfo buffer data
     uint32_t dataLen;
     uint64_t timeStamp;
     union {
-        uint8_t data[MSPROF_ADDTIONAL_INFO_DATA_LENGTH];
+        uint8_t data[MSPROF_ADDITIONAL_INFO_DATA_LENGTH];
         MsprofAicpuNodeAdditionalData aicpuNode;
         MsprofAicpuModelAdditionalData aicpuModel;
         MsprofAicpuDpAdditionalData aicpuDp;

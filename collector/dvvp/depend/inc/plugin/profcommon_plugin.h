@@ -16,7 +16,7 @@ namespace Collector {
 namespace Dvvp {
 namespace Plugin {
 typedef int(*MstxInitInjectionFunc)(MstxGetModuleFuncTableFunc);
-using ProfRegisteMstxFunc = std::function<void(MstxInitInjectionFunc, ProfModule)>;
+using ProfRegisterMstxFunc = std::function<void(MstxInitInjectionFunc, ProfModule)>;
 using EnableMstxFunc = std::function<void(ProfModule)>;
 
 class ProfCommonPlugin : public analysis::dvvp::common::singleton::Singleton<ProfCommonPlugin> {
@@ -25,7 +25,7 @@ public:
 
     bool IsFuncExist(const std::string &funcName) const;
 
-    void MsprofProfRegisteMstxFunc(MstxInitInjectionFunc injectFunc, ProfModule module);
+    void MsprofProfRegisterMstxFunc(MstxInitInjectionFunc injectFunc, ProfModule module);
 
     void MsprofEnableMstxFunc(ProfModule module);
 
@@ -33,7 +33,7 @@ private:
     std::string soName_;
     static SHARED_PTR_ALIA<PluginHandle> pluginHandle_;
     PTHREAD_ONCE_T loadFlag_;
-    ProfRegisteMstxFunc profRegisteMstxFunc_ = nullptr;
+    ProfRegisterMstxFunc profRegisterMstxFunc_ = nullptr;
     EnableMstxFunc enableMstxFunc_ = nullptr;
 
 private:
@@ -43,7 +43,7 @@ private:
     void GetAllFunction();
 };
 
-} // namspace Plugin
-} // namspace Dvvp
-} // namspace Collector
+} // namespace Plugin
+} // namespace Dvvp
+} // namespace Collector
 #endif // PROF_COMMON_PLUGIN_H

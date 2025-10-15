@@ -47,7 +47,7 @@ TEST_F(ChannelUtest, ShouldRetSuccessWhenExecChannelReaderCorrectly)
     EXPECT_EQ(MSPTI_SUCCESS, reader.Uinit());
 }
 
-TEST_F(ChannelUtest, ExecuteShouleBreakWhenGetInvalidDataLenFromDriver)
+TEST_F(ChannelUtest, ExecuteShouldBreakWhenGetInvalidDataLenFromDriver)
 {
     constexpr unsigned int maxChannelId = 160;
     uint32_t deviceId = 0;

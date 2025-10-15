@@ -140,7 +140,7 @@ bool EventGrouper::isKernelApiEvent(const std::shared_ptr<MsprofApi> &trace)
     if (trace->level == MSPROF_REPORT_ACL_LEVEL || trace->level == MSPROF_REPORT_MODEL_LEVEL ||
         trace->level == MSPROF_REPORT_NODE_LEVEL || trace->level == MSPROF_REPORT_HCCL_NODE_LEVEL) {
         if (trace->beginTime == trace->endTime) {
-            ERROR("Invaild api event, threadId = %, level = %, begin = %, end = %",
+            ERROR("Invalid api event, threadId = %, level = %, begin = %, end = %",
                   trace->threadId, trace->level, trace->beginTime, trace->endTime);
             return false;
         }

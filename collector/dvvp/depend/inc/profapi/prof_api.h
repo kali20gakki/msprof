@@ -116,7 +116,7 @@ MSVP_PROF_API void *profAclCreateStamp(void);
 
 /**
 * @ingroup AscendCL
-* @brief destory stamp pointer
+* @brief destroy stamp pointer
 *
 *
 * @retval void

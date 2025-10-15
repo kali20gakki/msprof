@@ -30,7 +30,7 @@ bool AnalyzerRt::IsRtCompactData(const std::string &tag) const
 }
 
 /*
- * @berif  : parse runtime task_track data
+ * @brief  : parse runtime task_track data
  * @param  : None
  * @return : None
  */

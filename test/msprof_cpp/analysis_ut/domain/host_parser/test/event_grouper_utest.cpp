@@ -106,7 +106,7 @@ void GenAdditionalInfoEventsBin(const std::string &fakeDataDir, EventType type, 
     const int size = 8;
     const int n = 2;
     uint8_t fakeData[size];
-    std::vector<MsprofAdditionalInfo> tarces;
+    std::vector<MsprofAdditionalInfo> traces;
     for (int i = n; i < num + n; i++) {
         auto tmp = MsprofAdditionalInfo{};
         tmp.magicNumber = MSPROF_DATA_HEAD_MAGIC_NUM;
@@ -117,18 +117,18 @@ void GenAdditionalInfoEventsBin(const std::string &fakeDataDir, EventType type, 
         tmp.timeStamp = static_cast<uint64_t>(n * i + 1);
         memcpy(tmp.data, fakeData, size);
 
-        tarces.emplace_back(tmp);
+        traces.emplace_back(tmp);
     }
 
     auto fakeGen = std::make_shared<FakeTraceGenerator>(fakeDataDir);
-    fakeGen->WriteBin<MsprofAdditionalInfo>(tarces, type, true, 0);
+    fakeGen->WriteBin<MsprofAdditionalInfo>(traces, type, true, 0);
 }
 
 void GenCompactInfoEventsBin(const std::string &fakeDataDir, EventType type, uint16_t level, const int num)
 {
     const int size = 8;
     const int n = 2;
-    std::vector<MsprofCompactInfo> tarces;
+    std::vector<MsprofCompactInfo> traces;
     uint8_t fakeData[size];
 
     for (int i = n; i < num + n; i++) {
@@ -147,11 +147,11 @@ void GenCompactInfoEventsBin(const std::string &fakeDataDir, EventType type, uin
         } else {
             memcpy(tmp.data.info, fakeData, size);
         }
-        tarces.emplace_back(tmp);
+        traces.emplace_back(tmp);
     }
 
     auto fakeGen = std::make_shared<FakeTraceGenerator>(fakeDataDir);
-    fakeGen->WriteBin<MsprofCompactInfo>(tarces, type, true, 0);
+    fakeGen->WriteBin<MsprofCompactInfo>(traces, type, true, 0);
 }
 
 uint64_t g_getCannEventsNum(std::set<uint32_t> &tids, CANNWarehouses &cwhs, const std::string &eventName)

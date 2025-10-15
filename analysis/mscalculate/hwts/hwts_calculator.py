@@ -36,7 +36,7 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
     """
     class used to calculate hwts offset and parse log by iter
     """
-    # Tags for differnt HWTS log type.
+    # Tags for different HWTS log type.
     HWTS_TASK_START = 0
     HWTS_TASK_END = 1
     HWTS_TASK_TYPE = 2

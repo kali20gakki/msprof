@@ -67,7 +67,7 @@ def test_monitor():
     y = torch.randn(width, width, dtype=torch.float16).npu()
 
     stream = torch_npu.npu.current_stream()
-    range_id = torch_npu.npu.mstx.range_start("mstx_matmal", stream)
+    range_id = torch_npu.npu.mstx.range_start("mstx_matmul", stream)
 
     result = x + y
     result = torch.matmul(x, y)

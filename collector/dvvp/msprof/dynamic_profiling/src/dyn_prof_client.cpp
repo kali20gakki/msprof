@@ -436,7 +436,7 @@ bool DynProfMngCli::IsEnableMode()
 std::string DynProfMngCli::ConstructEnv()
 {
     if (enabled_) {
-        return PROFILING_MODE_ENV + "=" + DAYNAMIC_PROFILING_VALUE;
+        return PROFILING_MODE_ENV + "=" + DYNAMIC_PROFILING_VALUE;
     } else {
         return "";
     }

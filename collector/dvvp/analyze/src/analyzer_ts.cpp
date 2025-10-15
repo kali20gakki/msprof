@@ -157,7 +157,7 @@ void AnalyzerTs::ParseTsKeypointData(CONST_CHAR_PTR data, uint32_t len)
     auto iter = keypointOpInfo_.find(key);
     if (tsData->tagId == TS_KEYPOINT_START_TASK_STATE) {
         if (iter != keypointOpInfo_.end()) {
-            MSPROF_LOGE("Reapted start key point. modelId %llu, indexId %llu, taskId %u, streamId %u",
+            MSPROF_LOGE("Repeated start key point. modelId %llu, indexId %llu, taskId %u, streamId %u",
                 tsData->modelId, tsData->indexId, tsData->taskId, tsData->streamId);
             return;
         }

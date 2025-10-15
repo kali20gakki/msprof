@@ -39,12 +39,12 @@ protected:
 TEST_F(FlipTaskDBDumperUtest, TestFlipTaskDBDumperWithCompletedApiEventShouldInsertDataCorrectly)
 {
     FlipTaskDBDumper FlipTaskDBDumper(".");
-    auto fliptask1 = std::make_shared<FlipTask>();
-    fliptask1->flipNum = 1;
-    auto fliptask2 = std::make_shared<FlipTask>();
-    fliptask2->streamId = 1;
+    auto flipTask1 = std::make_shared<FlipTask>();
+    flipTask1->flipNum = 1;
+    auto flipTask2 = std::make_shared<FlipTask>();
+    flipTask2->streamId = 1;
 
-    FlipTasks flipTasks {fliptask1, fliptask2};
+    FlipTasks flipTasks {flipTask1, flipTask2};
 
     auto res = FlipTaskDBDumper.DumpData(flipTasks);
     EXPECT_TRUE(res);
@@ -63,12 +63,12 @@ TEST_F(FlipTaskDBDumperUtest, TestFlipTaskDBDumperShouldReturnFalseWhenDBNotCrea
 {
     MOCKER_CPP(&DBRunner::CreateTable).stubs().will(returnValue(false));
     FlipTaskDBDumper FlipTaskDBDumper(".");
-    auto fliptask1 = std::make_shared<FlipTask>();
-    fliptask1->flipNum = 1;
-    auto fliptask2 = std::make_shared<FlipTask>();
-    fliptask2->streamId = 1;
+    auto flipTask1 = std::make_shared<FlipTask>();
+    flipTask1->flipNum = 1;
+    auto flipTask2 = std::make_shared<FlipTask>();
+    flipTask2->streamId = 1;
 
-    FlipTasks flipTasks {fliptask1, fliptask2};
+    FlipTasks flipTasks {flipTask1, flipTask2};
     auto res = FlipTaskDBDumper.DumpData(flipTasks);
     ASSERT_FALSE(res);
 }
@@ -77,12 +77,12 @@ TEST_F(FlipTaskDBDumperUtest, TestFlipTaskDBDumperShouldReturnFalseWhenCannotIns
 {
     MOCKER_CPP(&DBRunner::CreateTable).stubs().will(returnValue(true));
     FlipTaskDBDumper FlipTaskDBDumper(".");
-    auto fliptask1 = std::make_shared<FlipTask>();
-    fliptask1->flipNum = 1;
-    auto fliptask2 = std::make_shared<FlipTask>();
-    fliptask2->streamId = 1;
+    auto flipTask1 = std::make_shared<FlipTask>();
+    flipTask1->flipNum = 1;
+    auto flipTask2 = std::make_shared<FlipTask>();
+    flipTask2->streamId = 1;
 
-    FlipTasks flipTasks {fliptask1, fliptask2};
+    FlipTasks flipTasks {flipTask1, flipTask2};
     auto res = FlipTaskDBDumper.DumpData(flipTasks);
     ASSERT_FALSE(res);
 }

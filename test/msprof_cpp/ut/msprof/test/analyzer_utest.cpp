@@ -58,7 +58,7 @@ TEST_F(AnalyzerUtest, PrintHostStats)
     analyzer->PrintHostStats();
 }
 
-TEST_F(AnalyzerUtest, InitFailedWhenInitFrenqueryFailed)
+TEST_F(AnalyzerUtest, InitFailedWhenInitFrequencyFailed)
 {
     GlobalMockObject::verify();
     std::shared_ptr<Analyzer> analyzer;

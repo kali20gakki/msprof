@@ -77,13 +77,13 @@ int JobDeviceSoc::StartProf(SHARED_PTR_ALIA<analysis::dvvp::message::ProfilePara
         MSPROF_LOGI("JobDeviceSoc StartProf checking params");
         if (isStarted_ || params == nullptr || !(ParamValidation::instance()->CheckProfilingParams(params))) {
             MSPROF_LOGE("[JobDeviceSoc::StartProf]Failed to check params");
-            status_.info = "Start flag is true or parmas is invalid";
+            status_.info = "Start flag is true or params is invalid";
             break;
         }
         int ret = StartProfHandle(params);
         if (ret != PROFILING_SUCCESS) {
-            MSPROF_LOGE("[JobDeviceSoc::StartProf]Failed to StartProfParmasAdapt, devIndexId: %d", devIndexId_);
-            status_.info = "Start profiling, parmas handle failed";
+            MSPROF_LOGE("[JobDeviceSoc::StartProf]Failed to StartProfParamsAdapt, devIndexId: %d", devIndexId_);
+            status_.info = "Start profiling, params handle failed";
             break;
         }
         if (ProfChannelManager::instance()->Init() != PROFILING_SUCCESS) {
@@ -332,7 +332,7 @@ int JobDeviceSoc::StopProf(void)
 
 int JobDeviceSoc::RegisterCollectionJobs() const
 {
-    MSPROF_LOGI("Start to register collction job:%s", collectionjobComnCfg_->params->job_id.c_str());
+    MSPROF_LOGI("Start to register collection job:%s", collectionjobComnCfg_->params->job_id.c_str());
     int registerCnt = 0;
     std::vector<int> registered;
     for (int cnt = 0; cnt < NR_MAX_COLLECTION_JOB; cnt++) {
@@ -359,11 +359,11 @@ void JobDeviceSoc::UnRegisterCollectionJobs()
 {
     do {
         for (int cnt = 0; cnt < NR_MAX_COLLECTION_JOB; cnt++) {
-            int retn = CollectionRegisterMgr::instance()->CollectionJobUnregisterAndStop(
+            int ret = CollectionRegisterMgr::instance()->CollectionJobUnregisterAndStop(
                 collectionjobComnCfg_->devId, CollectionJobV_[cnt].jobTag);
             CollectionJobV_[cnt].jobCfg->jobParams.events.reset();
             CollectionJobV_[cnt].jobCfg->jobParams.cores.reset();
-            if (retn != PROFILING_SUCCESS) {
+            if (ret != PROFILING_SUCCESS) {
                 MSPROF_LOGD("Device %d Collection Job %d Unregister", collectionjobComnCfg_->devIdOnHost,
                             CollectionJobV_[cnt].jobTag);
             }

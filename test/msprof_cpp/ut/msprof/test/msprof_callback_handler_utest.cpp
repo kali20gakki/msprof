@@ -115,7 +115,7 @@ TEST_F(MsprofCallbackHandlerUtest, ReportCompactDataTest)
     handler.StopReporter();
 }
  
-TEST_F(MsprofCallbackHandlerUtest, ReportAdditonalDataTest)
+TEST_F(MsprofCallbackHandlerUtest, ReportAdditionalDataTest)
 {
     GlobalMockObject::verify();
     MsprofCallbackHandler handler("unaging.additional");

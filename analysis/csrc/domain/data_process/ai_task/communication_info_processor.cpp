@@ -91,14 +91,14 @@ bool CommunicationInfoProcessor::Process(DataInventory& dataInventory)
 OriTaskDataFormat CommunicationInfoProcessor::LoadTaskData(const DBInfo& taskSingleDevice)
 {
     OriTaskDataFormat oriTaskData;
-    std::string sourceConditon = "";
+    std::string sourceCondition = "";
     if (taskSingleDevice.tableName == "KfcTask") {
-        sourceConditon = " WHERE source = " + std::to_string(static_cast<int>(DeviceHcclOpSource::HCCL));
+        sourceCondition = " WHERE source = " + std::to_string(static_cast<int>(DeviceHcclOpSource::HCCL));
     }
     std::string sql{"SELECT model_id, op_name, hccl_name, group_name, plane_id, stream_id, task_id, local_rank, "
                     "remote_rank, transport_type, size, data_type, link_type, context_id, notify_id, batch_id, "
                     "rdma_type, timestamp, duration, connection_id, duration_estimated, bandwidth, is_master "
-                    "FROM " + taskSingleDevice.tableName + sourceConditon};
+                    "FROM " + taskSingleDevice.tableName + sourceCondition};
     if (!taskSingleDevice.dbRunner->QueryData(sql, oriTaskData)) {
         ERROR("Failed to obtain data from the % table.", taskSingleDevice.tableName);
     }

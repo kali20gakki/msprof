@@ -24,7 +24,7 @@ void Fsm::Init()
 void Fsm::OnEvent(EventLabel event, const HalTrackData& step, std::vector<StepTraceTasks>& baseSteps)
 {
     if (state_ == nullptr) {
-        ERROR("Unknow state: %", state_);
+        ERROR("Unknown state: %", state_);
         return;
     }
     switch (event) {

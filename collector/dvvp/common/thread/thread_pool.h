@@ -1,7 +1,6 @@
 /*
  * Copyright (c) Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
  * Description: handle ide profiling request
- * Author: hufengwei
  * Create: 2018-06-13
  */
 #ifndef ANALYSIS_DVVP_COMMON_THREAD_THREAD_POOL_H
@@ -53,15 +52,15 @@ public:
     int Dispatch(SHARED_PTR_ALIA<Task> task);
 
 private:
-    class InnnerThread : public Thread {
+    class InnerThread : public Thread {
         friend class ThreadPool;
 
     public:
-        explicit InnnerThread(size_t queueSize)
+        explicit InnerThread(size_t queueSize)
             : started_(false), queue_(nullptr), queueSize_(queueSize)
         {
         }
-        ~InnnerThread() override
+        ~InnerThread() override
         {
             (void)Stop();
         }
@@ -130,7 +129,7 @@ private:
     std::atomic_uint currIndex_;
     LOAD_BALANCE_METHOD balancerMethod_;
     volatile bool isStarted_;
-    std::vector<SHARED_PTR_ALIA<ThreadPool::InnnerThread> > threads_;
+    std::vector<SHARED_PTR_ALIA<ThreadPool::InnerThread> > threads_;
     std::string threadPoolNamePrefix_;
     size_t threadPoolQueueSize_;
 };
