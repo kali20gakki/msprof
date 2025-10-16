@@ -54,8 +54,6 @@ class PipelineOverlapViewer:
             with OpSummaryModel(sample_config) as _model:
                 compute_data = _model.get_operator_data_separated_by_kfc_stream()
 
-        with AscendTaskViewModel(self._project_path, [DBNameConstant.TABLE_ASCEND_TASK]) as _model:
-            latest_task, earliest_task = _model.get_ascend_task_time_extremes(self.FILTER_TYPE)
         compute_data = SectionCalculator.merge_continuous_intervals(compute_data)
         result.extend(self._format_timeline_data(OverlapType.COMPUTE_TIME, data) for data in compute_data)
 
@@ -74,12 +72,15 @@ class PipelineOverlapViewer:
         if not result:
             logging.warning("Both task data and hccl data are missing, no need to calculate the overlap.")
             return []
+
+        latest_task, earliest_task = None, None
+        if os.path.exists(PathManager.get_db_path(self._project_path, DBNameConstant.DB_ASCEND_TASK)):
+            with AscendTaskViewModel(self._project_path, [DBNameConstant.TABLE_ASCEND_TASK]) as _model:
+                latest_task, earliest_task = _model.get_ascend_task_time_extremes(self.FILTER_TYPE)
         latest_time = latest_task.start_time + latest_task.duration if latest_task else 0
         earliest_time = earliest_task.start_time if earliest_task else float('inf')
-        pure_communication_section, free_time_section = SectionCalculator.compute_pipeline_overlap(communication_data,
-                                                                                                   compute_data,
-                                                                                                   latest_time,
-                                                                                                   earliest_time)
+        pure_communication_section, free_time_section = (
+            SectionCalculator.compute_pipeline_overlap(communication_data, compute_data, latest_time, earliest_time))
         result.extend(
             self._format_timeline_data(OverlapType.COMMUNICATION_NOT_OVERLAPPED, data)
             for data in pure_communication_section
