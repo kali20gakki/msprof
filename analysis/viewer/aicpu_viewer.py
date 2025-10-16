@@ -87,6 +87,7 @@ class ParseAiCpuData:
         ge_summary_dic = {}
         for dto in ge_summary_data:
             ge_summary_dic.setdefault((dto.stream_id, dto.task_id, dto.batch_id), dto.op_name)
+        index = 0
         res = [[] for _ in range(len(ai_cpu_data))]
         for i, dto in enumerate(ai_cpu_data):
             sys_start = InfoConfReader().trans_into_local_time(dto.sys_start, use_us=True)
@@ -99,11 +100,12 @@ class ParseAiCpuData:
             dispatch_time = round(dto.dispatch_time, NumberConstant.ROUND_THREE_DECIMAL)
             total_time = round(dto.total_time, NumberConstant.ROUND_THREE_DECIMAL)
             node_name = ge_summary_dic.get((dto.stream_id, dto.task_id, dto.batch_id), dto.node_name)
-            res[i] = [
+            res[index] = [
                 sys_start, node_name, compute_time, memcpy_time,
                 task_time, dispatch_time, total_time, dto.stream_id, dto.task_id
             ]
-        return res
+            index = index + 1
+        return res[:index]
 
     @staticmethod
     def get_ge_summary_aicpu_data(project_path: str) -> list:
