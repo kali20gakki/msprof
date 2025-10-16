@@ -101,6 +101,7 @@ class TestMonitorCyclesCalculator(unittest.TestCase):
         self.assertEqual(check.get_pid(1, 1), 5)
         self.assertEqual(check.get_pid(26, 1), 7)
         self.assertEqual(check.get_pid(27, 1), 6)
+        self.assertEqual(check.get_pid(-1, 1), 0)
 
     def test_save(self):
         with mock.patch(NAMESPACE + '.logging.warning'):
