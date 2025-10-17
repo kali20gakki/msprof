@@ -6,6 +6,7 @@ import logging
 from collections import namedtuple
 from collections import defaultdict
 
+from common_func.constant import Constant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.db_name_constant import DBNameConstant
@@ -195,7 +196,8 @@ class KfcCalculator(ICalculator, MsMultiProcess):
 
     def get_host_task_info(self: any, kfc_op_data) -> dict:
         with GeInfoViewModel(self._project_path, [DBNameConstant.TABLE_GE_TASK]) as model:
-            ge_data = model.get_ge_info_by_device_id(DBNameConstant.TABLE_GE_TASK, InfoConfReader().get_device_id())
+            ge_data = model.get_ge_info_by_device_id(DBNameConstant.TABLE_GE_TASK, InfoConfReader().get_device_id(),
+                                                     (Constant.TASK_TYPE_HCCL, Constant.TASK_TYPE_HCCL_AI_CPU))
         node_info = {}
         for data in ge_data:
             if data.stream_id not in kfc_op_data:

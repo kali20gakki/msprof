@@ -62,10 +62,11 @@ class GeInfoViewModel(ViewModel):
     def __init__(self, result_dir: str, table_list: list):
         super().__init__(result_dir, DBNameConstant.DB_GE_INFO, table_list)
 
-    def get_ge_info_by_device_id(self: any, table_name: str, device_id: str):
-        ge_sql = "select * from {0} where device_id={1} " \
-                 "and task_type != '{2}' and task_type != '{3}'" \
-            .format(table_name, device_id,
-                    Constant.TASK_TYPE_HCCL, Constant.TASK_TYPE_HCCL_AI_CPU)
+    def get_ge_info_by_device_id(self: any, table_name: str, device_id: str, task_type_filter: tuple = tuple()) -> any:
+        ge_sql = "select * from {0} where device_id={1} ".format(table_name, device_id)
+        condition = ""
+        for t in task_type_filter:
+            condition += " AND task_type != '{0}' ".format(t)
+        ge_sql = ge_sql + condition
         task_info_data = DBManager.fetch_all_data(self.cur, ge_sql)
         return [self.TASK_INFO_TYPE(*data) for data in task_info_data]
