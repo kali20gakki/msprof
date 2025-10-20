@@ -83,6 +83,9 @@ void TaskTimeAssembler::AssembleTaskTime(const std::vector<AscendTaskData> &asce
         TaskTimeKey taskId{static_cast<uint16_t>(ascendTaskDatum.streamId),
                            static_cast<uint16_t>(ascendTaskDatum.batchId),
                            static_cast<uint16_t>(ascendTaskDatum.taskId)};
+        if (ascendTaskDatum.contextId != UINT32_MAX) {
+            continue;
+        }
         auto it = formatedTaskInfo_.find(taskId);
         std::string opName;
         std::string taskType;
