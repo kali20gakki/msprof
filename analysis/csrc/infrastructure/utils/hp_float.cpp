@@ -410,7 +410,7 @@ uint64_t HPFloat::Uint64()
     uint64_t res = 0;
     int32_t start = dynamicLen_ - digit_; // dynamicLen_表示vector总长度，digit_表示最大位数，前者>=后者
     for (int32_t i = dynamicLen_; i >= start; i--) {
-        res = res * POWER_10 + num_[i];
+        res = res * POWER_10 + (i < 0 ? 0 : num_[i]);
     }
     return res;
 }
