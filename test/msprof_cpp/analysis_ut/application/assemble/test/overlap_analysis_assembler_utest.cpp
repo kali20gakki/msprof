@@ -248,6 +248,30 @@ const std::string SCENARIOS5_JSON =
     "{\"name\":\"thread_name\",\"pid\":10330016,\"tid\":3,\"ph\":\"M\",\"args\":{\"name\":\"Free\"}},"
     "{\"name\":\"thread_sort_index\",\"pid\":10330016,\"tid\":3,\"ph\":\"M\",\"args\":{\"sort_index\":3}},"
     "{\"name\":\"Free\",\"pid\":10330016,\"tid\":3,\"ts\":\"0.001\",\"dur\":0.035,\"ph\":\"X\",\"args\":{}},";
+const std::string SCENARIOS6_JSON =
+    "{\"name\":\"process_name\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Overlap Analysis\"}},"
+    "{\"name\":\"process_labels\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU 0\"}},"
+    "{\"name\":\"process_sort_index\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":29}},"
+    "{\"name\":\"thread_name\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Communication\"}},"
+    "{\"name\":\"thread_sort_index\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":0}},"
+    "{\"name\":\"thread_name\",\"pid\":10330016,\"tid\":1,\"ph\":\"M\",\"args\":"
+    "{\"name\":\"Communication(Not Overlapped)\"}},"
+    "{\"name\":\"thread_sort_index\",\"pid\":10330016,\"tid\":1,\"ph\":\"M\",\"args\":{\"sort_index\":1}},"
+    "{\"name\":\"thread_name\",\"pid\":10330016,\"tid\":2,\"ph\":\"M\",\"args\":{\"name\":\"Computing\"}},"
+    "{\"name\":\"thread_sort_index\",\"pid\":10330016,\"tid\":2,\"ph\":\"M\",\"args\":{\"sort_index\":2}},"
+    "{\"name\":\"thread_name\",\"pid\":10330016,\"tid\":3,\"ph\":\"M\",\"args\":{\"name\":\"Free\"}},"
+    "{\"name\":\"thread_sort_index\",\"pid\":10330016,\"tid\":3,\"ph\":\"M\",\"args\":{\"sort_index\":3}},"
+    "{\"name\":\"Computing\",\"pid\":10330016,\"tid\":2,\"ts\":\"0.005\",\"dur\":0.002,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Computing\",\"pid\":10330016,\"tid\":2,\"ts\":\"0.010\",\"dur\":0.002,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Computing\",\"pid\":10330016,\"tid\":2,\"ts\":\"0.014\",\"dur\":0.002,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Computing\",\"pid\":10330016,\"tid\":2,\"ts\":\"0.020\",\"dur\":0.003,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Computing\",\"pid\":10330016,\"tid\":2,\"ts\":\"0.024\",\"dur\":0.001,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Computing\",\"pid\":10330016,\"tid\":2,\"ts\":\"0.030\",\"dur\":0.007,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Free\",\"pid\":10330016,\"tid\":3,\"ts\":\"0.007\",\"dur\":0.003,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Free\",\"pid\":10330016,\"tid\":3,\"ts\":\"0.012\",\"dur\":0.002,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Free\",\"pid\":10330016,\"tid\":3,\"ts\":\"0.016\",\"dur\":0.004,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Free\",\"pid\":10330016,\"tid\":3,\"ts\":\"0.023\",\"dur\":0.001,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Free\",\"pid\":10330016,\"tid\":3,\"ts\":\"0.025\",\"dur\":0.005,\"ph\":\"X\",\"args\":{}},";
 }
 
 class OverlapAnalysisAssemblerUTest : public testing::Test {
@@ -310,6 +334,40 @@ static std::vector<AscendTaskData> GenerateAscendTaskDataS2ByDevice(uint16_t dev
         data.batchId = ids[i].batchId;
         data.timestamp = times[i].first;
         data.duration = times[i].second;
+        res.push_back(data);
+    }
+    return res;
+}
+static std::vector<AscendTaskData> GeneratePureCompAscendTaskDataByDevice(uint16_t deviceId)
+{
+    std::vector<AscendTaskData> res;
+    std::vector<TaskId> ids = {{2, 0, 0, 0}, {2, 0, 1, 0}, {2, 0, 2, 0}, {2, 0, 3, 0}, {2, 0, 4, 0}, {2, 0, 5, 0}};
+    std::vector<std::pair<uint64_t, double>> times{{5, 2.0}, {10, 2.0}, {14, 2.0}, {20, 3.0}, {24, 1.0}, {30, 7.0}};
+    for (uint32_t i = 0; i < ids.size(); i++) {
+        AscendTaskData data;
+        data.deviceId = deviceId;
+        data.streamId = ids[i].streamId;
+        data.taskId = ids[i].taskId;
+        data.contextId = ids[i].contextId;
+        data.batchId = ids[i].batchId;
+        data.timestamp = times[i].first;
+        data.duration = times[i].second;
+        data.hostType = "KERNEL_AICORE";
+        res.push_back(data);
+    }
+    return res;
+}
+static std::vector<TaskInfoData> GeneratePureCompTasksByDevice(uint16_t deviceId)
+{
+    std::vector<TaskInfoData> res;
+    std::vector<TaskId> ids = {{2, 0, 0, 0}, {2, 0, 1, 0}, {2, 0, 2, 0}, {2, 0, 3, 0}, {2, 0, 4, 0}, {2, 0, 5, 0}};
+    for (auto &id : ids) {
+        TaskInfoData data;
+        data.deviceId = deviceId;
+        data.streamId = id.streamId;
+        data.taskId = id.taskId;
+        data.contextId = id.contextId;
+        data.batchId = id.batchId;
         res.push_back(data);
     }
     return res;
@@ -675,6 +733,19 @@ static void CheckScenarios5Data(DataInventory &dataInventory)
     EXPECT_EQ(SCENARIOS5_JSON, res.back());
 }
 
+static void CheckScenarios6Data(DataInventory &dataInventory)
+{
+    MOCKER_CPP(&Context::GetPidFromInfoJson).stubs().will(returnValue(10087)); // pid 10087
+    OverlapAnalysisAssembler assembler;
+    EXPECT_TRUE(assembler.Run(dataInventory, PROF_PATH));
+    auto files = File::GetOriginData(RESULT_PATH, {"msprof"}, {});
+    EXPECT_EQ(1ul, files.size());
+    FileReader reader(files.back());
+    std::vector<std::string> res;
+    EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
+    EXPECT_EQ(SCENARIOS6_JSON, res.back());
+}
+
 TEST_F(OverlapAnalysisAssemblerUTest, AssembleDataShouldContainCompleteDataInScenarios5)
 {
     // 场景5 只有调度类任务(无taskInfo类) 对齐python逻辑 overlap生成free
@@ -697,4 +768,34 @@ TEST_F(OverlapAnalysisAssemblerUTest, AssembleDataShouldContainCompleteDataInSce
     MAKE_SHARED_NO_OPERATION(tasksPtr, std::vector<AscendTaskData>, taskData);
     dataInventory_.Inject(tasksPtr);
     CheckScenarios5Data(dataInventory_);
+}
+
+TEST_F(OverlapAnalysisAssemblerUTest, AssembleDataShouldContainCompleteDataInScenarios6)
+{
+    // 场景5 Ascend只有计算类任务 overlap生成free和compute
+    // 但是会有meta头,不影响呈现
+    // 其中 [A,B]表示三类任务中的某一类，(A,B) 表示非计算非通信的任务, {A, B}表示图模式中一个算子跑多次
+
+    // *Ascend Hardware (device 0)*
+    // S2 (Comp)    (5,7)    (10,12)    (14,16)    (20,23)    (24,25)    (30,37)
+
+    std::shared_ptr<std::vector<AscendTaskData>> tasksPtr;
+    std::shared_ptr<std::vector<TaskInfoData>> compTasksPtr;
+    std::vector<AscendTaskData> taskData;
+    std::vector<TaskInfoData> compTaskData;
+
+    std::vector<uint16_t> devices = {0};
+    for (auto &id : devices) {
+        auto ascendTasks = GeneratePureCompAscendTaskDataByDevice(id);
+        taskData.insert(taskData.end(), ascendTasks.begin(), ascendTasks.end());
+        auto compTasks = GeneratePureCompTasksByDevice(id);
+        compTaskData.insert(compTaskData.end(), compTasks.begin(), compTasks.end());
+    }
+    MAKE_SHARED_NO_OPERATION(tasksPtr, std::vector<AscendTaskData>, taskData);
+    MAKE_SHARED_NO_OPERATION(compTasksPtr, std::vector<TaskInfoData>, compTaskData);
+
+    dataInventory_.Inject(tasksPtr);
+    dataInventory_.Inject(compTasksPtr);
+
+    CheckScenarios6Data(dataInventory_);
 }
