@@ -86,6 +86,15 @@ TEST_F(LogUTest, TestGetTimeShouldReturnCurrentTime)
     ASSERT_EQ(timeFormat.size(), currentTime.size());
 }
 
+TEST_F(LogUTest, TestGetTimeReturnCurrentTimeFailed)
+{
+    MOCKER_CPP(&std::localtime)
+        .stubs().will(returnValue(static_cast<tm*>(nullptr)));
+    std::string currentTime = Log::GetTime();
+    const std::string defaultTime = "9999-99-99 99:99:99";
+    ASSERT_EQ(defaultTime, currentTime);
+}
+
 TEST_F(LogUTest, TestLogMsg)
 {
     GlobalMockObject::verify();

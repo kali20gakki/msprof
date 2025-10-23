@@ -55,9 +55,12 @@ std::string Log::GetTime()
 {
     std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
     std::time_t nowTime = std::chrono::system_clock::to_time_t(now);
-    std::tm timeInfo = *std::localtime(&nowTime);
+    auto tmPtr = std::localtime(&nowTime);
+    if (!tmPtr) {
+        return "9999-99-99 99:99:99"; // When localtime is abnormal, the default value is '9999-99-99 99:99:99'
+    }
     char formatTime[TIME_SIZE];
-    std::strftime(formatTime, sizeof(formatTime), "%Y-%m-%d %H:%M:%S", &timeInfo);
+    std::strftime(formatTime, sizeof(formatTime), "%Y-%m-%d %H:%M:%S", tmPtr);
     return static_cast<std::string>(formatTime);
 }
 
