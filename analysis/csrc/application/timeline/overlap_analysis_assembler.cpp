@@ -451,6 +451,11 @@ void OverlapAnalysisAssembler::AssembleOneDevice(uint16_t deviceId, JsonWriter &
 }
 void OverlapAnalysisAssembler::UpdateTaskTimeExtremes(const std::shared_ptr<std::vector<AscendTaskData>>& ascendTasks)
 {
+    // 初始化每个device开始和结束时间
+    for (const auto& deviceId : deviceIds_) {
+        end_[deviceId] = 0;
+        begin_[deviceId] = UINT64_MAX;
+    }
     for (const AscendTaskData& task : *ascendTasks) {
         // 检查任务类型是否在过滤集合中
         if (FILTER_TYPE.find(task.hostType) != FILTER_TYPE.end()) {
@@ -460,11 +465,11 @@ void OverlapAnalysisAssembler::UpdateTaskTimeExtremes(const std::shared_ptr<std:
         uint64_t taskEndTime = task.timestamp + static_cast<uint64_t>(task.duration);
         uint16_t deviceId = task.deviceId;
         // 更新最晚结束时间
-        if (end_.find(deviceId) == end_.end() || taskEndTime > end_[deviceId]) {
+        if (taskEndTime > end_[deviceId]) {
             end_[deviceId] = taskEndTime;
         }
         // 更新最早开始时间
-        if (begin_.find(deviceId) == begin_.end() || taskStartTime < begin_[deviceId]) {
+        if (taskStartTime < begin_[deviceId]) {
             begin_[deviceId] = taskStartTime;
         }
     }
