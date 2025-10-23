@@ -150,9 +150,12 @@ int DynProfThread::StartProfTask()
 
     {
         std::lock_guard<std::mutex> lk(deviceMtx_);
+        std::vector<uint32_t> executeDevIdStrs;
         for (auto &devInfo : deviceInfos_) {
+            executeDevIdStrs.emplace_back(devInfo.first);
             if (HandleDevProfTask(devInfo.second) != PROFILING_SUCCESS) {
                 MSPROF_LOGE("Dynamic profiling start device: %u failed", devInfo.second);
+                ReleaseProfTask(executeDevIdStrs);
                 return PROFILING_FAILED;
             }
         }
@@ -160,6 +163,16 @@ int DynProfThread::StartProfTask()
     profHasStarted_.store(true);
     MSPROF_LOGI("Dynamic profiling start");
     return PROFILING_SUCCESS;
+}
+
+void DynProfThread::ReleaseProfTask(const std::vector<uint32_t>& devIds)
+{
+    for (const auto& devId : devIds) {
+        ge::EraseDevRecord(devId);
+        if (Msprofiler::Api::ProfAclMgr::instance()->MsprofResetDeviceHandle(devId) != MSPROF_ERROR_NONE) {
+            MSPROF_LOGE("Dynamic profiling reset device id[%u] failed", devId);
+        }
+    }
 }
  
 int DynProfThread::HandleDevProfTask(const ProfSetDevPara &devInfo)
