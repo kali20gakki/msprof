@@ -34,7 +34,7 @@ private:
     void DynProfSrvProcQuit();
     int DynProfServerRsqMsg(DynProfMsgType msgType, DynProfMsgProcRes rsqCode, const std::string &msgData);
     void Run(const struct error_message::Context &errorContext) override;
-
+    int DynProfSrvProcStartDeviceTask(std::string &detailInfo);
 private:
     int srvSockFd_;
     int cliSockFd_;

@@ -36,6 +36,7 @@ private:
     int StartProfTask();
     int HandleDevProfTask(const ProfSetDevPara &devInfo);
     int StopProfTask();
+    void ReleaseProfTask(const std::vector<uint32_t>& devIds);
 
 private:
     bool started_;
