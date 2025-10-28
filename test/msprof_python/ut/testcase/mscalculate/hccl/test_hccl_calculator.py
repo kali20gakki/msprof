@@ -135,7 +135,8 @@ class TestHcclCalculator(unittest.TestCase):
             HcclOps(timestamp=5, duration=2),
             HcclOps(timestamp=6, duration=2),
             HcclOps(timestamp=7, duration=2),
-            HcclOps(timestamp=8, duration=2)
+            HcclOps(timestamp=8, duration=2),
+            HcclOps(timestamp=9, duration=2, thread_id=111)
         ]
 
         hccl_tasks = [

@@ -360,7 +360,7 @@ class HcclCalculator(ICalculator, MsMultiProcess):
         # 取数的sql语句已经order by过了
         for thread_id, ops_queue in op_thread_map.items():
             if thread_id not in task_thread_map.keys():
-                logging.error("Op data can't match any task, thread id is %.", thread_id)
+                logging.error("Op data can't match any task, thread id is %d.", thread_id)
                 continue
             task_queue = task_thread_map[thread_id]
 
