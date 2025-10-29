@@ -48,6 +48,10 @@ int LltMain(int argc, const char **argv, const char **envp)
 int main(int argc, const char **argv, const char **envp)
 #endif
 {
+    if (getuid() == 0) {
+        CmdLog::instance()->CmdWarningLog("msprof is running as root. For security reasons,"
+                                          " use a regular user account instead.");
+    }
     std::vector<std::string> envpList;
     if (EnvManager::instance()->SetEnvList(envp, envpList)) {
         CmdLog::instance()->CmdErrorLog("Truncate env params due to exceeding limit!");
