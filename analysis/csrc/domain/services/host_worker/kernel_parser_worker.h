@@ -1,0 +1,46 @@
+/* -------------------------------------------------------------------------
+ * Copyright (c) 2025 Huawei Technologies Co., Ltd.
+ * This file is part of the MindStudio project.
+ *
+ * MindStudio is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *
+ *    http://license.coscl.org.cn/MulanPSL2
+ *
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ * -------------------------------------------------------------------------*/
+
+#ifndef ANALYSIS_WORKER_KERNEL_PARSER_WORKER_H
+#define ANALYSIS_WORKER_KERNEL_PARSER_WORKER_H
+#include <string>
+#include <atomic>
+#include <vector>
+
+namespace Analysis {
+namespace Domain {
+// 解析流程控制类，传入host data所在路径，启动采集流程并返回结果
+class KernelParserWorker {
+public:
+    // 初始化传入host路径
+    explicit KernelParserWorker(std::string  hostFilePath);
+    // 启动流程
+    int Run();
+
+private:
+    // hashData解析落盘
+    void DumpHashData();
+    // typeInfo解析落盘
+    void DumpTypeInfoData();
+    // 启动CANN侧数据解析及分析流程
+    void LaunchTraceParser();
+    std::string hostFilePath_;
+    // 用于子线程上报执行结果
+    std::atomic<bool> result_;
+};
+} // Domain
+} // Analysis
+#endif // ANALYSIS_WORKER_KERNEL_PARSER_WORKER_H

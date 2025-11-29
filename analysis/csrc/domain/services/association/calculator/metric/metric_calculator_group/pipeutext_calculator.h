@@ -1,0 +1,66 @@
+/* -------------------------------------------------------------------------
+ * Copyright (c) 2025 Huawei Technologies Co., Ltd.
+ * This file is part of the MindStudio project.
+ *
+ * MindStudio is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *
+ *    http://license.coscl.org.cn/MulanPSL2
+ *
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ * -------------------------------------------------------------------------*/
+
+#ifndef ANALYSIS_DOMAIN_SERVICES_ASSOCIATION_PIPEUTEXT_ITEM_H
+#define ANALYSIS_DOMAIN_SERVICES_ASSOCIATION_PIPEUTEXT_ITEM_H
+
+#include "analysis/csrc/domain/services/association/calculator/metric/metric_calculator.h"
+
+namespace Analysis {
+namespace Domain {
+using namespace Analysis::Infra;
+class PipeUtExtCalculator : public MetricCalculator {
+public:
+    std::vector<std::string> GetPmuHeader() override
+    {
+        auto res = GetPmuHeaderBySubType(pipeUtExTable);
+        return res;
+    }
+
+    bool CheckMetricEventValid(std::vector<uint32_t> &event) override
+    {
+        return CheckMetricEventBySubType(pipeUtExTable, event);
+    }
+private:
+    std::vector<double> SetAllParamsAndCalculator(CalculationElements& allParams, const DeviceContext& context,
+                                                  HalPmuData& pmuData) override
+    {
+        std::vector<double> res;
+        MAKE_SHARED_RETURN_VALUE(allParams.floatBit, DoublePtrType, res, floatBitVec);
+        res = CalculatePmu(pmuData, pipeUtExTable, allParams);
+        return res;
+    }
+private:
+    const std::map<PipeUtilizationExctIndex, Calculator> pipeUtExTable{
+        {PipeUtilizationExctIndex::MacRatioExtra, {{0x416, 0x417}, Calculator::CalculatorMetricByAdditions}},
+        {PipeUtilizationExctIndex::ScalarRatio, {{0x9}, Calculator::CalculatorMetricByAdditions}},
+        {PipeUtilizationExctIndex::Mte1RatioExtra, {{0x302}, Calculator::CalculatorMetricByAdditions}},
+        {PipeUtilizationExctIndex::Mte2Ratio, {{0xc}, Calculator::CalculatorMetricByAdditions}},
+        {PipeUtilizationExctIndex::FixPipeRatio, {{0x303}, Calculator::CalculatorMetricByAdditions}},
+        {PipeUtilizationExctIndex::ICacheMissRate, {{0x55, 0x54}, Calculator::CalculatorMetricByDivision}},
+        {PipeUtilizationExctIndex::MacTime, {{0x416, 0x417}, Calculator::CalculatorTimeByMultiplication}},
+        {PipeUtilizationExctIndex::ScalarTime, {{0x9}, Calculator::CalculatorTimeByMultiplication}},
+        {PipeUtilizationExctIndex::Mte1Time, {{0x302}, Calculator::CalculatorTimeByMultiplication}},
+        {PipeUtilizationExctIndex::Mte2Time, {{0xc}, Calculator::CalculatorTimeByMultiplication}},
+        {PipeUtilizationExctIndex::FixPipeTime, {{0x303}, Calculator::CalculatorTimeByMultiplication}}
+    };
+
+    const std::vector<double> floatBitVec{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+};
+}
+}
+
+#endif // ANALYSIS_DOMAIN_SERVICES_ASSOCIATION_PIPEUTEXT_ITEM_H
