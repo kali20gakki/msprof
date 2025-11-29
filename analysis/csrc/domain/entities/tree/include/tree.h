@@ -1,0 +1,62 @@
+/* -------------------------------------------------------------------------
+ * Copyright (c) 2025 Huawei Technologies Co., Ltd.
+ * This file is part of the MindStudio project.
+ *
+ * MindStudio is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *
+ *    http://license.coscl.org.cn/MulanPSL2
+ *
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ * -------------------------------------------------------------------------*/
+
+#ifndef ANALYSIS_ENTITIES_TREE_H
+#define ANALYSIS_ENTITIES_TREE_H
+
+#include <memory>
+#include <map>
+#include <utility>
+#include "analysis/csrc/infrastructure/dfx/log.h"
+#include "analysis/csrc/domain/entities/tree/include/event_queue.h"
+
+namespace Analysis {
+namespace Domain {
+
+// Event树节点数据结构，用于重建调用树
+struct TreeNode {
+    explicit TreeNode(std::shared_ptr<Event> eventPtr)
+    {
+        if (!eventPtr) {
+            ERROR("TreeNode construct point is nullptr");
+        } else {
+            event = std::move(eventPtr);
+        }
+    }
+
+    std::shared_ptr<TreeNode> parent = nullptr;
+    std::vector<std::shared_ptr<TreeNode>> children;
+    std::shared_ptr<Event> event = nullptr;        // 表示该节点的对应的api
+    std::vector<std::shared_ptr<Event>> records;   // 表示节点时间范围内的补充记录信息
+};
+
+// Event树 一个threadId一棵树
+class Tree {
+public:
+    explicit Tree(const std::shared_ptr<TreeNode> &rootNode) : root_(rootNode)
+    {}
+    // 获取根节点
+    std::shared_ptr<TreeNode> GetRoot() const;
+    // 层序遍历打印Tree结构便于问题定位
+    std::vector<std::string> Show();
+private:
+    std::string GetTreeLevelStr(const std::shared_ptr<TreeNode> &node) const;
+    std::shared_ptr<TreeNode> root_ = nullptr;
+};
+
+} // namespace Entities
+} // namespace Analysis
+#endif // ANALYSIS_ENTITIES_TREE_H
