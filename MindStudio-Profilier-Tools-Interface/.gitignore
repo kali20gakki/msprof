@@ -1,0 +1,28 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Visual Studio Code files
+.vscode
+.vs
+
+# PyCharm files
+.idea
+
+# third-party
+opensource/
+platform/
+
+# build
+build/
+prefix/
+
+# mspti build cache
+mspti/mspti.egg-info/
+mspti/lib64/
+
+# test cache file
+test/build_llt/
+test/output/
+tset/opensource

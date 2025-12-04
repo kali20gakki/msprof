@@ -1,0 +1,5 @@
+add_subdirectory(activity_manager_test)
+add_subdirectory(channel_test)
+add_subdirectory(dev_prof_task_test)
+add_subdirectory(parser_test)
+add_subdirectory(reporter_test)
