@@ -1,7 +1,22 @@
-# msPTI工具用户指南
+# msPTI工具
 
 ## 简介
 提供msPTI各种接口的使用用例，各个目录对应不同用例，供用户理解使用msPTI接口。
+
+## AI处理器支持情况
+
+**AI处理器支持情况**
+
+>![](./figures/icon-note.gif) **说明：** 
+>AI处理器与昇腾产品的对应关系，请参见《[昇腾产品形态说明](https://www.hiascend.com/document/detail/zh/AscendFAQ/ProduTech/productform/hardwaredesc_0001.html)》。
+
+| AI处理器类型 | 是否支持 |
+| ------------ | :------: |
+| Ascend 910C  |    √     |
+| Ascend 910B  |    √     |
+| Ascend 310B  |    √     |
+| Ascend 310P  |    x     |
+| Ascend 910   |    x     |
 
 ## 使用前准备
 
