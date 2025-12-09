@@ -19,6 +19,8 @@ function change_file_to_unix_format()
     find ${TOP_DIR}/csrc -type f -exec sed -i 's/\r$//' {} +
 }
 
+bash ${CUR_DIR}/download_thirdparty.sh
+
 mkdir -p ${TOP_DIR}/test/build_llt
 cd ${TOP_DIR}/test/build_llt
 change_file_to_unix_format  # change file from dos to unix format, so that gcov exclude comment can be added

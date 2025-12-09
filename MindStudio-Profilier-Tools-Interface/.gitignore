@@ -11,7 +11,7 @@ __pycache__/
 .idea
 
 # third-party
-opensource/
+/opensource/
 platform/
 
 # build
@@ -25,4 +25,4 @@ mspti/lib64/
 # test cache file
 test/build_llt/
 test/output/
-tset/opensource
+test/opensource

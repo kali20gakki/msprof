@@ -14,7 +14,7 @@ analysis/lib64
 .idea
 
 # third-party
-opensource/
+/opensource/
 platform/
 
 # build
