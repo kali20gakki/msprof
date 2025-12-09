@@ -85,8 +85,8 @@ function set_libmspti_right() {
 }
 
 function chmod_libmspti() {
-    if [ -f "${install_path}/${LIBMSPTI_PATH}/${LIBMSPTI}" ]; then
-        chmod ${libmspti_right} "${install_path}/${LIBMSPTI_PATH}/${LIBMSPTI}"
+    if [ -f "${install_path}/${LIBMSPTI_PATH}/lib64/${LIBMSPTI}" ]; then
+        chmod ${libmspti_right} "${install_path}/${LIBMSPTI_PATH}/lib64/${LIBMSPTI}"
     fi
 }
 
