@@ -1,0 +1,1 @@
+python3   pytorch_hccl_allreduce_deterministic_aiv_test.py    --used_deterministic true --data_list 1024 --dtype int32 --batch_num 1 --mul_num 10 --used_profiling true --optype sum --server_index 0 --server_num 1 --dev_num 8 --master_ip 10.174.216.241
