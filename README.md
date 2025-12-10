@@ -45,7 +45,7 @@ MindStudio Profiler（简称msProf）是性能调试命令行工具。msProf提�
 
 安装msProf工具，详情请参见《[msProf工具安装指南](docs/zh/msprof_install_guide.md)》。
 
-## 🚀 [快速入门](docs/zh/quick_start.md)
+## 🚀 快速入门
 
 离线推理场景推荐使用msProf命令采集，请参见[离线推理场景性能分析快速入门](https://www.hiascend.com/document/detail/zh/canncommercial/83RC1/devaids/Profiling/atlasprofiling_16_0005.html)。如果当前环境未安装Ascend-cann-toolkit包，则无法使用msProf命令。
 
@@ -56,7 +56,7 @@ MindStudio Profiler（简称msProf）是性能调试命令行工具。msProf提�
 
 通过msProf命令对AI任务运行性能数据、昇腾AI处理器系统数据进行采集。
 
-### [msProf性能数据解析](docs/zh/msprof_profile_data_parsing_instruct.md)
+### [msProf性能数据解析](docs/zh/msprof_parsing_instruct.md)
 
 通过msProf命令对AI任务运行性能数据、昇腾AI处理器系统数据进行解析。
 
