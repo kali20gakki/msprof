@@ -3,7 +3,11 @@
 本文主要介绍msPTI工具的安装方式。
 
 ## ⚠️安装前准备
-准备环境和依赖，详情请参见[环境和依赖](../../README.md#环境和依赖)
+- 硬件环境请参见《[昇腾产品形态说明](https://www.hiascend.com/document/detail/zh/AscendFAQ/ProduTech/productform/hardwaredesc_0001.html)》。
+
+- 软件环境请参见《[CANN 软件安装指南](https://www.hiascend.com/document/detail/zh/canncommercial/83RC1/softwareinst/instg/instg_quick.html?Mode=PmIns&InstallType=local&OS=openEuler&Software=cannToolKit)》安装昇腾设备开发或运行环境，即toolkit软件包。
+
+以上环境依赖请根据实际环境选择适配的版本。
 
 ## ✅安装run包
 
