@@ -26,11 +26,11 @@ msPTI主要包括以下功能：
 └── scripts                   // 存放whl包构建脚本，run包编译、安装相关脚本，UT运行、覆盖率脚本等
 └── test                      // 测试部分，存放UT代码
 └── README.md                 // 整体仓说明文档
-
 ```
+
 ## 🏷️版本说明
 
-包含msPTI的软件版本配套关系和软件包下载以及每个版本的特性变更说明。
+包含msPTI的软件版本配套关系和软件包下载以及每个版本的特性变更说明，详情请参见《[版本说明](docs/zh/release_notes.md)》。
 
 ## ⚙️环境部署
 
@@ -63,6 +63,9 @@ msPTI主要包括以下功能：
 ## 🔒安全声明
 
 描述msPTI产品的安全加固信息、公网地址信息及通信矩阵等内容。详情请参见《[msPTI工具安全声明](./docs/zh/security_statement.md)》。
+
+## 🔑License
+msPTI产品许可证。详见[LICENSE](./LICENSE.md)文件。
 
 ## 💬建议与交流
 
