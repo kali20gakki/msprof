@@ -27,16 +27,16 @@ INSTALL_SCRIPT=install.sh
 UTILS_SCRIPT=utils.sh
 
 MSPTI_RUN_NAME="mindstudio-mspti"
-version="unknwon"
+VERSION="none"
 
 PKG_LIMIT_SIZE=524288000 # 500M
 
-function funparse_script_args() {
+function parse_script_args() {
     if [ $# -gt 1 ]; then
         echo "[ERROR] Too many arguments. Only one argument (version) is allowed."
         exit 1
     elif [ $# -eq 1 ]; then
-        version="$1"
+        VERSION="$1"
     fi
 }
 
@@ -85,11 +85,16 @@ function copy_script() {
 
 function version() {
     local path="${TOP_DIR}/../manifest/dependency/config.ini"
-    if [ ! -f "${path}" ]; then
-        echo "none"
-    else
+    if [[ "$VERSION" != "none" ]]; then
+        echo "${VERSION}"
+    elif [ -f "${path}" ]; then
         local version=$(grep "^version=" "${path}" | cut -d"=" -f2)
         echo "${version}"
+    elif [ -f "${TOP_DIR}/version.txt" ]; then
+        local version=$(grep "^version=" "${TOP_DIR}/version.txt" | cut -d"=" -f2)
+        echo "${version}"
+    else
+        echo "${VERSION}"
     fi
 }
 
