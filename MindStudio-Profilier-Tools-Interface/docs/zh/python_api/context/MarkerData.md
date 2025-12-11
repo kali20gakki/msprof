@@ -1,12 +1,12 @@
 # MarkerData<a name="ZH-CN_TOPIC_0000002154732221"></a>
 
-展示mstx接口的瞬时打点数据，mstx接口详细介绍请参见[mstx API使用示例](zh-cn_topic_0000002017958049.md)。
+展示mstx接口的瞬时打点数据，mstx接口详细介绍请参见《mstx API使用示例》。
 
 MarkerData为[MstxMonitor.start](MstxMonitor-start.md)调用的结构体，定义如下：
 
 ```python
 class MarkerData:
-	[self.kind](msptiActivityKind.md)   # Activity Record类型MSPTI_ACTIVITY_KIND_MARKER
+	self.kind   # Activity Record类型MSPTI_ACTIVITY_KIND_MARKER
 	self.flag: MsptiActivityFlag   # Marker数据的flag标记
 	self.source_kind: MsptiActivitySourceKind   # 标记数据的来源类型
 	self.timestamp   # 标记的时间戳，单位ns。值为0时表示无法为标记收集时间戳信息

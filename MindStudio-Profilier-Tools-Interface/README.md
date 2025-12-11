@@ -10,6 +10,7 @@ msPTI工具（msPTI，MindStudio Profiling Tool Interface）是MindStudio针对A
 msPTI为通用场景接口，使用msPTI API开发的Profiling分析工具可以在各种框架的推理训练场景生效。
 
 msPTI主要包括以下功能：
+
 - Tracing：在msPTI中Tracing是指CANN应用程序执行启动CANN活动的时间戳和附加信息的收集，如CANN API、Kernel、内存拷贝等。通过了解程序运行耗时，识别CANN代码的性能问题。可以使用Activity API和Callback API收集Tracing信息。
 - Profiling：在msPTI中Profiling是指单独收集一个或一组Kernel的NPU性能指标。
 
@@ -26,9 +27,9 @@ msPTI主要包括以下功能：
 └── scripts                   // 存放whl包构建脚本，run包编译、安装相关脚本，UT运行、覆盖率脚本等
 └── test                      // 测试部分，存放UT代码
 └── README.md                 // 整体仓说明文档
-```
 
-## 🏷️版本说明
+```
+## 版本说明
 
 包含msPTI的软件版本配套关系和软件包下载以及每个版本的特性变更说明，详情请参见《[版本说明](docs/zh/release_notes.md)》。
 
@@ -50,6 +51,16 @@ msPTI主要包括以下功能：
 
 使用msPTI工具，详情请参见《[msPTI工具用户指南](docs/zh/README.md)》。
 
+## API参考
+
+- [msPTI C API参考](docs/zh/c_api/README.md)
+
+  介绍msPTI工具C语言的API。
+
+- [msPTI Python API参考](docs/zh/python_api/README.md)
+
+  介绍msPTI工具Python语言的API。
+
 ## ❗免责声明
 
 - 本工具仅供调试和开发之用，使用者需自行承担使用风险，并理解以下内容：
@@ -64,8 +75,9 @@ msPTI主要包括以下功能：
 
 描述msPTI产品的安全加固信息、公网地址信息及通信矩阵等内容。详情请参见《[msPTI工具安全声明](./docs/zh/security_statement.md)》。
 
-## 🔑License
-msPTI产品许可证。详见[LICENSE](./LICENSE.md)文件。
+## License
+
+msPTI产品许可证。详见[LICENSE](docs/zh/LICENSE.md)文件。
 
 ## 💬建议与交流
 

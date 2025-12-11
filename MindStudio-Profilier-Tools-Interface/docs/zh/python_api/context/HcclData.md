@@ -4,7 +4,7 @@ HcclData为[HcclMonitor.start](HcclMonitor-start.md)调用的结构体，定义�
 
 ```python
 class HcclData:
-	[self.kind](msptiActivityKind.md)   # Activity Record类型MSPTI_ACTIVITY_KIND_HCCL
+	self.kind   # Activity Record类型MSPTI_ACTIVITY_KIND_HCCL
 	self.start   # 通信算子在NPU设备上执行开始时间戳，单位ns。开始和结束时间戳均为0时则无法收集通信算子的时间戳信息
 	self.end   # 通信算子执行的结束时间戳，单位ns。开始和结束时间戳均为0时则无法收集通信算子的时间戳信息
 	self.device_id   # 通信算子运行设备的Device ID

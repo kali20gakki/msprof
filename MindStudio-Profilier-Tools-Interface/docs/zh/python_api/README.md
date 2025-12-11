@@ -35,7 +35,7 @@ msPTI API的功能介绍和使用示例请参见[msPTI工具用户指南](..//RE
 |[HcclData](./context/HcclData.md)|Activity Record类型MSPTI_ACTIVITY_KIND_HCCL对应的结构体。|
 |[KernelData](./context/KernelData.md)|Activity Record类型MSPTI_ACTIVITY_KIND_KERNEL对应的结构体。|
 |[MarkerData](./context/MarkerData)|Activity Record类型MSPTI_ACTIVITY_KIND_MARKER对应的结构体。|
-|[RangeMarkerData](./context/RangeMarkerData.md)||
+|[RangeMarkerData](./context/RangeMarkerData.md)|Activity Record类型MSPTI_ACTIVITY_KIND_MARKER对应的结构体。|
 |**Enumeration类型**||
 |[msptiResult](./context/msptiResult.md)|MSPTI返回的错误和结果代码。|
 |[msptiActivityKind](./context/msptiActivityKind.md)|MSPTI支持的所有Activity类型。|

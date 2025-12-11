@@ -49,7 +49,7 @@
 ## 函数原型<a name="section1121883194711"></a>
 
 ```cpp
-msptiResult msptiEnableCallback(uint32_t enable, msptiSubscriberHandle subscriber,                            msptiCallbackDomain domain, msptiCallbackId cbid)
+msptiResult msptiEnableCallback(uint32_t enable, msptiSubscriberHandle subscriber, msptiCallbackDomain domain, msptiCallbackId cbid)
 ```
 
 ## 参数说明<a name="section11506138144714"></a>

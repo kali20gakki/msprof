@@ -4,7 +4,7 @@ KernelData为[KernelMonitor.start](KernelMonitor-start.md)调用的结构体，�
 
 ```python
 class KernelData:
-	[self.kind](msptiActivityKind.md)   # Activity Record类型MSPTI_ACTIVITY_KIND_KERNEL
+	self.kind  # Activity Record类型MSPTI_ACTIVITY_KIND_KERNEL
 	self.start   # Kernel在NPU设备上执行开始时间戳，单位ns。开始和结束时间戳均为0时则无法收集Kernel的时间戳信息
 	self.end   # Kernel执行的结束时间戳，单位ns。开始和结束时间戳均为0时则无法收集Kernel的时间戳信息
 	self.device_id   # Kernel运行设备的Device ID
