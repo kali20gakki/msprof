@@ -33,7 +33,7 @@ $\{INSTALL\_DIR\}请替换为CANN软件安装后文件存储路径。若安装�
 |[msptiActivityDisableMarkerDomain](./context/msptiActivityDisableMarkerDomain.md)|关闭对应域打点的采集。|
 |**Typedef类型**|**Typedef说明**|
 |[msptiBuffersCallbackRequestFunc](./context/msptiBuffersCallbackRequestFunc.md)|向MSPTI注册回调函数，申请Activity Buffer的存储空间。|
-|[msptiBuffersCallbackCompleteFunc](./msptiBuffersCallbackCompleteFunc.md)|向MSPTI注册回调函数，释放Activity Buffer中的数据。|
+|[msptiBuffersCallbackCompleteFunc](./context/msptiBuffersCallbackCompleteFunc.md)|向MSPTI注册回调函数，释放Activity Buffer中的数据。|
 |**Enumeration类型**|**Enumeration说明**|
 |[msptiActivityKind](./context/msptiActivityKind.md)|MSPTI支持的所有Activity类型。|
 |[msptiActivityFlag](./context/msptiActivityFlag.md)|Activity Record的活动标记。|

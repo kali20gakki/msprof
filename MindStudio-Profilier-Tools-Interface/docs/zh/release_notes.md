@@ -2,7 +2,7 @@
 
 ## 版本配套说明
 
-- msPTI支持的固件驱动版本与配套CANN软件支持的固件驱动版本相同，开发者可通过“[昇腾社区-固件与驱动](https://www.hiascend.com/hardware/firmware-drivers/community?product=4&model=32&cann=8.3.RC2&driver=Ascend+HDK+25.3.RC1)”页面根据产品型号与CANN软件版本获取配套的固件与驱动。
+msPTI支持的固件驱动版本与配套CANN软件支持的固件驱动版本相同，开发者可通过“[昇腾社区-固件与驱动](https://www.hiascend.com/hardware/firmware-drivers/community?product=4&model=32&cann=8.3.RC2&driver=Ascend+HDK+25.3.RC1)”页面根据产品型号与CANN软件版本获取配套的固件与驱动。
 
 msPTI详细版本配套关系及对应软件包下载链接如下：
 
