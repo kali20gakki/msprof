@@ -5,7 +5,8 @@ TOP_DIR=${CUR_DIR}/..
 
 # store product
 MSPROF_TEMP_DIR=${TOP_DIR}/build/msprof_tmp
-mkdir -p "${MSPROF_TEMP_DIR}"
+rm -rf ${MSPROF_TEMP_DIR}
+mkdir -p ${MSPROF_TEMP_DIR}
 
 # makeself is tool for compiling run package
 MAKESELF_DIR=${TOP_DIR}/opensource/makeself
@@ -186,32 +187,49 @@ function delete_sed_param() {
     sed -i "2d" "${RUN_SCRIPT_DIR}/${main_script}"
 }
 
-function delete_dir() {
-    local dir_path=${1}
-    rm -rf dir_path
+function check_collector_files() {
+    local temp_dir="$1"
+    local pkg_limit_size="$2"
+
+    check_package ${temp_dir}/acl_prof.h ${pkg_limit_size}
+    check_package ${temp_dir}/ge_prof.h ${pkg_limit_size}
+    check_package ${temp_dir}/msprof ${pkg_limit_size}
+    check_package ${temp_dir}/libmsprofiler.so ${pkg_limit_size}
+    check_package ${temp_dir}/libprofapi.so ${pkg_limit_size}
+    check_package ${temp_dir}/libprofimpl.so ${pkg_limit_size}
 }
 
-check_file_exist() {
-  local temp_dir=${1}
+function check_analysis_files() {
+    local temp_dir="$1"
+    local pkg_limit_size="$2"
 
-  if [ "$BUILD_MODE" = "all" ]; then
-      # 1. collector
-      check_package ${temp_dir}/acl_prof.h ${PKG_LIMIT_SIZE}
-      check_package ${temp_dir}/ge_prof.h ${PKG_LIMIT_SIZE}
-      check_package ${temp_dir}/msprof ${PKG_LIMIT_SIZE}
-      check_package ${temp_dir}/libmsprofiler.so ${PKG_LIMIT_SIZE}
-      check_package ${temp_dir}/libprofapi.so ${PKG_LIMIT_SIZE}
-      check_package ${temp_dir}/libprofimpl.so ${PKG_LIMIT_SIZE}
-  fi
+    check_package ${temp_dir}/analysis ${pkg_limit_size}
+    check_package ${temp_dir}/analysis/lib64/msprof_analysis.so ${pkg_limit_size}
+}
 
-  # 2. analysis
-  check_package ${temp_dir}/analysis
-  check_package ${temp_dir}/analysis/lib64/msprof_analysis.so
+function check_file_exist() {
+    local temp_dir=${1}
 
-  # 3. package script
-  check_package ${temp_dir}/${MAIN_SCRIPT}
-  check_package ${temp_dir}/${INSTALL_SCRIPT} ${PKG_LIMIT_SIZE}
-  check_package ${temp_dir}/${UTILS_SCRIPT} ${PKG_LIMIT_SIZE}
+    case "$BUILD_MODE" in
+        "all")
+            check_collector_files ${temp_dir} ${PKG_LIMIT_SIZE}
+            check_analysis_files ${temp_dir} ${PKG_LIMIT_SIZE}
+            ;;
+        "collector")
+            check_collector_files ${temp_dir} ${PKG_LIMIT_SIZE}
+            ;;
+        "analysis")
+            check_analysis_files ${temp_dir} ${PKG_LIMIT_SIZE}
+            ;;
+        *)
+            echo "Invalid BUILD_MODE: $BUILD_MODE"
+            exit 1
+            ;;
+    esac
+
+    check_package ${temp_dir}/${MAIN_SCRIPT}
+    check_package ${temp_dir}/${INSTALL_SCRIPT} ${PKG_LIMIT_SIZE}
+    check_package ${temp_dir}/${UTILS_SCRIPT} ${PKG_LIMIT_SIZE}
 }
 
 function check_package() {
@@ -239,13 +257,19 @@ function main() {
 	local main_script=${1}
 	local filer=${2}
 	sed_param ${main_script}
-	build_python_whl
+    case "$BUILD_MODE" in
+        "all" | "analysis")
+            build_python_whl
+            ;;
+        *)
+            # 其他 BUILD_MODE 值的处理
+            ;;
+    esac
 	create_temp_dir ${MSPROF_TEMP_DIR}
 	check_file_exist ${MSPROF_TEMP_DIR}
 	create_run_package ${MSPROF_RUN_NAME} ${MSPROF_TEMP_DIR} ${main_script} ${filer}
 	check_package ${OUTPUT_DIR}/$(get_package_name) ${PKG_LIMIT_SIZE}
 	delete_sed_param ${main_script}
-	delete_dir ${TOP_DIR}/build/collector/
 }
 
 parse_script_args $*
