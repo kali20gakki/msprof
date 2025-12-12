@@ -1,66 +1,108 @@
 #!/bin/bash
-# This script is used to build msprofbin&&libmsprofiler.so&&stub/libmsprofiler.so
-# Copyright Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+# This script is used to build msprofbin&&libmsprofiler.so
+# Copyright Huawei Technologies Co., Ltd. 2025-2025. All rights reserved.
 
 set -e
 CUR_DIR=$(dirname $(readlink -f $0))
 TOP_DIR=${CUR_DIR}/..
-VERSION=""
-PACKAGE_TYPE=""
-BUILD_TYPE=""
+VERSION="none"
+BUILD_TYPE="Release"
+BUILD_MODE="analysis"
 
 # input param check
-if [[ $# > 2 ]];
-    then
-        echo "[ERROR]Please input valid param, for example:"
-        echo "       ./build.sh                 # Default"
-        echo "       ./build.sh Debug           # Debug"
-        echo "       ./build.sh [version]       # With Version"    
-        echo "       ./build.sh [version] [Patch] # With Version and Patch" 
-        exit
-fi
-
-if [ $# = 1 ] && [ "$1" = "Debug" ];
-    then
-        BUILD_TYPE="Debug"
-elif [ $# = 1 ] && [ "$1" != "Debug" ];
-    then
-        VERSION=$1
-elif [ $# = 2 ];
-    then
-        VERSION=$1
-        PACKAGE_TYPE=$2
-fi
-
-# binary check
-function bep_env_init() {
-    source /etc/profile
-    local bep_env_config=${CUR_DIR}/bep/bep_env.conf
-    local bep_sh=$(which bep_env.sh)
-    echo "has bep sh :${bep_sh}"
-    if [ ! -d "${SECBEPKIT_HOME}" ] && [ ! -f "$bep_sh" ]; then
-        echo "BepKit is not installed, Please install the tool and configure the env var \$SECBEPKIT_HOME"
-    else
-        source ${SECBEPKIT_HOME}/bep_env.sh -s $bep_env_config
-        if [ $? -ne 0 ]; then
-            echo "build bep failed!"
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --build_type=*)
+            BUILD_TYPE="${1#*=}"
+            if [[ "$BUILD_TYPE" != "Release" && "$BUILD_TYPE" != "Debug" ]]; then
+                echo "[ERROR] Invalid build type. Valid options are: Release, Debug"
+                exit 1
+            fi
+            shift
+            ;;
+        --mode=*)
+            MODE="${1#*=}"
+            if [[ "$MODE" != "all" && "$MODE" != "collector" && "$MODE" != "analysis" ]]; then
+                echo "[ERROR] Invalid mode. Valid options are: all, collector, analysis"
+                exit 1
+            fi
+            BUILD_MODE="$MODE"
+            shift
+            ;;
+        --version=*)
+            VERSION="${1#*=}"
+            shift
+            ;;
+        *)
+            echo "[ERROR] Unknown parameter: $1"
             exit 1
-        else
-            echo "build bep success."
-        fi
-    fi
+            ;;
+    esac
+done
+
+# input param check
+if [[ $# -gt 3 ]]; then
+    echo "[ERROR] Please input valid parameters, for example:"
+    echo "       ./build.sh                 # Default"
+    echo "       ./build.sh --build_type=Debug --mode=all --version=none"
+    exit 1
+fi
+
+function build_runtime() {
+    cd ${TOP_DIR}/build/collector
+    git clone https://gitcode.com/cann/runtime-dev.git
+    cd runtime-dev
+    echo "build runtime start."
+    bash build.sh
+    cd build_out/
+    chmod +x cann-npu-runtime_*.run
+    ./cann-npu-runtime_*.run --noexec --extract=./runtime_decompress
+    echo "build runtime end."
+    mkdir -p ${TOP_DIR}/build/collector/runtime_install
+    ./cann-npu-runtime_*.run --full --install-path=${TOP_DIR}/build/collector/runtime_install
 }
 
-bep_env_init
+function build_oam_tools() {
+    cd ${TOP_DIR}/build/collector
+    git clone https://gitcode.com/cann/oam-tools-dev.git
+    cd oam-tools-dev
+    sed -i '25s#set(ASCEND_CANN_PACKAGE_PATH .*)#set(ASCEND_CANN_PACKAGE_PATH '${TOP_DIR}'/build/collector/runtime_install/cann/)#' CMakeLists.txt
+    echo "build oam-tools start."
+    bash build.sh
+    cd build_out/
+    chmod +x cann-oam-tools_*.run
+    ./cann-oam-tools_*.run --noexec --extract=./oam_tools_decompress
+    echo "build oam-tools end."
+}
 
-# Hi Test
-HI_TEST="off"
-if [ ! -z "${TOOLKIT_HITEST}" ] && [ "${TOOLKIT_HITEST}" == "on" ]; then
-    HI_TEST=${TOOLKIT_HITEST}
-fi
+function build_analysis() {
+    cmake -S ${TOP_DIR}/cmake/superbuild/ -B ${TOP_DIR}/build -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=${TOP_DIR}/prefix -DSECUREC_LIB_DIR=${TOP_DIR}/prefix/securec_shared
+    cd ${TOP_DIR}/build; make -j$(nproc)
+}
 
-mkdir -p ${TOP_DIR}/build/prefix
-cmake -S ${TOP_DIR}/cmake/superbuild/ -B ${TOP_DIR}/build/build -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DHITEST=${HI_TEST} -DCMAKE_INSTALL_PREFIX=${TOP_DIR}/build/prefix -DOBJECT=all
-cd ${TOP_DIR}/build/build; make -j$(nproc); make clean
+function build_collector() {
+    mkdir -p ${TOP_DIR}/build/collector
+    build_runtime
+    build_oam_tools
+}
 
-bash ${TOP_DIR}/scripts/create_run_package_pack.sh ${VERSION} ${PACKAGE_TYPE}
+# 1. build
+case "$BUILD_MODE" in
+    "all")
+        build_collector
+        build_analysis
+        ;;
+    "collector")
+        build_collector
+        ;;
+    "analysis")
+        build_analysis
+        ;;
+    *)
+        echo "Invalid BUILD_MODE: $BUILD_MODE"
+        exit 1
+        ;;
+esac
+
+# 2. package
+bash ${TOP_DIR}/scripts/create_run_package.sh ${VERSION} ${BUILD_MODE}
