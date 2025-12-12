@@ -81,6 +81,7 @@ function build_analysis() {
 }
 
 function build_collector() {
+    rm -rf ${TOP_DIR}/build/collector
     mkdir -p ${TOP_DIR}/build/collector
     build_runtime
     build_oam_tools
