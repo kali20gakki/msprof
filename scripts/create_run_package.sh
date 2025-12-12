@@ -4,10 +4,8 @@ CUR_DIR=$(dirname $(readlink -f $0))
 TOP_DIR=${CUR_DIR}/..
 
 # store product
-PREFIX_DIR=${TOP_DIR}/build/prefix
 MSPROF_TEMP_DIR=${TOP_DIR}/build/msprof_tmp
-COMMON_DIR="common_script"
-mkdir -p "${MSPROF_TEMP_DIR}/${COMMON_DIR}"
+mkdir -p "${MSPROF_TEMP_DIR}"
 
 # makeself is tool for compiling run package
 MAKESELF_DIR=${TOP_DIR}/opensource/makeself
@@ -27,96 +25,80 @@ FILTER_PARAM_SCRIPT=${RUN_SCRIPT_DIR}/help.conf
 MAIN_SCRIPT=main.sh
 INSTALL_SCRIPT=install.sh
 UTILS_SCRIPT=utils.sh
-CANN_UNINSTALL=cann_uninstall.sh
-UNINSTALL=uninstall.sh
-
-# script for spc
-MAIN_SPC=main_spc.sh
-FILTER_PARAM_SCRIPT_SPC=${RUN_SCRIPT_DIR}/help_spc.conf
-BACKUP=backup.sh
-ROLLBACK_PRECHECK=rollback_precheck.sh
-ROLLBACK_SPC=rollback_spc.sh
-UNINSTALL_SPC=uninstall_spc.sh
-COMMON_ROLLBACK=rollback.sh
-COMMON_UNINSTALL=uninstall.sh
 
 MSPROF_RUN_NAME="mindstudio-msprof"
-version="unknwon"
-package_type="unknwon"
+VERSION="none"
+BUILD_MODE="analysis"
 
 PKG_LIMIT_SIZE=524288000 # 500M
 
 function parse_script_args() {
-    while true; do
-        if [ "$1" = "" ]; then
-            break
-        fi
-        case "$1" in
-        version_dir=*)
-            version=${1#version_dir=}
-            shift
-            continue
-            ;;
-        Patch)
-            package_type="Patch"
-            shift
-            continue
-            ;;
-        *)
-            echo "[ERROR]" "Input option is invalid"
-            exit 1
-            ;;
-        esac
-    done
+    if [ $# -gt 2 ]; then
+        echo "[ERROR] Too many arguments. Only one or two arguments are allowed."
+        exit 1
+    elif [ $# -eq 2 ]; then
+        VERSION="$1"
+        BUILD_MODE="$2"
+    elif [ $# -eq 1 ]; then
+        VERSION="$1"
+    fi
 }
 
 # build python whl
 function build_python_whl() {
   cd ${TOP_DIR}/build/build
-  python3  ${TOP_DIR}/build/setup_mspti.py bdist_wheel --python-tag=py3 --py-limited-api=cp37
+  python3  ${TOP_DIR}/build/setup.py bdist_wheel --python-tag=py3 --py-limited-api=cp37
   rm -rf ${TOP_DIR}/mspti.egg-info
-  cd -
+  cd - > /dev/null
+}
+
+function create_collector_temp_dir() {
+    local temp_dir=${1}
+    local runtime_dir=${2}
+    local oam_tools_dir=${3}
+
+    # 1. runtime
+    cp ${runtime_dir}/runtime/lib/libmsprofiler.so ${temp_dir}
+    cp ${runtime_dir}/runtime/lib/libprofapi.so ${temp_dir}
+    cp ${runtime_dir}/runtime/lib/libprofimpl.so ${temp_dir}
+    cp ${runtime_dir}/runtime/include/external/acl/acl_prof.h ${temp_dir}
+    cp ${runtime_dir}/runtime/include/external/ge/ge_prof.h ${temp_dir}
+    # 2. oam_tools
+    cp ${oam_tools_dir}/oam_tools/msprof/bin/msprof ${temp_dir}
+}
+
+function create_analysis_temp_dir() {
+    local temp_dir=${1}
+
+    cp ${TOP_DIR}/build/dist/msprof-0.0.1-py3-none-any.whl ${temp_dir}
+    cp -r ${TOP_DIR}/analysis ${temp_dir}
+    rm -rf ${temp_dir}/analysis/csrc
 }
 
 # create temp dir for product
 function create_temp_dir() {
     local temp_dir=${1}
-    local collector_dir=${PREFIX_DIR}/collector
-    local mspti_dir=${PREFIX_DIR}/mspti
-    local profcommon_dir=${PREFIX_DIR}/profcommon
+    local runtime_dir=${TOP_DIR}/build/collector/runtime-dev/build_out/runtime_decompress/
+    local oam_tools_dir=${TOP_DIR}/build/collector/oam-tools-dev/build_out/oam_tools_decompress/
 
-    cp ${collector_dir}/lib/libmsprofiler.so ${temp_dir}
-    cp -r ${collector_dir}/stub ${temp_dir}
-    cp ${collector_dir}/bin/msprof ${temp_dir}
-    cp ${mspti_dir}/libmspti.so ${temp_dir}
-    cp ${profcommon_dir}/libprof_common.so ${temp_dir}
-    cp ${TOP_DIR}/build/build/dist/mspti-0.0.1-py3-none-any.whl ${temp_dir}
-    cp ${TOP_DIR}/collector/inc/external/acl/acl_prof.h ${temp_dir}
-    cp ${TOP_DIR}/collector/inc/external/ge/ge_prof.h ${temp_dir}
-    cp ${TOP_DIR}/mspti/external/mspti.h ${temp_dir}
-    cp ${TOP_DIR}/mspti/external/mspti_activity.h ${temp_dir}
-    cp ${TOP_DIR}/mspti/external/mspti_callback.h ${temp_dir}
-    cp ${TOP_DIR}/mspti/external/mspti_cbid.h ${temp_dir}
-    cp ${TOP_DIR}/mspti/external/mspti_result.h ${temp_dir}
-    cp -r ${TOP_DIR}/mspti/samples ${temp_dir}
-    mkdir -p ${temp_dir}/mstx_samples
-    cp -r ${TOP_DIR}/samples ${temp_dir}/mstx_samples
-    cp -r ${TOP_DIR}/analysis ${temp_dir}
-    rm -rf ${temp_dir}/analysis/csrc
-    if [ "${package_type}" = "Patch" ]; then
-        # if we want to change product, we also need to change rollback_precheck
-        copy_script ${MAIN_SPC} ${temp_dir}
-        copy_script ${BACKUP} ${temp_dir}
-        copy_script ${ROLLBACK_PRECHECK} ${temp_dir}
-        copy_script ${ROLLBACK_SPC} ${temp_dir}
-        copy_script ${UNINSTALL_SPC} ${temp_dir}
-        copy_script ${COMMON_DIR}/${COMMON_ROLLBACK} ${temp_dir}
-        copy_script ${COMMON_DIR}/${COMMON_UNINSTALL} ${temp_dir}
-    else
-        copy_script ${MAIN_SCRIPT} ${temp_dir}
-        copy_script ${COMMON_DIR}/${COMMON_UNINSTALL} ${temp_dir}
-        copy_script ${UNINSTALL} ${temp_dir}
-    fi
+    case "$BUILD_MODE" in
+        "all")
+            create_collector_temp_dir ${temp_dir} ${runtime_dir} ${oam_tools_dir}
+            create_analysis_temp_dir ${temp_dir}
+            ;;
+        "collector")
+            create_collector_temp_dir ${temp_dir} ${runtime_dir} ${oam_tools_dir}
+            ;;
+        "analysis")
+            create_analysis_temp_dir ${temp_dir}
+            ;;
+        *)
+            echo "Invalid BUILD_MODE: $BUILD_MODE"
+            exit 1
+            ;;
+        esac
+
+    copy_script ${MAIN_SCRIPT} ${temp_dir}
     copy_script ${INSTALL_SCRIPT} ${temp_dir}
     copy_script ${UTILS_SCRIPT} ${temp_dir}
 }
@@ -134,17 +116,38 @@ function copy_script() {
     chmod 500 "${temp_dir}/${script_name}"
 }
 
-function version() {
+function get_version() {
+    # 如果 VERSION 不是 "none"，直接返回 VERSION
+    if [ "${VERSION}" != "none" ]; then
+        echo "${VERSION}"
+        return
+    fi
+
+    # 定义配置文件路径
     local path="${TOP_DIR}/../manifest/dependency/config.ini"
-    local version=$(grep "^version=" "${path}" | cut -d"=" -f2)
-    echo "${version}"
+
+    # 检查配置文件是否存在
+    if [ ! -f "${path}" ]; then
+        echo "none"
+        return
+    fi
+
+    # 从配置文件中读取 version
+    local version=$(grep -m 1 "^version=" "${path}" | cut -d"=" -f2)
+
+    # 检查读取到的 version 是否为空
+    if [ -z "${version}" ]; then
+        echo "none"
+    else
+        echo "${version}"
+    fi
 }
 
 function get_package_name() {
     local product="Ascend"
     local name=${MSPROF_RUN_NAME}
 
-    local version=$(echo $(version) | cut -d '.' -f 1,2,3)
+    local version=$(echo $(get_version) | cut -d '.' -f 1,2,3)
     local os_arch=$(arch)
     echo "${product}-${name}_${version}_linux-${os_arch}.run"
 }
@@ -175,56 +178,40 @@ function sed_param() {
     local main_script=${1}
     sed -i "2i VERSION=$version" "${RUN_SCRIPT_DIR}/${main_script}"
     sed -i "2i package_arch=$(arch)" "${RUN_SCRIPT_DIR}/${main_script}"
-    build_python_whl
-    if [ "${main_script}" = "${MAIN_SCRIPT}" ]; then
-        sed -i "2i package_arch=$(arch)" "${RUN_SCRIPT_DIR}/${UNINSTALL}"
-    fi
 }
 
 function delete_sed_param() {
     local main_script=${1}
     sed -i "2d" "${RUN_SCRIPT_DIR}/${main_script}"
     sed -i "2d" "${RUN_SCRIPT_DIR}/${main_script}"
-
-    if [ "${main_script}" = "${MAIN_SCRIPT}" ]; then
-        sed -i "2d" "${RUN_SCRIPT_DIR}/${UNINSTALL}"
-    fi
 }
 
-function sed_main_param() {
-	local main_script=${1}
-	local filer=${2}
-	sed_param ${main_script}
-	create_temp_dir ${MSPROF_TEMP_DIR}
-	check_file_exist ${MSPROF_TEMP_DIR}
-	create_run_package ${MSPROF_RUN_NAME} ${MSPROF_TEMP_DIR} ${main_script} ${filer}
-	check_package ${OUTPUT_DIR}/$(get_package_name) ${PKG_LIMIT_SIZE}
-	delete_sed_param ${main_script}
+function delete_dir() {
+    local dir_path=${1}
+    rm -rf dir_path
 }
 
 check_file_exist() {
   local temp_dir=${1}
-  check_package ${temp_dir}/acl_prof.h ${PKG_LIMIT_SIZE}
-  check_package ${temp_dir}/ge_prof.h ${PKG_LIMIT_SIZE}
-  check_package ${temp_dir}/msprof ${PKG_LIMIT_SIZE}
-  check_package ${temp_dir}/libmsprofiler.so ${PKG_LIMIT_SIZE}
-  check_package ${temp_dir}/libmsprofiler.so ${PKG_LIMIT_SIZE}
-  check_package ${temp_dir}/mspti-0.0.1-py3-none-any.whl ${PKG_LIMIT_SIZE}
+
+  if [ "$BUILD_MODE" = "all" ]; then
+      # 1. collector
+      check_package ${temp_dir}/acl_prof.h ${PKG_LIMIT_SIZE}
+      check_package ${temp_dir}/ge_prof.h ${PKG_LIMIT_SIZE}
+      check_package ${temp_dir}/msprof ${PKG_LIMIT_SIZE}
+      check_package ${temp_dir}/libmsprofiler.so ${PKG_LIMIT_SIZE}
+      check_package ${temp_dir}/libprofapi.so ${PKG_LIMIT_SIZE}
+      check_package ${temp_dir}/libprofimpl.so ${PKG_LIMIT_SIZE}
+  fi
+
+  # 2. analysis
   check_package ${temp_dir}/analysis
   check_package ${temp_dir}/analysis/lib64/msprof_analysis.so
+
+  # 3. package script
   check_package ${temp_dir}/${MAIN_SCRIPT}
-  check_package ${temp_dir}/${COMMON_DIR}/${COMMON_UNINSTALL}
-  check_package ${temp_dir}/${UNINSTALL}
+  check_package ${temp_dir}/${INSTALL_SCRIPT} ${PKG_LIMIT_SIZE}
   check_package ${temp_dir}/${UTILS_SCRIPT} ${PKG_LIMIT_SIZE}
-  check_package ${temp_dir}/libmspti.so ${PKG_LIMIT_SIZE}
-  check_package ${temp_dir}/mspti.h ${PKG_LIMIT_SIZE}
-  check_package ${temp_dir}/mspti_activity.h ${PKG_LIMIT_SIZE}
-  check_package ${temp_dir}/mspti_callback.h ${PKG_LIMIT_SIZE}
-  check_package ${temp_dir}/mspti_cbid.h ${PKG_LIMIT_SIZE}
-  check_package ${temp_dir}/mspti_result.h ${PKG_LIMIT_SIZE}
-  check_package ${temp_dir}/samples ${PKG_LIMIT_SIZE}
-  check_package ${temp_dir}/mstx_samples/samples ${PKG_LIMIT_SIZE}
-  check_package ${temp_dir}/libprof_common.so ${PKG_LIMIT_SIZE}
 }
 
 function check_package() {
@@ -248,11 +235,18 @@ function check_package() {
     fi
 }
 
-parse_script_args $*
+function main() {
+	local main_script=${1}
+	local filer=${2}
+	sed_param ${main_script}
+	build_python_whl
+	create_temp_dir ${MSPROF_TEMP_DIR}
+	check_file_exist ${MSPROF_TEMP_DIR}
+	create_run_package ${MSPROF_RUN_NAME} ${MSPROF_TEMP_DIR} ${main_script} ${filer}
+	check_package ${OUTPUT_DIR}/$(get_package_name) ${PKG_LIMIT_SIZE}
+	delete_sed_param ${main_script}
+	delete_dir ${TOP_DIR}/build/collector/
+}
 
-if [ "${package_type}" = "Patch" ];
-    then
-        sed_main_param ${MAIN_SPC} ${FILTER_PARAM_SCRIPT_SPC}
-    else
-        sed_main_param ${MAIN_SCRIPT} ${FILTER_PARAM_SCRIPT}
-fi
+parse_script_args $*
+main ${MAIN_SCRIPT} ${FILTER_PARAM_SCRIPT}

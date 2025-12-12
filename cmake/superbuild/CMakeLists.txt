@@ -42,56 +42,6 @@ set_target_properties(c_sec
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_INSTALL_PREFIX}/securec_shared
 )
 
-########################## error_manager ###################################
-add_library(error_manager SHARED
-    ${TOP_DIR}/collector/dvvp/depend/stub/error_manager/error_manager_stub.cpp
-)
-
-target_include_directories(error_manager PRIVATE
-    ${TOP_DIR}/collector/dvvp/depend/inc/metadef
-)
-
-target_compile_options(error_manager PRIVATE
-    -std=c++11
-    -Werror
-    -fno-common
-    -Wextra
-    -Wfloat-equal
-    -D_GLIBCXX_USE_CXX11_ABI=0
-)
-
-set_target_properties(error_manager
-    PROPERTIES
-    OUTPUT_NAME error_manager
-    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_INSTALL_PREFIX}/error_manager
-)
-
-ExternalProject_Add(profcommon
-    SOURCE_DIR ${TOP_DIR}/profcommon
-    CONFIGURE_COMMAND ${CMAKE_COMMAND}
-    -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
-    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-    <SOURCE_DIR>
-    BUILD_COMMAND $(MAKE)
-)
-
-if(OBJECT STREQUAL all OR OBJECT STREQUAL collector)
-ExternalProject_Add(msprof
-    SOURCE_DIR ${TOP_DIR}
-    CONFIGURE_COMMAND ${CMAKE_COMMAND}
-                -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
-                -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-                -DCMAKE_EXPORT_COMPILE_COMMANDS=1
-                -DSECUREC_LIB_DIR=${CMAKE_INSTALL_PREFIX}/securec_shared
-                -DERROR_MANAGER_LIB_DIR=${CMAKE_INSTALL_PREFIX}/error_manager
-                -DHITEST=${HITEST}
-                <SOURCE_DIR>
-    BUILD_COMMAND $(MAKE)
-    DEPENDS c_sec profcommon
-)
-endif()
-
-if(OBJECT STREQUAL all OR OBJECT STREQUAL analysis)
 ExternalProject_Add(analysis
     SOURCE_DIR ${TOP_DIR}/analysis/csrc
     CONFIGURE_COMMAND ${CMAKE_COMMAND}
@@ -101,17 +51,3 @@ ExternalProject_Add(analysis
     BUILD_COMMAND $(MAKE)
     DEPENDS c_sec
 )
-endif()
-
-if(OBJECT STREQUAL all OR OBJECT STREQUAL mspti)
-ExternalProject_Add(mspti
-    SOURCE_DIR ${TOP_DIR}/mspti
-    CONFIGURE_COMMAND ${CMAKE_COMMAND}
-                -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
-                -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-                -DSECUREC_LIB_DIR=${CMAKE_INSTALL_PREFIX}/securec_shared
-                <SOURCE_DIR>
-    BUILD_COMMAND $(MAKE)
-    DEPENDS c_sec profcommon
-)
-endif()

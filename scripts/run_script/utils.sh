@@ -17,33 +17,35 @@ PATH_LENGTH=4096
 
 MSPROF_RUN_NAME="mindstudio-msprof"
 # product constant
-LIBMSPROFILER="libmsprofiler.so"
-LIBMSPROFILER_STUB="stub/libmsprofiler.so"
-LIBMSPTI="libmspti.so"
-LIBPROFCOMMON="libprof_common.so"
+LIB_MS_PROFILER="libmsprofiler.so"
+LIB_PROF_API="libprofapi.so"
+LIB_PROF_IMPL="libprofimpl.so"
+ACL_PROF_H="acl_prof.h"
+GE_PROF_H="ge_prof.h"
+
 # never use analysis/, or remove important file by softlink
 ANALYSIS="analysis"
 MSPROF="msprof"
 
-LIBMSPROFILER_PATH="/runtime/lib64/"
-LIBMSPTI_PATH="/tools/mspti/"
-LIBPROFCOMMON_PATH="/tools/mspti/"
-ANALYSIS_PATH="/tools/profiler/profiler_tool/"
-MSPROF_PATH="/tools/profiler/bin/"
+ANALYSIS_PATH="tools/profiler/profiler_tool"
+MSPROF_PATH="tools/profiler/bin"
 
-# spc dir
-SPC_DIR="spc"
-BACKUP_DIR="backup"
-SCRIPT_DIR="script"
+# msprof analysis whl
+MSPROF_ANALYSIS_WHL="msprof-0.0.1-py3-none-any.whl"
 
 # hete path
 HETE_PATH="hetero-arch-scripts"
 
 function print() {
+    local log_file="$1"
+    local level="$2"
+    local message="$3"
+    local timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+
     if [ ! -f "$log_file" ]; then
-        echo "[${MSPROF_RUN_NAME}] [$(date +"%Y-%m-%d %H:%M:%S")] [$1]: $2"
+        echo "[${MSPROF_RUN_NAME}] [${timestamp}] [${level}] ${message}"
     else
-        echo "[${MSPROF_RUN_NAME}] [$(date +"%Y-%m-%d %H:%M:%S")] [$1]: $2" | tee -a $log_file
+        echo "[${MSPROF_RUN_NAME}] [${timestamp}] [${level}] ${message}" | tee -a "$log_file"
     fi
 }
 
@@ -66,74 +68,6 @@ function log_init() {
         fi
     fi
     chmod 640 $log_file
-}
-
-function del_dir() {
-    local dir_path=$1
-
-    if [ -n "${dir_path}" ] && [[ ! "${dir_path}" =~ ^/+$ ]]; then
-        if [ -d "${dir_path}" ]; then
-            chmod 750 -R ${dir_path}
-            rm -rf "${dir_path}"
-            if [ $? = 0 ]; then
-                print "INFO" "delete directory ${dir_path} successfully"
-            else
-                print "ERROR" "delete directory ${dir_path} fail"
-                exit 1
-            fi
-        else
-            print "WARNING" "the directory ${dir_path} is not exist"
-        fi
-    else
-        print "WARNING" "the directory ${dir_path} path is NULL"
-    fi
-}
-
-function remove_empty_dir() {
-    [ ! -d "$1" ] && return 1
-    if [ -z "$(ls -A $1 2>&1)" ]; then
-        rm -rf "$1"
-        if [ $? = 0 ]; then
-            print "INFO" "delete directory $1 successfully"
-        else
-            print "ERROR" "delete directory $1 fail"
-            exit 1
-        fi
-    fi
-}
-
-function uninstall_backup() {
-    if [ -d ${install_path}/${SPC_DIR}/${BACKUP_DIR}/${MSPROF_RUN_NAME} ]; then
-        chmod -R u+w ${install_path}/${SPC_DIR}/${BACKUP_DIR}/${MSPROF_RUN_NAME}
-        del_dir ${install_path}/${SPC_DIR}/${BACKUP_DIR}/${MSPROF_RUN_NAME}
-        remove_empty_dir ${install_path}/${SPC_DIR}/${BACKUP_DIR}
-    fi
-}
-
-function uninstall_script() {
-    if [ -d ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME} ]; then
-        chmod -R u+w ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}
-        del_dir ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}
-        remove_empty_dir ${install_path}/${SPC_DIR}/${SCRIPT_DIR}
-    fi
-}
-
-function rm_file_safe() {
-    local file_path=$1
-    if [ -n "${file_path}" ]; then
-        if [ -f "${file_path}" ] || [ -h "${file_path}" ]; then
-            rm -f "${file_path}"
-            if [ $? -ne 0 ]; then
-                print "ERROR" "delete file ${file_path} failed, please delete it by yourself."
-            else
-            print "INFO" "delete file ${file_path} successfully"
-            fi
-        else
-            print "WARNING" "the file is not exist"
-        fi
-    else
-        print "WARNING" "the file path is NULL"
-    fi
 }
 
 function check_path() {
@@ -159,6 +93,26 @@ function check_path() {
     else
         print "ERROR" "The path ${path_str} is invalid, only [a-z,A-Z,0-9,-,_] is support!"
         exit 1
+    fi
+}
+
+function check_cann_path() {
+    local cann_path=${1}
+    local current_user=$(whoami)
+    local cann_path_owner=$(stat -c '%U' "$cann_path")
+
+    if [ "$current_user" != "root" ]; then
+        # 1. Check the current executing user and the installation user of cann_path.
+        if [ "$current_user" != "$cann_path_owner" ]; then
+            print "ERROR" "Current user ($current_user) is not the same as the owner of cann_path ($cann_path_owner)."
+            exit 1
+        fi
+
+        # 2. Check whether the current cann_path is writable (except for the root user).
+        if [ ! -w "$cann_path" ]; then
+            print "ERROR" "cann_path ($cann_path) is not writable by the current user ($current_user)."
+            exit 1
+        fi
     fi
 }
 
