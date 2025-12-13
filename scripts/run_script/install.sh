@@ -59,7 +59,9 @@ function implement_install() {
 	copy_file ${ANALYSIS} ${install_path}/${ANALYSIS_PATH}/${ANALYSIS}
     msprof_analyse_whl=${install_path}/${ANALYSIS_PATH}/${MSPROF_ANALYSIS_WHL}
     copy_file ${MSPROF_ANALYSIS_WHL} $msprof_analyse_whl
-    install_whl_package $pylocal $msprof_analyse_whl ${install_path}/${ANALYSIS_PATH}
+    if [ -f "${MSPROF_ANALYSIS_WHL}" ]; then
+        install_whl_package $pylocal ${MSPROF_ANALYSIS_WHL} ${install_path}/${ANALYSIS_PATH}
+    fi
     if [ $? -ne 0 ]; then
         print "ERROR" "Install msprof analysis whl failed."
         return 1
