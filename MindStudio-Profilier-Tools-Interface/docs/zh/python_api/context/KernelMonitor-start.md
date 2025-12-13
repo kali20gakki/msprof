@@ -29,16 +29,17 @@
 </tr>
 <tr id="zh-cn_topic_0000002143882701_row18403312418"><td class="cellrowborder" valign="top" width="57.99999999999999%" headers="mcps1.1.3.1.1 "><p id="zh-cn_topic_0000002143882701_p78319051815"><a name="zh-cn_topic_0000002143882701_p78319051815"></a><a name="zh-cn_topic_0000002143882701_p78319051815"></a><span id="zh-cn_topic_0000002143882701_ph1383116081815"><a name="zh-cn_topic_0000002143882701_ph1383116081815"></a><a name="zh-cn_topic_0000002143882701_ph1383116081815"></a><term id="zh-cn_topic_0000002143882701_zh-cn_topic_0000001312391781_term4363218112215"><a name="zh-cn_topic_0000002143882701_zh-cn_topic_0000001312391781_term4363218112215"></a><a name="zh-cn_topic_0000002143882701_zh-cn_topic_0000001312391781_term4363218112215"></a>Ascend 310P</term></span></p>
 </td>
-<td class="cellrowborder" align="center" valign="top" width="42%" headers="mcps1.1.3.1.2 "><p id="zh-cn_topic_0000002143882701_p1695443971810"><a name="zh-cn_topic_0000002143882701_p1695443971810"></a><a name="zh-cn_topic_0000002143882701_p1695443971810"></a>x</p>
+<td class="cellrowborder" align="center" valign="top" width="42%" headers="mcps1.1.3.1.2 "><p id="zh-cn_topic_0000002143882701_p1695443971810"><a name="zh-cn_topic_0000002143882701_p1695443971810"></a><a name="zh-cn_topic_0000002143882701_p1695443971810"></a>×</p>
 </td>
 </tr>
 <tr id="zh-cn_topic_0000002143882701_row17253142120252"><td class="cellrowborder" valign="top" width="57.99999999999999%" headers="mcps1.1.3.1.1 "><p id="zh-cn_topic_0000002143882701_p38313021813"><a name="zh-cn_topic_0000002143882701_p38313021813"></a><a name="zh-cn_topic_0000002143882701_p38313021813"></a><span id="zh-cn_topic_0000002143882701_ph58317041819"><a name="zh-cn_topic_0000002143882701_ph58317041819"></a><a name="zh-cn_topic_0000002143882701_ph58317041819"></a><term id="zh-cn_topic_0000002143882701_zh-cn_topic_0000001312391781_term71949488213"><a name="zh-cn_topic_0000002143882701_zh-cn_topic_0000001312391781_term71949488213"></a><a name="zh-cn_topic_0000002143882701_zh-cn_topic_0000001312391781_term71949488213"></a>Ascend 910</term></span></p>
 </td>
-<td class="cellrowborder" align="center" valign="top" width="42%" headers="mcps1.1.3.1.2 "><p id="zh-cn_topic_0000002143882701_p395243920186"><a name="zh-cn_topic_0000002143882701_p395243920186"></a><a name="zh-cn_topic_0000002143882701_p395243920186"></a>x</p>
+<td class="cellrowborder" align="center" valign="top" width="42%" headers="mcps1.1.3.1.2 "><p id="zh-cn_topic_0000002143882701_p395243920186"><a name="zh-cn_topic_0000002143882701_p395243920186"></a><a name="zh-cn_topic_0000002143882701_p395243920186"></a>×</p>
 </td>
 </tr>
 </tbody>
 </table>
+
 
 ## 函数功能<a name="section463019538153"></a>
 
@@ -65,13 +66,14 @@ def start(self, cb: Callable[[KernelData], None]) -> MsptiResult:
 </td>
 <td class="cellrowborder" valign="top" width="14.000000000000002%" headers="mcps1.1.4.1.2 "><p id="p187904392335"><a name="p187904392335"></a><a name="p187904392335"></a>输入</p>
 </td>
-<td class="cellrowborder" valign="top" width="72%" headers="mcps1.1.4.1.3 "><p id="p1871112011815"><a name="p1871112011815"></a><a name="p1871112011815"></a>用用于传递采集到的Kernel数据。调用结构体<a href="KernelData.md">KernelData</a>。</p>
+<td class="cellrowborder" valign="top" width="72%" headers="mcps1.1.4.1.3 "><p id="p1871112011815"><a name="p1871112011815"></a><a name="p1871112011815"></a>用于传递采集到的Kernel数据。调用结构体<a href="KernelData.md">KernelData</a>。</p>
 </td>
 </tr>
 </tbody>
 </table>
 
+
 ## 返回值说明<a name="section776014535188"></a>
 
-返回MsptiResult.MSPTI\_SUCCESS表示成功，返回MsptiResult.MSPTI\_ERROR\_INVALID\_PARAMETER，则回调函数类型不正确，表示失败。
+返回MsptiResult.MSPTI\_SUCCESS则表示成功，返回MsptiResult.MSPTI\_ERROR\_INVALID\_PARAMETER，则表示回调函数类型不正确，操作失败。
 

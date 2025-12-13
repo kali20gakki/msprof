@@ -15,9 +15,9 @@ class RangeMarkerData:
 	self.start   # Range打点的开始时间，mark打点值为0
 	self.end   # Range打点的结束时间，mark打点值为0
 class MsptiObjectId:
-	PROCESS_ID = "processId"   # 进程ID，如果为device侧数据，则固定为-1
-	THREAD_ID = "threadId"   # 线程ID，如果为device侧数据，则固定为-1
-	DEVICE_ID = "deviceId"   # 设备ID，如果为host侧数据，则固定为-1
-	STREAM_ID = "streamId"   # 流ID，如果为host侧数据，则固定为-1
+	PROCESS_ID = "processId"   # 进程ID：如果为device侧数据，则对应值固定为-1
+	THREAD_ID = "threadId"   # 线程ID：如果为device侧数据，则对应值固定为-1
+	DEVICE_ID = "deviceId"   # 设备ID：如果为host侧数据，则对应值固定为-1
+	STREAM_ID = "streamId"   # 流ID：如果为host侧数据，则对应值固定为-1
 ```
 

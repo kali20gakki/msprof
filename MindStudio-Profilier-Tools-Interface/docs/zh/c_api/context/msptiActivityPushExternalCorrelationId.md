@@ -29,16 +29,17 @@
 </tr>
 <tr id="zh-cn_topic_0000002014413733_row18403312418"><td class="cellrowborder" valign="top" width="57.99999999999999%" headers="mcps1.1.3.1.1 "><p id="zh-cn_topic_0000002014413733_p78319051815"><a name="zh-cn_topic_0000002014413733_p78319051815"></a><a name="zh-cn_topic_0000002014413733_p78319051815"></a><span id="zh-cn_topic_0000002014413733_ph1383116081815"><a name="zh-cn_topic_0000002014413733_ph1383116081815"></a><a name="zh-cn_topic_0000002014413733_ph1383116081815"></a><term id="zh-cn_topic_0000002014413733_zh-cn_topic_0000001312391781_term4363218112215"><a name="zh-cn_topic_0000002014413733_zh-cn_topic_0000001312391781_term4363218112215"></a><a name="zh-cn_topic_0000002014413733_zh-cn_topic_0000001312391781_term4363218112215"></a>Ascend 310P</term></span></p>
 </td>
-<td class="cellrowborder" align="center" valign="top" width="42%" headers="mcps1.1.3.1.2 "><p id="zh-cn_topic_0000002014413733_p1695443971810"><a name="zh-cn_topic_0000002014413733_p1695443971810"></a><a name="zh-cn_topic_0000002014413733_p1695443971810"></a>x</p>
+<td class="cellrowborder" align="center" valign="top" width="42%" headers="mcps1.1.3.1.2 "><p id="zh-cn_topic_0000002014413733_p1695443971810"><a name="zh-cn_topic_0000002014413733_p1695443971810"></a><a name="zh-cn_topic_0000002014413733_p1695443971810"></a>×</p>
 </td>
 </tr>
 <tr id="zh-cn_topic_0000002014413733_row17253142120252"><td class="cellrowborder" valign="top" width="57.99999999999999%" headers="mcps1.1.3.1.1 "><p id="zh-cn_topic_0000002014413733_p38313021813"><a name="zh-cn_topic_0000002014413733_p38313021813"></a><a name="zh-cn_topic_0000002014413733_p38313021813"></a><span id="zh-cn_topic_0000002014413733_ph58317041819"><a name="zh-cn_topic_0000002014413733_ph58317041819"></a><a name="zh-cn_topic_0000002014413733_ph58317041819"></a><term id="zh-cn_topic_0000002014413733_zh-cn_topic_0000001312391781_term71949488213"><a name="zh-cn_topic_0000002014413733_zh-cn_topic_0000001312391781_term71949488213"></a><a name="zh-cn_topic_0000002014413733_zh-cn_topic_0000001312391781_term71949488213"></a>Ascend 910</term></span></p>
 </td>
-<td class="cellrowborder" align="center" valign="top" width="42%" headers="mcps1.1.3.1.2 "><p id="zh-cn_topic_0000002014413733_p395243920186"><a name="zh-cn_topic_0000002014413733_p395243920186"></a><a name="zh-cn_topic_0000002014413733_p395243920186"></a>x</p>
+<td class="cellrowborder" align="center" valign="top" width="42%" headers="mcps1.1.3.1.2 "><p id="zh-cn_topic_0000002014413733_p395243920186"><a name="zh-cn_topic_0000002014413733_p395243920186"></a><a name="zh-cn_topic_0000002014413733_p395243920186"></a>×</p>
 </td>
 </tr>
 </tbody>
 </table>
+
 
 ## 功能说明<a name="section20806203412478"></a>
 
@@ -84,5 +85,5 @@ msptiResult msptiActivityPushExternalCorrelationId(msptiExternalCorrelationKind 
 
 ## 返回值说明<a name="section16621124213476"></a>
 
-返回MSPTI\_SUCCESS表示成功，外部关联类型无效时返回MSPTI\_ERROR\_INVALID\_PARAMETER和外部关联ID栈空时出栈返回MSPTI\_ERROR\_QUEUE\_EMPTY，表示失败。
+返回MSPTI\_SUCCESS表示成功；外部关联类型无效时返回MSPTI\_ERROR\_INVALID\_PARAMETER和外部关联ID栈空时出栈返回MSPTI\_ERROR\_QUEUE\_EMPTY，表示失败。
 

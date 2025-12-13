@@ -1,6 +1,6 @@
 # MstxMonitor.set\_buffer\_size<a name="ZH-CN_TOPIC_0000002302580593"></a>
 
-## AI处理器支持情况<a name="zh-cn_topic_0000002111094444_section5889102116569"></a>
+## AI处理器支持情况
 
 >![](public_sys-resources/icon-note.gif) **说明：** 
 >AI处理器与昇腾产品的对应关系，请参见《[昇腾产品形态说明](https://www.hiascend.com/document/detail/zh/AscendFAQ/ProduTech/productform/hardwaredesc_0001.html)》。
@@ -63,7 +63,7 @@ def set_buffer_size(cls, size: int) -> MsptiResult:
 </th>
 </tr>
 </thead>
-<tbody><tr id="row10379818172019"><td class="cellrowborder" valign="top" width="14.000000000000002%" headers="mcps1.1.4.1.1 "><p id="p1991714716347"><a name="p1991714716347"></a><a name="p1991714716347"></a>size：int</p>
+<tbody><tr id="row10379818172019"><td class="cellrowborder" valign="top" width="14.000000000000002%" headers="mcps1.1.4.1.1 "><p id="p1991714716347"><a name="p1991714716347"></a><a name="p1991714716347"></a>size:int</p>
 </td>
 <td class="cellrowborder" valign="top" width="14.000000000000002%" headers="mcps1.1.4.1.2 "><p id="p187904392335"><a name="p187904392335"></a><a name="p187904392335"></a>输入</p>
 </td>
@@ -76,5 +76,5 @@ def set_buffer_size(cls, size: int) -> MsptiResult:
 
 ## 返回值说明<a name="section776014535188"></a>
 
-返回MsptiResult.MSPTI\_SUCCESS表示成功，返回MsptiResult.MSPTI\_ERROR\_INVALID\_PARAMETER，则参数设置不正确，表示失败。
+返回MsptiResult.MSPTI\_SUCCESS表示设置成功；返回MsptiResult.MSPTI\_ERROR\_INVALID\_PARAMETER，则表示参数设置不正确，设置失败。
 

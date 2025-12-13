@@ -4,7 +4,7 @@
 
 Profiling模块提供MSPTI C接口，用于实现采集各模块性能数据。
 
-msPTI API的功能介绍和使用示例请参见[msPTI工具用户指南](../README.md)。
+msPTI API的功能介绍和使用示例请参见[msPTI工具](../README.md)。
 
 头文件路径：$\{INSTALL\_DIR\}/include/mspti。
 
@@ -22,9 +22,9 @@ $\{INSTALL\_DIR\}请替换为CANN软件安装后文件存储路径。若安装�
 |--|--|
 |**Function类型**|**Function说明**|
 |[msptiActivityRegisterCallbacks](./context/msptiActivityRegisterCallbacks.md)|向MSPTI注册回调函数，用于Activity Buffer处理。|
-|[msptiActivityEnable](./context/msptiActivityEnable)|用于使能指定Activity类型数据的采集。|
+|[msptiActivityEnable](./context/msptiActivityEnable.md)|用于使能指定Activity类型数据的采集。|
 |[msptiActivityDisable](./context/msptiActivityDisable.md)|停止收集特定类型的Activity Record。|
-|[msptiActivityGetNextRecord](./context/msptiActivityDisable.md)|依次从Activity Buffer获取Activity Record数据。|
+|[msptiActivityGetNextRecord](./context/msptiActivityGetNextRecord.md)|依次从Activity Buffer获取Activity Record数据。|
 |[msptiActivityFlushAll](./context/msptiActivityFlushAll.md)|订阅者手动Flush Activity Buffer中记录的数据。|
 |[msptiActivityFlushPeriod](./context/msptiActivityFlushPeriod.md)|设置Flush的执行周期。|
 |[msptiActivityPushExternalCorrelationId](./context/msptiActivityPushExternalCorrelationId.md)|为调用线程推送外部关联ID。|

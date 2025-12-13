@@ -1,4 +1,4 @@
-# HcclMonitor<a name="ZH-CN_TOPIC_0000002143882717"></a>
+# HcclMonitor
 
 -   **[HcclMonitor.start](HcclMonitor-start.md)**  
 

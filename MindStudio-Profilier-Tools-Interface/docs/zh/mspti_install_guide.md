@@ -32,7 +32,7 @@ run包中的arch表示系统架构，根据实际运行系统自动适配。
     ```shell
     ./Ascend-mindstudio-mspti_<version>_linux-<arch>.run --install
     ```
-    安装命令支持`--install-path=<path>`等参数，具体使用方式请参见[参数说明](#参数说明)
+    安装命令支持`--install-path=<path>`等参数，具体使用方式请参见[参数说明](#参数说明)。
 
     执行安装命令时，会自动执行--check参数，校验软件包的一致性和完整性，出现如下回显信息，表示软件包校验成功。
     ```text
@@ -40,7 +40,7 @@ run包中的arch表示系统架构，根据实际运行系统自动适配。
     ```
     安装完成后，若显示如下信息，则说明软件安装成功：
     ```text
-    MindStudio-Profilier-Tools-Interface package install success.
+    MindStudio-Profiler-Tools-Interface package install success.
     ```
 
 ## 附录
@@ -50,7 +50,7 @@ msPTI工具run包的安装命令可配置如下参数：
 
 | 参数     | 可选/必选 | 说明 |
 | --------| -------  |------|
-| --install | 必选 | 安装软件包。可配置--install-path参数指定软的安装路径；不配置--install-path参数时，则直接安装到默认路径下。 |
+| --install | 必选 | 安装软件包。可配置--install-path参数指定软件的安装路径；不配置--install-path参数时，则直接安装到默认路径下。 |
 | --install-path | 可选 | 安装路径。须和CANN包安装时指定路径保持一致，如果用户未指定安装路径，则软件会安装到默认路径下，默认安装路径如下：<br> - root用户：“/usr/local/Ascend”。<br>- 非root用户：“\${HOME}/Ascend”，${HOME}为当前用户的家目录。 |
 | --install-for-all | 可选 | 安装时，允许其他用户具有安装用户组的权限。当安装携带该参数时，支持其他用户使用msPTI运行业务，但该参数存在安全风险，请谨慎使用。 |
 

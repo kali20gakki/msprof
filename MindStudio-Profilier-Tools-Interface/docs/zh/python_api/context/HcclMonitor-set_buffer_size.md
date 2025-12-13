@@ -29,12 +29,12 @@
 </tr>
 <tr id="zh-cn_topic_0000002143882701_row18403312418"><td class="cellrowborder" valign="top" width="57.99999999999999%" headers="mcps1.1.3.1.1 "><p id="zh-cn_topic_0000002143882701_p78319051815"><a name="zh-cn_topic_0000002143882701_p78319051815"></a><a name="zh-cn_topic_0000002143882701_p78319051815"></a><span id="zh-cn_topic_0000002143882701_ph1383116081815"><a name="zh-cn_topic_0000002143882701_ph1383116081815"></a><a name="zh-cn_topic_0000002143882701_ph1383116081815"></a><term id="zh-cn_topic_0000002143882701_zh-cn_topic_0000001312391781_term4363218112215"><a name="zh-cn_topic_0000002143882701_zh-cn_topic_0000001312391781_term4363218112215"></a><a name="zh-cn_topic_0000002143882701_zh-cn_topic_0000001312391781_term4363218112215"></a>Ascend 310P</term></span></p>
 </td>
-<td class="cellrowborder" align="center" valign="top" width="42%" headers="mcps1.1.3.1.2 "><p id="zh-cn_topic_0000002143882701_p1695443971810"><a name="zh-cn_topic_0000002143882701_p1695443971810"></a><a name="zh-cn_topic_0000002143882701_p1695443971810"></a>x</p>
+<td class="cellrowborder" align="center" valign="top" width="42%" headers="mcps1.1.3.1.2 "><p id="zh-cn_topic_0000002143882701_p1695443971810"><a name="zh-cn_topic_0000002143882701_p1695443971810"></a><a name="zh-cn_topic_0000002143882701_p1695443971810"></a>×</p>
 </td>
 </tr>
 <tr id="zh-cn_topic_0000002143882701_row17253142120252"><td class="cellrowborder" valign="top" width="57.99999999999999%" headers="mcps1.1.3.1.1 "><p id="zh-cn_topic_0000002143882701_p38313021813"><a name="zh-cn_topic_0000002143882701_p38313021813"></a><a name="zh-cn_topic_0000002143882701_p38313021813"></a><span id="zh-cn_topic_0000002143882701_ph58317041819"><a name="zh-cn_topic_0000002143882701_ph58317041819"></a><a name="zh-cn_topic_0000002143882701_ph58317041819"></a><term id="zh-cn_topic_0000002143882701_zh-cn_topic_0000001312391781_term71949488213"><a name="zh-cn_topic_0000002143882701_zh-cn_topic_0000001312391781_term71949488213"></a><a name="zh-cn_topic_0000002143882701_zh-cn_topic_0000001312391781_term71949488213"></a>Ascend 910</term></span></p>
 </td>
-<td class="cellrowborder" align="center" valign="top" width="42%" headers="mcps1.1.3.1.2 "><p id="zh-cn_topic_0000002143882701_p395243920186"><a name="zh-cn_topic_0000002143882701_p395243920186"></a><a name="zh-cn_topic_0000002143882701_p395243920186"></a>x</p>
+<td class="cellrowborder" align="center" valign="top" width="42%" headers="mcps1.1.3.1.2 "><p id="zh-cn_topic_0000002143882701_p395243920186"><a name="zh-cn_topic_0000002143882701_p395243920186"></a><a name="zh-cn_topic_0000002143882701_p395243920186"></a>×</p>
 </td>
 </tr>
 </tbody>
@@ -63,7 +63,7 @@ def set_buffer_size(cls, size: int) -> MsptiResult:
 </th>
 </tr>
 </thead>
-<tbody><tr id="row10379818172019"><td class="cellrowborder" valign="top" width="14.000000000000002%" headers="mcps1.1.4.1.1 "><p id="p10791153923311"><a name="p10791153923311"></a><a name="p10791153923311"></a>size:int</p>
+<tbody><tr id="row10379818172019"><td class="cellrowborder" valign="top" width="14.000000000000002%" headers="mcps1.1.4.1.1 "><p id="p10791153923311"><a name="p10791153923311"></a><a name="p10791153923311"></a>size: int</p>
 </td>
 <td class="cellrowborder" valign="top" width="14.000000000000002%" headers="mcps1.1.4.1.2 "><p id="p187904392335"><a name="p187904392335"></a><a name="p187904392335"></a>输入</p>
 </td>
@@ -76,5 +76,5 @@ def set_buffer_size(cls, size: int) -> MsptiResult:
 
 ## 返回值说明<a name="section776014535188"></a>
 
-返回MsptiResult.MSPTI\_SUCCESS表示成功，返回MsptiResult.MSPTI\_ERROR\_INVALID\_PARAMETER，则参数设置不正确，表示失败。
+返回MsptiResult.MSPTI\_SUCCESS则表示成功；返回MsptiResult.MSPTI\_ERROR\_INVALID\_PARAMETER，则参数设置不正确，表示失败。
 
