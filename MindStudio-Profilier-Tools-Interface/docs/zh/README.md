@@ -15,14 +15,18 @@
 | Ascend 910C  |    √     |
 | Ascend 910B  |    √     |
 | Ascend 310B  |    √     |
-| Ascend 310P  |    x     |
-| Ascend 910   |    x     |
+| Ascend 310P  |    ×     |
+| Ascend 910   |    ×     |
 
 ## 使用前准备
 
 **环境准备**
 
-详情请参见[环境和依赖](../../README.md#环境和依赖)。
+- 硬件环境请参见《[昇腾产品形态说明](https://www.hiascend.com/document/detail/zh/AscendFAQ/ProduTech/productform/hardwaredesc_0001.html)》。
+
+- 软件环境请参见《[CANN 软件安装指南](https://www.hiascend.com/document/detail/zh/canncommercial/83RC1/softwareinst/instg/instg_quick.html?Mode=PmIns&InstallType=local&OS=openEuler&Software=cannToolKit)》安装昇腾设备开发或运行环境，即toolkit软件包。
+
+以上环境依赖请根据实际环境选择适配的版本。
 
 **约束**
 
@@ -30,7 +34,7 @@ msPTI工具不可与任何其他性能数据采集工具同时使用，否则会
 
 ## msPTI样例集
 
-本节提供MSPTI各种接口的使用样例，供用户理解使用MSPTI接口，样例具体说明及目录如下。
+本节提供msPTI各种接口的使用样例，供用户理解使用msPTI接口，样例具体说明及目录如下。
 
 **注意事项<a name="zh-cn_topic_0000002257378834_section9293111211496"></a>**
 
@@ -38,7 +42,7 @@ msPTI工具不可与任何其他性能数据采集工具同时使用，否则会
 
   参见《CANN 软件安装指南》。
 
-- MSPTI Python API部分的样例依赖于PyTorch框架和torch\_npu插件，请确保安装。
+- msPTI Python API部分的样例依赖于PyTorch框架和torch\_npu插件，请确保安装。
 
   参见《Ascend Extension for PyTorch 软件安装指南》中的“安装PyTorch”。
 
@@ -46,11 +50,11 @@ msPTI工具不可与任何其他性能数据采集工具同时使用，否则会
 
 **构建样例执行<a name="zh-cn_topic_0000002257378834_section6122533557"></a>**
 
-1. 安装CANN软件后，使用CANN运行用户进行编译、运行时，需要以CANN运行用户登录环境，执行**source $_\{install\_path\}_/set\_env.sh**命令设置环境变量。其中$\{install\_path\}为CANN软件的安装目录，例如：/usr/local/Ascend/ascend-toolkit。
+1. 安装CANN软件后，使用CANN运行用户进行编译、运行时，需要以CANN运行用户登录环境，执行source $_\{install\_path\}_/set\_env.sh命令设置环境变量。其中$\{install\_path\}为CANN软件的安装目录，例如：/usr/local/Ascend/ascend-toolkit。
 
 2. 进入样例目录。
 
-   MSPTI样例代码集成在Ascend-cann-toolkit包中，路径为$\{INSTALL\_DIR\}/tools/mspti/samples。
+   msPTI样例代码集成在Ascend-cann-toolkit包中，路径为$\{INSTALL\_DIR\}/tools/mspti/samples。
 
    $\{INSTALL\_DIR\}请替换为CANN软件安装后文件存储路径。若安装的Ascend-cann-toolkit软件包，以root安装举例，则安装后文件存储路径为：/usr/local/Ascend/ascend-toolkit/latest。
 
@@ -68,7 +72,7 @@ msPTI工具不可与任何其他性能数据采集工具同时使用，否则会
 
 下表为当前提供的样例介绍：
 
-- Callback Api
+- Callback API
 
   | 样例                                             | 说明                                                         | AI处理器支持情况            |
   | ------------------------------------------------ | ------------------------------------------------------------ | --------------------------- |

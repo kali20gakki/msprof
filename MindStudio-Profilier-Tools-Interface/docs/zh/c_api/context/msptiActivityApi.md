@@ -12,7 +12,7 @@ typedef struct PACKED_ALIGNMENT {
 		uint32_t threadId;   // API运行流的线程ID
 	} pt;
 	uint64_t correlationId;   // API的关联ID。每个API执行都被分配一个唯一的关联ID，该关联ID与启动API的驱动程序或运行时API Activity Record的关联ID相同
-	const char* name;   // API的名称，该名称在整个Activity Record中保持一致，不建议修改
+	const char* name;   // API的名称，该名称在整个Activity Record中保持一致，不建议更改
 } msptiActivityApi;
 ```
 

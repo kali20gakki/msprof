@@ -52,7 +52,7 @@ typedef void(*msptiBuffersCallbackCompleteFunc)(uint8_t *buffer, size_t size, si
 
 ## 参数说明<a name="section11506138144714"></a>
 
-**表 1**  参数说明
+**表 2**  参数说明
 
 <a name="table827101275518"></a>
 <table><thead align="left"><tr id="row429121265517"><th class="cellrowborder" valign="top" width="28.65286528652865%" id="mcps1.2.4.1.1"><p id="p1329121214558"><a name="p1329121214558"></a><a name="p1329121214558"></a>参数名</p>
