@@ -1954,10 +1954,10 @@ op\_summary\_\*.csv文件根据msprof采集参数取值不同，文件呈现结�
 
 |字段名|字段含义|
 |--|--|
-|*_write_cache_hit|写cache命中的次数。|
-|*_write_cache_miss_allocate|写cache缺失后重新分配缓存的次数。|
-|*_r*_read_cache_hit|读r*通道cache命中次数。|
-|*_r*_read_cache_miss_allocate|读r*通道cache缺失后重新分配的次数。|
+|`*_write_cache_hit`|写cache命中的次数。|
+|`*_write_cache_miss_allocate`|写cache缺失后重新分配缓存的次数。|
+|`*_r*_read_cache_hit`|读r*通道cache命中次数。|
+|`*_r*_read_cache_miss_allocate`|读r*通道cache缺失后重新分配的次数。|
 
 注：对于部分产品，部分字段在该表中使用*前缀指代aic或aiv，表示该数据是在Cube Core或Vector Core上执行的结果。
 
@@ -2464,7 +2464,7 @@ npu\_module\_mem\_\*.csv文件内容格式示例如下：
 |Device_id|设备ID。|
 |Component|组件名称。|
 |Timestamp(us)|时间戳，单位us。可查看组件在当前时刻占用的内存。|
-|Total Reserved(KB)|内存占用大小，单位kB。若为-1，则可能是该组件只采集到了释放的内存。|
+|Total Reserved(KB)|内存占用大小，单位KB。若为-1，则可能是该组件只采集到了已释放的内存。|
 |Device|设备类型和设备ID，仅涉及NPU。|
 
 
@@ -3010,7 +3010,7 @@ pcie\_\*.csv文件内容格式示例如下：
 |字段名|字段含义|
 |--|--|
 |Device_id|设备ID。|
-|Mode|模式，包含：<br>Tx_p_avg(MB/s)：发送端PCIe Post数据传输带宽，单位MB/s。Tx表示发送端，Rx表示接收端。<br/>Tx_np_avg(MB/s)：发送端PCIe Non-Post数据传输带宽，单位MB/s。<br/>Tx_cpl_avg(MB/s)：发送端接收写请求的完成数据包，单位MB/s。<br/>Tx_latency_avg(us)：发送端PCIe Non-Post模式下的传输时延，单位us。<br/>Rx_p_avg(MB/s)：接收端PCIe Post数据传输带宽，单位MB/s。<br/>Rx_np_avg(MB/s)：接收端PCIe Non-Post数据传输带宽，单位MB/s。<br/>Rx_cpl_avg(MB/s)：接收端接收写请求的完成数据包，单位MB/s。|
+|Mode|模式，包含：<br>&#8226; Tx_p_avg(MB/s)：发送端PCIe Post数据传输带宽，单位MB/s。Tx表示发送端，Rx表示接收端。<br/>&#8226; Tx_np_avg(MB/s)：发送端PCIe Non-Post数据传输带宽，单位MB/s。<br/>&#8226; Tx_cpl_avg(MB/s)：发送端接收写请求的完成数据包，单位MB/s。<br/>&#8226; Tx_latency_avg(us)：发送端PCIe Non-Post模式下的传输时延，单位us。<br/>&#8226; Rx_p_avg(MB/s)：接收端PCIe Post数据传输带宽，单位MB/s。<br/>&#8226; Rx_np_avg(MB/s)：接收端PCIe Non-Post数据传输带宽，单位MB/s。<br/>&#8226; Rx_cpl_avg(MB/s)：接收端接收写请求的完成数据包，单位MB/s。|
 |Min、Max、Avg|最小值、最大值、平均值。|
 
 
@@ -3187,8 +3187,10 @@ msprof\_\*.json文件LLC层级数据如下图所示。
 
 |字段名|字段含义|
 |--|--|
-|LLC <id> Read/ThroughputLLC <id> Write/Throughput|三级缓存读取、写入时的吞吐量。|
-|LLC <id> Read/Hit RateLLC <id> Write/Hit Rate|三级缓存读取、写入时的命中率。|
+|LLC <id> Read/Throughput|三级缓存读取时的吞吐量。|
+|LLC <id> Write/Throughput|三级缓存写入时的吞吐量。|
+|LLC <id> Read/Hit Rate|三级缓存读取时的命中率。|
+|LLC <id> Write/Hit Rate|三级缓存读写入时的命中率。|
 
 
 **llc\_read\_write\_\*.csv文件说明<a name="zh-cn_topic_0000001750960004_section11791341554"></a>**
@@ -3650,7 +3652,6 @@ Host侧syscall和pthreadcall数据timeline信息在msprof\_\*.json文件的OS Ru
 |Ascend 310B|√|
 |Ascend 310P|√|
 |Ascend 910|√|
-
 
 **msprof\_\*.json文件的OS Runtime API层级数据说明<a name="zh-cn_topic_0000001751778218_section11622953115117"></a>**
 

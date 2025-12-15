@@ -44,17 +44,27 @@ msprof命令行工具是通过msprof.py封装的，支持性能数据的通用�
 使用该工具前，请了解相关使用约束：
 
 -   权限约束
-    -   用户须自行保证使用最小权限原则（如禁止other用户可写，常见如禁止666、777）。
+    -   用户须自行保证使用最小权限原则（如禁止other用户拥有写权限，常见如禁止666、777）。
     -   使用性能分析工具前请确保执行用户的umask值大于等于0027，否则会导致获取的性能数据所在目录和文件权限过大。
     -   出于安全性及权限最小化角度考虑，本工具不应使用root等高权限账户，建议使用普通用户权限执行。
     -   本工具为开发调测工具，不建议在生产环境使用。
     -   请确保性能数据保存在不含软链接的当前用户目录下，否则可能引起安全问题。
 
 -   数据落盘约束
-    -   解析性能数据过程中如果配置的落盘路径磁盘或用户目录空间已满，会出现解析失败或文件无法落盘的情况，须自行清理磁盘或用户目录空间。
-
+    
+-   解析性能数据过程中如果配置的落盘路径磁盘或用户目录空间已满，会出现解析失败或文件无法落盘的情况，须自行清理磁盘或用户目录空间。
+    
 -   兼容性和场景约束
+    
     -   工具要求Python 3.7.5及以上版本。
+    
+-   其他约束
+
+    -   本工具中需要指定路径的参数，要求路径中不能包含如下特殊字符。
+
+        ```
+        "\n", "\\n", "\f", "\\f", "\r", "\\r", "\b", "\\b", "\t", "\\t", "\v", "\\v", "\u007F", "\\u007F", "\"", "\\\"", "'", "\'", "\\", "\\\\", "%", "\\%", ">", "\\>", "<", "\\<", "|", "\\|", "&", "\\&", "$", "\\$", ";", "\\;", "`", "\\`"
+        ```
 
 ## 解析并导出性能数据
 
@@ -92,8 +102,8 @@ msprof --export=on --output=<dir> [--type=<type>] [--reports=<reports_sample_con
 |参数|**可选/必选**|说明|
 |--|--|--|
 |--export|必选|解析并导出性能数据。可选on或off，默认值为off。<br>&#8226; on：表示开启<br/>&#8226; off：表示关闭<br/>若需导出个别模型（Model ID）/迭代（Iteration ID）的数据，可在msprof采集命令执行完成后重新执行msprof --export命令配置--model-id、--iteration-id参数。<br/>对于未解析的PROF*_*XXX文件，自动解析后再导出。<br/>示例：msprof --export=on --output=/home/HwHiAiUser|
-|--output|必选|性能数据文件目录。须指定为PROF*_*XXX目录或PROF*_*XXX目录的父目录，例如：/home/profiler_data/PROF_XXX。<br/>路径中不能包含特殊字符："\n", "\\n", "\f", "\\f", "\r", "\\r", "\b", "\\b", "\t", "\\t", "\v", "\\v", "\u007F", "\\u007F", "\"", "\\\"", "'", "\'", "\\", "\\\\", "%", "\\%", "&gt;", "\\&gt;", "&lt;", "\\&lt;", "。|
-|--type|可选|设置性能数据解析结果文件格式，即可以选择msprof命令行执行采集后自动解析的结果文件格式，取值为：<br/>&#8226; text：表示解析为.json和.csv格式的timeline和summary文件和.db格式文件（msprof\_时间戳.db），详见[性能数据文件参考](profile_data_file_references.md)。支持CANN 7.0.0及以上版本的性能数据解析。<br/>&#8226; db：仅解析为一个汇总所有性能数据的.db格式文件（msprof_时间戳.db），使用MindStudio Insight工具展示。当前该格式数据与text参数解析的数据信息量存在差异，建议使用text方式采集。配置db时，仅支持**msprof** **--export**命令的**--output**参数，不支持**msprof** **--export**命令的其他参数。<br/>默认为text。|
+|--output|必选|性能数据文件目录。须指定为PROF*_*XXX目录或PROF*_*XXX目录的父目录，例如：/home/profiler_data/PROF_XXX。|
+|--type|可选|设置性能数据解析结果文件格式，即可以选择msprof命令行执行采集后自动解析的结果文件格式，取值为：<br/>&#8226; text：表示解析为json和csv格式的timeline和summary文件和db格式文件（msprof\_时间戳.db），详见[性能数据文件参考](profile_data_file_references.md)。支持CANN 7.0.0及以上版本的性能数据解析。<br/>&#8226; db：仅解析为一个汇总所有性能数据的db格式文件（msprof_时间戳.db），使用MindStudio Insight工具展示。当前该格式数据与text参数解析的数据信息量存在差异，建议使用text方式采集。配置db时，仅支持**msprof** **--export**命令的**--output**参数，不支持**msprof** **--export**命令的其他参数。<br/>默认为text。|
 |--reports|可选|传入用户自定义的reports_sample_config.json配置文件，会根据配置文件中指定的范围导出相应的性能数据。详见[使用示例（--reports参数）](#zh-cn_topic_0000001265229686_section1128153151819)。|
 |--iteration-id|可选|迭代ID。需配置为正整数。默认值为1。与--model-id必须同时配置。<br/>&#8226; 对于Ascend 910B和Ascend 910C，支持--model-id=4294967295，表示指定以Step为粒度统计的迭代ID（每执行完成一个Step，Iteration ID加1）。仅支持解析MindSpore（版本号大于等于2.3）框架的性能数据。<br/>&#8226; --model-id配置为其他值时，指定以Graph为粒度统计的迭代ID（每个Graph执行一次，Iteration ID加1，当一个脚本被编译为多个Graph时，该ID与脚本层面的Step ID不一致）。|
 |--model-id|可选|模型ID。需配置为正整数。与--iteration-id必须同时配置。<br/>&#8226; 对于Ascend 910B和Ascend 910C，支持--model-id=4294967295，为Step模式，即--iteration-id配置的值以Step为粒度解析。仅支持解析MindSpore（版本号大于等于2.3）框架的性能数据。<br/>&#8226; --model-id配置为其他值时，为Graph模式，即--iteration-id配置的值以Graph为粒度解析。|
@@ -123,8 +133,6 @@ msprof --export=on --output=/home/profiler_data/PROF_XXX --reports=${INSTALL_DIR
 ```
 
 $\{INSTALL\_DIR\}请替换为CANN软件安装后文件存储路径。若安装的Toolkit软件包，以root安装举例，则安装后文件存储路径为：/usr/local/Ascend/ascend-toolkit/latest。
-
-路径中不能包含特殊字符："\\n", "\\\\n", "\\f", "\\\\f", "\\r", "\\\\r", "\\b", "\\\\b", "\\t", "\\\\t", "\\v", "\\\\v", "\\u007F", "\\\\u007F", "\\"", "\\\\\\"", "'", "\\'", "\\\\", "\\\\\\\\", "%", "\\\\%", "\>", "\\\\\>", "&lt;", "\\\\&lt;", "|", "\\\\|", "&", "\\\\&", "$", "\\\\$", ";", "\\\\;", "\`", "\\\\\`"。
 
 >![](public_sys-resources/icon-note.gif) **说明：** 
 >-   --reports参数指定的是reports\_sample\_config.json文件。需要与--export同时配置，仅支持--type=text，且仅支持对json文件的timeline数据进行控制，csv文件的summary数据依然为全量导出。
@@ -274,7 +282,7 @@ msprof --query=on --output=<dir>
 |参数|**可选/必选**|说明|
 |--|--|--|
 |--query|必选|查询性能数据文件信息。可选on或off，默认值为off。<br>&#8226; on：表示开启<br>&#8226; off：表示关闭<br/>当完成解析后，可以通过本参数查询性能数据文件信息。|
-|--output|必选|解析后的性能数据文件目录。须指定为PROF_XXX目录或PROF*_*XXX目录的父目录，例如：/home/profiler_data/PROF_XXX。<br/>路径中不能包含特殊字符："\n", "\\n", "\f", "\\f", "\r", "\\r", "\b", "\\b", "\t", "\\t", "\v", "\\v", "\u007F", "\\u007F", "\"", "\\\"", "'", "\'", "\\", "\\\\", "%", "\\%", ">", "\\>", "<", "\\<", "。|
+|--output|必选|解析后的性能数据文件目录。须指定为PROF_XXX目录或PROF*_*XXX目录的父目录，例如：/home/profiler_data/PROF_XXX。|
 
 **使用示例<a name="zh-cn_topic_0000001265069802_section1418112291310"></a>**
 
@@ -344,7 +352,7 @@ msprof --parse=on --output=<dir>
 |参数|**可选/必选**|说明|
 |--|--|--|
 |--parse|必选|解析原始性能数据文件。可选on或off，默认值为off。<br>&#8226; on：表示开启<br/>&#8226; off：表示关闭|
-|--output|必选|原始性能数据文件目录。须指定为PROF*_*XXX目录或PROF*_*XXX目录的父目录，例如：/home/profiler_data/PROF_XXX。<br/>路径中不能包含特殊字符："\n", "\\n", "\f", "\\f", "\r", "\\r", "\b", "\\b", "\t", "\\t", "\v", "\\v", "\u007F", "\\u007F", "\"", "\\\"", "'", "\'", "\\", "\\\\", "%", "\\%", ">", "\\>", "<", "\\<", "。|
+|--output|必选|原始性能数据文件目录。须指定为PROF*_*XXX目录或PROF*_*XXX目录的父目录，例如：/home/profiler_data/PROF_XXX。|
 |--python-path|可选|指定解析使用的Python解释器路径，要求Python 3.7.5及以上版本。|
 
 **使用示例<a name="zh-cn_topic_0000001265229730_section16676746151716"></a>**
@@ -357,7 +365,7 @@ msprof --parse=on --output=/home/profiler_data/PROF_XXX
 
 **输出说明<a name="section1110932215311"></a>**
 
-执行完上述命令，会打印展示性能数据文件信息并在PROF\_XXX的device_\_\{id\}_和host目录下生成sqlite目录，sqlite目录下会有.db文件生成。
+执行完上述命令，会打印展示性能数据文件信息并在PROF\_XXX的device_\_\{id\}_和host目录下生成sqlite目录，sqlite目录下会有db文件生成。
 
 需要继续导出最终结果的timeline数据或db文件，可执行[解析并导出性能数据](#解析并导出性能数据)。
 
@@ -414,7 +422,7 @@ python3 msprof.py analyze [--type <type>] --rule communication -dir <dir> [--cle
 |--analyze|必选|分析性能数据文件，可选on或off，默认值为off。<br>&#8226; on：表示开启<br/>&#8226; off：表示关闭|
 |--type|可选|设置性能数据解析结果文件格式，即可以选择msprof命令行执行后自动解析的结果文件格式，取值为：<br/>text：表示解析为json格式文件和communication_analyzer.db文件。<br/>db：表示解析为communication_analyzer.db文件。<br/>默认为text。|
 |--rule|可选|分析规则，取值为：<br/>&#8226; communication：分析通信类数据。<br/>&#8227; --type=text时，在PROF_XXX/analyze目录下生成communication.json文件，展示单卡所有通信算子通信耗时、带宽等详细信息，如[图4](#zh-cn_topic_0000001631250206_fig176088819116)所示；以及生成communication_analyzer.db文件。<br/>&#8227; --type=db时，在PROF_XXX/analyze目录下仅生成communication_analyzer.db文件，保存CommAnalyzerTime（通信耗时）和CommAnalyzerBandwidth（通信带宽）信息表。<br/>&#8226; communication_matrix：分析通信矩阵数据。<br/>&#8227; --type=text时，在PROF_XXX/analyze目录下生成communication_matrix.json文件，展示通信小算子基本的信息，包含通信size、通信带宽、通信rank等信息，用于分析通信细节，如[图5](#zh-cn_topic_0000001631250206_fig182611711341)所示；以及生成communication_analyzer.db文件。<br/>&#8227; --type=db时，在PROF_XXX/analyze目录下仅生成communication_analyzer.db文件，保存CommAnalyzerMatrix（通信矩阵）信息表。<br/>以上两个参数值可以同时配置，使用逗号分隔，例如**：--rule**=communication,communication_matrix。<br/>默认同时设置以上两个参数值。|
-|--output|必选|性能数据文件目录。须指定为PROF*_*XXX目录，例如：/home/HwHiAiUser/profiler_data/PROF_XXX。<br>路径中不能包含特殊字符："\n", "\\n", "\f", "\\f", "\r", "\\r", "\b", "\\b", "\t", "\\t", "\v", "\\v", "\u007F", "\\u007F", "\"", "\\\"", "'", "\'", "\\", "\\\\", "%", "\\%", ">", "\\>", "<", "\\<", "。|
+|--output|必选|性能数据文件目录。须指定为PROF*_*XXX目录，例如：/home/HwHiAiUser/profiler_data/PROF_XXX。|
 |--clear|可选|数据精简模式，开启后将在导出性能数据后删除PROF_XXX目录下的sqlite目录，以节省存储空间。可选on或off，默认值为off。|
 
 
@@ -425,8 +433,8 @@ python3 msprof.py analyze [--type <type>] --rule communication -dir <dir> [--cle
 |analyze|必选|分析性能数据文件。|
 |--type|可选|设置性能数据解析结果文件格式，即可以选择msprof.py脚本执行后自动解析的结果文件格式，取值为：<br/>&#8226; text：表示解析为json格式文件和communication_analyzer.db文件。<br/>&#8226; db：表示解析为communication_analyzer.db文件。默认为text。|
 |-r或--rule|必选|分析规则，取值为：<br/>&#8226; communication：分析通信类数据。<br/>&#8227; --type text时，在PROF_XXX/analyze目录下生成communication.json文件，展示单卡所有通信算子通信耗时、带宽等详细信息，如[图4](#zh-cn_topic_0000001631250206_fig176088819116)所示；以及生成communication_analyzer.db文件。<br/>&#8227; --type db时，在PROF_XXX/analyze目录下仅生成communication_analyzer.db文件，保存CommAnalyzerTime（通信耗时）和CommAnalyzerBandwidth（通信带宽）信息表。<br/>&#8226; communication_matrix：分析通信矩阵数据。<br/>&#8227; --type text时，在PROF_XXX/analyze目录下生成communication_matrix.json文件，展示通信小算子基本的信息，包含通信size、通信带宽、通信rank等信息，用于分析通信细节，如[图5](#zh-cn_topic_0000001631250206_fig182611711341)所示；以及生成communication_analyzer.db文件。<br/>&#8227; --type db时，在PROF_XXX/analyze目录下仅生成communication_analyzer.db文件，保存CommAnalyzerMatrix（通信矩阵）信息表。<br/>以上两个参数值可以二选一也可以同时配置，同时配置时使用逗号分隔，例如**：--rule**communication,communication_matrix。|
-|-dir或--collection-dir|必选|性能数据文件目录。须指定为PROF*_*XXX目录，例如：/home/profiler_data/PROF_XXX。<br>路径中不能包含特殊字符："\n", "\\n", "\f", "\\f", "\r", "\\r", "\b", "\\b", "\t", "\\t", "\v", "\\v", "\u007F", "\\u007F", "\"", "\\\"", "'", "\'", "\\", "\\\\", "%", "\\%", ">", "\\>", "<", "\\<", "。|
-|--clear|可选|数据精简模式，开启后将在导出性能数据后删除PROF_XXX目录下的sqlite目录，以节省存储空间。配置该参数时表示开启数据精简模式，未配置表示关闭，默认关闭。|
+|-dir或--collection-dir|必选|性能数据文件目录。须指定为PROF*_*XXX目录，例如：/home/profiler_data/PROF_XXX。|
+|--clear|可选|数据精简模式，开启后将在导出性能数据后删除PROF_XXX目录下的sqlite目录，以节省存储空间。配置该参数时表示开启数据精简模式，默认未配置该参数，表示关闭。|
 
 
 **使用示例（msprof命令行方式）<a name="zh-cn_topic_0000001631250206_section627382494419"></a>**
