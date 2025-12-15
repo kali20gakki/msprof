@@ -7,8 +7,10 @@ pylocal=y
 
 function get_right() {
     if [ "$install_for_all_flag" = 1 ] || [ "$UID" = "0" ]; then
+        mspti_right=${root_mspti_right}
         right=${root_right}
     else
+        mspti_right=${user_mspti_right}
         right=${user_right}
     fi
 }
@@ -41,9 +43,13 @@ function install_whl_package() {
 }
 
 function implement_install() {
-    copy_file ${LIBMSPTI} ${install_path}/${LIBMSPTI_PATH}/lib64/${LIBMSPTI}
+    for header in "${MSPTI_HEADER[@]}"; do
+        copy_file ${header} ${install_path}/${LIBMSPTI_PATH}/include/${header} ${mspti_right}
+    done
+    copy_file ${LIBMSPTI} ${install_path}/${LIBMSPTI_PATH}/lib64/${LIBMSPTI} ${mspti_right}
+    copy_file ${SAMPLES} ${install_path}/${LIBMSPTI_PATH}/${SAMPLES} ${right}
     mspti_whl=${install_path}/${LIBMSPTI_PATH}/python/${MSPTI_WHL}
-    copy_file ${MSPTI_WHL} $mspti_whl
+    copy_file ${MSPTI_WHL} $mspti_whl ${right}
     install_whl_package $pylocal $mspti_whl ${install_path}/python/site-packages
     if [ $? -ne 0 ]; then
         print $LEVEL_ERROR "Install mspti whl failed."
@@ -54,6 +60,7 @@ function implement_install() {
 function copy_file() {
     local filename=${1}
     local target_file=$(readlink -f ${2})
+    local _right=${3}
 
     if [ ! -f "$filename" ] && [ ! -d "$filename" ]; then
         return
@@ -68,7 +75,7 @@ function copy_file() {
         rm -r ${target_file}
 
         cp -r ${filename} ${target_file}
-        chmod -R ${right} ${target_file}
+        chmod -R ${_right} ${target_file}
         chmod ${parent_right} ${parent_dir}
 
         print $LEVEL_INFO "$filename is replaced."
@@ -77,24 +84,9 @@ function copy_file() {
     print $LEVEL_WARNING "Target $filename is non-existent."
 }
 
-function set_libmspti_right() {
-    libmspti_right=${user_libmspti_right}
-    if [ "$install_for_all_flag" = "1" ] || [ "$UID" = "0" ]; then
-        libmspti_right=${root_libmspti_right}
-    fi
-}
-
-function chmod_libmspti() {
-    if [ -f "${install_path}/${LIBMSPTI_PATH}/lib64/${LIBMSPTI}" ]; then
-        chmod ${libmspti_right} "${install_path}/${LIBMSPTI_PATH}/lib64/${LIBMSPTI}"
-    fi
-}
-
 source utils.sh
 
 right=${user_right}
 arch_name="${package_arch}-linux"
 get_right
 implement_install
-set_libmspti_right
-chmod_libmspti
