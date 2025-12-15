@@ -1,25 +1,28 @@
 #!/bin/bash
 # right constant
-root_right=555
-user_right=550
+root_right=755
+user_right=750
 
 script_right=500
 
-root_libmspti_right=444
-user_libmspti_right=440
+root_mspti_right=555
+user_mspti_right=550
 
 PATH_LENGTH=4096
 
 MSPTI_RUN_NAME="MindStudio-Profilier-Tools-Interface"
 # product constant
 LIBMSPTI="libmspti.so"
+SAMPLES="samples"
 LIBMSPTI_PATH="tools/mspti"
 MSPTI_WHL="mspti-0.0.1-py3-none-any.whl"
-
-# spc dir
-SPC_DIR="spc"
-BACKUP_DIR="backup"
-SCRIPT_DIR="script"
+MSPTI_HEADER=(
+    mspti.h
+    mspti_activity.h
+    mspti_callback.h
+    mspti_cbid.h
+    mspti_result.h
+)
 
 # log level
 LEVEL_ERROR="ERROR"
@@ -80,7 +83,7 @@ function check_path() {
         exit 1
     fi
     # check the existence of the path
-    if [ ! -e "$install_path/ascend-toolkit" ]; then
+    if [ ! -e "${install_path}" ]; then
         print $LEVEL_ERROR "The path ${install_path} does not exist, please check."
         exit 1
     fi
