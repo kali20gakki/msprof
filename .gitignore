@@ -21,10 +21,6 @@ platform/
 build/prefix
 build/build
 
-# mspti build cache
-mspti/whl/mspti.egg-info/
-mspti/whl/mspti/lib64/
-
 # test cache file
 test/build_llt
 test/output

@@ -1,3 +1,0 @@
-add_subdirectory(context_manager_test)
-add_subdirectory(function_loader_test)
-add_subdirectory(utils_test)

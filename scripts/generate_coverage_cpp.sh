@@ -56,16 +56,6 @@ test_obj=(
     device_persistence_utest
     data_process_utest
     export_assemble_utest
-    activity_utest
-    dev_prof_task_utest
-    callback_utest
-    context_manager_utest
-    mspti_utils_utest
-    mspti_channel_utest
-    mspti_parser_utest
-    mspti_reporter_utest
-    function_loader_utest
-    mspti_adapter_utest
 )
 
 str_test=""

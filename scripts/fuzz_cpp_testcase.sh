@@ -101,11 +101,11 @@ while getopts "t:m:h" opt; do
             fi
             ;;
         m )
-            if [[ $OPTARG == "all" || $OPTARG == "mspti" || $OPTARG == "analysis" || $OPTARG == "collector" ]]; then
+            if [[ $OPTARG == "all" || $OPTARG == "analysis" || $OPTARG == "collector" ]]; then
                 FUZZ_RUN_MODULE=$OPTARG
             else
                 echo "*************[WARNING] invalid fuzz execution module"
-                echo "*************[WARNING] please input in [all|collector|mspti|analysis]"
+                echo "*************[WARNING] please input in [all|collector|analysis]"
                 exit 1
             fi
             ;;
@@ -113,7 +113,7 @@ while getopts "t:m:h" opt; do
             echo "[INFO] Description for msprof fuzz testcase shell..."
             echo "[INFO] Options:"
             echo "[INFO] -t------------Fuzz execution time, default time: 1000000"
-            echo "[INFO] -m------------Fuzz execution module, can be set in [all(default)|collector|mspti|analysis]"
+            echo "[INFO] -m------------Fuzz execution module, can be set in [all(default)|collector|analysis]"
             echo "[INFO] -h------------Fuzz execution shell help"
             exit 0
             ;;
