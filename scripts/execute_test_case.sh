@@ -30,21 +30,15 @@ function add_gcov_excl_line_for_collector() {
     sed -i -e 's/^[[:blank:]]*};/&\/\/ LCOV_EXCL_LINE/' ${TOP_DIR}/collector/dvvp/message/prof_json_config.h
 }
 
-function add_gcov_excl_line_for_mspti() {
-    find ${TOP_DIR}/mspti -name "*.cpp" -type f -exec sed -i -e 's/^[[:blank:]]*MSPTI_.*;/& \/\/ LCOV_EXCL_LINE/g' -e '/^[[:blank:]]*MSPTI_.*[,"]$/,/.*;$/ s/;$/& \/\/ LCOV_EXCL_LINE/g' {} \;
-}
-
 function add_gcov_excl_line() {
     add_gcov_excl_line_for_analysis
     add_gcov_excl_line_for_collector
-    add_gcov_excl_line_for_mspti
 }
 
 function change_file_to_unix_format()
 {
     find ${TOP_DIR}/analysis/csrc -type f -exec sed -i 's/\r$//' {} +
     find ${TOP_DIR}/collector/dvvp -type f -exec sed -i 's/\r$//' {} +
-    find ${TOP_DIR}/mspti -type f -exec sed -i 's/\r$//' {} +
 }
 
 mkdir -p ${TOP_DIR}/test/build_llt
@@ -53,8 +47,6 @@ if [[ -n "$1" && "$1" == "analysis" ]]; then
     cmake ../ -DPACKAGE=ut -DMODE=analysis
 elif [[ -n "$1" && "$1" == "collector" ]]; then
     cmake ../ -DPACKAGE=ut -DMODE=collector
-elif [[ -n "$1" && "$1" == "mspti" ]]; then
-    cmake ../ -DPACKAGE=ut -DMODE=mspti
 elif [[ -n "$1" && "$1" == "all" ]]; then
     cmake ../ -DPACKAGE=ut -DMODE=all
 else

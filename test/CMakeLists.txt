@@ -43,19 +43,3 @@ ExternalProject_Add(analysis_llt
     DEPENDS gtest_build mockcpp_build
 )
 endif()
-
-if(MODE STREQUAL all OR MODE STREQUAL mspti)
-ExternalProject_Add(mspti_llt
-    SOURCE_DIR ${TOP_DIR}/test/msprof_cpp/mspti_ut
-    CONFIGURE_COMMAND ${CMAKE_COMMAND}
-                -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
-                -DPACKAGE=${PACKAGE}
-                -DFULL_COVERAGE=true
-                -DCOVERAGE_RC_CONFIG=true
-                <SOURCE_DIR>
-    BUILD_COMMAND $(MAKE)
-    INSTALL_COMMAND "" # llt install
-    BUILD_ALWAYS TRUE
-    DEPENDS gtest_build mockcpp_build
-)
-endif()
