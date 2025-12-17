@@ -1,14 +1,18 @@
-// /* ******************************************************************************
-//             版权所有 (c) 华为技术有限公司 2024-2024
-//             Copyright, 2024, Huawei Tech. Co., Ltd.
-// ****************************************************************************** *
-// /* ******************************************************************************
-//  * File Name          : task_type_parser_item.h
-//  * Description        : taskType数据类型解析头文件
-//  * Author             : msprof team
-//  * Creation Date      : 24-4-29 下午3:49
-//  * *****************************************************************************
-//  *
+/* -------------------------------------------------------------------------
+ * Copyright (c) 2025 Huawei Technologies Co., Ltd.
+ * This file is part of the MindStudio project.
+ *
+ * MindStudio is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *
+ *    http://license.coscl.org.cn/MulanPSL2
+ *
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ * -------------------------------------------------------------------------*/
 
 #ifndef MSPROF_ANALYSIS_DOMAIN_SERVICES_PARSER_PARSER_ITEM_TASK_TYPE_PARSER_ITEM_H
 #define MSPROF_ANALYSIS_DOMAIN_SERVICES_PARSER_PARSER_ITEM_TASK_TYPE_PARSER_ITEM_H

@@ -1,14 +1,18 @@
-/* ******************************************************************************
-            版权所有 (c) 华为技术有限公司 2023-2023
-            Copyright, 2023, Huawei Tech. Co., Ltd.
-****************************************************************************** */
-/* ******************************************************************************
- * File Name          : chunk_generator.cpp
- * Description        : 数据chunk生成类
- * Author             : msprof team
- * Creation Date      : 2023/11/18
- * *****************************************************************************
- */
+/* -------------------------------------------------------------------------
+ * Copyright (c) 2025 Huawei Technologies Co., Ltd.
+ * This file is part of the MindStudio project.
+ *
+ * MindStudio is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *
+ *    http://license.coscl.org.cn/MulanPSL2
+ *
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ * -------------------------------------------------------------------------*/
 
 #include "analysis/csrc/infrastructure/dfx/log.h"
 #include "analysis/csrc/infrastructure/dfx/error_code.h"
