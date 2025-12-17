@@ -4,7 +4,7 @@
 本文档主要介绍msProf工具的安装方式。
 
 ## 安装前准备
-安装配套版本的CANN Toolkit开发套件包并配置CANN环境变量，具体请参见《CANN软件安装指南》中“选择安装场景”章节的“训练&推理&开发调试”场景。
+已完成安装配套版本的CANN Toolkit开发套件包和ops算子包并配置CANN环境变量，具体请参见《CANN软件安装指南》。
 
 ## 安装run包
 
@@ -26,11 +26,11 @@
     ```
 
 3. 编译run包。
- 
+
    编译命令支持通过--mode参数，分别编译包含msProf采集和解析功能的软件包或仅包含msProf采集功能以及仅包含msProf解析功能的软件包，更多编译参数详细介绍请参见[编译run包参数说明](#编译run包参数说明)。
 
    其中msProf采集功能采集的是原始性能数据（不可直接查看，需通过msProf解析工具解析出交付件查看）；msProf解析功能将原始性能数据进行解析，并导出可查看的交付件。
-    
+   
    操作方式如下：
 
    - 编译采集和解析包
@@ -41,7 +41,7 @@
        # 编译采集、解析包
        bash build/build.sh --mode=all --version=[<version>]
        ```
-        
+       
    - 编译采集包
       ```shell
        cd msprof
@@ -57,7 +57,7 @@
        bash scripts/download_thirdparty.sh
        # 编译解析包
        bash build/build.sh --version=[<version>]
-       ```
+      ```
 
      编译完成后，会在msprof/output目录下生成msProf工具的run包，run包名称格式为`Ascend-mindstudio-msprof_<version>_linux-<arch>.run`。
    
@@ -74,7 +74,7 @@
     ```
 
 2. 安装run包。
-    
+   
     ```shell
     ./Ascend-mindstudio-msprof_<version>_linux-<arch>.run --install
     ```
@@ -92,10 +92,10 @@
     ```text
     MindStudio-Profilier package install success.
     ```
- 
+
 ## 附录
 ### 编译run包参数说明
- 
+
 msProf工具run包的编译命令可配置如下参数。
 
 | 参数                | 可选/必选 | 说明                                                                                                                                            |
@@ -106,7 +106,7 @@ msProf工具run包的编译命令可配置如下参数。
 
 
 ### 安装run包参数说明
- 
+
 msProf工具run包的安装命令可配置如下参数。
 
 | 参数     | 可选/必选 | 说明                                                                                                                                            |
@@ -114,5 +114,5 @@ msProf工具run包的安装命令可配置如下参数。
 | --install | 必选 | 安装软件包。可配置--install-path参数指定软件的安装路径；不配置--install-path参数时，则直接安装到默认路径下。                                                                          |
 | --install-path | 可选 | 安装路径。须和CANN包安装时指定路径保持一致，如果用户未指定安装路径，则软件会安装到默认路径下，默认安装路径如下：<br> - root用户：“/usr/local/Ascend”。<br>- 非root用户：“\${HOME}/Ascend”，${HOME}为当前用户的家目录。 |
 | --install-for-all | 可选 | 安装时，允许其他用户具有安装用户组的权限。当安装携带该参数时，支持其他用户使用msProf运行业务，但该参数存在安全风险，请谨慎使用。                                                                           |
- 
+
 安装run包还可指定其他参数，具体可通过./xxx.run --help命令查看。

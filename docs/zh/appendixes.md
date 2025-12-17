@@ -21,7 +21,7 @@
 
 |脚本名|功能|路径|
 |--|--|--|
-|get_msprof_info.py|获取设备信息。|${INSTALL_DIR}/tools/profiler/profiler_tool/analysis/interface，${INSTALL_DIR}请替换为CANN软件安装后文件存储路径。若安装的Toolkit软件包，以root安装举例，则安装后文件存储路径为：/usr/local/Ascend/ascend-toolkit/latest。|
+|get_msprof_info.py|获取设备信息。|${INSTALL_DIR}/tools/profiler/profiler_tool/analysis/interface，${INSTALL_DIR}请替换为CANN软件安装后文件存储路径。若安装的Toolkit软件包，以root安装举例，则安装后文件存储路径为：/usr/local/Ascend/cann。|
 
 
 **命令格式<a name="zh-cn_topic_0000001276273570_section25968322563"></a>**
@@ -153,7 +153,7 @@ python3 get_msprof_info.py -dir <dir> [-help]
 
 msprof\_slice.json配置文件保存目录为：
 
-$\{INSTALL\_DIR\}/tools/profiler/profiler\_tool/analysis/msconfig，$\{INSTALL\_DIR\}请替换为CANN软件安装后文件存储路径。若安装的Toolkit软件包，以root安装举例，则安装后文件存储路径为：/usr/local/Ascend/ascend-toolkit/latest。
+$\{INSTALL\_DIR\}/tools/profiler/profiler\_tool/analysis/msconfig，$\{INSTALL\_DIR\}请替换为CANN软件安装后文件存储路径。若安装的Toolkit软件包，以root安装举例，则安装后文件存储路径为：/usr/local/Ascend/cann。
 
 **参数说明<a name="zh-cn_topic_0000001265229666_section112651016202315"></a>**
 
@@ -234,7 +234,7 @@ python3 msprof.py import -dir <dir>
 1.  登录安装了Toolkit包的环境。
 2.  切换至msprof.py脚本所在目录。
 
-    $\{INSTALL\_DIR\}/tools/profiler/profiler\_tool/analysis/msprof，$\{INSTALL\_DIR\}请替换为CANN软件安装后文件存储路径。若安装的Toolkit软件包，以root安装举例，则安装后文件存储路径为：/usr/local/Ascend/ascend-toolkit/latest。
+    $\{INSTALL\_DIR\}/tools/profiler/profiler\_tool/analysis/msprof，$\{INSTALL\_DIR\}请替换为CANN软件安装后文件存储路径。若安装的Toolkit软件包，以root安装举例，则安装后文件存储路径为：/usr/local/Ascend/cann。
 
 3.  解析性能数据。
 
@@ -305,7 +305,7 @@ python3 msprof.py query -dir <dir>
 1.  登录安装了Toolkit包的环境。
 2.  切换至msprof.py脚本所在目录。
 
-    $\{INSTALL\_DIR\}/tools/profiler/profiler\_tool/analysis/msprof，$\{INSTALL\_DIR\}请替换为CANN软件安装后文件存储路径。若安装的Toolkit软件包，以root安装举例，则安装后文件存储路径为：/usr/local/Ascend/ascend-toolkit/latest。
+    $\{INSTALL\_DIR\}/tools/profiler/profiler\_tool/analysis/msprof，$\{INSTALL\_DIR\}请替换为CANN软件安装后文件存储路径。若安装的Toolkit软件包，以root安装举例，则安装后文件存储路径为：/usr/local/Ascend/cann。
 
 3.  查询性能数据信息，命令行格式如下。
 
@@ -396,7 +396,7 @@ msprof工具的查询功能获取到的信息如[表2](#zh-cn_topic_000000131270
 1.  登录安装了Toolkit包的环境。
 2.  切换至msprof.py脚本所在目录。
 
-    $\{INSTALL\_DIR\}/tools/profiler/profiler\_tool/analysis/msprof，$\{INSTALL\_DIR\}请替换为CANN软件安装后文件存储路径。若安装的Toolkit软件包，以root安装举例，则安装后文件存储路径为：/usr/local/Ascend/ascend-toolkit/latest。
+    $\{INSTALL\_DIR\}/tools/profiler/profiler\_tool/analysis/msprof，$\{INSTALL\_DIR\}请替换为CANN软件安装后文件存储路径。若安装的Toolkit软件包，以root安装举例，则安装后文件存储路径为：/usr/local/Ascend/cann。
 
 3.  导出性能数据。可以导出timeline、summary和db三类文件，命令行格式如下：
 

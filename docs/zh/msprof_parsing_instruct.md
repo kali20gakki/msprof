@@ -17,9 +17,9 @@ msprof命令行工具是通过msprof.py封装的，支持性能数据的通用�
 
 **环境准备**
 
-1.  根据实际用户场景选择CANN相关软件包安装并配置CANN环境变量，具体请参见《CANN 软件安装指南》中“选择安装场景”章节的“训练&推理&开发调试”场景。
+1.  安装配套版本的CANN Toolkit开发套件包和ops算子包并配置CANN环境变量，具体请参见《CANN 软件安装指南》。
 
-    Ascend EP场景下msprof工具路径为：$\{INSTALL\_DIR\}/tools/profiler/bin，$\{INSTALL\_DIR\}请替换为CANN软件安装后文件存储路径。若安装的Toolkit软件包，以root安装举例，则安装后文件存储路径为：/usr/local/Ascend/ascend-toolkit/latest。
+    Ascend EP场景下msprof工具路径为：$\{INSTALL\_DIR\}/tools/profiler/bin，$\{INSTALL\_DIR\}请替换为CANN软件安装后文件存储路径。若安装的Toolkit软件包，以root安装举例，则安装后文件存储路径为：/usr/local/Ascend/cann。
 
     Ascend RC场景下msprof工具路径为：/var
 
@@ -86,7 +86,7 @@ msprof命令行工具是通过msprof.py封装的，支持性能数据的通用�
 
 -   请先完成[使用前准备](#使用前准备)。
 -   请先完成性能数据采集。
--   以下产品不支持在设备上直接解析，需要将采集到的PROF\_XXX目录拷贝到安装了Toolkit包的环境下进行解析：
+-   以下产品不支持在设备上直接解析，需要将采集到的PROF\_XXX目录拷贝到安装了Toolkit软件包的环境下进行解析：
     -   Ascend 310B的Ascend RC场景
 
 **命令格式**
@@ -132,7 +132,7 @@ msprof --export=on --output=/home/profiler_data/PROF_XXX
 msprof --export=on --output=/home/profiler_data/PROF_XXX --reports=${INSTALL_DIR}/tools/profiler/profiler_tool/analysis/msconfig/reports_sample_config.json
 ```
 
-$\{INSTALL\_DIR\}请替换为CANN软件安装后文件存储路径。若安装的Toolkit软件包，以root安装举例，则安装后文件存储路径为：/usr/local/Ascend/ascend-toolkit/latest。
+$\{INSTALL\_DIR\}请替换为CANN软件安装后文件存储路径。若安装的Toolkit软件包，以root安装举例，则安装后文件存储路径为：/usr/local/Ascend/cann。
 
 >![](public_sys-resources/icon-note.gif) **说明：** 
 >-   --reports参数指定的是reports\_sample\_config.json文件。需要与--export同时配置，仅支持--type=text，且仅支持对json文件的timeline数据进行控制，csv文件的summary数据依然为全量导出。
@@ -266,7 +266,7 @@ reports\_sample\_config.json文件默认保存在$\{INSTALL\_DIR\}/tools/profile
 
 -   请先完成[使用前准备](#使用前准备)。
 -   请先完成性能数据采集。
--   以下产品不支持在设备上直接解析，需要将采集到的PROF\_XXX目录拷贝到安装了Toolkit包的环境下进行解析：
+-   以下产品不支持在设备上直接解析，需要将采集到的PROF\_XXX目录拷贝到安装了Toolkit软件包的环境下进行解析：
     -   Ascend 310B的Ascend RC场景
 
 **命令格式<a name="zh-cn_topic_0000001265069802_section427441453914"></a>**
@@ -336,7 +336,7 @@ msprof工具的查询功能获取到的信息如下表所示。
 
 -   请先完成[使用前准备](#使用前准备)。
 -   请先完成性能数据采集。
--   以下产品不支持在设备上直接解析，需要将采集到的PROF\_XXX目录拷贝到安装了Toolkit包的环境下进行解析：
+-   以下产品不支持在设备上直接解析，需要将采集到的PROF\_XXX目录拷贝到安装了Toolkit软件包的环境下进行解析：
     -   Ascend 310B的Ascend RC场景
 
 **命令格式<a name="zh-cn_topic_0000001265229730_section242218915115"></a>**
@@ -395,7 +395,7 @@ msprof通信性能数据解析功能主要用于统计通信类的分段耗时�
     msprof --export=on --output=/home/xxx/profiler_data/PROF_XXX --clear=off
     ```
 
--   以下产品不支持在设备上直接解析，需要将采集到的PROF\_XXX目录拷贝到安装了Toolkit包的环境下进行解析：
+-   以下产品不支持在设备上直接解析，需要将采集到的PROF\_XXX目录拷贝到安装了Toolkit软件包的环境下进行解析：
     
     -   Ascend 310B的Ascend RC场景
 
@@ -447,10 +447,10 @@ msprof --analyze=on --output=/home/profiler_data/PROF_XXX
 
 **使用示例（msprof.py脚本方式）<a name="zh-cn_topic_0000001631250206_section1080212562237"></a>**
 
-1.  以Toolkit包的运行用户登录开发环境。
+1.  以Toolkit软件包的运行用户登录开发环境。
 2.  切换至msprof.py脚本所在目录。
 
-    $\{INSTALL\_DIR\}/tools/profiler/profiler\_tool/analysis/msprof，$\{INSTALL\_DIR\}请替换为CANN软件安装后文件存储路径。若安装的Toolkit软件包，以root安装举例，则安装后文件存储路径为：/usr/local/Ascend/ascend-toolkit/latest。
+    $\{INSTALL\_DIR\}/tools/profiler/profiler\_tool/analysis/msprof，$\{INSTALL\_DIR\}请替换为CANN软件安装后文件存储路径。若安装的Toolkit软件包，以root安装举例，则安装后文件存储路径为：/usr/local/Ascend/cann。
 
 3.  设置分析通信类数据，指定/home/profiler\_data/PROF\_XXX目录为性能数据文件目录，执行分析命令。
 
