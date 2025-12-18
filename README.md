@@ -82,7 +82,9 @@ msProf的版本说明包含msProf的软件版本配套关系和软件包下载�
 
 ## License
 
-msProf产品的使用许可证，具体请参见[LICENSE](LICENSE.md)文件。
+msProf产品的使用许可证，具体请参见[License](License)文件。
+
+msProf工具docs目录下的文档适用CC-BY 4.0许可证，具体请参见[License](./docs/LICENSE)。
 
 ## 贡献声明
 
