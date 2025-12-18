@@ -25,6 +25,7 @@
 #include "csrc/common/utils.h"
 #include "csrc/activity/activity_manager.h"
 #include "csrc/common/context_manager.h"
+#include "csrc/activity/ascend/channel/stars_common.h"
 
 namespace Mspti {
 namespace Parser {
@@ -40,8 +41,8 @@ msptiResult CommunicationCalculator::AppendCompactInfo(bool agingFlag, const Msp
         return MSPTI_SUCCESS;
     }
     auto &msprofHcclOpInfo = data->data.hcclopInfo;
-    std::shared_ptr<CommunicationOpDesc> communication;
-    Mspti::Common::MsptiMakeSharedPtr(communication);
+    std::unique_ptr<CommunicationOpDesc> communication;
+    Mspti::Common::MsptiMakeUniquePtr(communication);
     if (!UNLIKELY(communication)) {
         MSPTI_LOGE("fail to malloc msptiActivityCommunication, return MSPTI_ERROR_INNER");
         return MSPTI_ERROR_INNER;
@@ -52,97 +53,79 @@ msptiResult CommunicationCalculator::AppendCompactInfo(bool agingFlag, const Msp
     communication->algTypeHash = msprofHcclOpInfo.algType;
     communication->count = msprofHcclOpInfo.count;
     std::lock_guard<std::mutex> lk(communicationOpInfoMutex_);
-    communicationOpInfoQueue_[data->threadId].push(communication);
+    communicationOpInfoQueue_[data->threadId].push(std::move(communication));
     return MSPTI_SUCCESS;
 }
 
-std::shared_ptr<DeviceTask> TransCommTask2DeviceTask(const std::unique_ptr<CommunicationTask>& commTask)
+void TransApiEvent2CommTask(const ApiEvent& api2TaskInfo, CommunicationTask& commTask)
 {
-    std::shared_ptr<DeviceTask> ans;
-    Mspti::Common::MsptiMakeSharedPtr(ans, 0, 0, commTask->streamId, commTask->taskId, commTask->deviceId, false,
-                                      commTask->agingFlag);
-    return ans;
+    auto track = api2TaskInfo.compactInfo.data.runtimeTrack;
+    auto taskId = Convert::StarsCommon::GetTaskId(track.streamId, static_cast<uint16_t>(track.taskInfo));
+    auto streamId = Convert::StarsCommon::GetStreamId(track.streamId, static_cast<uint16_t>(track.taskInfo));
+    commTask.start = 0;
+    commTask.end = 0;
+    commTask.hostStartTime = api2TaskInfo.api.beginTime;
+    commTask.hostEndTime = api2TaskInfo.api.endTime;
+    commTask.streamId = streamId;
+    commTask.taskId = taskId;
+    commTask.deviceId = track.deviceId;
+    commTask.agingFlag = api2TaskInfo.agingFlag;
 }
 
-std::unique_ptr<CommunicationTask> TransApiEvent2CommTask(const ApiEvent *api2TaskInfo)
+std::unique_ptr<CommunicationOpDesc> TransApiEvent2CommOpDesc(const ApiEvent& api2TaskInfo)
 {
-    auto track = api2TaskInfo->compactInfo.data.runtimeTrack;
-    auto taskId = static_cast<uint16_t>(track.taskInfo & 0xffff);
-    std::unique_ptr<CommunicationTask> ans;
-    Mspti::Common::MsptiMakeUniquePtr(ans, 0, 0, api2TaskInfo->api.beginTime, api2TaskInfo->api.endTime,
-                                      track.streamId, taskId, track.deviceId, api2TaskInfo->agingFlag);
-    return ans;
-}
-
-std::shared_ptr<CommunicationOpDesc> TransApiEvent2CommOpDesc(const ApiEvent *api2TaskInfo)
-{
-    std::shared_ptr<CommunicationOpDesc> desc;
-    Mspti::Common::MsptiMakeSharedPtr(desc);
+    std::unique_ptr<CommunicationOpDesc> desc;
+    Mspti::Common::MsptiMakeUniquePtr(desc);
     if (!UNLIKELY(desc)) {
         return desc;
     }
-    desc->correlationId = api2TaskInfo->correlationId;
-    desc->opNameHash = api2TaskInfo->api.itemId;
-    desc->hostStartTime = api2TaskInfo->api.beginTime;
-    desc->hostEndTime = api2TaskInfo->api.endTime;
-    desc->threadId = api2TaskInfo->api.threadId;
-    desc->opNameHash = api2TaskInfo->api.itemId;
-    for (auto &communicationTask : api2TaskInfo->children) {
-        if (communicationTask->level == MSPROF_REPORT_HCCL_NODE_LEVEL) {
-            auto commTask = TransApiEvent2CommTask(communicationTask.get());
+    desc->correlationId = api2TaskInfo.correlationId;
+    desc->opNameHash = api2TaskInfo.api.itemId;
+    desc->hostStartTime = api2TaskInfo.api.beginTime;
+    desc->hostEndTime = api2TaskInfo.api.endTime;
+    desc->threadId = api2TaskInfo.api.threadId;
+    desc->opNameHash = api2TaskInfo.api.itemId;
+    for (auto &communicationTask : api2TaskInfo.children) {
+        std::unique_ptr<CommunicationTask> commTask;
+        Mspti::Common::MsptiMakeUniquePtr(commTask);
             if (UNLIKELY(commTask == nullptr)) {
                 MSPTI_LOGE("can not TransApiEvent2CommTask, commTask is nullptr!");
                 continue;
             }
+        TransApiEvent2CommTask(communicationTask, *commTask);
             desc->agingFlag = commTask->agingFlag;
+        desc->streamId = commTask->streamId;
             desc->tasks.emplace_back(std::move(commTask));
         }
-    }
     return desc;
 }
 
-msptiResult CommunicationCalculator::AppendApi2TaskInfo(const std::unique_ptr<ApiEvent>& api2TaskInfo)
+msptiResult CommunicationCalculator::AppendApi2TaskInfo(const ApiEvent& api2TaskInfo)
 {
-    if (api2TaskInfo->children.empty()) {
+    if (api2TaskInfo.children.empty()) {
         MSPTI_LOGW("target Api has not communication tasks");
         return MSPTI_SUCCESS;
     }
 
-    auto commOp = TransApiEvent2CommOpDesc(api2TaskInfo.get());
+    auto commOp = TransApiEvent2CommOpDesc(api2TaskInfo);
     if (commOp->tasks.empty()) {
         MSPTI_LOGW("commOp has not communication tasks");
         return MSPTI_SUCCESS;
     }
-    std::sort(commOp->tasks.begin(), commOp->tasks.end(),
+    auto lastHostTask = std::max_element(commOp->tasks.begin(), commOp->tasks.end(),
         [](const std::unique_ptr<CommunicationTask>& a, const std::unique_ptr<CommunicationTask>& b) {
-            return a->start < b->start; // 按 timestamp 升序排序
+            return a->hostStartTime < b->hostStartTime;
         });
-    if (commOp->tasks.empty()) {
-        MSPTI_LOGW("commOp has not communication tasks");
-        return MSPTI_SUCCESS;
-    }
-    auto firstTask = TransCommTask2DeviceTask(commOp->tasks.front());
-    auto lastTask = TransCommTask2DeviceTask(commOp->tasks.back());
-    if (UNLIKELY(firstTask == nullptr || lastTask == nullptr)) {
-        MSPTI_LOGE("firstTask or lastTask is nullptr!");
-        return MSPTI_ERROR_INNER;
-    }
-
-    auto firstTaskDst = std::make_tuple(firstTask->deviceId, firstTask->streamId, firstTask->taskId);
+    auto& lastTask = *lastHostTask;
     auto lastTaskDst = std::make_tuple(lastTask->deviceId, lastTask->streamId, lastTask->taskId);
-
-    {
+    if (Common::ContextManager::GetInstance()->GetChipType(lastTask->deviceId) == Common::PlatformType::CHIP_V6) {
+        // 唯一ID, 匹配时streamId设置0
+        std::get<1>(lastTaskDst) = 0;
+    }
         std::lock_guard<std::mutex> lk(hcclTaskMutex_);
-        firstTask2CommunicationOp_[firstTaskDst] = commOp;
-        lastTask2CommunicationOp_[lastTaskDst] = commOp;
-    }
-
-    std::vector<std::shared_ptr<DeviceTask>> assembleTasks{ firstTask };
-    if (firstTaskDst != lastTaskDst) {
-        assembleTasks.push_back(lastTask);
-    }
-    DeviceTaskCalculator::GetInstance().RegisterCallBack(assembleTasks,
-        [this](const std::shared_ptr<DeviceTask>& task) { return Record(task); });
+    communicationTask2Op_[lastTaskDst].second = true;
+    commOp->startTime = UINT64_MAX;
+    eventId2Communication_[api2TaskInfo.eventId] = std::move(commOp);
     return MSPTI_SUCCESS;
 }
 
@@ -153,8 +136,8 @@ void AssembleTaskInfo(msptiActivityCommunication& communication, const Communica
     if (additionOpDesc != nullptr) {
         communication.dataType = static_cast<msptiCommunicationDataType>(additionOpDesc->dataType);
         communication.count = additionOpDesc->count;
-        communication.algType = CannHashCache::GetInstance().GetHashInfo(additionOpDesc->algTypeHash).c_str();
-        communication.commName = CannHashCache::GetInstance().GetHashInfo(additionOpDesc->groupNameHash).c_str();
+        communication.algType = CannHashCache::GetHashInfo(additionOpDesc->algTypeHash).c_str();
+        communication.commName = CannHashCache::GetHashInfo(additionOpDesc->groupNameHash).c_str();
     }
 
     if (OpTaskDesc != nullptr) {
@@ -162,84 +145,105 @@ void AssembleTaskInfo(msptiActivityCommunication& communication, const Communica
         communication.ds.streamId = OpTaskDesc->streamId;
         communication.start = OpTaskDesc->startTime;
         communication.end = OpTaskDesc->endTime;
-        communication.name = CannHashCache::GetInstance().GetHashInfo(OpTaskDesc->opNameHash).c_str();
+        communication.name = CannHashCache::GetHashInfo(OpTaskDesc->opNameHash).c_str();
         communication.correlationId = OpTaskDesc->correlationId;
     }
 }
 
 msptiResult CommunicationCalculator::ReportCommunication(const DstType& dstKey,
-                                                         const std::shared_ptr<CommunicationOpDesc>& commOp)
+                                                         const std::unique_ptr<CommunicationOpDesc>& commOp)
 {
-    std::shared_ptr<CommunicationOpDesc> additionOpDesc;
     {
         std::lock_guard<std::mutex> lk(communicationOpInfoMutex_);
         if (!commOp->agingFlag && taskId2AdditionInfo.count(dstKey)) {
-            // 拿DstKey查一遍unordered_map，如果没有走正常逻辑
-            additionOpDesc = taskId2AdditionInfo[dstKey];
+            auto& addationOpDesc = taskId2AdditionInfo[dstKey];
+            msptiActivityCommunication record{};
+            AssembleTaskInfo(record, addationOpDesc.get(), commOp.get());
+            Mspti::Activity::ActivityManager::GetInstance()->Record(
+                Common::ReinterpretConvert<msptiActivity *>(&record), sizeof(msptiActivityCommunication));
         } else {
             auto& it =  communicationOpInfoQueue_[commOp->threadId];
             if (!it.empty()) {
-                additionOpDesc = communicationOpInfoQueue_[commOp->threadId].front();
+                auto& addationOpDesc = communicationOpInfoQueue_[commOp->threadId].front();
+                msptiActivityCommunication record{};
+                AssembleTaskInfo(record, addationOpDesc.get(), commOp.get());
+                Mspti::Activity::ActivityManager::GetInstance()->Record(
+                    Common::ReinterpretConvert<msptiActivity *>(&record), sizeof(msptiActivityCommunication));
+                if (!commOp->agingFlag) {
+                    taskId2AdditionInfo.emplace(dstKey, std::move(addationOpDesc));
+                }
                 communicationOpInfoQueue_[commOp->threadId].pop();
             }
-            if (!commOp->agingFlag && additionOpDesc != nullptr) {
-                taskId2AdditionInfo.emplace(dstKey, additionOpDesc);
             }
         }
+    return MSPTI_SUCCESS;
     }
-    msptiActivityCommunication record{};
-    AssembleTaskInfo(record, additionOpDesc.get(), commOp.get());
-    Mspti::Activity::ActivityManager::GetInstance()->Record(
-        Common::ReinterpretConvert<msptiActivity *>(&record), sizeof(msptiActivityCommunication));
+
+msptiResult CommunicationCalculator::Record(const DeviceTask& taskTime)
+{
+    auto dstType = std::make_tuple(taskTime.deviceId, taskTime.streamId, taskTime.taskId);
+    std::lock_guard<std::mutex> lk(hcclTaskMutex_);
+    auto iter = communicationTask2Op_.find(dstType);
+    if (iter == communicationTask2Op_.end()) {
     return MSPTI_SUCCESS;
 }
 
-msptiResult CommunicationCalculator::Record(const std::shared_ptr<DeviceTask>& taskTime)
-{
-    if (!taskTime) {
-        MSPTI_LOGE("Record received null task");
-        return MSPTI_ERROR_INNER;
+    auto commEventIter = eventId2Communication_.find(iter->second.first);
+    if (commEventIter == eventId2Communication_.end()) {
+        return MSPTI_SUCCESS;
     }
-    auto dstType = std::make_tuple(taskTime->deviceId, taskTime->streamId, taskTime->taskId);
-    std::lock_guard<std::mutex> lk(hcclTaskMutex_);
-    auto iter = firstTask2CommunicationOp_.find(dstType);
-    if (iter != firstTask2CommunicationOp_.end()) {
-        auto commOp = iter->second;
-        commOp->agingFlag = taskTime->agingFlag;
-        commOp->streamId = taskTime->streamId;
-        commOp->deviceId = taskTime->deviceId;
-        if (taskTime->isFfts && !taskTime->subTasks.empty()) {
-            std::sort(taskTime->subTasks.begin(), taskTime->subTasks.end(),
-                [](const std::shared_ptr<SubTask>& a, const std::shared_ptr<SubTask>& b) {
-                    return a->start < b->start;
+    auto& commOp = commEventIter->second;
+    commOp->agingFlag = taskTime.agingFlag;
+    commOp->deviceId = taskTime.deviceId;
+    uint64_t startTime = 0;
+    if (taskTime.isFfts && !taskTime.subTasks.empty()) {
+        auto startIt = std::min_element(taskTime.subTasks.begin(), taskTime.subTasks.end(),
+            [](const SubTask& a, const SubTask& b) {
+                return a.start < b.start;
                 });
-            commOp->startTime = taskTime->subTasks.front()->start;
+        startTime = (*startIt).start;
         } else {
-            commOp->startTime = taskTime->start;
+        startTime = taskTime.start;
         }
-        if (commOp->agingFlag) {
-            firstTask2CommunicationOp_.erase(iter);
-        }
-    }
+    commOp->startTime = std::min(commOp->startTime, startTime);
 
-    iter = lastTask2CommunicationOp_.find(dstType);
-    if (iter != lastTask2CommunicationOp_.end()) {
-        auto commOp = iter->second;
-        if (taskTime->isFfts && !taskTime->subTasks.empty()) {
-            std::sort(taskTime->subTasks.begin(), taskTime->subTasks.end(),
-                [](const std::shared_ptr<SubTask>& a, const std::shared_ptr<SubTask>& b) {
-                    return a->end > b->end;
+    if (iter->second.second) {
+        if (taskTime.isFfts && !taskTime.subTasks.empty()) {
+            auto endIt = std::max_element(taskTime.subTasks.begin(), taskTime.subTasks.end(),
+                [](const SubTask& a, const SubTask& b) {
+                    return a.end < b.end;
                 });
-            commOp->endTime = taskTime->subTasks.front()->end;
+            commOp->endTime = (*endIt).end;
         } else {
-            commOp->endTime = taskTime->end;
+            commOp->endTime = taskTime.end;
         }
         ReportCommunication(dstType, commOp);
         if (commOp->agingFlag) {
-            lastTask2CommunicationOp_.erase(iter);
+            eventId2Communication_.erase(commEventIter);
+            communicationTask2Op_.erase(iter);
+        } else {
+            // start时间根据最小值进行判断, 图模式场景下commop常驻，不更新startTime会导致后续startTime异常
+            commOp->startTime = UINT64_MAX;
         }
     }
     return MSPTI_SUCCESS;
+}
+
+void CommunicationCalculator::AppendCommunicationTask(ApiEvent &apiEvent)
+{
+    CommunicationTask commTask;
+    TransApiEvent2CommTask(apiEvent, commTask);
+    DstType dstType = std::make_tuple(commTask.deviceId, commTask.streamId, commTask.taskId);
+    DeviceTask task(0, 0, commTask.streamId, commTask.taskId, commTask.deviceId, false, commTask.agingFlag);
+    if (Common::ContextManager::GetInstance()->GetChipType(commTask.deviceId) == Common::PlatformType::CHIP_V6) {
+        // 唯一ID，host侧匹配时设置为0
+        task.streamId = 0;
+        std::get<1>(dstType) = 0;
+}
+    DeviceTaskCalculator::GetInstance().RegisterCallBack(task,
+        [this](const DeviceTask& task) { return Record(task); });
+    std::lock_guard<std::mutex> lk(hcclTaskMutex_);
+    communicationTask2Op_[dstType] = {apiEvent.parentEventId, false};
 }
 }
 }

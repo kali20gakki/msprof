@@ -29,6 +29,7 @@
 #include "securec.h"
 
 namespace {
+using namespace Mspti;
 class ParserUtest : public testing::Test {
 protected:
     virtual void SetUp()
@@ -42,8 +43,8 @@ TEST_F(ParserUtest, ShouldRetSuccessWhenReportApiSuccess)
 {
     auto instance = Mspti::Parser::ParserManager::GetInstance();
     const std::string hashInfo = "aclnnAdd_AxpyAiCore_Axpy";
-    auto hashId = Mspti::Parser::CannHashCache::GetInstance().GenHashId(hashInfo);
-    EXPECT_STREQ(hashInfo.c_str(), Mspti::Parser::CannHashCache::GetInstance().GetHashInfo(hashId).c_str());
+    auto hashId = Mspti::Parser::CannHashCache::GenHashId(hashInfo);
+    EXPECT_STREQ(hashInfo.c_str(), Mspti::Parser::CannHashCache::GetHashInfo(hashId).c_str());
     constexpr uint16_t level = 20000;
     constexpr uint32_t typeId = 1;
     const std::string typeName = "acl_api";
@@ -75,26 +76,22 @@ TEST_F(ParserUtest, ShouldRetSuccessWhenReportKernelInfo)
     EXPECT_EQ(MSPTI_SUCCESS, instance.ReportRtTaskTrack(1, &compactInfo));
     EXPECT_EQ(MSPTI_SUCCESS, instance.ReportRtTaskTrack(1, &compactInfo));
 
-    StarsSocLog socLogStart;
+    HalLogData socLogStart;
     (void)memset_s(&socLogStart, sizeof(socLogStart), 0, sizeof(socLogStart));
-    socLogStart.funcType = STARS_FUNC_TYPE_BEGIN;
-    socLogStart.streamId = streamId;
-    socLogStart.taskId = taskId;
+    socLogStart.acsq.funcType = STARS_FUNC_TYPE_BEGIN;
+    socLogStart.acsq.streamId = streamId;
+    socLogStart.acsq.taskId = taskId;
 
-    StarsSocLog socLogEnd;
+    HalLogData socLogEnd;
     (void)memset_s(&socLogEnd, sizeof(socLogEnd), 0, sizeof(socLogEnd));
-    socLogEnd.funcType = STARS_FUNC_TYPE_END;
-    socLogEnd.streamId = streamId;
-    socLogEnd.taskId = taskId;
+    socLogEnd.acsq.funcType = STARS_FUNC_TYPE_END;
+    socLogEnd.acsq.streamId = streamId;
+    socLogEnd.acsq.taskId = taskId;
 
-    EXPECT_EQ(MSPTI_SUCCESS, Mspti::Parser::DeviceTaskCalculator::GetInstance().ReportStarsSocLog(deviceId,
-        reinterpret_cast<StarsSocHeader*>(&socLogStart)));
-    EXPECT_EQ(MSPTI_SUCCESS, Mspti::Parser::DeviceTaskCalculator::GetInstance().ReportStarsSocLog(deviceId,
-        reinterpret_cast<StarsSocHeader*>(&socLogEnd)));
-    EXPECT_EQ(MSPTI_SUCCESS, Mspti::Parser::DeviceTaskCalculator::GetInstance().ReportStarsSocLog(deviceId,
-        reinterpret_cast<StarsSocHeader*>(&socLogStart)));
-    EXPECT_EQ(MSPTI_SUCCESS, Mspti::Parser::DeviceTaskCalculator::GetInstance().ReportStarsSocLog(deviceId,
-        reinterpret_cast<StarsSocHeader*>(&socLogEnd)));
+    EXPECT_EQ(MSPTI_SUCCESS, instance.ReportStarsSocLog(deviceId, socLogStart));
+    EXPECT_EQ(MSPTI_SUCCESS, instance.ReportStarsSocLog(deviceId, socLogEnd));
+    EXPECT_EQ(MSPTI_SUCCESS, instance.ReportStarsSocLog(deviceId, socLogStart));
+    EXPECT_EQ(MSPTI_SUCCESS, instance.ReportStarsSocLog(deviceId, socLogEnd));
 }
 
 TEST_F(ParserUtest, ShouldRetSuccessWhenReportMstxData)
@@ -139,7 +136,7 @@ TEST_F(ParserUtest, ShouldRecordKernelNameWhenReportRtTaskTrack)
     constexpr uint32_t streamId = 3;
     constexpr uint32_t BIT_NUM = 16;
     const std::string kernelName = "test_kernelName";
-    auto kernelNameHash = Mspti::Parser::CannHashCache::GetInstance().GenHashId(kernelName);
+    auto kernelNameHash = Mspti::Parser::CannHashCache::GenHashId(kernelName);
     MsprofCompactInfo compactInfo;
     (void)memset_s(&compactInfo, sizeof(compactInfo), 0, sizeof(compactInfo));
     compactInfo.data.runtimeTrack.deviceId = deviceId;

@@ -18,21 +18,19 @@
 #ifndef MSPTI_PARSER_CANN_HASH_CACHE_H
 #define MSPTI_PARSER_CANN_HASH_CACHE_H
 
-#include <unordered_map>
-#include <mutex>
+#include "csrc/common/concurrent_map.h"
 
 namespace Mspti {
 namespace Parser {
 class CannHashCache {
 public:
-    static CannHashCache& GetInstance();
-    std::string& GetHashInfo(uint64_t hashId);
-    uint64_t GenHashId(const std::string &hashInfo);
+    static std::string& GetHashInfo(uint64_t hashId);
+    static uint64_t GenHashId(const std::string &hashInfo);
+    static uint64_t GenHashId(std::string &&hashInfo);
 private:
     CannHashCache() = default;
     // <hashID, hashInfo>
-    static std::unordered_map<uint64_t, std::string> hashInfoMap_;
-    static std::mutex hashMutex_;
+    static Common::ConcurrentMap<uint64_t, std::string> hashInfoMap_;
 };
 }
 }

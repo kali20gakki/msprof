@@ -35,26 +35,32 @@ class CommunicationCalculator {
 public:
     msptiResult AppendCompactInfo(bool agingFlag, const MsprofCompactInfo *data);
 
-    msptiResult AppendApi2TaskInfo(const std::unique_ptr<ApiEvent>& ApiEvent);
+    msptiResult AppendApi2TaskInfo(const ApiEvent& api2TaskInfo);
 
     static CommunicationCalculator &GetInstance();
 
-private:
-    msptiResult ReportCommunication(const DstType& dstKey, const std::shared_ptr<CommunicationOpDesc>& hcclOp);
+    void AppendCommunicationTask(ApiEvent& apiEvent);
 
-    msptiResult Record(const std::shared_ptr<DeviceTask>& taskTime);
+private:
+    msptiResult ReportCommunication(const DstType& dstKey, const std::unique_ptr<CommunicationOpDesc>& hcclOp);
+
+    msptiResult Record(const DeviceTask& taskTime);
 
     CommunicationCalculator() = default;
 
 private:
     std::mutex hcclTaskMutex_;
-    std::map<DstType, std::shared_ptr<CommunicationOpDesc>> firstTask2CommunicationOp_;
-    std::map<DstType, std::shared_ptr<CommunicationOpDesc>> lastTask2CommunicationOp_;
+
+    // 通过eventId找communication算子
+    std::unordered_map<uint64_t, std::unique_ptr<CommunicationOpDesc>> eventId2Communication_;
+
+    // 记录每个DstType对应的CommunicationId, 以及是否是最后一个task
+    std::unordered_map<DstType, std::pair<uint64_t, bool>, Common::TupleHash> communicationTask2Op_;
 
     std::mutex communicationOpInfoMutex_;
-    std::unordered_map<std::uint64_t, std::queue<std::shared_ptr<CommunicationOpDesc>>>
+    std::unordered_map<std::uint64_t, std::queue<std::unique_ptr<CommunicationOpDesc>>>
         communicationOpInfoQueue_;
-    std::unordered_map<DstType, std::shared_ptr<CommunicationOpDesc>, Common::TupleHash> taskId2AdditionInfo;
+    std::unordered_map<DstType, std::unique_ptr<CommunicationOpDesc>, Common::TupleHash> taskId2AdditionInfo;
 };
 }
 }

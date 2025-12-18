@@ -17,7 +17,7 @@
 
 #include "device_task_calculator.h"
 
-#include "stars_common.h"
+#include "csrc/activity/ascend/channel/stars_common.h"
 #include "csrc/common/context_manager.h"
 #include "csrc/common/plog_manager.h"
 #include "csrc/common/utils.h"
@@ -25,138 +25,112 @@
 
 namespace Mspti {
 namespace Parser {
-void DeviceTaskCalculator::RegisterCallBack(const std::vector<std::shared_ptr<DeviceTask>> &assembleTasks,
-    const DeviceTaskCalculator::CompleteFunc& completeFunc)
+void DeviceTaskCalculator::RegisterCallBack(const DeviceTask &task,
+                                            const DeviceTaskCalculator::CompleteFunc &completeFunc)
 {
+    DstType dstKey = std::make_tuple(task.deviceId, task.streamId, task.taskId);
     std::lock_guard<std::mutex> lockGuard(assembleTaskMutex_);
-    for (auto &task : assembleTasks) {
-        if (!task) {
-            continue;
+    assembleTaskQueue_.emplace_back(task, completeFunc);
         }
-        DstType dstKey = std::make_tuple(task->deviceId, task->streamId, task->taskId);
-        assembleTasks_[dstKey].emplace_back(task);
-        completeFunc_[dstKey].push_back(completeFunc);
-    }
-}
 
-msptiResult DeviceTaskCalculator::ReportStarsSocLog(uint32_t deviceId, StarsSocHeader *socLogHeader)
+msptiResult DeviceTaskCalculator::ReportStarsSocLog(uint32_t deviceId, const HalLogData& originData)
 {
-    if (!socLogHeader) {
-        return MSPTI_ERROR_INNER;
+    if (!Activity::ActivityManager::GetInstance()->IsActivityKindEnable(MSPTI_ACTIVITY_KIND_COMMUNICATION)) {
+        return MSPTI_SUCCESS;
+    }
+    DealCacheDeviceTask();
+    if (originData.type == ACSQ_LOG) {
+        return AssembleTasksTimeWithSocLog(deviceId, originData.acsq);
     }
 
-    if (socLogHeader->funcType == STARS_FUNC_TYPE_BEGIN || socLogHeader->funcType == STARS_FUNC_TYPE_END) {
-        return AssembleTasksTimeWithSocLog(deviceId, Common::ReinterpretConvert<StarsSocLog *>(socLogHeader));
+    if (originData.type == FFTS_LOG) {
+        return AssembleSubTasksTimeWithFftsLog(deviceId, originData.ffts);
     }
-
-    if (socLogHeader->funcType == FFTS_PLUS_TYPE_END || socLogHeader->funcType == FFTS_PLUS_TYPE_START) {
-        return AssembleSubTasksTimeWithFftsLog(deviceId, Common::ReinterpretConvert<FftsPlusLog *>(socLogHeader));
-    }
-    MSPTI_LOGW("stars log from device %u is not ffts or stars, funcType is %u", deviceId, socLogHeader->funcType);
+    MSPTI_LOGW("stars log from device %u is not ffts or stars, funcType is %u", deviceId, originData.type);
     return MSPTI_SUCCESS;
 }
 
-msptiResult DeviceTaskCalculator::AssembleTasksTimeWithSocLog(uint32_t deviceId, StarsSocLog* socLog)
+msptiResult DeviceTaskCalculator::AssembleTasksTimeWithSocLog(uint32_t deviceId, const SocLog& socLog)
 {
-    uint16_t streamId = StarsCommon::GetStreamId(socLog->streamId, socLog->taskId);
-    uint16_t taskId = StarsCommon::GetTaskId(socLog->streamId, socLog->taskId);
+    uint16_t streamId = socLog.streamId;
+    uint32_t taskId = socLog.taskId;
     auto dstKey = std::make_tuple(static_cast<uint16_t>(deviceId), streamId, taskId);
-    std::shared_ptr<Mspti::Parser::DeviceTask> deviceTask = nullptr;
-    msptiResult ans = MSPTI_SUCCESS;
-    {
-        std::lock_guard<std::mutex> lk(assembleTaskMutex_);
         auto iter = assembleTasks_.find(dstKey);
-        if (iter == assembleTasks_.end() || iter->second.empty()) {
+    if (iter == assembleTasks_.end()) {
             return MSPTI_SUCCESS;
         }
-        deviceTask = iter->second.front();
-        if (socLog->funcType == STARS_FUNC_TYPE_BEGIN) {
-            deviceTask->start = socLog->timestamp;
-        } else if (socLog->funcType == STARS_FUNC_TYPE_END) {
-            std::vector<uint64_t> timeFromSysCnt =
-                Mspti::Common::ContextManager::GetInstance()->GetRealTimeFromSysCnt(
-                    deviceId, {deviceTask->start, socLog->timestamp});
-            deviceTask->start = timeFromSysCnt[0];
-            deviceTask->end = timeFromSysCnt[1];
+    auto& deviceTask = iter->second;
+    if (socLog.funcType == STARS_FUNC_TYPE_BEGIN) {
+        deviceTask.start = socLog.timestamp;
+    } else if (socLog.funcType == STARS_FUNC_TYPE_END) {
+        std::vector<uint64_t> timeFromSysCnt = Mspti::Common::ContextManager::GetInstance()->GetRealTimeFromSysCnt(
+            deviceId, {deviceTask.start, socLog.timestamp});
+        deviceTask.start = timeFromSysCnt[0];
+        deviceTask.end = timeFromSysCnt[1];
 
-            auto& funcList = completeFunc_[dstKey];
-            for (auto it = funcList.begin(); it != funcList.end();) {
-                auto callback = *it;
-                ans = callback(deviceTask);
-                if (deviceTask->agingFlag) {
-                    it = funcList.erase(it);
-                } else {
-                    it++;
-                }
-            }
-            if (funcList.empty()) {
+        auto& callback = completeFunc_[dstKey];
+        msptiResult ans = callback(deviceTask);
+        if (deviceTask.agingFlag) {
                 completeFunc_.erase(dstKey);
+            assembleTasks_.erase(iter);
             }
-            auto& tasks_ = assembleTasks_[dstKey];
-            if (!tasks_.empty()) {
-                if (deviceTask->agingFlag) {
-                    tasks_.pop_front();
-                } else {
-                    tasks_.front()->subTasks.clear();
+        return ans;
                 }
+    return MSPTI_SUCCESS;
             }
-            if (tasks_.empty()) {
-                assembleTasks_.erase(dstKey);
-            }
-        }
-    }
-    return ans;
-}
 
-msptiResult DeviceTaskCalculator::AssembleSubTasksTimeWithFftsLog(uint32_t deviceId, FftsPlusLog *fftsLog)
+msptiResult DeviceTaskCalculator::AssembleSubTasksTimeWithFftsLog(uint32_t deviceId, const FftsLog& fftsLog)
 {
-    uint16_t streamId = StarsCommon::GetStreamId(fftsLog->streamId, fftsLog->taskId);
-    uint16_t taskId = StarsCommon::GetTaskId(fftsLog->streamId, fftsLog->taskId);
+    uint16_t streamId = fftsLog.streamId;
+    uint32_t taskId = fftsLog.taskId;
     auto dstKey = std::make_tuple(static_cast<uint16_t>(deviceId), streamId, taskId);
-    auto dstsKey = std::make_tuple(static_cast<uint16_t>(deviceId), streamId, taskId, fftsLog->subTaskId);
+    auto dstsKey = std::make_tuple(static_cast<uint16_t>(deviceId), streamId, taskId, fftsLog.subTaskId);
 
-    {
-        std::lock_guard<std::mutex> lk(assembleTaskMutex_);
         auto iter = assembleTasks_.find(dstKey);
-        if (iter == assembleTasks_.end() || iter->second.empty()) {
+    if (iter == assembleTasks_.end()) {
             return MSPTI_SUCCESS;
         }
+    auto it = assembleSubTasks_.find(dstsKey);
+    if (it == assembleSubTasks_.end()) {
+        it = assembleSubTasks_.emplace(dstsKey, SubTask{}).first;
     }
-
-    {
-        std::lock_guard<std::mutex> lk(assembleSubTaskMutex_);
-        if (!assembleSubTasks_.count(dstsKey) || assembleSubTasks_[dstsKey].empty()) {
-            std::shared_ptr<SubTask> subTask;
-            Mspti::Common::MsptiMakeSharedPtr(subTask);
-            if (!UNLIKELY(subTask)) {
-                MSPTI_LOGE("fail to malloc subTask");
-                return MSPTI_ERROR_INNER;
+    auto& subTask = it->second;
+    if (fftsLog.funcType == FFTS_PLUS_TYPE_START) {
+        subTask.start = fftsLog.timestamp;
+        subTask.streamId = streamId;
+        subTask.taskId = taskId;
+        subTask.subTaskId = fftsLog.subTaskId;
+    } else {
+        auto timeFromSysCnt =
+            Mspti::Common::ContextManager::GetInstance()->GetRealTimeFromSysCnt(deviceId,
+                                                                                {subTask.start, fftsLog.timestamp});
+        subTask.start = timeFromSysCnt[0];
+        subTask.end = timeFromSysCnt[1];
+        iter->second.isFfts = true;
+        iter->second.subTasks.emplace_back(subTask);
+        assembleSubTasks_.erase(it);
             }
-            assembleSubTasks_[dstsKey].emplace_back(subTask);
-        }
-        auto subTask = assembleSubTasks_[dstsKey].front();
-        if (fftsLog->funcType == FFTS_PLUS_TYPE_START) {
-            subTask->start =
-                Mspti::Common::ContextManager::GetInstance()->GetRealTimeFromSysCnt(deviceId, fftsLog->timestamp);
-            subTask->streamId = streamId;
-            subTask->taskId = taskId;
-            subTask->subTaskId = fftsLog->subTaskId;
-        } else {
-            subTask->end =
-                Mspti::Common::ContextManager::GetInstance()->GetRealTimeFromSysCnt(deviceId, fftsLog->timestamp);
-            {
-                std::lock_guard<std::mutex> guard(assembleTaskMutex_);
-                assembleTasks_[dstKey].front()->isFfts = true;
-                assembleTasks_[dstKey].front()->subTasks.emplace_back(subTask);
-            }
-            auto& subTaskList = assembleSubTasks_[dstsKey];
-            subTaskList.pop_front();
-            if (subTaskList.empty()) {
-                assembleSubTasks_.erase(dstsKey);
-            }
-        }
-    }
     return MSPTI_SUCCESS;
-}
+        }
+
+void DeviceTaskCalculator::DealCacheDeviceTask()
+            {
+    {
+        std::lock_guard<std::mutex> lk(assembleTaskMutex_);
+        if (assembleTaskQueue_.empty()) {
+            return;
+            }
+        dealAssembleTaskQueue_.reserve(assembleTaskQueue_.size());
+        dealAssembleTaskQueue_.swap(assembleTaskQueue_);
+            }
+    for (const auto& it: dealAssembleTaskQueue_) {
+        auto& deviceTask = it.first;
+        auto& callbackFunc = it.second;
+        DstType dstKey = std::make_tuple(deviceTask.deviceId, deviceTask.streamId, deviceTask.taskId);
+        assembleTasks_.emplace(dstKey, deviceTask);
+        completeFunc_.emplace(dstKey, callbackFunc);
+        }
+    dealAssembleTaskQueue_.clear();
+    }
 }
 }

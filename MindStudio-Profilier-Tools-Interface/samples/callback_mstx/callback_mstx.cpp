@@ -139,12 +139,16 @@ void MstxCallback(void *pUserData, msptiCallbackDomain domain, msptiCallbackId c
 void SetUpMspti(aclrtContext* context, aclrtStream* stream)
 {
     UserData *pUserData = (UserData *)malloc(sizeof(UserData));
-    if (pUserData != nullptr) {
-        if (memset_s(pUserData, sizeof(UserData), 0, sizeof(UserData)) != EOK) {
-            LOG_PRINT("memset failed!\n");
+    if (pUserData == nullptr) {
+        LOG_PRINT("ERROR malloc failed!\n");
+        return;
+    }
+
+    if (memset_s(pUserData, sizeof(UserData), 0, sizeof(UserData)) != EOK) {
+        free(pUserData);
+        LOG_PRINT("ERROR memset failed!\n");
             return;
         }
-
         pUserData->context = context;
         pUserData->stream = stream;
     }

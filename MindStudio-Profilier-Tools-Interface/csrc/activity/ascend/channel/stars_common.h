@@ -32,39 +32,26 @@
  */
 
 namespace Mspti {
-namespace Parser {
+namespace Convert {
 const uint16_t STREAM_LOW_OPERATOR = 1u << 11;
 const uint16_t STREAM_JUDGE_BIT12_OPERATOR = 0x1000;
 const uint16_t STREAM_JUDGE_BIT13_OPERATOR = 0x2000;
+const uint16_t STREAM_JUDGE_BIT15_OPERATOR = 0x8000;
 const uint16_t TASK_LOW_OPERATOR = 0x1FFF;
 const uint16_t STREAM_HIGH_OPERATOR = 0xE000;
 const uint16_t COMMON_LOW_OPERATOR = 0x0FFF;
 const uint16_t COMMON_HIGH_OPERATOR = 0xF000;
+const uint16_t EXPANDING_LOW_OPERATOR = 0x7FFF;
+
 class StarsCommon {
 public:
-static uint16_t GetStreamId(uint16_t streamId, uint16_t taskId)
-{
-    if ((streamId & STREAM_JUDGE_BIT12_OPERATOR) != 0) {
-        return streamId % STREAM_LOW_OPERATOR;
-    }
-    if ((streamId & STREAM_JUDGE_BIT13_OPERATOR) != 0) {
-        streamId = taskId & COMMON_LOW_OPERATOR;
-    }
-    auto res = streamId % STREAM_LOW_OPERATOR;
-    return res;
-}
-
-static uint16_t GetTaskId(uint16_t streamId, uint16_t taskId)
-{
-    if ((streamId & STREAM_JUDGE_BIT12_OPERATOR) != 0) {
-        taskId = taskId & TASK_LOW_OPERATOR;
-        taskId |= (streamId & STREAM_HIGH_OPERATOR);
-    } else if ((streamId & STREAM_JUDGE_BIT13_OPERATOR) != 0) {
-        taskId = (streamId & COMMON_LOW_OPERATOR) | (taskId & COMMON_HIGH_OPERATOR);
-    }
-    return taskId;
-}
+    static void SetStreamExpandStatus(uint8_t expandStatus);
+    static uint16_t GetStreamId(uint16_t streamId, uint16_t taskId);
+    static uint16_t GetTaskId(uint16_t streamId, uint16_t taskId);
+private:
+    static bool isExpand;
 };
-}
-}
-#endif
+} // namespace Parser
+} // namespace Mspti
+
+#endif // MSPTI_PARSER_STARS_COMMON_H

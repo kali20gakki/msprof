@@ -218,34 +218,34 @@ uint64_t ContextManager::GetHostTimeStampNs()
 
 PlatformType ContextManager::GetChipType(uint32_t deviceId)
 {
-    return GetChipTypeImpl(deviceId);
+    std::call_once(deviceInfoCache_[deviceId].flag, [&] {
+        deviceInfoCache_[deviceId].platformType = GetChipTypeImpl(deviceId);
+    });
+    return deviceInfoCache_[deviceId].platformType;
 }
 
 uint64_t ContextManager::GetCorrelationId(uint32_t threadId)
 {
-    std::lock_guard<std::mutex> lk(correlationIdMtx_);
     uint32_t tid = (threadId > 0 ? threadId : Common::Utils::GetTid());
-    auto iter = threadCorrelationIdInfo_.find(tid);
-    if (iter == threadCorrelationIdInfo_.end()) {
+    uint64_t ans = MSPTI_INVALID_CORRELATION_ID;
+    if (!threadCorrelationIdInfo_.Find(tid, ans)) {
         MSPTI_LOGE("Thread %u get correlation id failed.", tid);
-        return MSPTI_INVALID_CORRELATION_ID;
-    } else {
-        return iter->second;
     }
+    return ans;
 }
 
 uint64_t ContextManager::UpdateAndReportCorrelationId(uint32_t tid)
 {
-    std::lock_guard<std::mutex> lk(correlationIdMtx_);
-    correlationId_++;
-    Mspti::Reporter::ExternalCorrelationReporter::GetInstance()->ReportExternalCorrelationId(correlationId_);
-    auto iter = threadCorrelationIdInfo_.find(tid);
-    if (iter == threadCorrelationIdInfo_.end()) {
-        threadCorrelationIdInfo_.insert({tid, correlationId_});
+    uint64_t correlationId = correlationId_.fetch_add(1);
+    Mspti::Reporter::ExternalCorrelationReporter::GetInstance()->ReportExternalCorrelationId(correlationId);
+    auto guard = threadCorrelationIdInfo_.GetGuard(tid);
+    auto ans = guard->UnSafeFind(tid);
+    if (!ans.second) {
+        guard->UnSafeInsert(tid, correlationId);
     } else {
-        iter->second = correlationId_;
+        ans.first->second = correlationId;
     }
-    return correlationId_;
+    return correlationId;
 }
 
 uint64_t ContextManager::UpdateAndReportCorrelationId()

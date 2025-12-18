@@ -111,6 +111,7 @@ typedef struct TagTsTsFwProfileConfig {
     uint32_t aiVectorStatus;  // 1-enable,2-disable
     uint32_t tsKeypoint;       // 1-enable,2-disable
     uint32_t tsMemcpy;         // 1-enable,2-disable
+    uint32_t tsBlockdim;       // 1-enable,2-disable
 } TsTsFwProfileConfigT;
 
 typedef struct TagStarsSocLogConfig {
@@ -123,6 +124,8 @@ typedef struct TagStarsSocLogConfig {
     uint32_t ffts_thread_task;  // 1-enable,2-disable
     uint32_t ffts_block;        // 1-enable,2-disable
     uint32_t sdma_dmu;          // 1-enable,2-disable
+    uint32_t tag;                // 0-enable immediately, 1-enable delay
+    uint32_t blockShinkFlag;     // 1-enable,2-disable
 } StarsSocLogConfigT;
 
 enum PROFILE_MODE {

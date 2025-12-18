@@ -36,6 +36,7 @@ struct CommunicationTask {
     uint16_t taskId;
     uint16_t deviceId;
     bool agingFlag = true;
+    CommunicationTask() = default;
     CommunicationTask(uint64_t start, uint64_t end, uint64_t hostStartTime, uint64_t hostEndTime, uint16_t streamId,
         uint16_t taskId, uint16_t deviceId, bool agingFlag = true)
         : start(start),
@@ -65,6 +66,7 @@ struct CommunicationOpDesc {
     uint64_t count;
     uint64_t correlationId;
     std::vector<std::unique_ptr<CommunicationTask>> tasks;
+    CommunicationOpDesc() = default;
 };
 }
 }

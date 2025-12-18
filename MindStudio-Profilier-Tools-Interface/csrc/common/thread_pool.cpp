@@ -73,7 +73,7 @@ int ThreadPool::Stop()
     return 0;
 }
 
-int ThreadPool::Dispatch(std::shared_ptr<Task> task)
+int ThreadPool::Dispatch(const std::shared_ptr<Task>& task)
 {
     if (task == nullptr) {
         return -1;
@@ -93,7 +93,7 @@ int ThreadPool::Dispatch(std::shared_ptr<Task> task)
             threadIndex = currIndex_++ % threadNum_;
             break;
     }
-    auto taskQueue = threads_[threadIndex]->GetQueue();
+    auto& taskQueue = threads_[threadIndex]->GetQueue();
     if (!taskQueue) {
         MSPTI_LOGE("The task queue is null.");
         return -1;

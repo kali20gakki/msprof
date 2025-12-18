@@ -27,13 +27,15 @@
 namespace Mspti {
 namespace Parser {
 struct ApiEvent {
+    uint64_t eventId;
+    uint64_t parentEventId;
     uint16_t level;
     bool agingFlag = true;
     uint64_t threadId;
     uint64_t correlationId;
     MsprofApi api;
     MsprofCompactInfo compactInfo;
-    std::vector<std::unique_ptr<ApiEvent>> children;
+    std::vector<ApiEvent> children;
 };
 
 class ProfTask {
