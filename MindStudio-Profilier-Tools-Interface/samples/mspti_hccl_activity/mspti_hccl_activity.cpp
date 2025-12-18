@@ -113,7 +113,9 @@ int main(int argc, char*argv[])
         std::this_thread::sleep_for(duration);
     }
     for (uint32_t i = 0; i < ndev; i++) {
-        threads[i]->join();
+        if (threads[i] && threads[i]->joinable()) {
+            threads[i]->join();
+        }
     }
     for (uint32_t i = 0; i < ndev; i++) {
         HCCL_CHECK(HcclCommDestroy(comms[i]));

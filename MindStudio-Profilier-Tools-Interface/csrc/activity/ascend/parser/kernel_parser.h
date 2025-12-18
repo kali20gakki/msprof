@@ -22,6 +22,8 @@
 #include "csrc/include/mspti_result.h"
 #include "csrc/include/mspti_activity.h"
 #include "csrc/common/inject/profapi_inject.h"
+#include "csrc/activity/ascend/channel/channel_data.h"
+#include "csrc/activity/ascend/entity/soclog.h"
 
 namespace Mspti {
 namespace Parser {
@@ -29,6 +31,7 @@ class KernelParser {
 public:
     static KernelParser &GetInstance();
     msptiResult ReportRtTaskTrack(uint32_t agingFlag, const MsprofCompactInfo *data);
+    msptiResult ReportStarsSocLog(uint32_t deviceId, const HalLogData& originData);
 private:
     KernelParser();
     ~KernelParser();

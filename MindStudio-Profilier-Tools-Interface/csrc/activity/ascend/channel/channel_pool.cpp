@@ -110,6 +110,7 @@ void ChannelPool::Run()
     while (isStarted_) {
         int ret = ProfChannelPoll(channels, CHANNEL_POOL_NUM, DEFAULT_TIMEOUT_SEC);
         if (ret == CHANNEL_PROF_ERROR) {
+            MSPTI_LOGE("Failed to ProfChannelPoll, CHANNEL_POOL_NUM=%d, ret=%d", CHANNEL_POOL_NUM, ret);
             break;
         }
         if (ret == CHANNEL_PROF_STOPPED_ALREADY) {
@@ -122,7 +123,7 @@ void ChannelPool::Run()
             }
         }
         if (ret < 0 || ret > CHANNEL_POOL_NUM) {
-            MSPTI_LOGE("Failed to ProfChannelPoll, CHANNEL_POOL_NUM=%d, ret=%d", CHANNEL_POOL_NUM, ret);
+            MSPTI_LOGE("Ret is out of range, CHANNEL_POOL_NUM=%d, ret=%d", CHANNEL_POOL_NUM, ret);
             break;
         }
         for (int ii = 0; ii < ret; ++ii) {

@@ -143,35 +143,55 @@ void PrintCorrelationTrace()
 void HandleKernelRecord(msptiActivityKernel* record)
 {
     auto* copy = reinterpret_cast<msptiActivity*>(malloc(sizeof(msptiActivityKernel)));
-    if (copy) {
-        if (memset_s(copy, sizeof(msptiActivityKernel), 0, sizeof(msptiActivityKernel)) != EOK) {
-            LOG_PRINT("ERROR KernelRecord: memset failed!\n");
-            return;
-        }
-        if (memcpy_s(copy, sizeof(msptiActivityKernel), record, sizeof(msptiActivityKernel)) != EOK) {
-            LOG_PRINT("ERROR KernelRecord: memcpy failed!\n");
-            return;
-        }
-        g_CorrelationMap[record->correlationId] = copy;
+    if (copy == nullptr) {
+        LOG_PRINT("ERROR KernelRecord: malloc failed!\n");
+        return;
     }
+
+    if (memset_s(copy, sizeof(msptiActivityKernel), 0, sizeof(msptiActivityKernel)) != EOK) {
+        free(copy);
+        LOG_PRINT("ERROR KernelRecord: memset failed!\n");
+        return;
+    }
+    if (memcpy_s(copy, sizeof(msptiActivityKernel), record, sizeof(msptiActivityKernel)) != EOK) {
+        free(copy);
+        LOG_PRINT("ERROR KernelRecord: memcpy failed!\n");
+        return;
+    }
+    g_CorrelationMap[record->correlationId] = copy;
 }
 
 void HandleApiRecord(msptiActivityApi* record)
 {
     auto* copy = reinterpret_cast<msptiActivityApi*>(malloc(sizeof(msptiActivityApi)));
-    if (copy) {
-        if (memset_s(copy, sizeof(msptiActivityApi), 0, sizeof(msptiActivityApi)) != EOK) {
-            LOG_PRINT("ERROR ApiRecord: memset failed!\n");
-            return;
-        }
-        if (memcpy_s(copy, sizeof(msptiActivityApi), record, sizeof(msptiActivityApi)) != EOK) {
-            LOG_PRINT("ERROR ApiRecord: memcpy failed!\n");
-            return;
-        }
-        g_ApiConnectionMap[record->correlationId] = reinterpret_cast<msptiActivityApi*>(copy);
+    if (copy == nullptr) {
+        LOG_PRINT("ERROR ApiRecord: malloc failed!\n");
+        return;
     }
+
+    if (memset_s(copy, sizeof(msptiActivityApi), 0, sizeof(msptiActivityApi)) != EOK) {
+        free(copy);
+        LOG_PRINT("ERROR ApiRecord: memset failed!\n");
+        return;
+    }
+    if (memcpy_s(copy, sizeof(msptiActivityApi), record, sizeof(msptiActivityApi)) != EOK) {
+        free(copy);
+        LOG_PRINT("ERROR ApiRecord: memcpy failed!\n");
+        return;
+    }
+    g_ApiConnectionMap[record->correlationId] = reinterpret_cast<msptiActivityApi*>(copy);
 }
 
+void FreeMapData()
+{
+    for (const auto& it: g_CorrelationMap) {
+        free(it.second);
+    }
+
+    for (const auto& it: g_ApiConnectionMap) {
+        free(it.second);
+    }
+}
 
 // MSPTI
 void MsptiTrace(uint8_t *buffer, size_t size, size_t validSize)
@@ -232,5 +252,6 @@ int main()
     DeInitMspti();
 
     PrintCorrelationTrace();
+    FreeMapData();
     return 0;
 }

@@ -228,23 +228,26 @@ msptiResult ActivityManager::GetNextRecord(uint8_t *buffer, size_t validBufferSi
 
 msptiResult ActivityManager::FlushAll()
 {
-    {
-        std::lock_guard<std::mutex> lk(buf_mtx_);
-        if (cur_buf_) {
-            co_activity_buffers_.emplace_back(std::move(cur_buf_));
-        }
-    }
     std::deque<std::unique_ptr<ActivityBuffer>> flushBuffers;
     {
         std::unique_lock<std::mutex> lck(cv_mtx_);
         flushBuffers = std::move(co_activity_buffers_);
     }
     for (const auto &buffer : flushBuffers) {
-        buffer->UnInit(bufferCompleted_handle_);
+        if (buffer) {
+            buffer->UnInit(bufferCompleted_handle_);
+        }
     }
     {
         std::unique_lock<std::mutex> lck(cv_mtx_);
         JoinWorkThreads();
+    }
+    {
+        std::lock_guard<std::mutex> lk(buf_mtx_);
+        if (cur_buf_) {
+            auto consumeBuf = std::move(cur_buf_);
+            consumeBuf->UnInit(this->bufferCompleted_handle_);
+        }
     }
     MSPTI_LOGI("Flush all activity buffer.");
     return MSPTI_SUCCESS;

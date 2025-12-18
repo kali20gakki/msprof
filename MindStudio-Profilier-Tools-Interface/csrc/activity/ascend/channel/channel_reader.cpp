@@ -27,6 +27,8 @@
 #include "csrc/common/inject/inject_base.h"
 #include "csrc/common/plog_manager.h"
 #include "csrc/common/utils.h"
+#include "csrc/activity/ascend/channel/soclog_convert.h"
+#include "csrc/activity/ascend/parser/kernel_parser.h"
 #include "csrc/include/mspti_activity.h"
 #include "securec.h"
 
@@ -88,7 +90,7 @@ msptiResult ChannelReader::Execute()
             break;
         }
         auto uint_currLen = static_cast<size_t>(currLen);
-        if (uint_currLen >= (MAX_BUFFER_SIZE - cur_pos)) {
+        if (uint_currLen > (MAX_BUFFER_SIZE - cur_pos)) {
             MSPTI_LOGE("Read invalid data len [%zu] from driver", uint_currLen);
             break;
         }
@@ -139,9 +141,14 @@ size_t ChannelReader::TransStarsLog(char buffer[], size_t valid_size, uint32_t d
 {
     size_t pos = 0;
     while (valid_size - pos >= sizeof(StarsSocLog)) {
-        Mspti::Parser::DeviceTaskCalculator::GetInstance().ReportStarsSocLog(deviceId,
-            reinterpret_cast<StarsSocHeader *>(buffer + pos));
-        pos += sizeof(StarsSocLog);
+        HalLogData logData;
+        Convert::SocLogConvert::GetInstance().TransData(buffer, valid_size, deviceId, pos, logData);
+        if (Mspti::Parser::DeviceTaskCalculator::GetInstance().ReportStarsSocLog(deviceId, logData) != MSPTI_SUCCESS) {
+            MSPTI_LOGE("DeviceTaskCalculator parse SocLog failed");
+    }
+        if (Mspti::Parser::KernelParser::GetInstance().ReportStarsSocLog(deviceId, logData) != MSPTI_SUCCESS) {
+            MSPTI_LOGE("KernelParser parse SocLog failed");
+        }
     }
     return pos;
 }

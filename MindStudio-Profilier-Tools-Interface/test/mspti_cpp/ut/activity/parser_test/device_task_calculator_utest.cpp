@@ -28,6 +28,7 @@
 #include "securec.h"
 
 namespace {
+using namespace Mspti;
 class DeviceTaskCalculatorUtest : public testing::Test {
 protected:
     virtual void SetUp()
@@ -43,28 +44,26 @@ TEST_F(DeviceTaskCalculatorUtest, ShouldReturnTaskWhenSocLogReport)
     uint16_t streamId = 1;
     uint16_t taskId = 1;
     auto &instance = Mspti::Parser::DeviceTaskCalculator::GetInstance();
-    std::shared_ptr<Mspti::Parser::DeviceTask> firstTask =
-        std::make_shared<Mspti::Parser::DeviceTask>(0, 0, streamId, taskId, deviceId);
-    std::vector<std::shared_ptr<Mspti::Parser::DeviceTask>> assembleTasks{ firstTask, nullptr };
-    instance.RegisterCallBack(assembleTasks, [deviceId](std::shared_ptr<Mspti::Parser::DeviceTask> task) {
-        EXPECT_EQ(task->deviceId, 1);
+    Mspti::Parser::DeviceTask firstTask(0, 0, streamId, taskId, deviceId);
+    instance.RegisterCallBack(firstTask, [deviceId](const Mspti::Parser::DeviceTask& task) {
+        EXPECT_EQ(task.deviceId, 1);
         return MSPTI_SUCCESS;
     });
 
-    StarsSocLog socLogStart;
+    HalLogData socLogStart;
     (void)memset_s(&socLogStart, sizeof(socLogStart), 0, sizeof(socLogStart));
-    socLogStart.funcType = STARS_FUNC_TYPE_BEGIN;
-    socLogStart.streamId = streamId;
-    socLogStart.taskId = taskId;
+    socLogStart.acsq.funcType = STARS_FUNC_TYPE_BEGIN;
+    socLogStart.acsq.streamId = streamId;
+    socLogStart.acsq.taskId = taskId;
 
-    StarsSocLog socLogEnd;
+    HalLogData socLogEnd;
     (void)memset_s(&socLogEnd, sizeof(socLogEnd), 0, sizeof(socLogEnd));
-    socLogEnd.funcType = STARS_FUNC_TYPE_END;
-    socLogEnd.streamId = streamId;
-    socLogEnd.taskId = taskId;
+    socLogEnd.acsq.funcType = STARS_FUNC_TYPE_END;
+    socLogEnd.acsq.streamId = streamId;
+    socLogEnd.acsq.taskId = taskId;
 
-    EXPECT_EQ(instance.ReportStarsSocLog(deviceId, reinterpret_cast<StarsSocHeader *>(&socLogStart)), MSPTI_SUCCESS);
-    EXPECT_EQ(instance.ReportStarsSocLog(deviceId, reinterpret_cast<StarsSocHeader *>(&socLogEnd)), MSPTI_SUCCESS);
+    EXPECT_EQ(instance.ReportStarsSocLog(deviceId, socLogStart), MSPTI_SUCCESS);
+    EXPECT_EQ(instance.ReportStarsSocLog(deviceId, socLogEnd), MSPTI_SUCCESS);
 }
 
 TEST_F(DeviceTaskCalculatorUtest, ShouldReturnTaskWhenFftsLogReport)
@@ -73,46 +72,48 @@ TEST_F(DeviceTaskCalculatorUtest, ShouldReturnTaskWhenFftsLogReport)
     uint16_t streamId = 1;
     uint16_t taskId = 1;
     uint16_t subTaskId = 1;
-    std::shared_ptr<Mspti::Parser::DeviceTask> firstTask =
-        std::make_shared<Mspti::Parser::DeviceTask>(0, 0, streamId, taskId, deviceId);
-    std::vector<std::shared_ptr<Mspti::Parser::DeviceTask>> assembleTasks{ firstTask };
+    Mspti::Parser::DeviceTask firstTask(0, 0, streamId, taskId, deviceId);
     auto &instance = Mspti::Parser::DeviceTaskCalculator::GetInstance();
-    instance.RegisterCallBack(assembleTasks, [deviceId](std::shared_ptr<Mspti::Parser::DeviceTask> task) {
-        EXPECT_EQ(task->deviceId, deviceId);
-        EXPECT_EQ(task->subTasks.size(), 1);
+    instance.RegisterCallBack(firstTask, [deviceId](const Mspti::Parser::DeviceTask& task) {
+        EXPECT_EQ(task.deviceId, deviceId);
+        EXPECT_EQ(task.subTasks.size(), 1);
         return MSPTI_SUCCESS;
     });
 
-    StarsSocLog socLogStart;
+    HalLogData socLogStart;
     (void)memset_s(&socLogStart, sizeof(socLogStart), 0, sizeof(socLogStart));
-    socLogStart.funcType = STARS_FUNC_TYPE_BEGIN;
-    socLogStart.streamId = streamId;
-    socLogStart.taskId = taskId;
+    socLogStart.type = ACSQ_LOG;
+    socLogStart.acsq.funcType = STARS_FUNC_TYPE_BEGIN;
+    socLogStart.acsq.streamId = streamId;
+    socLogStart.acsq.taskId = taskId;
 
-    StarsSocLog socLogEnd;
+    HalLogData socLogEnd;
     (void)memset_s(&socLogEnd, sizeof(socLogEnd), 0, sizeof(socLogEnd));
-    socLogEnd.funcType = STARS_FUNC_TYPE_END;
-    socLogEnd.streamId = streamId;
-    socLogEnd.taskId = taskId;
+    socLogEnd.type = ACSQ_LOG;
+    socLogEnd.acsq.funcType = STARS_FUNC_TYPE_END;
+    socLogEnd.acsq.streamId = streamId;
+    socLogEnd.acsq.taskId = taskId;
 
-    FftsPlusLog fftsLogStart;
+    HalLogData fftsLogStart;
     (void)memset_s(&fftsLogStart, sizeof(fftsLogStart), 0, sizeof(fftsLogStart));
-    fftsLogStart.funcType = FFTS_PLUS_TYPE_START;
-    fftsLogStart.streamId = streamId;
-    fftsLogStart.taskId = taskId;
-    fftsLogStart.subTaskId = subTaskId;
+    fftsLogStart.type = FFTS_LOG;
+    fftsLogStart.ffts.funcType = FFTS_PLUS_TYPE_START;
+    fftsLogStart.ffts.streamId = streamId;
+    fftsLogStart.ffts.taskId = taskId;
+    fftsLogStart.ffts.subTaskId = subTaskId;
 
-    FftsPlusLog fftsLogEnd;
+    HalLogData fftsLogEnd;
     (void)memset_s(&fftsLogEnd, sizeof(fftsLogEnd), 0, sizeof(fftsLogEnd));
-    fftsLogEnd.funcType = FFTS_PLUS_TYPE_END;
-    fftsLogEnd.streamId = streamId;
-    fftsLogEnd.taskId = taskId;
-    fftsLogEnd.subTaskId = subTaskId;
+    fftsLogEnd.type = FFTS_LOG;
+    fftsLogEnd.ffts.funcType = FFTS_PLUS_TYPE_END;
+    fftsLogEnd.ffts.streamId = streamId;
+    fftsLogEnd.ffts.taskId = taskId;
+    fftsLogEnd.ffts.subTaskId = subTaskId;
 
-    instance.ReportStarsSocLog(deviceId, reinterpret_cast<StarsSocHeader *>(&socLogStart));
-    instance.ReportStarsSocLog(deviceId, reinterpret_cast<StarsSocHeader *>(&fftsLogStart));
-    instance.ReportStarsSocLog(deviceId, reinterpret_cast<StarsSocHeader *>(&fftsLogEnd));
-    instance.ReportStarsSocLog(deviceId, reinterpret_cast<StarsSocHeader *>(&socLogEnd));
+    instance.ReportStarsSocLog(deviceId, socLogStart);
+    instance.ReportStarsSocLog(deviceId, fftsLogStart);
+    instance.ReportStarsSocLog(deviceId, fftsLogEnd);
+    instance.ReportStarsSocLog(deviceId, socLogEnd);
 }
 
 TEST_F(DeviceTaskCalculatorUtest, ShouldNotReturnTask)
@@ -121,30 +122,29 @@ TEST_F(DeviceTaskCalculatorUtest, ShouldNotReturnTask)
     uint16_t streamId = 1;
     uint16_t taskId = 1;
     uint16_t subTaskId = 1;
-    std::shared_ptr<Mspti::Parser::DeviceTask> firstTask =
-        std::make_shared<Mspti::Parser::DeviceTask>(0, 0, streamId, taskId, deviceId);
-    std::vector<std::shared_ptr<Mspti::Parser::DeviceTask>> assembleTasks{ firstTask };
+    Mspti::Parser::DeviceTask firstTask(0, 0, streamId, taskId, deviceId);
     auto &instance = Mspti::Parser::DeviceTaskCalculator::GetInstance();
-    instance.RegisterCallBack(assembleTasks, [deviceId](std::shared_ptr<Mspti::Parser::DeviceTask> task) {
+    instance.RegisterCallBack(firstTask, [deviceId](const Mspti::Parser::DeviceTask& task) {
         EXPECT_TRUE(false);
         return MSPTI_SUCCESS;
     });
 
-
-    StarsSocLog socLogStart;
+    HalLogData socLogStart;
     (void)memset_s(&socLogStart, sizeof(socLogStart), 0, sizeof(socLogStart));
-    socLogStart.funcType = STARS_FUNC_TYPE_BEGIN;
-    socLogStart.streamId = streamId;
-    socLogStart.taskId = taskId;
+    socLogStart.type = ACSQ_LOG;
+    socLogStart.acsq.funcType = STARS_FUNC_TYPE_BEGIN;
+    socLogStart.acsq.streamId = streamId;
+    socLogStart.acsq.taskId = taskId;
 
-    FftsPlusLog fftsLogEnd;
+    HalLogData fftsLogEnd;
     (void)memset_s(&fftsLogEnd, sizeof(fftsLogEnd), 0, sizeof(fftsLogEnd));
-    fftsLogEnd.funcType = FFTS_PLUS_TYPE_END;
-    fftsLogEnd.streamId = streamId + 1;
-    fftsLogEnd.taskId = taskId + 1;
-    fftsLogEnd.subTaskId = subTaskId + 1;
+    fftsLogEnd.type = FFTS_LOG;
+    fftsLogEnd.ffts.funcType = FFTS_PLUS_TYPE_END;
+    fftsLogEnd.ffts.streamId = streamId + 1;
+    fftsLogEnd.ffts.taskId = taskId + 1;
+    fftsLogEnd.ffts.subTaskId = subTaskId + 1;
 
-    instance.ReportStarsSocLog(deviceId, reinterpret_cast<StarsSocHeader *>(&socLogStart));
-    instance.ReportStarsSocLog(deviceId, reinterpret_cast<StarsSocHeader *>(&fftsLogEnd));
+    instance.ReportStarsSocLog(deviceId, socLogStart);
+    instance.ReportStarsSocLog(deviceId, fftsLogEnd);
 }
 }

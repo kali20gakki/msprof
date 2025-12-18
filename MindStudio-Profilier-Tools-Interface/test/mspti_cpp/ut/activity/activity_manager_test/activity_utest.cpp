@@ -29,6 +29,9 @@
 namespace {
 std::atomic<uint64_t> g_records{0};
 
+std::atomic<uint64_t> g_massive_records{0};
+std::atomic<uint64_t> g_total_records{0};
+
 class ActivityUtest : public testing::Test {
 protected:
     virtual void SetUp()
@@ -68,6 +71,23 @@ static void ActivityParser(msptiActivity *pRecord)
                 activity->objectId.pt.threadId, activity->name);
         }
     }
+}
+
+void MassiveBufferComplete(uint8_t *buffer, size_t size, size_t validSize)
+{
+    if (validSize > 0) {
+        msptiActivity *pRecord = NULL;
+        msptiResult status = MSPTI_SUCCESS;
+        do {
+            status = msptiActivityGetNextRecord(buffer, validSize, &pRecord);
+            if (status == MSPTI_SUCCESS) {
+                g_massive_records++;
+            } else if (status == MSPTI_ERROR_MAX_LIMIT_REACHED) {
+                break;
+            }
+        } while (1);
+    }
+    free(buffer);
 }
 
 void UserBufferComplete(uint8_t *buffer, size_t size, size_t validSize)
@@ -122,6 +142,29 @@ void TestActivityKernel()
     Mspti::Activity::ActivityManager::GetInstance()->Record(
         reinterpret_cast<msptiActivity*>(&kernel), sizeof(kernel));
     EXPECT_EQ(MSPTI_SUCCESS, msptiActivityDisable(MSPTI_ACTIVITY_KIND_KERNEL));
+}
+
+void RecordMassiveMarkerActivity()
+{
+    msptiActivityMarker activity;
+    constexpr uint64_t timeStamp = 1614659207688700;
+    constexpr uint32_t markNum = 10000;
+    constexpr uint32_t flushPeriod = 20;
+    auto instance = Mspti::Activity::ActivityManager::GetInstance();
+    for (size_t i = 0; i < markNum ; ++i) {
+        activity.kind = MSPTI_ACTIVITY_KIND_MARKER;
+        activity.sourceKind = MSPTI_ACTIVITY_SOURCE_KIND_HOST;
+        activity.timestamp = timeStamp;
+        activity.id = i;
+        activity.objectId.pt.processId = 0;
+        activity.objectId.pt.threadId = 0;
+        activity.name = "UserMark";
+        instance->Record(reinterpret_cast<msptiActivity*>(&activity), sizeof(activity));
+        g_total_records += 1;
+        if (i % flushPeriod == 0) {
+            EXPECT_EQ(MSPTI_SUCCESS, msptiActivityFlushAll(1));
+        }
+    }
 }
 
 TEST_F(ActivityUtest, ShouldRetSuccessWhenSetAllKindWithCorrectApiInvocationSequence)
@@ -281,5 +324,26 @@ TEST_F(ActivityUtest, GetRecordSuccessWhenBufferNull)
     validSize = 1;
     EXPECT_EQ(MSPTI_ERROR_MAX_LIMIT_REACHED, msptiActivityGetNextRecord(buffer, validSize, &pRecord));
     free(buffer);
+}
+
+
+TEST_F(ActivityUtest, MultThreadFlushAll)
+{
+    MOCKER_CPP(&Mspti::Ascend::DevTaskManager::StartDevProfTask).stubs().will(returnValue(MSPTI_SUCCESS));
+    MOCKER_CPP(&Mspti::Ascend::DevTaskManager::StopDevProfTask).stubs().will(returnValue(MSPTI_SUCCESS));
+    EXPECT_EQ(MSPTI_SUCCESS, msptiActivityRegisterCallbacks(UserLittleBufferRequest, MassiveBufferComplete));
+    EXPECT_EQ(MSPTI_SUCCESS, msptiActivityEnable(MSPTI_ACTIVITY_KIND_MARKER));
+
+    std::vector<std::thread> worker;
+    for (int i = 0; i < 8; i++) {
+        worker.push_back(std::thread(RecordMassiveMarkerActivity));
+    }
+    for (auto &thread : worker) {
+        if (thread.joinable()) {
+            thread.join();
+        }
+    }
+    EXPECT_EQ(MSPTI_SUCCESS, msptiActivityFlushAll(1));
+    EXPECT_EQ(g_total_records.load(), g_massive_records.load());
 }
 }

@@ -18,7 +18,7 @@
 #ifndef MSPTI_ACTIVITY_ASCEND_CHANNEL_CHANNEL_DATA_H
 #define MSPTI_ACTIVITY_ASCEND_CHANNEL_CHANNEL_DATA_H
 
-#include <stdint.h>
+#include <cstdint>
 
 enum TsTrackRptType {
     RPT_TYPE_STEP_TRACE = 10,
@@ -113,6 +113,19 @@ struct FftsPlusLog {
     uint16_t fftsType : 3;
     uint16_t threadId;
     uint32_t resv5[10];
+};
+
+struct StarsSocLogV6 {
+    uint16_t funcType : 6;
+    uint16_t cnt : 4;
+    uint16_t taskType : 6;
+    uint16_t resv0;
+    uint32_t taskId;
+    uint64_t timestamp;
+    uint16_t resv1;
+    uint16_t accId : 6;
+    uint16_t acsqId : 10;
+    uint32_t resv2[3];
 };
 #pragma pack()
 

@@ -28,6 +28,7 @@
 #include "csrc/common/utils.h"
 #include "csrc/activity/ascend/parser/cann_hash_cache.h"
 #include "csrc/activity/ascend/parser/communication_calculator.h"
+#include "csrc/activity/ascend/channel/stars_common.h"
 
 namespace Mspti {
 namespace Inject {
@@ -113,7 +114,7 @@ uint64_t MsptiGetHashIdImpl(const char* hashInfo, size_t len)
         MSPTI_LOGE("GenHashId failed. hashInfo is nullptr");
         return 0;
     }
-    return Mspti::Parser::CannHashCache::GetInstance().GenHashId(std::string(hashInfo, len));
+    return Mspti::Parser::CannHashCache::GenHashId(std::string(hashInfo, len));
 }
 
 int8_t MsptiHostFreqIsEnableImpl()
@@ -187,6 +188,12 @@ int32_t MsptiCompactInfoReporterCallbackImpl(uint32_t agingFlag, CONST_VOID_PTR 
             return PROFAPI_ERROR;
         }
     }
+
+    if (compact->level == MSPROF_REPORT_RUNTIME_LEVEL
+        && compact->type == MSPROF_STREAM_EXPAND_SPEC_TYPE) {
+        Mspti::Convert::StarsCommon::SetStreamExpandStatus(compact->data.streamExpandInfo.expandStatus);
+    }
+
     return PROFAPI_ERROR_NONE;
 }
 

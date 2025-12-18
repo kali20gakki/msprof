@@ -107,7 +107,7 @@ public:
     void SetThreadPoolQueueSize(const size_t queueSize);
     int Start();
     int Stop();
-    int Dispatch(std::shared_ptr<Task> task);
+    int Dispatch(const std::shared_ptr<Task>& task);
 
 private:
     unsigned int threadNum_;

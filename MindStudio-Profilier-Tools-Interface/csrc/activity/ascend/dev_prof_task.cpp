@@ -44,6 +44,14 @@ DevProfTaskFactory::kindToChannel_map_ = {
             {MSPTI_ACTIVITY_KIND_HCCL, {PROF_CHANNEL_TS_FW}},
             {MSPTI_ACTIVITY_KIND_COMMUNICATION, {PROF_CHANNEL_TS_FW, PROF_CHANNEL_STARS_SOC_LOG}},
         }
+    },
+    {
+        Mspti::Common::PlatformType::CHIP_V6, {
+            {MSPTI_ACTIVITY_KIND_MARKER, {PROF_CHANNEL_TS_FW}},
+            {MSPTI_ACTIVITY_KIND_KERNEL, {PROF_CHANNEL_TS_FW, PROF_CHANNEL_STARS_SOC_LOG}},
+            {MSPTI_ACTIVITY_KIND_HCCL, {PROF_CHANNEL_TS_FW}},
+            {MSPTI_ACTIVITY_KIND_COMMUNICATION, {PROF_CHANNEL_TS_FW, PROF_CHANNEL_STARS_SOC_LOG}},
+        }
     }
 };
 
@@ -152,10 +160,14 @@ msptiResult DevProfTaskTsFw::StartTask()
         }
         configP.period = SAMPLE_PERIOD;
         configP.tsKeypoint = 1;
-
+        configP.tsBlockdim = TS_PROFILE_COMMAND_TYPE_PROFILING_ENABLE;
         ProfStartParaT profStartPara;
         profStartPara.channelType = PROF_CHANNEL_TYPE_TS;
-        profStartPara.samplePeriod = SAMPLE_PERIOD;
+        if (Common::ContextManager::GetInstance()->GetChipType(deviceId_) == Common::PlatformType::CHIP_V6) {
+            profStartPara.samplePeriod = 0;
+        } else {
+            profStartPara.samplePeriod = 20;
+        }
         profStartPara.realTime = PROFILE_REAL_TIME;
         profStartPara.userData = &configP;
         profStartPara.userDataSize = static_cast<unsigned int>(sizeof(TsTsFwProfileConfigT));
@@ -228,8 +240,11 @@ msptiResult DevProfTaskStars::StartTask()
         configP.ffts_thread_task = TS_PROFILE_COMMAND_TYPE_PROFILING_ENABLE;
         ProfStartParaT profStartPara;
         profStartPara.channelType = PROF_CHANNEL_TYPE_TS;
-        static const uint32_t SAMPLE_PERIOD = 20;
-        profStartPara.samplePeriod = SAMPLE_PERIOD;
+        if (Common::ContextManager::GetInstance()->GetChipType(deviceId_) == Common::PlatformType::CHIP_V6) {
+            profStartPara.samplePeriod = 0;
+        } else {
+            profStartPara.samplePeriod = 20;
+        }
         profStartPara.realTime = PROFILE_REAL_TIME;
         profStartPara.userData = &configP;
         profStartPara.userDataSize = static_cast<unsigned int>(sizeof(StarsSocLogConfigT));

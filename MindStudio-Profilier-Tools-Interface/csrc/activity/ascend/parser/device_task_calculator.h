@@ -29,6 +29,7 @@
 #include "csrc/activity/ascend/channel/channel_data.h"
 #include "csrc/common/utils.h"
 #include "csrc/include/mspti_result.h"
+#include "csrc/activity/ascend/entity/soclog.h"
 
 namespace Mspti {
 namespace Parser {
@@ -48,7 +49,8 @@ struct DeviceTask {
     uint32_t deviceId;
     bool isFfts;
     bool agingFlag;
-    std::vector<std::shared_ptr<SubTask>> subTasks;
+    std::vector<SubTask> subTasks;
+    DeviceTask() = default;
     DeviceTask(uint64_t start, uint64_t end, uint32_t streamId, uint32_t taskId, uint32_t deviceId, bool isFfts = false,
         bool agingFlag = true)
         : start(start),
@@ -63,13 +65,13 @@ struct DeviceTask {
 
 class DeviceTaskCalculator {
     // <deviceId, streamId, taskId>
-    using DstType = std::tuple<uint16_t, uint16_t, uint16_t>;
+    using DstType = std::tuple<uint16_t, uint16_t, uint32_t>;
 
     // <deviceId, streamId, taskId, subTaskId>
-    using DstsType = std::tuple<uint16_t, uint16_t, uint16_t, uint16_t>;
+    using DstsType = std::tuple<uint16_t, uint16_t, uint32_t, uint16_t>;
 
 public:
-    using CompleteFunc = std::function<msptiResult(std::shared_ptr<DeviceTask>&)>;
+    using CompleteFunc = std::function<msptiResult(DeviceTask&)>;
 
     static DeviceTaskCalculator &GetInstance()
     {
@@ -77,23 +79,27 @@ public:
         return instance;
     }
 
-    void RegisterCallBack(const std::vector<std::shared_ptr<DeviceTask>> &assembleTasks, const CompleteFunc& completeFunc);
-
-    msptiResult ReportStarsSocLog(uint32_t deviceId, StarsSocHeader *socLogHeader);
+    void RegisterCallBack(const DeviceTask &assembleTask,
+                          const DeviceTaskCalculator::CompleteFunc& completeFunc);
+    msptiResult ReportStarsSocLog(uint32_t deviceId, const HalLogData& originData);
 
 private:
     DeviceTaskCalculator() = default;
 
-    msptiResult AssembleTasksTimeWithSocLog(uint32_t deviceId, StarsSocLog *socLog);
+    msptiResult AssembleTasksTimeWithSocLog(uint32_t deviceId, const SocLog& socLog);
 
-    msptiResult AssembleSubTasksTimeWithFftsLog(uint32_t deviceId, FftsPlusLog *fftsLog);
+    msptiResult AssembleSubTasksTimeWithFftsLog(uint32_t deviceId, const FftsLog& fftsLog);
+
+    void DealCacheDeviceTask();
 
 private:
-    std::unordered_map<DstType, std::list<std::shared_ptr<DeviceTask>>, Common::TupleHash> assembleTasks_;
-    std::unordered_map<DstsType, std::list<std::shared_ptr<SubTask>>, Common::TupleHash> assembleSubTasks_;
-    std::unordered_map<DstType, std::list<CompleteFunc>, Common::TupleHash> completeFunc_;
+    std::unordered_map<DstType, DeviceTask, Common::TupleHash> assembleTasks_;
+    std::unordered_map<DstsType, SubTask, Common::TupleHash> assembleSubTasks_;
+    std::unordered_map<DstType, CompleteFunc, Common::TupleHash> completeFunc_;
+
     std::mutex assembleTaskMutex_;
-    std::mutex assembleSubTaskMutex_;
+    std::vector<std::pair<DeviceTask, CompleteFunc>> assembleTaskQueue_{};
+    std::vector<std::pair<DeviceTask, CompleteFunc>> dealAssembleTaskQueue_{};
 };
 }
 }

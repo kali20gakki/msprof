@@ -46,7 +46,7 @@ TEST_F(CommunicationCalculatorUtest, ShouldReturnSuccessWhenChildEmpty)
 {
     std::unique_ptr<Mspti::Parser::ApiEvent> api2TaskInfo = std::make_unique<Mspti::Parser::ApiEvent>();
     auto &instance = Mspti::Parser::CommunicationCalculator::GetInstance();
-    EXPECT_EQ(instance.AppendApi2TaskInfo(api2TaskInfo), MSPTI_SUCCESS);
+    EXPECT_EQ(instance.AppendApi2TaskInfo(*api2TaskInfo), MSPTI_SUCCESS);
 }
 
 TEST_F(CommunicationCalculatorUtest, ShouldReturnSuccess)
@@ -64,9 +64,9 @@ TEST_F(CommunicationCalculatorUtest, ShouldReturnSuccess)
     std::unique_ptr<Mspti::Parser::ApiEvent> subApi2TaskInfo = std::make_unique<Mspti::Parser::ApiEvent>();
     subApi2TaskInfo->api.beginTime = subBeginTime;
     subApi2TaskInfo->api.endTime = subEndTime;
-    api2TaskInfo->children.push_back(std::move(subApi2TaskInfo));
+    api2TaskInfo->children.push_back(*subApi2TaskInfo);
     auto &instance = Mspti::Parser::CommunicationCalculator::GetInstance();
-    EXPECT_EQ(instance.AppendApi2TaskInfo(api2TaskInfo), MSPTI_SUCCESS);
+    EXPECT_EQ(instance.AppendApi2TaskInfo(*api2TaskInfo), MSPTI_SUCCESS);
 }
 
 TEST_F(CommunicationCalculatorUtest, ShouldReturnSuccessAppendCompactInfo)
@@ -77,8 +77,8 @@ TEST_F(CommunicationCalculatorUtest, ShouldReturnSuccessAppendCompactInfo)
     MsprofCompactInfo data;
     (void)memset_s(&data, sizeof(data), 0, sizeof(data));
     data.data.hcclopInfo.dataType = dataType;
-    data.data.hcclopInfo.groupName = Mspti::Parser::CannHashCache::GetInstance().GenHashId("hcom_1");
-    data.data.hcclopInfo.algType = Mspti::Parser::CannHashCache::GetInstance().GenHashId("mesh");
+    data.data.hcclopInfo.groupName = Mspti::Parser::CannHashCache::GenHashId("hcom_1");
+    data.data.hcclopInfo.algType = Mspti::Parser::CannHashCache::GenHashId("mesh");
     data.data.hcclopInfo.algType = dataCount;
     auto &instance = Mspti::Parser::CommunicationCalculator::GetInstance();
     EXPECT_EQ(MSPTI_SUCCESS, instance.AppendCompactInfo(agingFlag, &data));

@@ -59,6 +59,7 @@ enum ProfilerCallbackType {
 
 #define MSPROF_REPORT_HCCL_MASTER_TYPE  10001U
 #define MSPROF_REPORT_HCCL_SLAVE_TYPE   10002U
+#define MSPROF_STREAM_EXPAND_SPEC_TYPE   804U
 
 const uint32_t MSPROF_REPORT_NODE_HCCL_OP_INFO_TYPE = 10;
 const uint32_t MSPROF_REPORT_NODE_LAUNCH_TYPE       = 5;
@@ -132,6 +133,14 @@ struct MsprofHcclOPInfo {  // for MsprofReportCompactInfo buffer data
 };
 #pragma pack()
 
+#pragma pack(1)
+struct MsprofStreamExpandSpecInfo {  // for MsprofReportCompactInfo buffer data
+    uint8_t expandStatus; // 1: 扩容场景 0: 非扩容场景
+    uint8_t reserved1;
+    uint16_t reserved2;
+};
+#pragma pack()
+
 enum TsTaskType {
     TS_TASK_TYPE_KERNEL_AICORE = 0,
     TS_TASK_TYPE_KERNEL_AICPU = 1,
@@ -166,6 +175,7 @@ struct MsprofCompactInfo {
         MsprofNodeBasicInfo nodeBasicInfo;
         MsprofAttrInfo nodeAttrInfo;
         MsprofHcclOPInfo hcclopInfo;
+        MsprofStreamExpandSpecInfo streamExpandInfo;
     } data;
 };
 

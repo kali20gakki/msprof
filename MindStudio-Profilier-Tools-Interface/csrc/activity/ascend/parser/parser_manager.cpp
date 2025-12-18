@@ -20,12 +20,9 @@
 #include "csrc/activity/activity_manager.h"
 #include "csrc/activity/ascend/reporter/external_correlation_reporter.h"
 #include "csrc/common/thread_local.h"
-#include "hccl_reporter.h"
-#include "stars_common.h"
+#include "csrc/common/utils.h"
 #include "mstx_parser.h"
 #include "cann_hash_cache.h"
-
-#include "communication_calculator.h"
 
 namespace Mspti {
 namespace Parser {
@@ -58,7 +55,7 @@ msptiResult ParserManager::ReportApi(const MsprofApi* const data)
     if (!data) {
         return MSPTI_ERROR_INNER;
     }
-    const auto& name = CannHashCache::GetInstance().GetHashInfo(data->itemId);
+    const auto& name = CannHashCache::GetHashInfo(data->itemId);
     if (name.empty()) {
         MSPTI_LOGW("Get HashInfo failed. HashId: %lu", data->itemId);
         return MSPTI_SUCCESS;

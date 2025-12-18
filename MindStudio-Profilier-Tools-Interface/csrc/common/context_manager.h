@@ -26,6 +26,7 @@
 #include <thread>
 #include <vector>
 #include "csrc/include/mspti_result.h"
+#include "csrc/common/concurrent_map.h"
 
 namespace Mspti {
 namespace Common {
@@ -39,7 +40,13 @@ struct DevTimeInfo {
 enum class PlatformType {
     CHIP_910B = 5,
     CHIP_310B = 7,
+    CHIP_V6 = 15,
     END_TYPE
+};
+
+struct ContextInfo {
+    PlatformType platformType;
+    std::once_flag flag;
 };
 
 class ContextManager final {
@@ -84,13 +91,13 @@ private:
     std::atomic<bool> isQuit_{false};
     std::thread t_;
 
-    std::mutex correlationIdMtx_;
-    uint64_t correlationId_{0};
+    std::atomic<uint64_t> correlationId_{1};
 
     std::mutex cv_mutex_;
     std::condition_variable cv_;
 
-    std::unordered_map<uint32_t, uint64_t> threadCorrelationIdInfo_;
+    ConcurrentMap<uint32_t, uint64_t> threadCorrelationIdInfo_;
+    std::unordered_map<uint32_t, ContextInfo> deviceInfoCache_;
 };
 }  // Common
 }  // Mspti

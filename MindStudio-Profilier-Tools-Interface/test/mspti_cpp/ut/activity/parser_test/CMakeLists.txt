@@ -26,6 +26,8 @@ add_executable(mspti_parser_utest
     ${TOP_DIR}/csrc/activity/ascend/channel/channel_pool_manager.cpp
     ${TOP_DIR}/csrc/activity/ascend/channel/channel_pool.cpp
     ${TOP_DIR}/csrc/activity/ascend/channel/channel_reader.cpp
+    ${TOP_DIR}/csrc/activity/ascend/channel/soclog_convert.cpp
+    ${TOP_DIR}/csrc/activity/ascend/channel/stars_common.cpp
     ${UT_TOP_DIR}/stub/inject/profapi_inject_stub.cpp
     ${UT_TOP_DIR}/stub/inject/driver_inject_stub.cpp
     ${UT_TOP_DIR}/stub/inject/runtime_inject_stub.cpp
