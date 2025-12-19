@@ -40,13 +40,13 @@ uint32_t FreqParser::GetTrunkSize()
 
 uint32_t FreqParser::ParseDataItem(uint8_t* binaryData, uint32_t binaryDataSize, uint8_t* data)
 {
-    std::function<int(uint8_t *, uint32_t, uint8_t *)> parser =
+    std::function<int(uint8_t *, uint32_t, uint8_t *, uint16_t)> parser =
             ParserItemFactory::GetParseItem(FREQ_PARSER, DEFAULT_FREQ_LPM);
     if (parser == nullptr) {
         ERROR("There is no Parser function to handle data! funcType is %", DEFAULT_FREQ_LPM);
         return ANALYSIS_ERROR;
     }
-    parser(binaryData, binaryDataSize, data);
+    parser(binaryData, binaryDataSize, data, 0);
     return ANALYSIS_OK;
 }
 

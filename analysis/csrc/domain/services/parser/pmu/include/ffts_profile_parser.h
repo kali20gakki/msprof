@@ -27,7 +27,7 @@ namespace Domain {
 
 class FftsProfileParser : public Parser {
 private:
-    uint32_t ParseDataItem(uint8_t* binaryData, uint32_t binaryDataSize, uint8_t* data);
+    uint32_t ParseDataItem(uint8_t* binaryData, uint32_t binaryDataSize, uint8_t* data, uint16_t expandStatus);
 
     std::vector<std::string> GetFilePattern() override;
 

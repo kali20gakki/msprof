@@ -27,6 +27,7 @@ from common_func.profiling_scene import ProfilingScene
 from common_func.profiling_scene import ExportMode
 from common_func.ms_constant.str_constant import StrConstant
 from framework.load_info_manager import LoadInfoManager
+from msparser.compact_info.stream_expand_spec_reader import StreamExpandSpecReader
 
 
 class MsMultiProcess(multiprocessing.Process):
@@ -47,6 +48,8 @@ class MsMultiProcess(multiprocessing.Process):
         init_log(self.sample_config.get("result_dir"))
         LoadInfoManager.load_info(self.sample_config.get("result_dir"))
         ProfilingScene().set_mode(self.sample_config.get(StrConstant.EXPORT_MODE, ExportMode.ALL_EXPORT))
+        StreamExpandSpecReader().load_stream_expand_spec(os.path.join(os.path.dirname(self.sample_config.
+                                                                                      get("result_dir")), 'host'))
 
     @abstractmethod
     def ms_run(self: any) -> None:

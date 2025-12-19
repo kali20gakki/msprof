@@ -21,36 +21,36 @@ using namespace Analysis::Domain;
 
 TEST(StarCommonUTest, ShouldStreamChangeLow12BitsWhenStreamBit13IsOne)
 {
-    auto res = StarsCommon::GetStreamId(8195, 8);
+    auto res = StarsCommon::GetStreamId(8195, 8, 0);
     EXPECT_EQ(8, res);
 }
 
 TEST(StarCommonUTest, ShouldReturnStreamWhenStreamBit13IsNotOne)
 {
-    auto res = StarsCommon::GetStreamId(3, 8);
+    auto res = StarsCommon::GetStreamId(3, 8, 0);
     EXPECT_EQ(3, res);
 }
 
 TEST(StarCommonUTest, ShouldReturnStreamLow12BitsWhenStreamBit12IsOne)
 {
-    auto res = StarsCommon::GetStreamId(12291, 8);
+    auto res = StarsCommon::GetStreamId(12291, 8, 0);
     EXPECT_EQ(3, res);
 }
 
 TEST(StarCommonUTest, ShouldTaskChangeLow12BitsWhenStreamBit13IsOne)
 {
-    auto res = StarsCommon::GetTaskId(8195, 8);
+    auto res = StarsCommon::GetTaskId(8195, 8, 0);
     EXPECT_EQ(3, res);
 }
 
 TEST(StarCommonUTest, ShouldReturnTaskWhenStreamBit13AndBit12IsNotOne)
 {
-    auto res = StarsCommon::GetTaskId(3, 8);
+    auto res = StarsCommon::GetTaskId(3, 8, 0);
     EXPECT_EQ(8, res);
 }
 
 TEST(StarCommonUTest, ShouldReturnTaskChangeHighThreeBitsWhenStreamBit12IsOne)
 {
-    auto res = StarsCommon::GetTaskId(20483, 8);
+    auto res = StarsCommon::GetTaskId(20483, 8, 0);
     EXPECT_EQ(16392, res);
 }

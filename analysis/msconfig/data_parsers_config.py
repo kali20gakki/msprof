@@ -328,4 +328,9 @@ class DataParsersConfig(MetaConfig):
             ('chip_model', '0,1,2,3,4,5,7,8,11'),
             ('position', 'D')
         ],
+        'StreamExpandSpecParser': [
+            ('path', 'msparser.compact_info.stream_expand_spec_parser'),
+            ('chip_model', '5'),
+            ('position', 'H')
+        ],
     }

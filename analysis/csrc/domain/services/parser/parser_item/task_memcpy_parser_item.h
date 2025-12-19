@@ -42,7 +42,7 @@ struct TaskMemcpy {
 };
 #pragma pack()
 
-int TaskMemcpyParseItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *halUniData);
+int TaskMemcpyParseItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *halUniData, uint16_t expandStatus);
 }
 }
 

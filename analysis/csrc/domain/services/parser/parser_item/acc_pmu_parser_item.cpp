@@ -26,7 +26,7 @@ namespace Analysis {
 namespace Domain {
 using namespace Analysis::Utils;
 
-int AccPmuParserItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *halUniData)
+int AccPmuParserItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *halUniData, uint16_t expandStatus)
 {
     if (binaryDataSize != sizeof(AccPmu)) {
         ERROR("The trunkSize of accPmu is not equal with the AccPmu struct");

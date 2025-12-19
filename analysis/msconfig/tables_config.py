@@ -1545,4 +1545,7 @@ class TablesConfig(MetaConfig):
             ('task_id', 'INTEGER,null'),
             ('block_dim', 'INTEGER,null'),
         ],
+        'StreamExpandSpecMap': [
+            ('expand_status', 'NUMERIC,null')
+        ],
     }

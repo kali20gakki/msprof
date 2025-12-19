@@ -14,36 +14,17 @@
  * See the Mulan PSL v2 for more details.
  * -------------------------------------------------------------------------*/
 
-#ifndef MSPROF_ANALYSIS_DOMAIN_SERVICES_PARSER_PARSER_ITEM_TASK_TYPE_PARSER_ITEM_H
-#define MSPROF_ANALYSIS_DOMAIN_SERVICES_PARSER_PARSER_ITEM_TASK_TYPE_PARSER_ITEM_H
+#ifndef MSPROF_ANALYSIS_LOAD_STREAM_EXPAND_SPEC_DATA_H
+#define MSPROF_ANALYSIS_LOAD_STREAM_EXPAND_SPEC_DATA_H
 
-#include <cstdint>
+#include "analysis/csrc/infrastructure/process/include/process_register.h"
 
 namespace Analysis {
 namespace Domain {
-#define PARSER_ITEM_TS_TASK_TYPE 0x0C
-
-#pragma pack(1)
-struct TaskType {
-    uint8_t resv1;
-    uint8_t funcType;
-    uint16_t resv2;
-    uint32_t resv3;
-    uint64_t timestamp;
-    uint16_t streamId : 11;
-    uint16_t resv4 : 5;
-    uint16_t taskId;
-    uint16_t taskType;
-    uint8_t taskStatus;
-    uint8_t resv5;
-    uint64_t resv6;
-    uint64_t resv7;
+class LoadStreamExpandSpec : public Infra::Process {
+private:
+    uint32_t ProcessEntry(Infra::DataInventory &dataInventory, const Infra::Context &deviceContext) override;
 };
-#pragma pack()
-
-int TaskTypeParseItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *halUniData, uint16_t expandStatus);
 }
 }
-
-
-#endif // MSPROF_ANALYSIS_DOMAIN_SERVICES_PARSER_PARSER_ITEM_TASK_TYPE_PARSER_ITEM_H
+#endif // MSPROF_ANALYSIS_LOAD_STREAM_EXPAND_SPEC_DATA_H

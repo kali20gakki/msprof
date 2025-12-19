@@ -25,7 +25,7 @@ namespace Analysis {
 namespace Domain {
 class StarsSocParser : public Parser {
 private:
-    uint32_t ParseDataItem(uint8_t* binaryData, uint32_t binaryDataSize, uint8_t* data);
+    uint32_t ParseDataItem(uint8_t* binaryData, uint32_t binaryDataSize, uint8_t* data, uint16_t expandStatus);
     std::vector<std::string> GetFilePattern() override;
     uint32_t GetTrunkSize() override;
     uint32_t ParseData(Infra::DataInventory &dataInventory, const Infra::Context &context) override;

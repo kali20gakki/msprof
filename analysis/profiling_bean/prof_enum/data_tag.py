@@ -96,6 +96,7 @@ class DataTag(Enum):
     MC2_COMM_INFO = 77
     CAPTURE_STREAM_INFO = 78
     NETDEV_STATS = 79
+    STREAM_EXPAND = 89
 
 
 @unique

@@ -39,7 +39,7 @@ struct TaskFlip {
 };
 #pragma pack()
 
-int TaskFlipParseItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *halUniData);
+int TaskFlipParseItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *halUniData, uint16_t expandStatus);
 }
 }
 #endif // MSPROF_ANALYSIS_DOMAIN_SERVICES_PARSER_PARSER_ITEM_TASK_FLIP_PARSER_ITEM_H

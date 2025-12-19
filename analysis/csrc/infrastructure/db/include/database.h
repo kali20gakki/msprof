@@ -61,6 +61,11 @@ public:
     GEInfoDB();
 };
 
+class StreamExpandSpecDB : public Database {
+public:
+    StreamExpandSpecDB();
+};
+
 class HashDB : public Database {
 public:
     HashDB();
