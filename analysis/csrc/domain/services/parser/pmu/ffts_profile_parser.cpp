@@ -20,6 +20,8 @@
 #include "analysis/csrc/infrastructure/resource/chip_id.h"
 #include "analysis/csrc/infrastructure/process/include/process_register.h"
 #include "analysis/csrc/infrastructure/resource/binary_struct_info.h"
+#include "analysis/csrc/domain/entities/hal/include/stream_expand_spec.h"
+#include "analysis/csrc/domain/services/device_context/load_stream_expand_spec_data.h"
 
 namespace Analysis {
 
@@ -46,7 +48,7 @@ uint32_t FftsProfileParser::GetTrunkSize()
     return Analysis::FFTS_PROFILE_STRUCT_SIZE;
 }
 
-uint32_t FftsProfileParser::ParseDataItem(uint8_t* binaryData, uint32_t binaryDataSize, uint8_t* data)
+uint32_t FftsProfileParser::ParseDataItem(uint8_t* binaryData, uint32_t binaryDataSize, uint8_t* data, uint16_t expandStatus)
 {
     if (binaryDataSize < sizeof(FftsProfileHeader)) {
         ERROR("The binaryDataSize is small than FftsProfileHeader");
@@ -54,13 +56,13 @@ uint32_t FftsProfileParser::ParseDataItem(uint8_t* binaryData, uint32_t binaryDa
     }
     FftsProfileHeader *header = ReinterpretConvert<FftsProfileHeader *>(binaryData);
 
-    std::function<int(uint8_t *, uint32_t, uint8_t *)> parser =
+    std::function<int(uint8_t *, uint32_t, uint8_t *, uint16_t)> parser =
             ParserItemFactory::GetParseItem(PMU_PARSER, header->funcType);
     if (parser == nullptr) {
         WARN("There is no Parser function to handle data! funcType is %", header->funcType);
         return ANALYSIS_OK;
     }
-    int currentCnt = parser(binaryData, binaryDataSize, data);
+    int currentCnt = parser(binaryData, binaryDataSize, data, expandStatus);
     if (cnt_ == DEFAULT_CNT) {
         cnt_ = currentCnt;
         return ANALYSIS_OK;
@@ -74,6 +76,8 @@ uint32_t FftsProfileParser::ParseDataItem(uint8_t* binaryData, uint32_t binaryDa
 
 uint32_t FftsProfileParser::ParseData(DataInventory &dataInventory, const Infra::Context &context)
 {
+    auto streamExpandSpecData = dataInventory.GetPtr<StreamExpandSpec>();
+    uint16_t expandStatus = streamExpandSpecData && streamExpandSpecData->expandStatus ? streamExpandSpecData->expandStatus : 0;
     auto trunkSize = this->GetTrunkSize();
     auto structCount = this->binaryDataSize / trunkSize;
     INFO("FftsProfileData structCount is : %", structCount);
@@ -84,7 +88,7 @@ uint32_t FftsProfileParser::ParseData(DataInventory &dataInventory, const Infra:
     int stat{ANALYSIS_OK};
     for (uint64_t i = 0; i < structCount; i++) {
         auto res = this->ParseDataItem(&this->binaryData[i * trunkSize], trunkSize,
-                                       ReinterpretConvert<uint8_t *>(&this->halUniData_[i]));
+                                       ReinterpretConvert<uint8_t *>(&this->halUniData_[i]), expandStatus);
         if (res != ANALYSIS_OK) {
             stat = ANALYSIS_ERROR;
             ERROR("FftsProfileData parse error in %th", i);
@@ -97,7 +101,8 @@ uint32_t FftsProfileParser::ParseData(DataInventory &dataInventory, const Infra:
     return stat;
 }
 
-REGISTER_PROCESS_SEQUENCE(FftsProfileParser, true);
+REGISTER_PROCESS_SEQUENCE(FftsProfileParser, true, LoadStreamExpandSpec);
+REGISTER_PROCESS_DEPENDENT_DATA(FftsProfileParser, StreamExpandSpec);
 REGISTER_PROCESS_SUPPORT_CHIP(FftsProfileParser, CHIP_V4_1_0);
 }
 }

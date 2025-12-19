@@ -25,7 +25,7 @@ namespace Analysis {
 namespace Domain {
 using namespace Utils;
 
-int BlockDimParseItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *halUniData)
+int BlockDimParseItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *halUniData, uint16_t expandStatus)
 {
     if (binaryDataSize != sizeof(BlockDim)) {
         ERROR("BlockDimParseItem failure, struct is BlockDim");

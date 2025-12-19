@@ -26,7 +26,7 @@ namespace Analysis {
 namespace Domain {
 using namespace Utils;
 
-int FreqLpmParseItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *halUniData)
+int FreqLpmParseItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *halUniData, uint16_t expandStatus)
 {
     if (binaryDataSize != sizeof(FreqData)) {
         ERROR("The TrunkSize of Freq is not equal with the FreqData struct");

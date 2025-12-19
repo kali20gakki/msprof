@@ -26,7 +26,7 @@ namespace Domain {
 using namespace Analysis::Utils;
 
 int AcsqLogParseItem(uint8_t *binaryData, uint32_t binaryDataSize,
-                     uint8_t *halUniData)
+                     uint8_t *halUniData, uint16_t expandStatus)
 {
     if (binaryDataSize != sizeof(AcsqLog)) {
         ERROR("binaryDataSize is not equal to the size of binaryData");
@@ -36,9 +36,9 @@ int AcsqLogParseItem(uint8_t *binaryData, uint32_t binaryDataSize,
 
     auto *unionData = ReinterpretConvert<HalLogData *>(halUniData);
 
-    unionData->hd.taskId.streamId = StarsCommon::GetStreamId(log->streamId, log->taskId);
+    unionData->hd.taskId.streamId = StarsCommon::GetStreamId(log->streamId, log->taskId, expandStatus, log->taskType);
     unionData->hd.taskId.batchId = 0;
-    unionData->hd.taskId.taskId = StarsCommon::GetTaskId(log->streamId, log->taskId);
+    unionData->hd.taskId.taskId = StarsCommon::GetTaskId(log->streamId, log->taskId, expandStatus, log->taskType);
     unionData->hd.taskId.contextId = INVALID_CONTEXT_ID;
 
     unionData->type = ACSQ_LOG;

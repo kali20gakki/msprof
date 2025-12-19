@@ -17,6 +17,7 @@
 from common_func.utils import Utils
 from profiling_bean.stars.stars_common import StarsCommon
 from profiling_bean.struct_info.struct_decoder import StructDecoder
+from msmodel.sqe_type_map import SqeType
 
 
 class FftsLogDecoder(StructDecoder):
@@ -30,7 +31,7 @@ class FftsLogDecoder(StructDecoder):
         self._func_type = Utils.get_func_type(filed[0])
         # get the most significant six bits
         self._task_type = filed[0] >> 10
-        self._stars_common = StarsCommon(filed[3], filed[2], filed[4])
+        self._stars_common = StarsCommon(filed[3], filed[2], filed[4], SqeType.StarsSqeType(self._task_type))
         self._subtask_id = filed[6]
         self._thread_id = filed[9]
         # get lower 4 bit

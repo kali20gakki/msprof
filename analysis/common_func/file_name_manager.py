@@ -253,6 +253,9 @@ class FileNameManagerConstant:
     # netdev stats
     NETDEV_STATS_FILE_PATTERN = r"^netdev_stats\.data\.(\d+)\.slice_\d+"
 
+    # stream expand spec info
+    STREAM_EXPAND_SPEC_INFO_PATTERN = r"^(aging|unaging)\.compact\.expand_stream_spec\.slice_\d+"
+
     def get_file_name_manager_class_name(self: any) -> any:
         """
         get file name manager class name
@@ -330,6 +333,13 @@ def get_host_start_compiles() -> tuple:
     get host start regex compiles
     """
     return (re.compile(FileNameManagerConstant.HOST_START_PATTERN),)
+
+
+def get_host_stream_expand_spec_info_compiles() -> tuple:
+    """
+    get host start regex compiles
+    """
+    return (re.compile(FileNameManagerConstant.STREAM_EXPAND_SPEC_INFO_PATTERN),)
 
 
 def get_sample_json_compiles() -> tuple:

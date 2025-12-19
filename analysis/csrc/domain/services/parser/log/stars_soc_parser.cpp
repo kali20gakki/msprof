@@ -15,11 +15,13 @@
  * -------------------------------------------------------------------------*/
 
 #include "analysis/csrc/domain/services/parser/log/include/stars_soc_parser.h"
+#include "analysis/csrc/domain/services/device_context/load_stream_expand_spec_data.h"
 #include "analysis/csrc/infrastructure/dfx/error_code.h"
 #include "analysis/csrc/domain/services/parser/parser_item_factory.h"
 #include "analysis/csrc/infrastructure/resource/binary_struct_info.h"
 #include "analysis/csrc/infrastructure/resource/chip_id.h"
 #include "analysis/csrc/infrastructure/process/include/process_register.h"
+#include "analysis/csrc/domain/entities/hal/include/stream_expand_spec.h"
 
 namespace Analysis {
 namespace Domain {
@@ -44,7 +46,7 @@ uint32_t StarsSocParser::GetTrunkSize()
     return STARS_SOC_STRUCT_SIZE;
 }
 
-uint32_t StarsSocParser::ParseDataItem(uint8_t* binaryData, uint32_t binaryDataSize, uint8_t* data)
+uint32_t StarsSocParser::ParseDataItem(uint8_t* binaryData, uint32_t binaryDataSize, uint8_t* data, uint16_t expandStatus)
 {
     if (binaryDataSize < sizeof(StarsSocHeader)) {
         ERROR("The binaryDataSize is small than StarsSocHeader");
@@ -52,13 +54,13 @@ uint32_t StarsSocParser::ParseDataItem(uint8_t* binaryData, uint32_t binaryDataS
     }
     auto *header = ReinterpretConvert<StarsSocHeader *>(binaryData);
 
-    std::function<int(uint8_t *, uint32_t, uint8_t *)> parser =
+    std::function<int(uint8_t *, uint32_t, uint8_t *, uint16_t)> parser =
             ParserItemFactory::GetParseItem(LOG_PARSER, header->funcType);
     if (parser == nullptr) {
         WARN("There is no Parser function to handle data! functype is %", header->funcType);
         return ANALYSIS_OK;
     }
-    int currentCnt = parser(binaryData, binaryDataSize, data);
+    int currentCnt = parser(binaryData, binaryDataSize, data, expandStatus);
     if (cnt_ == DEFAULT_CNT) {
         cnt_ = currentCnt;
         return ANALYSIS_OK;
@@ -72,6 +74,8 @@ uint32_t StarsSocParser::ParseDataItem(uint8_t* binaryData, uint32_t binaryDataS
 
 uint32_t StarsSocParser::ParseData(DataInventory &dataInventory, const Infra::Context &context)
 {
+    auto streamExpandSpecData = dataInventory.GetPtr<StreamExpandSpec>();
+    uint16_t expandStatus = streamExpandSpecData && streamExpandSpecData->expandStatus ? streamExpandSpecData->expandStatus : 0;
     auto trunkSize = this->GetTrunkSize();
     auto structCount = this->binaryDataSize / trunkSize;
     INFO("StarsSoc structCount: %", structCount);
@@ -86,7 +90,7 @@ uint32_t StarsSocParser::ParseData(DataInventory &dataInventory, const Infra::Co
     }
     for (uint64_t i = 0; i < structCount; i++) {
         if (this->ParseDataItem(&this->binaryData[i * trunkSize], trunkSize,
-                                ReinterpretConvert<uint8_t *>(&this->halUniData_[i])) == ANALYSIS_ERROR) {
+                                ReinterpretConvert<uint8_t *>(&this->halUniData_[i]), expandStatus) == ANALYSIS_ERROR) {
             ERROR("parse data failed, total of % pieces of data are parsed", i);
             stat = ANALYSIS_ERROR;
         }
@@ -97,7 +101,8 @@ uint32_t StarsSocParser::ParseData(DataInventory &dataInventory, const Infra::Co
     return stat;
 }
 
-REGISTER_PROCESS_SEQUENCE(StarsSocParser, true);
+REGISTER_PROCESS_SEQUENCE(StarsSocParser, true, LoadStreamExpandSpec);
+REGISTER_PROCESS_DEPENDENT_DATA(StarsSocParser, StreamExpandSpec);
 REGISTER_PROCESS_SUPPORT_CHIP(StarsSocParser, CHIP_V4_1_0);
 
 }

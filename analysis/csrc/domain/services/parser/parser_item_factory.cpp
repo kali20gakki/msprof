@@ -20,7 +20,7 @@
 
 namespace Analysis {
 namespace Domain {
-using ItemFunc = std::function<int(uint8_t *, uint32_t, uint8_t *)>;
+using ItemFunc = std::function<int(uint8_t *, uint32_t, uint8_t *, uint16_t)>;
 using ItemFuncMap = std::unordered_map<uint32_t, ItemFunc>;
 ItemFunc ParserItemFactory::GetParseItem(ParserType parserType, uint32_t itemType)
 {

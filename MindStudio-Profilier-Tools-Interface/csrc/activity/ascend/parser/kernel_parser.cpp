@@ -139,8 +139,8 @@ msptiResult KernelParser::KernelParserImpl::DealCacheHostTask()
     }
     for (const auto& hostTask: dealHostTasks_) {
         // GetKernelBasicInfo
-        auto taskId = static_cast<uint16_t>(hostTask.taskInfo & 0xffff);
-        uint16_t streamId = hostTask.streamId;
+        uint16_t streamId = StarsCommon::GetStreamId(track.streamId, static_cast<uint16_t>(track.taskInfo));
+        uint16_t taskId = StarsCommon::GetTaskId(track.streamId, static_cast<uint16_t>(track.taskInfo));
         uint16_t deviceId = hostTask.deviceId;
         bool agingFlag = hostTask.agingFlag;
         const char* kernelTypeName = GetValidKernelTypeName(static_cast<TsTaskType>(hostTask.taskType));

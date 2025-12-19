@@ -25,7 +25,7 @@ namespace Analysis {
 namespace Domain {
 using namespace Utils;
 
-int StepTraceParseItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *halUniData)
+int StepTraceParseItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *halUniData, uint16_t expandStatus)
 {
     if (binaryDataSize != sizeof(StepTrace)) {
         ERROR("StepTraceParseItem failure, struct is StepTrace");

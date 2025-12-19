@@ -1,18 +1,14 @@
-/* -------------------------------------------------------------------------
- * Copyright (c) 2025 Huawei Technologies Co., Ltd.
- * This file is part of the MindStudio project.
- *
- * MindStudio is licensed under Mulan PSL v2.
- * You can use this software according to the terms and conditions of the Mulan PSL v2.
- * You may obtain a copy of Mulan PSL v2 at:
- *
- *    http://license.coscl.org.cn/MulanPSL2
- *
- * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
- * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
- * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
- * See the Mulan PSL v2 for more details.
- * -------------------------------------------------------------------------*/
+/* ******************************************************************************
+            版权所有 (c) 华为技术有限公司 2024-2024
+            Copyright, 2024, Huawei Tech. Co., Ltd.
+****************************************************************************** */
+/* ******************************************************************************
+ * File Name          : stars_common.h
+ * Description        : 通过streamId标记位计算taskId
+ * Author             : msprof team
+ * Creation Date      : 2024/5/28
+ * *****************************************************************************
+ */
 
 #ifndef ANALYSIS_DOMAIN_SERVICES_PARSER_PARSER_ITEM_STARS_COMMON_H
 #define ANALYSIS_DOMAIN_SERVICES_PARSER_PARSER_ITEM_STARS_COMMON_H
@@ -35,33 +31,60 @@ namespace Domain {
 const uint16_t STREAM_LOW_OPERATOR = 1u << 11;
 const uint16_t STREAM_JUDGE_BIT12_OPERATOR = 0x1000;
 const uint16_t STREAM_JUDGE_BIT13_OPERATOR = 0x2000;
+const uint16_t STREAM_JUDGE_BIT15_OPERATOR = 0x8000;
 const uint16_t TASK_LOW_OPERATOR = 0x1FFF;
 const uint16_t STREAM_HIGH_OPERATOR = 0xE000;
 const uint16_t COMMON_LOW_OPERATOR = 0x0FFF;
 const uint16_t COMMON_HIGH_OPERATOR = 0xF000;
+const uint16_t EXPANDING_LOW_OPERATOR = 0x7FFF;
+const uint16_t PLACE_HOLDER_SQE = 3;
+const uint16_t EVENT_RECORD_SQE = 4;
+
 class StarsCommon {
 public:
-static uint16_t GetStreamId(uint16_t streamId, uint16_t taskId)
+static uint16_t GetStreamId(uint16_t streamId, uint16_t taskId, uint16_t expandStatus, uint16_t sqeType = 0)
 {
-    if ((streamId & STREAM_JUDGE_BIT12_OPERATOR) != 0) {
-        return streamId % STREAM_LOW_OPERATOR;
+    if (expandStatus == 1) {
+        if (sqeType == PLACE_HOLDER_SQE || sqeType == EVENT_RECORD_SQE) {
+            return streamId & EXPANDING_LOW_OPERATOR;
+        }
+        if ((streamId & STREAM_JUDGE_BIT15_OPERATOR) != 0) {
+            return taskId & EXPANDING_LOW_OPERATOR;
+        } else {
+            return streamId & EXPANDING_LOW_OPERATOR;
+        }
+    } else {
+        if ((streamId & STREAM_JUDGE_BIT12_OPERATOR) != 0) {
+            return streamId % STREAM_LOW_OPERATOR;
+        }
+        if ((streamId & STREAM_JUDGE_BIT13_OPERATOR) != 0) {
+            streamId = taskId & COMMON_LOW_OPERATOR;
+        }
+        auto res = streamId % STREAM_LOW_OPERATOR;
+        return res;
     }
-    if ((streamId & STREAM_JUDGE_BIT13_OPERATOR) != 0) {
-        streamId = taskId & COMMON_LOW_OPERATOR;
-    }
-    auto res = streamId % STREAM_LOW_OPERATOR;
-    return res;
 }
 
-static uint16_t GetTaskId(uint16_t streamId, uint16_t taskId)
+static uint16_t GetTaskId(uint16_t streamId, uint16_t taskId, uint16_t expandStatus, uint16_t sqeType = 0)
 {
-    if ((streamId & STREAM_JUDGE_BIT12_OPERATOR) != 0) {
-        taskId = taskId & TASK_LOW_OPERATOR;
-        taskId |= (streamId & STREAM_HIGH_OPERATOR);
-    } else if ((streamId & STREAM_JUDGE_BIT13_OPERATOR) != 0) {
-        taskId = (streamId & COMMON_LOW_OPERATOR) | (taskId & COMMON_HIGH_OPERATOR);
+    if (expandStatus == 1) {
+        if (sqeType == PLACE_HOLDER_SQE || sqeType == EVENT_RECORD_SQE) {
+            return taskId;
+        }
+        if ((streamId & STREAM_JUDGE_BIT15_OPERATOR) != 0) {
+            return (taskId & STREAM_JUDGE_BIT15_OPERATOR) | (streamId & EXPANDING_LOW_OPERATOR);
+        } else {
+            return taskId;
+        }
+    } else {
+        if ((streamId & STREAM_JUDGE_BIT12_OPERATOR) != 0) {
+            taskId = taskId & TASK_LOW_OPERATOR;
+            taskId |= (streamId & STREAM_HIGH_OPERATOR);
+        } else if ((streamId & STREAM_JUDGE_BIT13_OPERATOR) != 0) {
+            taskId = (streamId & COMMON_LOW_OPERATOR) | (taskId & COMMON_HIGH_OPERATOR);
+        }
+        return taskId;
     }
-    return taskId;
 }
 };
 }

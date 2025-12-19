@@ -49,7 +49,7 @@ struct ContextPmu {
 };
 #pragma pack()
 
-int Chip4PmuParseItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *halUniData);
+int Chip4PmuParseItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *halUniData, uint16_t expandStatus);
 
 }
 }

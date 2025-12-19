@@ -23,7 +23,7 @@ namespace Analysis {
 namespace Domain {
 using namespace Utils;
 
-int TaskMemcpyParseItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *halUniData)
+int TaskMemcpyParseItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *halUniData, uint16_t expandStatus)
 {
     if (binaryDataSize != sizeof(TaskMemcpy)) {
         ERROR("TaskMemcpyParseItem failure, struct is TaskFlip");

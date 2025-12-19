@@ -34,12 +34,12 @@ const int VALID_CNT = 15;
 const int DEFAULT_CNT = -1;
 
 class ParserItemFactory {
-    using ItemFunc = std::function<int(uint8_t *, uint32_t, uint8_t *)>;
+    using ItemFunc = std::function<int(uint8_t *, uint32_t, uint8_t *, uint16_t)>;
     using ItemFuncMap = std::unordered_map<uint32_t, ItemFunc>;
 public:
     ParserItemFactory(ParserType parserType, uint32_t itemType,
-                      std::function<int(uint8_t *, uint32_t, uint8_t *)> parserItemFunc);
-    static std::function<int(uint8_t *, uint32_t, uint8_t *)> GetParseItem(ParserType parserType, uint32_t itemType);
+                      std::function<int(uint8_t *, uint32_t, uint8_t *, uint16_t)> parserItemFunc);
+    static std::function<int(uint8_t *, uint32_t, uint8_t *, uint16_t)> GetParseItem(ParserType parserType, uint32_t itemType);
 private:
     static std::unordered_map<ParserType, ItemFuncMap>& GetContainer();
 };

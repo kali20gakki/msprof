@@ -21,6 +21,7 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from profiling_bean.stars.stars_common import StarsCommon
 from msparser.compact_info.hccl_op_info_bean import HcclOpInfoBean
+from msmodel.sqe_type_map import SqeType
 
 
 class AicpuNodeBean:
@@ -30,8 +31,8 @@ class AicpuNodeBean:
 
     def __init__(self: any, *args) -> None:
         data = args[0]
-        self._stream_id = StarsCommon.set_stream_id(data[6], data[7])
-        self._task_id = StarsCommon.set_task_id(data[6], data[7])
+        self._stream_id = StarsCommon.set_stream_id(data[6], data[7], SqeType.StarsSqeType.AI_CPU)
+        self._task_id = StarsCommon.set_task_id(data[6], data[7], SqeType.StarsSqeType.AI_CPU)
         self._ai_cpu_task_start = data[10]
         self._compute_time = (data[12] - data[11]) / NumberConstant.MILLI_SECOND  # ms
         self._mem_copy_time = (data[13] - data[12]) / NumberConstant.MILLI_SECOND
@@ -227,8 +228,8 @@ class KfcHcclInfoBean:
         self._src_addr = data[10]
         self._dst_addr = data[11]
         self._data_size = data[12]
-        self._task_id = StarsCommon.set_task_id(data[15], data[13])
-        self._stream_id = StarsCommon.set_stream_id(data[15], data[13])
+        self._task_id = StarsCommon.set_task_id(data[15], data[13], SqeType.StarsSqeType.AI_CPU)
+        self._stream_id = StarsCommon.set_stream_id(data[15], data[13], SqeType.StarsSqeType.AI_CPU)
         self._plane_id = data[16]
         self._op_type = data[17]
         self._data_type = data[18]
@@ -350,8 +351,8 @@ class KfcCommTurnBean:
         self._server_end_time = data[12]  # KFC流程结束时间
         self._data_len = data[13]
         self._device_id = data[14]
-        self._stream_id = StarsCommon.set_stream_id(data[15], data[16])
-        self._task_id = StarsCommon.set_task_id(data[15], data[16])
+        self._stream_id = StarsCommon.set_stream_id(data[15], data[16], SqeType.StarsSqeType.AI_CPU)
+        self._task_id = StarsCommon.set_task_id(data[15], data[16], SqeType.StarsSqeType.AI_CPU)
         self._version = data[17]
         self._comm_turn = data[18]
         self._current_turn = data[19]
@@ -471,8 +472,8 @@ class DeviceHcclOpInfoBean(HcclOpInfoBean):
         self._count = data[9]
         self._group_name = data[10]
         self._rank_size = data[11]
-        self._stream_id = StarsCommon.set_stream_id(data[12], data[13])
-        self._task_id = StarsCommon.set_task_id(data[12], data[13])
+        self._stream_id = StarsCommon.set_stream_id(data[12], data[13], SqeType.StarsSqeType.AI_CPU)
+        self._task_id = StarsCommon.set_task_id(data[12], data[13], SqeType.StarsSqeType.AI_CPU)
 
     @property
     def stream_id(self: any) -> int:
@@ -486,8 +487,8 @@ class DeviceHcclOpInfoBean(HcclOpInfoBean):
 class AicpuFlipTaskBean:
     def __init__(self: any, *args) -> None:
         data = args[0]
-        self._stream_id = StarsCommon.set_stream_id(data[6], data[7])
-        self._task_id = StarsCommon.set_task_id(data[6], data[7])
+        self._stream_id = StarsCommon.set_stream_id(data[6], data[7], SqeType.StarsSqeType.AI_CPU)
+        self._task_id = StarsCommon.set_task_id(data[6], data[7], SqeType.StarsSqeType.AI_CPU)
         self._flip_num = data[8]
 
     @property
@@ -506,10 +507,10 @@ class AicpuFlipTaskBean:
 class AicpuMasterStreamHcclTaskBean:
     def __init__(self: any, *args) -> None:
         data = args[0]
-        self._aicpu_stream_id = StarsCommon.set_stream_id(data[6], data[7])
-        self._aicpu_task_id = StarsCommon.set_task_id(data[6], data[7])
-        self._stream_id = StarsCommon.set_stream_id(data[8], data[9])
-        self._task_id = StarsCommon.set_task_id(data[8], data[9])
+        self._aicpu_stream_id = StarsCommon.set_stream_id(data[6], data[7], SqeType.StarsSqeType.AI_CPU)
+        self._aicpu_task_id = StarsCommon.set_task_id(data[6], data[7], SqeType.StarsSqeType.AI_CPU)
+        self._stream_id = StarsCommon.set_stream_id(data[8], data[9], SqeType.StarsSqeType.AI_CPU)
+        self._task_id = StarsCommon.set_task_id(data[8], data[9], SqeType.StarsSqeType.AI_CPU)
         self._type = data[10]
 
     @property

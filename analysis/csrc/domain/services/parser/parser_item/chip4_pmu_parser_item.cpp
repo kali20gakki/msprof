@@ -28,7 +28,7 @@ namespace Analysis {
 namespace Domain {
 using namespace Analysis::Utils;
 
-int Chip4PmuParseItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *halUniData)
+int Chip4PmuParseItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *halUniData, uint16_t expandStatus)
 {
     if (binaryDataSize != sizeof(ContextPmu)) {
         ERROR("The TrunkSize of PMU is not equal with the ContextPmu struct");
@@ -37,9 +37,9 @@ int Chip4PmuParseItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *hal
     auto *contextPmu = ReinterpretConvert<ContextPmu *>(binaryData);
     auto *pmuData = ReinterpretConvert<HalPmuData *>(halUniData);
 
-    pmuData->hd.taskId.streamId = StarsCommon::GetStreamId(contextPmu->streamId, contextPmu->taskId);
+    pmuData->hd.taskId.streamId = StarsCommon::GetStreamId(contextPmu->streamId, contextPmu->taskId, expandStatus);
     pmuData->hd.taskId.batchId = INVALID_BATCH_ID;
-    pmuData->hd.taskId.taskId = StarsCommon::GetTaskId(contextPmu->streamId, contextPmu->taskId);
+    pmuData->hd.taskId.taskId = StarsCommon::GetTaskId(contextPmu->streamId, contextPmu->taskId, expandStatus);
     if (contextPmu->fftsType == FFTS_PLUS) {
         pmuData->hd.taskId.contextId = contextPmu->subTaskId;
     } else {

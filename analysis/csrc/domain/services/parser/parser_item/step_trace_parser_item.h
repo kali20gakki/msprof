@@ -41,7 +41,7 @@ struct StepTrace {
 };
 #pragma pack()
 
-int StepTraceParseItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *halUniData);
+int StepTraceParseItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *halUniData, uint16_t expandStatus);
 }
 }
 

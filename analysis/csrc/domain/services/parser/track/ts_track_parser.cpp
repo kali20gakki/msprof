@@ -51,10 +51,10 @@ uint32_t TsTrackParser::ParseDataItem(uint8_t *binaryData, uint32_t binaryDataSi
     }
     auto *header = ReinterpretConvert<TsTrackHeader *>(binaryData);
 
-    std::function<int(uint8_t *, uint32_t, uint8_t *)> parser =
+    std::function<int(uint8_t *, uint32_t, uint8_t *, uint16_t)> parser =
             ParserItemFactory::GetParseItem(TRACK_PARSER, header->funcType);
     if (parser != nullptr) {
-        parser(binaryData, binaryDataSize, data);
+        parser(binaryData, binaryDataSize, data, 0);
         return ANALYSIS_OK;
     }
     ERROR("There is no Parser function to handle data! functype is %", header->funcType);

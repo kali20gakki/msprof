@@ -85,6 +85,10 @@ namespace {
         {"hash_value", SQL_TEXT_TYPE}
     };
 
+    const TableColumns StreamExpandSpec = {
+        {"expand_status", SQL_NUMERIC_TYPE},
+    };
+
     const TableColumns TypeHashInfo = {
         {"hash_key", SQL_TEXT_TYPE},
         {"hash_value", SQL_TEXT_TYPE},
@@ -803,6 +807,12 @@ GEInfoDB::GEInfoDB()
     dbName_ = "ge_info.db";
     tableColNames_["TaskInfo"] = TaskInfo;
     tableColNames_["StepInfo"] = StepInfo;
+}
+
+StreamExpandSpecDB::StreamExpandSpecDB()
+{
+    dbName_ = "stream_expand_spec.db";
+    tableColNames_["StreamExpandSpec"] = StreamExpandSpec;
 }
 
 HashDB::HashDB()

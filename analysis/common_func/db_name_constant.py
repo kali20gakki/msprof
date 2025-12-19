@@ -95,6 +95,7 @@ class DBNameConstant(metaclass=ABCMeta):
     DB_ASCEND_TASK = "ascend_task.db"
     DB_NPU_MODULE_MEM = "npu_module_mem.db"
     DB_NODE_ATTR_INFO = "node_attr_info.db"
+    DB_STREAM_EXPAND_SPEC = "stream_expand_spec.db"
     DB_NAME_AICORE = "aicore.db"
     DB_NAME_AI_VECTOR_CORE = "ai_vector_core.db"
     DB_NAME_AICPU = "aicpu.db"
@@ -325,6 +326,7 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_ASCEND_TASK = "AscendTask"
     TABLE_NODE_ATTR_INFO = "NodeAttrInfo"
     TABLE_HCCL_OP_INFO = "HcclOpInfo"
+    TABLE_STREAM_EXPAND_SPEC = "StreamExpandSpec"
 
     # flip
     TABLE_HOST_TASK_FLIP = "HostTaskFlip"
