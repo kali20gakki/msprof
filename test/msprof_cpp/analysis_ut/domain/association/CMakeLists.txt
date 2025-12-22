@@ -4,6 +4,8 @@ aux_source_directory(${TOP_DIR}/analysis/csrc/domain/entities/hal DEVICE_ASSOCIA
 aux_source_directory(${TOP_DIR}/analysis/csrc/domain/entities/metric DEVICE_ASSOCIATION_SOURCE)
 aux_source_directory(${TOP_DIR}/analysis/csrc/domain/entities/tree DEVICE_ASSOCIATION_SOURCE)
 aux_source_directory(${TOP_DIR}/analysis/csrc/infrastructure/process DEVICE_ASSOCIATION_SOURCE)
+aux_source_directory(${TOP_DIR}/analysis/csrc/infrastructure/db DEVICE_ASSOCIATION_SOURCE)
+aux_source_directory(${TOP_DIR}/analysis/csrc/infrastructure/db/include DEVICE_ASSOCIATION_SOURCE)
 aux_source_directory(${TOP_DIR}/analysis/csrc/domain/services/association DEVICE_ASSOCIATION_SOURCE)
 aux_source_directory(${TOP_DIR}/analysis/csrc/domain/services/constant DEVICE_ASSOCIATION_SOURCE)
 aux_source_directory(${TOP_DIR}/analysis/csrc/domain/services/association/cann DEVICE_ASSOCIATION_SOURCE)
@@ -28,6 +30,7 @@ add_executable(association_utest
 
 target_link_libraries(association_utest PRIVATE
     c_sec_static
+    -lsqlite3
 )
 
 run_test(association_utest)

@@ -66,6 +66,7 @@ public:
     int32_t ReportData(uint32_t agingFlag, const MsprofEvent &data);
     int32_t ReportData(uint32_t agingFlag, const MsprofCompactInfo &data);
     int32_t ReportData(uint32_t agingFlag, const MsprofAdditionalInfo &data);
+    int32_t ReportVariableData(std::shared_ptr<MsprofVariableInfo> data, uint32_t len);
     int32_t SendAdditinalData(SHARED_PTR_ALIA<ProfileFileChunk> fileChunk);
     int32_t RegReportTypeInfo(uint16_t level, uint32_t typeId, const std::string &typeName);
     void GetRegReportTypeInfo(uint16_t level, uint32_t typeId, std::string& tag);

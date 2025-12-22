@@ -99,6 +99,7 @@ from common_func.file_name_manager import get_ccu_wait_signal_info_compiles
 from common_func.file_name_manager import get_soc_pmu_compiles
 from common_func.file_name_manager import get_lpm_info_compiles
 from common_func.file_name_manager import get_host_stream_expand_spec_info_compiles
+from common_func.file_name_manager import get_runtime_op_info_compiles
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.path_manager import PathManager
 from framework.prof_factory_maker import ProfFactoryMaker
@@ -192,7 +193,8 @@ class FileDispatch:
         DataTag.BIU_PERF_CHIP6: get_biu_compiles(),
         DataTag.SOC_PMU: get_soc_pmu_compiles(),
         DataTag.LPM_INFO: get_lpm_info_compiles(),
-        DataTag.STREAM_EXPAND: get_host_stream_expand_spec_info_compiles()
+        DataTag.STREAM_EXPAND: get_host_stream_expand_spec_info_compiles(),
+        DataTag.RUNTIME_OP_INFO: get_runtime_op_info_compiles(),
     }
 
     def __init__(self: any, sample_config: dict) -> None:

@@ -180,6 +180,15 @@ int32_t MsprofReporterMgr::ReportData(uint32_t agingFlag, const MsprofAdditional
     return reporters_[agingFlag ?  AGING_ADDITIONAL_INFO : UNAGING_ADDITIONAL_INFO].ReportData(data);
 }
 
+int32_t MsprofReporterMgr::ReportVariableData(std::shared_ptr<MsprofVariableInfo> data, uint32_t len)
+{
+    if (!isStarted_) {
+        MSPROF_LOGW("The reporter has not been started.");
+        return PROFILING_NOTSUPPORT;
+    }
+    return reporters_[UNAGING_VARIABLE_INFO].ReportVariableData(data, len);
+}
+
 int32_t MsprofReporterMgr::SendAdditionalInfo(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunk)
 {
     if (!isStarted_) {

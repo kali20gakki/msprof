@@ -130,7 +130,7 @@ class TensorAddInfoParser(DataParser, MsMultiProcess):
             if len(data) < 12:
                 continue
             # 3 timestamp 2 thread_id 4 node_id
-            key = "{}_{}_{}".format(str(data[3]), str(data[2]), str(data[4]))
+            key = (str(data[3]), str(data[2]), str(data[4]))
             if key not in hash_dict.keys():
                 self._generate_new_hash_dict_data(hash_dict, key, data)
             else:
@@ -140,9 +140,7 @@ class TensorAddInfoParser(DataParser, MsMultiProcess):
     def _assemble_tensor_data(self: any, hash_dict: dict) -> None:
         self._ge_tensor_info_data = []
         for key, value in hash_dict.items():
-            timestamp = str(key.split("_")[0])
-            thread_id = str(key.split("_")[1])
-            node_id = str(key.split("_")[2])
+            timestamp, thread_id, node_id = key
             self._ge_tensor_info_data.append(
                 [
                     value['level'], value['add_info_type'], thread_id, timestamp, node_id, value['tensor_num'],

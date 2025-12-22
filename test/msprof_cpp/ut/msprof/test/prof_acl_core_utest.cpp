@@ -2247,17 +2247,41 @@ TEST_F(MSPROF_CALL_BACK_IMPL_UTEST, MsprofAddiInfoReporterCallbackImpl)
     
     MsprofAdditionalInfo data;
     EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofAddiInfoReporterCallbackImpl(true, &data, 0));
-    
+
+    MOCKER_CPP(memcpy_s).stubs().will(returnValue(EOK - 1));
+    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofAddiInfoReporterCallbackImpl(
+        true, &data, sizeof(MsprofAdditionalInfo) - 1));
+    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofAddiInfoReporterCallbackImpl(
+        true, &data, sizeof(MsprofAdditionalInfo) + 1));
+    MOCKER_CPP(memcpy_s).reset();
+
+    // start 失败，reporter初始化失败
     MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::IsInited)
         .stubs()
         .will(returnValue(false))
         .then(returnValue(true));
     EXPECT_EQ(PROFILING_FAILED, Msprof::Engine::MsprofReporterMgr::instance()->StartReporters());
+    // variable data, but length less than sizeof(MsprofAdditionalInfo)
+    EXPECT_EQ(MSPROF_ERROR_UNINITIALIZE, Analysis::Dvvp::ProfilerCommon::MsprofAddiInfoReporterCallbackImpl(true,
+        &data, sizeof(MsprofAdditionalInfo) - 1));
+
+    // additional
     EXPECT_EQ(MSPROF_ERROR_UNINITIALIZE, Analysis::Dvvp::ProfilerCommon::MsprofAddiInfoReporterCallbackImpl(true,
         &data, sizeof(MsprofAdditionalInfo)));
+    // variable
+    EXPECT_EQ(MSPROF_ERROR_UNINITIALIZE, Analysis::Dvvp::ProfilerCommon::MsprofAddiInfoReporterCallbackImpl(true,
+        &data, sizeof(MsprofAdditionalInfo) + 1));
+
     EXPECT_EQ(PROFILING_SUCCESS, Msprof::Engine::MsprofReporterMgr::instance()->StartReporters());
+    // variable data, but length less than sizeof(MsprofAdditionalInfo)
+    EXPECT_EQ(MSPROF_ERROR_NONE, Analysis::Dvvp::ProfilerCommon::MsprofAddiInfoReporterCallbackImpl(true,
+        &data, sizeof(MsprofAdditionalInfo) - 1));
+    // additional
     EXPECT_EQ(MSPROF_ERROR_NONE, Analysis::Dvvp::ProfilerCommon::MsprofAddiInfoReporterCallbackImpl(true,
         &data, sizeof(MsprofAdditionalInfo)));
+    // variable
+    EXPECT_EQ(MSPROF_ERROR_NONE, Analysis::Dvvp::ProfilerCommon::MsprofAddiInfoReporterCallbackImpl(true,
+        &data, sizeof(MsprofAdditionalInfo) + 1));
     Msprof::Engine::MsprofReporterMgr::instance()->StopReporters();
 }
  

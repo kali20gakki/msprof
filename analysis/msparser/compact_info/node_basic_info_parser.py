@@ -101,10 +101,16 @@ class NodeBasicInfoParser(DataParser, MsMultiProcess):
                 data[1] = type_hash_dict.get('node', {}).get(data[1], data[1])
                 data[4] = ge_hash_dict.get(data[4], data[4])
                 data[6] = ge_hash_dict.get(data[6], data[6])
-                # aging_file -> dynamic op, unaging_file -> static op
-                data.append(OPType.DYNAMIC_OP.value if mode == 'aging_file' else OPType.STATIC_OP.value)
+                data.append(self.get_op_state(mode))
             node_basic_info_data.extend(data_list)
         return node_basic_info_data
+
+    @classmethod
+    def get_op_state(cls, mode: str):
+        """
+        # aging_file -> dynamic op, unaging_file -> static op
+        """
+        return OPType.DYNAMIC_OP.value if mode == 'aging_file' else OPType.STATIC_OP.value
 
 
 class OPType(IntEnum):

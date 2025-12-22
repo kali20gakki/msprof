@@ -186,6 +186,7 @@ const int PROF_MGR_TRACE_ID_DEFAULT_LEN  = 27;
 const size_t MAX_LOOP_TIMES = 1400; // the max send package nums of once Dump()
 const int SLEEP_INTERVAL_US = 1000; // the interval of Run()
 const size_t RING_BUFF_CAPACITY = 16384; // 16384:16K. Note:capacity value must be 2^n
+const size_t VARIABLE_RING_BUFF_CAPACITY = 65536; // 65536:64K. Note:capacity value must be 2^n
 const size_t GE_RING_BUFF_CAPACITY = 262144; // 262144:256K. Note:capacity value must be 2^n
 const size_t MSPROF_RING_BUFF_CAPACITY = 16384; // 16384:16K. Note:capacity value must be 2^n
 

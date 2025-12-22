@@ -17,6 +17,7 @@
 #include "analysis/csrc/domain/services/persistence/host/cann_trace_db_dumper.h"
 #include "analysis/csrc/domain/services/environment/context.h"
 #include "analysis/csrc/domain/services/parser/host/cann/hash_data.h"
+#include "analysis/csrc/domain/services/parser/host/cann/rt_add_info_center.h"
 #include "analysis/csrc/infrastructure/utils/thread_pool.h"
 #include "analysis/csrc/infrastructure/utils/time_logger.h"
 #include "analysis/csrc/domain/services/persistence/host/number_mapping.h"
@@ -25,6 +26,7 @@ namespace Analysis {
 namespace Domain {
 using Context = Analysis::Domain::Environment::Context;
 using ThreadPool = Analysis::Utils::ThreadPool;
+using RTAddInfoCenter = Analysis::Domain::Host::Cann::RTAddInfoCenter;
 using HashData = Analysis::Domain::Host::Cann::HashData;
 using TypeData = Analysis::Domain::Host::Cann::TypeData;
 using MappingType = NumberMapping::MappingType;
@@ -306,21 +308,49 @@ std::string CANNTraceDBDumper::GetFormat(uint32_t oriFormat)
     return enumFormat;
 }
 
+void CANNTraceDBDumper::AddTaskInfoForOnlyTaskTrack(const std::shared_ptr<HostTask> &task,
+                                                    TaskInfoData &data, bool isLevel0)
+{
+    // treeAnalyze中通过白名单控制,此时无kernelName算子为非预期算子
+    auto info = RTAddInfoCenter::GetInstance().Get(task->deviceId, task->streamId, task->taskId);
+    if (task->kernelName == 0 && !info.isValid) {
+        WARN("Can't get task's kernel name, streamId is %, taskId is %, batch id is %, timestamp is %.",
+             task->streamId, task->taskId, task->batchId, task->timeStamp);
+        return;
+    }
+
+    std::string taskType;
+    std::string opType;
+    std::string opName;
+    std::string kernelName = HashData::GetInstance().Get(task->kernelName);
+    // opFlag在level0 或者无补充信息时填NA
+    auto opFlag = (isLevel0 || !info.isValid) ? NA : (info.opFlag ? "YES" : "NO");
+    if (info.isValid) {
+        taskType = isLevel0 ? NA : info.taskType;
+        opType = isLevel0 ? NA : info.opType;
+        opName = info.opName;
+    } else {
+        taskType = isLevel0 ? NA : TransTaskTypeFromRtsToGe(task->taskType);
+        opType = isLevel0 ? NA : kernelName;
+        opName = kernelName;
+    }
+    if (isLevel0) {
+        data.emplace_back(info.modelId, opName, task->streamId, task->taskId, 0, 0, NA,
+                          taskType, opType, task->requestId, task->thread_id, task->timeStamp, task->batchId,
+                          0, NA, NA, NA, NA, NA, NA, task->deviceId, task->contextId, opFlag, NA);
+    } else {
+        data.emplace_back(info.modelId, opName, task->streamId, task->taskId, info.blockDim, info.mixBlockDim,
+                          info.isDynamic, taskType, opType, task->requestId, task->thread_id, task->timeStamp,
+                          task->batchId, info.tensorNum, info.inputFormats, info.inputDataTypes, info.inputShapes,
+                          info.outputFormats, info.outputDataTypes, info.outputShapes,
+                          task->deviceId, task->contextId, opFlag, NA);
+    }
+}
+
 void CANNTraceDBDumper::AddTaskInfo(const std::shared_ptr<HostTask> &task, TaskInfoData &data, bool isLevel0)
 {
     if (!task->op) {
-        // treeAnalyze中通过白名单控制,此时无kernelName算子为非预期算子
-        if (task->kernelName == 0) {
-            WARN("Can't get task's kernel name, streamId is %, taskId is %, batch id is %, timestamp is %.",
-                 task->streamId, task->taskId, task->batchId, task->timeStamp);
-            return;
-        }
-        auto name = HashData::GetInstance().Get(task->kernelName);
-        auto taskType = isLevel0 ? NA : TransTaskTypeFromRtsToGe(task->taskType);
-        auto opType = isLevel0 ? NA : name;
-        data.emplace_back(task->modelId, name, task->streamId, task->taskId, 0, 0, NA,
-                          taskType, opType, task->requestId, task->thread_id, task->timeStamp, task->batchId,
-                          0, NA, NA, NA, NA, NA, NA, task->deviceId, task->contextId, NA, NA);
+        AddTaskInfoForOnlyTaskTrack(task, data, isLevel0);
         return;
     }
 

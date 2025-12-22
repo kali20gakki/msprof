@@ -218,16 +218,18 @@ class TestAiCoreOpReport(unittest.TestCase):
     def test_union_task_ge_ai_core_data_should_return_3_data_when_have_no_pmu_data(self):
         op_state = "N/A"
         expect_res = [
-            (1, 2, 3, 11, 16, op_state, "AI_CPU"),
-            (4, 5, 6, 11, 16, op_state, "AI_CPU"),
-            (7, 8, 9, 11, 16, op_state, 10)
+            (1, 2, 3, "AI_CPU", 16, op_state, "AI_CPU"),
+            (4, 5, 6, "AI_CPU", 16, op_state, "AI_CPU"),
+            (7, 8, 9, "10", 16, op_state, 10),
+            (7, 8, 9, "AivKernel", 16, op_state, "COMMUNICATION"),
         ]
         data = [
-            (1, 2, 3, 11, 16, op_state, "AI_CPU", 0),
-            (4, 5, 6, 11, 16, op_state, "AI_CPU", 0),
-            (7, 8, 9, 11, 16, op_state, 10, 0),
-            (1, 2, 3, 11, 16, op_state, "COMMUNICATION", 0),
-            (1, 3, 3, 11, 16, op_state, "HCCL_AI_CPU", 0)
+            (1, 2, 3, "AI_CPU", 16, op_state, "AI_CPU", 0),
+            (4, 5, 6, "AI_CPU", 16, op_state, "AI_CPU", 0),
+            (7, 8, 9, "10", 16, op_state, 10, 0),
+            (1, 2, 3, "COMMUNICATION", 16, op_state, "COMMUNICATION", 0),
+            (1, 3, 3, "HCCL_AI_CPU", 16, op_state, "HCCL_AI_CPU", 0),
+            (7, 8, 9, "AivKernel", 16, op_state, "COMMUNICATION", 0),
         ]
         ai_core_group_dict = {}
         res = AiCoreOpReport._union_task_ge_ai_core_data(data, ai_core_group_dict)

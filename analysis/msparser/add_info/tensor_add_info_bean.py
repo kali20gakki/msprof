@@ -35,21 +35,7 @@ class TensorAddInfoBean(GeTensorBaseBean):
         self._timestamp = data[5]
         self._node_id = data[6]
         self._tensor_num = data[7]
-        _tensor_datas = []
-        for tensor_index in range(0, self._tensor_num):
-            _tensor_datas.append(
-                list(data[self.TENSOR_LEN * tensor_index + self.TENSOR_PER_LEN:
-                                       self.TENSOR_LEN * tensor_index + (self.TENSOR_LEN + self.TENSOR_PER_LEN)]))
-        for _tensor_data in _tensor_datas:
-            # 0 input 1 output
-            if _tensor_data[0] == 0:
-                self._input_format.append(_tensor_data[1])
-                self._input_data_type.append(_tensor_data[2])
-                self._input_shape.append(_tensor_data[3:])
-            if _tensor_data[0] == 1:
-                self._output_format.append(_tensor_data[1])
-                self._output_data_type.append(_tensor_data[2])
-                self._output_shape.append(_tensor_data[3:])
+        self._deal_with_tensor_data(data[self.TENSOR_PER_LEN:], self.tensor_num, self.TENSOR_LEN)
 
     @property
     def level(self: any) -> str:

@@ -27,6 +27,7 @@ from common_func.ms_constant.ge_enum_constant import GeTaskType
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_object import HighPerfDict
 from common_func.platform.chip_manager import ChipManager
+from common_func.rt_add_info_center import RTAddInfoCenter
 from mscalculate.cann.additional_record import AdditionalRecord
 from mscalculate.cann.cann_event_generator import CANNThreadDB
 from mscalculate.cann.event import Event
@@ -235,7 +236,6 @@ class TaskGear(CANNGear):
     INVALID_ID = -1
     INVALID_DIRECT = -1
     INVALID_CONTEXT_ID = 4294967295
-    INVALID_MODEL_ID = 4294967295
     HCCL_CONTEXT_ID_NUM = 2
     KERNEL_TASK_PREFIX = "KERNEL"
     HCCL_TASK_TYPE = "COMMUNICATION"
@@ -398,13 +398,19 @@ class TaskGear(CANNGear):
             hccl_descs[NumberConstant.DEFAULT_GE_CONTEXT_ID] = self.HcclDesc()
         return hccl_descs
 
+    def get_model_id(self, rts_trk: TaskTrackDto, model_dto: ApiDataDto):
+        if model_dto.item_id != "":
+            return model_dto.item_id
+        return RTAddInfoCenter().get_op_info_by_id(rts_trk.device_id, rts_trk.stream_id, rts_trk.task_id).model_id
+
+
     def add_host_task(self, call_stack: dict, task_track_dto: TaskTrackDto):
         model_event: Event = call_stack.get(Constant.MODEL_LEVEL)
         model_dto: ApiDataDto = self.db.get_api(model_event)
         node_event: Event = call_stack.get(Constant.NODE_LEVEL)
         node_dto: ApiDataDto = self.db.get_api(node_event)
 
-        model_id = model_dto.item_id if model_dto.item_id != "" else self.INVALID_MODEL_ID
+        model_id = self.get_model_id(task_track_dto, model_dto)
         request_id = model_dto.request_id if model_dto.request_id is not None else -1
         # 根据task type是否在白名单内对context_ids和connection_id进行处理，以应对Node@Launch下有多个Task的问题
         # 对于在白名单内的task正常生成context_ids，反之使用对应的默认值
@@ -434,7 +440,7 @@ class TaskGear(CANNGear):
         hccl_descs = self.get_hccl_descs(hccl_event)
         model_dto: ApiDataDto = self.db.get_api(model_event)
 
-        model_id = model_dto.item_id if model_dto.item_id != "" else self.INVALID_MODEL_ID
+        model_id = self.get_model_id(task_track_dto, model_dto)
         request_id = model_dto.request_id if model_dto.request_id is not None else -1
 
         hccl_tasks = [0] * len(hccl_descs)
@@ -442,7 +448,7 @@ class TaskGear(CANNGear):
             hccl_info_dto = hccl_desc.hccl_info
             context_id = int(hccl_desc.ctx_info.ctx_id)
             is_master = 1 if hccl_event.struct_type == 'master' else 0
-            notify_id = hccl_info_dto.notify_id if int(hccl_info_dto.notify_id) != -1 else "N/A"
+            notify_id = hccl_info_dto.notify_id if int(hccl_info_dto.notify_id) != -1 else Constant.NA
             hccl_tasks[i] = [
                 model_id, request_id, hccl_info_dto.op_name, hccl_info_dto.group_name,
                 hccl_info_dto.plane_id, task_track_dto.timestamp, hccl_info_dto.duration_estimated,
@@ -478,7 +484,7 @@ class TaskGear(CANNGear):
         model_event: Event = call_stack.get(Constant.MODEL_LEVEL)
         model_dto: ApiDataDto = self.db.get_api(model_event)
         request_id = model_dto.request_id if model_dto.request_id is not None else -1
-        model_id = NumberConstant.INVALID_MODEL_ID if model_dto.item_id is None else model_dto.item_id
+        model_id = self.get_model_id(task_track_dto, model_dto)
         connection_id = node_dto.connection_id if node_dto.connection_id is not None else Constant.DEFAULT_INVALID_VALUE
         kfc_connection_id = self.get_kfc_connection_id(node_event)
 
@@ -555,7 +561,7 @@ class TaskGear(CANNGear):
             return
 
         model_dto: ApiDataDto = self.db.get_api(call_stack.get(Constant.MODEL_LEVEL))
-        model_id = model_dto.item_id if model_dto.item_id != "" else self.INVALID_MODEL_ID
+        model_id = self.get_model_id(add_dto, model_dto)
         request_id = model_dto.request_id if model_dto.request_id is not None else -1
 
         if is_level0:
@@ -594,15 +600,16 @@ class TaskGear(CANNGear):
         ctx_id_dto: CtxIdDto = node_desc.ctx_info
         cxt_ids = str(ctx_id_dto.ctx_id).split(',')
         op_name = ctx_id_dto.op_name if ctx_id_dto.op_name else node_dto.item_id
-        task_type = 'N/A'
+        task_type = Constant.NA
         if self.is_hccl_task(hccl_event, add_dto):
             op_name = hccl_dto.item_id
             task_type = self.get_truth_task_type_for_kernel_hccl_task(add_dto)
         for cxt_id in cxt_ids:
             self.task_info.append([model_id, op_name, add_dto.stream_id, add_dto.task_id, 0, 0,
-                                   'N/A', task_type, 'N/A', request_id, add_dto.thread_id, add_dto.timestamp,
-                                   add_dto.batch_id, None, None, None, None, None, None, None,
-                                   add_dto.device_id, int(cxt_id), "N/A", "N/A"])
+                                   Constant.NA, task_type, Constant.NA, request_id,
+                                   add_dto.thread_id, add_dto.timestamp, add_dto.batch_id,
+                                   None, None, None, None, None, None, None,
+                                   add_dto.device_id, int(cxt_id), Constant.NA, Constant.NA])
 
     def add_kernel_task_l1_or_l2(self, node_info: list, add_dto: TaskTrackDto, hccl_info: list, model_info: list):
         # 采集开启l2开关之后，需要在建树的逻辑里面添加attr的相关信息
@@ -636,22 +643,42 @@ class TaskGear(CANNGear):
                                    tensor_info_dto.output_formats, tensor_info_dto.output_data_types,
                                    tensor_info_dto.output_shapes, add_dto.device_id, int(cxt_id),
                                    "YES" if node_basic_info_dto.op_flag else "NO",
-                                   "N/A" if not node_attr_info.hashid else node_attr_info.hashid])
+                                   Constant.NA if not node_attr_info.hashid else node_attr_info.hashid])
 
-    def add_kernel_task_only_task_track(self, rts_trk_dto: TaskTrackDto, is_level0: bool):
-        if rts_trk_dto.kernel_name == Constant.NA:
+    def add_kernel_task_only_task_track(self, rts_trk: TaskTrackDto, is_level0: bool):
+        op_info = RTAddInfoCenter().get_op_info_by_id(rts_trk.device_id, rts_trk.stream_id, rts_trk.task_id)
+        if rts_trk.kernel_name == Constant.NA and not op_info.is_valid:
             return
-        task_type = Constant.NA if is_level0 else self.RTS_TASK_TYPE_MAP.get(rts_trk_dto.task_type,
-                                                                             rts_trk_dto.task_type)
-        op_type = Constant.NA if is_level0 else rts_trk_dto.kernel_name
+
+        if op_info.is_valid:
+            task_type = Constant.NA if is_level0 else op_info.task_type
+            op_type = Constant.NA if is_level0 else op_info.op_type
+            op_name = op_info.op_name
+        else:
+            task_type = Constant.NA if is_level0 else self.RTS_TASK_TYPE_MAP.get(rts_trk.task_type, rts_trk.task_type)
+            op_type = Constant.NA if is_level0 else rts_trk.kernel_name
+            op_name = rts_trk.kernel_name
+
+        request_id = -1
         context_id = 0 if (task_type in [GeTaskType.MIX_AIC.name, GeTaskType.MIX_AIV.name] and
-                           not ChipManager().is_chip_v6()) else self.INVALID_CONTEXT_ID
-        self.task_info.append([self.INVALID_MODEL_ID, rts_trk_dto.kernel_name,
-                               rts_trk_dto.stream_id, rts_trk_dto.task_id, 0, 0,
-                               Constant.NA, task_type, op_type, -1, rts_trk_dto.thread_id,
-                               rts_trk_dto.timestamp, rts_trk_dto.batch_id,
-                               None, None, None, None, None, None, None,
-                               rts_trk_dto.device_id, context_id, Constant.NA, Constant.NA])
+                           not ChipManager().is_chip_v6()) else self.INVALID_CONTEXT_ID        # op_flag在level0 或者无补充信息时填NA
+        op_flag = Constant.NA if (is_level0 or not op_info.is_valid) else ("YES" if op_info.op_flag else "NO")
+
+        if is_level0:
+            self.task_info.append([op_info.model_id, op_name, rts_trk.stream_id, rts_trk.task_id,
+                                   0, 0, Constant.NA, task_type, op_type, request_id,
+                                   rts_trk.thread_id, rts_trk.timestamp, rts_trk.batch_id, None,
+                                   None, None, None, None, None, None,
+                                   rts_trk.device_id, context_id, op_flag, Constant.NA])
+        else:
+            self.task_info.append([op_info.model_id, op_name, rts_trk.stream_id, rts_trk.task_id,
+                                   op_info.block_dim, op_info.mix_block_dim, op_info.is_dynamic, task_type,
+                                   op_type, request_id, rts_trk.thread_id, rts_trk.timestamp,
+                                   rts_trk.batch_id, op_info.tensor_num, op_info.input_formats,
+                                   op_info.input_data_types, op_info.input_shapes,
+                                   op_info.output_formats, op_info.output_data_types, op_info.output_shapes,
+                                   rts_trk.device_id, context_id, op_flag, Constant.NA])
+
 
     def run(self, event: Event, call_stack: dict):
         # pure runtime api

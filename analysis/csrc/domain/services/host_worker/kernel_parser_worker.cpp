@@ -21,6 +21,7 @@
 #include "analysis/csrc/domain/services/persistence/host/hash_db_dumper.h"
 #include "analysis/csrc/domain/services/persistence/host/type_info_db_dumper.h"
 #include "analysis/csrc/domain/services/parser/host/cann/hash_data.h"
+#include "analysis/csrc/domain/services/parser/host/cann/rt_add_info_center.h"
 #include "analysis/csrc/domain/services/environment/context.h"
 #include "analysis/csrc/domain/services/parser/host/cann/type_data.h"
 
@@ -76,6 +77,8 @@ void KernelParserWorker::DumpHashData()
     auto dataPath = Utils::File::PathJoin({hostFilePath_, "data"});
     INFO("Hash data load from path: %", dataPath);
     HashData::GetInstance().Load(dataPath);
+    INFO("Start load runtime op info data");
+    RTAddInfoCenter::GetInstance().Load(Utils::File::PathJoin({hostFilePath_, "sqlite"}));
     auto hashDataContent = HashData::GetInstance().GetAll();
     INFO("success get hash data");
     if (hashDataContent.empty()) {

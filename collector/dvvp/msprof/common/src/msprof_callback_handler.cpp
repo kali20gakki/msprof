@@ -110,6 +110,15 @@ void MsprofCallbackHandler::InitReporters()
     }
 }
 
+int MsprofCallbackHandler::ReportVariableData(std::shared_ptr<MsprofVariableInfo> data, uint32_t len) const
+{
+    if (reporter_ == nullptr) {
+        MSPROF_LOGE("reporter is not started, module: %s", module_.c_str());
+        return PROFILING_FAILED;
+    }
+    return reporter_->DoReportVariableData(data, len);
+}
+
 int MsprofCallbackHandler::ReportData(CONST_VOID_PTR data, uint32_t len) const
 {
     if (reporter_ == nullptr) {

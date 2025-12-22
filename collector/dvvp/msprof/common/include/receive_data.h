@@ -39,13 +39,19 @@ using namespace analysis::dvvp;
 using namespace analysis::dvvp::common::memory;
 using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::common::queue;
+using namespace analysis::dvvp::common::utils;
+struct VariableStruct {
+    std::shared_ptr<MsprofVariableInfo> data;
+    uint32_t len;
+};
+
 struct ModuleIdName {
     uint32_t id;
     std::string name;
     size_t ringBufSize;
 };
 const std::vector<ModuleIdName> MSPROF_MODULE_ID_NAME_MAP = {
-    {MSPROF_MODULE_DATA_PREPROCESS, "DATA_PREPROCESS", RING_BUFF_CAPACITY}
+    {MSPROF_MODULE_DATA_PREPROCESS,                     "DATA_PREPROCESS",      RING_BUFF_CAPACITY}
 };
 
 struct ReporterDataChunk {
@@ -60,7 +66,8 @@ enum MsprofProfileDataType {
     MSPROF_DEFAULT_PROFILE_DATA_TYPE = 0,
     MSPROF_API_AND_EVENT_PROFILE_DATA_TYPE,
     MSPROF_COMPACT_PROFILE_DATA_TYPE,
-    MSPROF_ADDITIONAL_PROFILE_DATA_TYPE
+    MSPROF_ADDITIONAL_PROFILE_DATA_TYPE,
+    MSPROF_VARIABLE_PROFILE_DATA_TYPE,
 };
 
 enum MsprofReporterId {
@@ -71,7 +78,8 @@ enum MsprofReporterId {
     AGING_COMPACT_INFO        = 4,
     UNAGING_COMPACT_INFO      = 5,
     AGING_ADDITIONAL_INFO     = 6,
-    UNAGING_ADDITIONAL_INFO   = 7
+    UNAGING_ADDITIONAL_INFO   = 7,
+    UNAGING_VARIABLE_INFO     = 8,
 };
 
 const std::vector<ModuleIdName> MSPROF_MODULE_REPORT_TABLE = {
@@ -83,6 +91,7 @@ const std::vector<ModuleIdName> MSPROF_MODULE_REPORT_TABLE = {
     {UNAGING_COMPACT_INFO,      "unaging.compact",       RING_BUFF_CAPACITY},
     {AGING_ADDITIONAL_INFO,     "aging.additional",      RING_BUFF_CAPACITY},
     {UNAGING_ADDITIONAL_INFO,   "unaging.additional",    RING_BUFF_CAPACITY},
+    {UNAGING_VARIABLE_INFO,     "unaging.variable",      VARIABLE_RING_BUFF_CAPACITY},
 };
 
 class ReceiveData {
@@ -105,6 +114,7 @@ public:
     int32_t DoReportData(const MsprofApi &dataChunk);
     int32_t DoReportData(const MsprofCompactInfo &dataChunk);
     int32_t DoReportData(const MsprofAdditionalInfo &dataChunk);
+    int32_t DoReportVariableData(std::shared_ptr<MsprofVariableInfo> data, uint32_t len);
 
 protected:
     virtual void StopReceiveData();
@@ -121,11 +131,14 @@ protected:
     int DoReport(CONST_REPORT_DATA_PTR rData);
     template<typename T>
     int32_t DumpData(std::vector<T> &message, SHARED_PTR_ALIA<ProfileFileChunk> fileChunk);
+    int32_t DumpVariableData(std::vector<VariableStruct> &msgVec, SHARED_PTR_ALIA<ProfileFileChunk> fileChunk);
     template<typename T>
     void RunNoTagData(analysis::dvvp::common::queue::RingBuffer<T> &dataBuffer,
         std::vector<SHARED_PTR_ALIA<ProfileFileChunk>>& fileChunks);
     template<typename T>
     void RunTagData(analysis::dvvp::common::queue::RingBuffer<T> &dataBuffer,
+        std::vector<SHARED_PTR_ALIA<ProfileFileChunk>>& fileChunks);
+    void RunVariableData(analysis::dvvp::common::queue::RingBuffer<VariableStruct> &dataBuffer,
         std::vector<SHARED_PTR_ALIA<ProfileFileChunk>>& fileChunks);
    
     void PrintTotalSize();
@@ -153,6 +166,7 @@ private:
     analysis::dvvp::common::queue::RingBuffer<MsprofApi> dataBufApi_;
     analysis::dvvp::common::queue::RingBuffer<MsprofCompactInfo> dataBufCompactInfo_;
     analysis::dvvp::common::queue::RingBuffer<MsprofAdditionalInfo> dataBufAdditionalInfo_;
+    analysis::dvvp::common::queue::RingBuffer<VariableStruct> dataBufVariableInfo_;
     std::condition_variable cvBufferEmpty_;
     std::mutex cvBufferEmptyMtx_;
     std::atomic<uint64_t> totalPushCounter_;

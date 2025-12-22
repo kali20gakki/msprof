@@ -488,21 +488,21 @@ db命名：msprof_{时间戳}.db
 
 格式：
 
-| 字段名          | 类型      | 索引  | 含义                                                                          |
-|--------------|---------|-----|-----------------------------------------------------------------------------|
-| opName       | INTEGER |     | 算子名，STRING_IDS(opName)，例：hcom_allReduce__428_0_1                            |
-| startNs      | INTEGER |     | 通信大算子的开始时间，单位 ns                                                            |
-| endNs        | INTEGER |     | 通信大算子的结束时间，单位 ns                                                            |
-| connectionId | INTEGER |     | 生成host-device连线                                                             |
-| groupName    | INTEGER |     | 通信域，STRING_IDS(groupName)，例：10.170.22.98%enp67s0f5_60000_0_1708156014257149 |
-| opId         | INTEGER | 主键  | 通信大算子Id，用于关联COMMUNICATION_TASK_INFO表                                        |
-| relay        | INTEGER |     | 借轨通信标识，暂未开发                                                                 |
-| retry        | INTEGER |     | 重传标识，暂未开发                                                                   |
-| dataType     | INTEGER |     | 大算子传输的数据类型，如（INT8，FP32），ENUM_HCCL_DATA_TYPE(dataType)                       |
-| algType      | INTEGER |     | 通信算子使用的算法，可分为多个阶段，如（HD-MESH）                                                |
-| count        | NUMERIC |     | 算子传输的dataType类型的数据量                                                         |
-| opType       | INTEGER |     | 算子类型，STRING_IDS(opType), 例：hcom_broadcast_                                  |
-| deviceId     | INTEGER |     | deviceId                                                                    |
+| 字段名          | 类型      | 索引  | 含义                                                                     |
+|--------------|---------|-----|------------------------------------------------------------------------|
+| opName       | INTEGER |     | 算子名，STRING_IDS(opName)，例：hcom_allReduce__428_0_1                       |
+| startNs      | INTEGER |     | 通信大算子的开始时间，单位 ns                                                       |
+| endNs        | INTEGER |     | 通信大算子的结束时间，单位 ns                                                       |
+| connectionId | INTEGER |     | 生成host-device连线                                                        |
+| groupName    | INTEGER |     | 通信域，STRING_IDS(groupName)，例：9.9.9.9%enp67s0f5_60000_0_1708156014257149 |
+| opId         | INTEGER | 主键  | 通信大算子Id，用于关联COMMUNICATION_TASK_INFO表                                   |
+| relay        | INTEGER |     | 借轨通信标识，暂未开发                                                            |
+| retry        | INTEGER |     | 重传标识，暂未开发                                                              |
+| dataType     | INTEGER |     | 大算子传输的数据类型，如（INT8，FP32），ENUM_HCCL_DATA_TYPE(dataType)                  |
+| algType      | INTEGER |     | 通信算子使用的算法，可分为多个阶段，如（HD-MESH）                                           |
+| count        | NUMERIC |     | 算子传输的dataType类型的数据量                                                    |
+| opType       | INTEGER |     | 算子类型，STRING_IDS(opType), 例：hcom_broadcast_                             |
+| deviceId     | INTEGER |     | deviceId                                                               |
 
 
 变更记录：

@@ -21,6 +21,7 @@ from common_func.constant import Constant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.profiling_scene import ProfilingScene
+from common_func.rt_add_info_center import RTAddInfoCenter
 from mscalculate.cann.cann_analysis_chain import CANNAnalysisChain
 from mscalculate.cann.cann_analysis_gear import HCCLGear, ACLGear
 from mscalculate.cann.cann_analysis_gear import ModelGear
@@ -83,5 +84,6 @@ class CANNCalculator(ICalculator, MsMultiProcess):
             return
         else:
             logging.warning("Data will not be parsed by msprof_analysis.so!")
+        RTAddInfoCenter(self._project_path)
         self.calculate()
         self.save()

@@ -91,6 +91,8 @@ class StructDecoder:
         "StarsQosBean": StructFmt.STARS_QOS_FMT,
         "AicoreSampleV6": StructFmt.AICORE_SAMPLE_V6_FMT,
         "BiuPerfInstructionBean": StructFmt.BIU_PERF_FMT,
+        "RuntimeOpInfoBean": StructFmt.RUNTIME_OP_INFO_FMT,
+        "RuntimeOpInfo256Bean": StructFmt.RUNTIME_OP_INFO_256_FMT,
     }
 
     @classmethod

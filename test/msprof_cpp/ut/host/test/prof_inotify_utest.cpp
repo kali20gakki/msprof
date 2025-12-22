@@ -1209,8 +1209,8 @@ TEST_F(PROF_INOTIFY_UTEST, CheckPodName)
 
     std::string rankFile = "./jobstarthccl.json";
     std::string json = "{\"status\": \"completed\",\"group_count\": \"2\",\"group_list\": [{\"group_name\": \"training\", \
-    \"instance_count\": \"1024\",\"instance_list\": [{\"pod_name\": \"tf-bae43\",\"server_id\": \"10.0.0.10\",\"devices\": \
-     [{\"device_id\": \"0\",\"device_ip\": \"192.168.0.11\"}]}]}]}";
+    \"instance_count\": \"1024\",\"instance_list\": [{\"pod_name\": \"tf-bae43\",\"server_id\": \"9.9.9.9\",\"devices\": \
+     [{\"device_id\": \"0\",\"device_ip\": \"180.180.180.180\"}]}]}]}";
 
 
     // test exception 
@@ -1221,22 +1221,22 @@ TEST_F(PROF_INOTIFY_UTEST, CheckPodName)
     
     EXPECT_EQ(PROFILING_FAILED, inotify->CheckPodName(rankFile, podName, devId));
     json = "{\"status\": \"completed\",\"group_count\": \"2\",\"group_list\": [{\"group_name\": \"training\", \
-    \"instance_count\": \"1024\",\"instance_list\": [{\"pod_name\": \"0\",\"server_id\": \"10.0.0.10\",\"devices\": \
-     [{\"device_id\": \"0\",\"device_ip\": \"192.168.0.11\"}]}]}]}";
+    \"instance_count\": \"1024\",\"instance_list\": [{\"pod_name\": \"0\",\"server_id\": \"9.9.9.9\",\"devices\": \
+     [{\"device_id\": \"0\",\"device_ip\": \"180.180.180.180\"}]}]}]}";
     std::ofstream ofs1(rankFile);
     ofs1 << json << std::endl;
     ofs1.close();
     EXPECT_EQ(PROFILING_SUCCESS, inotify->CheckPodName(rankFile, podName, devId));
     json = "{\"status\": \"completed\",\"group_count\": \"2\",\"group_list\": [{\"group_name\": \"training\", \
-    \"instance_count\": \"1024\",\"instance_list1\": [{\"pod_name\": \"0\",\"server_id\": \"10.0.0.10\",\"devices\": \
-     [{\"device_id\": \"0\",\"device_ip\": \"192.168.0.11\"}]}]}]}";
+    \"instance_count\": \"1024\",\"instance_list1\": [{\"pod_name\": \"0\",\"server_id\": \"9.9.9.9\",\"devices\": \
+     [{\"device_id\": \"0\",\"device_ip\": \"180.180.180.180\"}]}]}]}";
     std::ofstream ofs2(rankFile);
     ofs2 << json << std::endl;
     ofs2.close();
     EXPECT_EQ(PROFILING_FAILED, inotify->CheckPodName(rankFile, podName, devId));
     json = "{\"status\": \"completed\",\"group_count\": \"2\",\"group_list\": [{\"group_name\": \"training\", \
-    \"instance_count\": \"1024\",\"instance_list\": [{\"pod_name\": \"0\",\"server_id\": \"10.0.0.10\",\"devices\": \
-     [{\"device_id\": \"3\",\"device_ip\": \"192.168.0.11\"}]}]}]}";
+    \"instance_count\": \"1024\",\"instance_list\": [{\"pod_name\": \"0\",\"server_id\": \"9.9.9.9\",\"devices\": \
+     [{\"device_id\": \"3\",\"device_ip\": \"180.180.180.180\"}]}]}]}";
     std::ofstream ofs3(rankFile);
     ofs3 << json << std::endl;
     ofs3.close();

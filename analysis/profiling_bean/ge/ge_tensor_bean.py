@@ -123,18 +123,4 @@ class GeTensorBean(GeTensorBaseBean):
         self._tensor_num = self._fusion_data[7]
         self._timestamp = self._fusion_data[63]
 
-        # tensor data is 5, each tensor len is 11
-        _tensor_datas = []
-        for tensor_index in range(0, self._tensor_num):
-            _tensor_datas.append(
-                list(self._fusion_data[self.TENSOR_LEN * tensor_index + self.TENSOR_PER_LEN:
-                                       self.TENSOR_LEN * tensor_index + (self.TENSOR_LEN + self.TENSOR_PER_LEN)]))
-        for _tensor_data in _tensor_datas:
-            if _tensor_data[0] == 0:
-                self._input_format.append(_tensor_data[1])
-                self._input_data_type.append(_tensor_data[2])
-                self._input_shape.append(_tensor_data[3:])
-            if _tensor_data[0] == 1:
-                self._output_format.append(_tensor_data[1])
-                self._output_data_type.append(_tensor_data[2])
-                self._output_shape.append(_tensor_data[3:])
+        self._deal_with_tensor_data(self._fusion_data[self.TENSOR_PER_LEN:], self.tensor_num, self.TENSOR_LEN)

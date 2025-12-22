@@ -332,13 +332,37 @@ int32_t MsprofCompactInfoReporterCallbackImpl(uint32_t agingFlag, CONST_VOID_PTR
  
 int32_t MsprofAddiInfoReporterCallbackImpl(uint32_t agingFlag, CONST_VOID_PTR data, uint32_t length)
 {
-    if (data == nullptr || length != sizeof(struct MsprofAdditionalInfo)) {
+    if (data == nullptr || length <= sizeof(struct MsprofVariableInfo)) {
         MSPROF_LOGE("data is null or report data length (%u) is invalid.", length);
         MSPROF_CALL_ERROR("EK9999", "Failed to register info reporter callback");
         return MSPROF_ERROR;
     }
-    return InternalErrorCodeToExternal(MsprofReporterMgr::instance()->ReportData(agingFlag,
-        *(reinterpret_cast<const MsprofAdditionalInfo *>(data))));
+
+    if (length < sizeof(struct MsprofAdditionalInfo)) {
+        MSPROF_LOGD("variable data, length is %u, agingFlag is %u.", length, agingFlag);
+        std::shared_ptr<MsprofAdditionalInfo> addPtr;
+        MSVP_MAKE_SHARED0_RET(addPtr, MsprofAdditionalInfo, MSPROF_ERROR);
+        if (memcpy_s(static_cast<void *>(addPtr.get()), sizeof(MsprofAdditionalInfo), data, length) != EOK) {
+            MSPROF_LOGE("memcpy for variable data failed!");
+            return MSPROF_ERROR;
+        }
+        return InternalErrorCodeToExternal(MsprofReporterMgr::instance()->ReportData(agingFlag, *addPtr));
+    } else if (length == sizeof(struct MsprofAdditionalInfo)) {
+        MSPROF_LOGD("additional data, length is %u, agingFlag is %u.", length, agingFlag);
+        return InternalErrorCodeToExternal(MsprofReporterMgr::instance()->ReportData(agingFlag,
+            *(reinterpret_cast<const MsprofAdditionalInfo *>(data))));
+    } else {
+        MSPROF_LOGD("variable data, length is %u.", length);
+        VOID_PTR cpyData = malloc(length);
+        if (cpyData == nullptr || memcpy_s(cpyData, length, data, length) != EOK) {
+            MSPROF_LOGE("memcpy or malloc for variable data failed!");
+            return MSPROF_ERROR;
+        }
+        std::shared_ptr<MsprofVariableInfo> varPtr(
+            static_cast<MsprofVariableInfo*>(cpyData), [](MsprofVariableInfo* ptr) { free(ptr); }
+        );
+        return InternalErrorCodeToExternal(MsprofReporterMgr::instance()->ReportVariableData(varPtr, length));
+    }
 }
  
 int32_t MsprofRegReportTypeInfoImpl(uint16_t level, uint32_t typeId, const std::string &typeName)

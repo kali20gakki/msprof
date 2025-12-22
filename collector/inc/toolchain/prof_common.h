@@ -458,6 +458,16 @@ struct MsprofAdditionalInfo {  // for MsprofReportAdditionalInfo buffer data
     };
 };
 
+struct MsprofVariableInfo {  // for MsprofVariableInfo buffer data
+    uint16_t magicNumber = MSPROF_DATA_HEAD_MAGIC_NUM;
+    uint16_t level;
+    uint32_t type;
+    uint32_t threadId;
+    uint32_t dataLen;
+    uint64_t timeStamp;
+    uint8_t  data[0];
+};
+
 struct ConcatTensorInfo {
     uint16_t magicNumber = MSPROF_DATA_HEAD_MAGIC_NUM;
     uint16_t level = 0;

@@ -165,6 +165,31 @@ namespace {
         {"flip_num", SQL_INTEGER_TYPE}
     };
 
+    const TableColumns RuntimeOpInfo = {
+        {"level", SQL_TEXT_TYPE},
+        {"struct_type", SQL_TEXT_TYPE},
+        {"thread_id", SQL_INTEGER_TYPE},
+        {"timestamp", SQL_NUMERIC_TYPE},
+        {"device_id", SQL_INTEGER_TYPE},
+        {"model_id", SQL_INTEGER_TYPE},
+        {"stream_id", SQL_INTEGER_TYPE},
+        {"task_id", SQL_INTEGER_TYPE},
+        {"op_name", SQL_TEXT_TYPE},
+        {"task_type", SQL_TEXT_TYPE},
+        {"op_type", SQL_TEXT_TYPE},
+        {"block_dim", SQL_INTEGER_TYPE},
+        {"mix_block_dim", SQL_INTEGER_TYPE},
+        {"op_flag", SQL_INTEGER_TYPE},
+        {"is_dynamic", SQL_INTEGER_TYPE},
+        {"tensor_num", SQL_INTEGER_TYPE},
+        {"input_formats", SQL_TEXT_TYPE},
+        {"input_data_types", SQL_TEXT_TYPE},
+        {"input_shapes", SQL_TEXT_TYPE},
+        {"output_formats", SQL_TEXT_TYPE},
+        {"output_data_types", SQL_TEXT_TYPE},
+        {"output_shapes", SQL_TEXT_TYPE}
+    };
+
     const TableColumns AscendTask = {
         {"model_id", SQL_INTEGER_TYPE},
         {"index_id", SQL_INTEGER_TYPE},
@@ -840,6 +865,7 @@ RtsTrackDB::RtsTrackDB()
 {
     dbName_ = "rts_track.db";
     tableColNames_["HostTaskFlip"] = HostTaskFlip;
+    tableColNames_["RuntimeOpInfo"] = RuntimeOpInfo;
 }
 
 AscendTaskDB::AscendTaskDB()

@@ -255,6 +255,10 @@ class FileNameManagerConstant:
     # capture stream info
     CAPTURE_STREAM_INFO_PATTERN = r"^(unaging|aging)\.compact\.capture_stream_info\.slice_\d+"
 
+    # runtime op info
+    RUNTIME_OP_INFO_PATTERN = r"^(unaging|aging)\.additional\.capture_op_info\.slice_\d+"
+    RUNTIME_OP_INFO_VAR_PATTERN = r"^unaging\.variable\.capture_op_info\.slice_\d+"
+
     # netdev stats
     NETDEV_STATS_FILE_PATTERN = r"^netdev_stats\.data\.(\d+)\.slice_\d+"
 
@@ -1067,6 +1071,15 @@ def get_netdev_stats_compiles() -> tuple:
     return (re.compile(FileNameManagerConstant.NETDEV_STATS_FILE_PATTERN),)
 
 
+def get_runtime_op_info_compiles() -> tuple:
+    """
+    get runtime op info regex compiles
+    :return: runtime op info data regex
+    """
+    return (re.compile(FileNameManagerConstant.RUNTIME_OP_INFO_PATTERN),
+            re.compile(FileNameManagerConstant.RUNTIME_OP_INFO_VAR_PATTERN))
+
+
 def get_ub_compiles() -> tuple:
     """
     get ub regex compiles
@@ -1097,7 +1110,6 @@ def get_soc_pmu_compiles() -> tuple:
     :return: soc pmu data regex
     """
     return (re.compile(FileNameManagerConstant.SOC_PMU_PATTEN),)
-
 
 
 def get_ccu_task_info_compiles() -> tuple:
