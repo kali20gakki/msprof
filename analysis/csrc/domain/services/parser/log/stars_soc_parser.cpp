@@ -55,7 +55,7 @@ uint32_t StarsSocParser::ParseDataItem(uint8_t* binaryData, uint32_t binaryDataS
     auto *header = ReinterpretConvert<StarsSocHeader *>(binaryData);
 
     std::function<int(uint8_t *, uint32_t, uint8_t *, uint16_t)> parser =
-            ParserItemFactory::GetParseItem(LOG_PARSER, header->funcType);
+            ParserItemFactory::GetParseItem(GetParserType(), header->funcType);
     if (parser == nullptr) {
         WARN("There is no Parser function to handle data! functype is %", header->funcType);
         return ANALYSIS_OK;
@@ -104,6 +104,16 @@ uint32_t StarsSocParser::ParseData(DataInventory &dataInventory, const Infra::Co
 REGISTER_PROCESS_SEQUENCE(StarsSocParser, true, LoadStreamExpandSpec);
 REGISTER_PROCESS_DEPENDENT_DATA(StarsSocParser, StreamExpandSpec);
 REGISTER_PROCESS_SUPPORT_CHIP(StarsSocParser, CHIP_V4_1_0);
+
+uint32_t StarsSocParserV6::GetTrunkSize()
+{
+    return STARS_SOC_STRUCT_SIZE_V6;
+}
+
+namespace CHIP_V6_REGISTER {
+    REGISTER_PROCESS_SEQUENCE(StarsSocParserV6, true);
+    REGISTER_PROCESS_SUPPORT_CHIP(StarsSocParserV6,  CHIP_V6_1_0);
+}
 
 }
 }

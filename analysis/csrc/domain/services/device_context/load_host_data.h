@@ -21,6 +21,12 @@
 
 namespace Analysis {
 namespace Domain {
+
+struct StreamIdInfo {
+    // key: taskId, value: streamId
+    std::unordered_map<uint32_t, uint16_t> streamIdMap;
+};
+
 class LoadHostData : public Infra::Process {
 private:
     uint32_t ProcessEntry(Infra::DataInventory &dataInventory, const Infra::Context &deviceContext) override;

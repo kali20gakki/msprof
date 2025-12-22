@@ -24,6 +24,7 @@
 #include "analysis/csrc/domain/entities/hal/include/top_down_task.h"
 #include "analysis/csrc/domain/entities/hal/include/ascend_obj.h"
 #include "analysis/csrc/infrastructure/dfx/error_code.h"
+#include "analysis/csrc/domain/services/device_context/load_host_data.h"
 
 using namespace testing;
 using namespace Analysis::Infra;
@@ -39,6 +40,8 @@ protected:
         dataInventory_.Inject(data);
         auto deviceTask = std::make_shared<std::map<TaskId, std::vector<DeviceTask>>>();
         dataInventory_.Inject(deviceTask);
+        auto streamInfo = std::make_shared<StreamIdInfo>();
+        dataInventory_.Inject(streamInfo);
     }
 
     void TearDown()
@@ -131,6 +134,38 @@ TEST_F(AscendTaskAssociationUTest, ShouldReturnOKWhenDeviceTaskAndHostTaskIsEmpt
     AscendTaskAssociation association;
     DeviceContext context;
     ASSERT_EQ(ANALYSIS_OK, association.Run(dataInventory_, context));
+}
+
+TEST_F(AscendTaskAssociationUTest, TestProcessEntryReturnUnsetStreamIdWhenDeviceTaskIsEmpty)
+{
+    AscendTaskAssociation association;
+    DeviceContext context;
+    auto hostDataS = dataInventory_.GetPtr<std::map<TaskId, std::vector<HostTask>>>();
+    auto deviceDataS = dataInventory_.GetPtr<std::map<TaskId, std::vector<DeviceTask>>>();
+    auto hostData = GeneratorHostTask();
+    auto deviceData = GenerateDeviceTask();
+    deviceDataS->swap(deviceData);
+    hostDataS->swap(hostData);
+    context.deviceContextInfo.deviceInfo.chipID = 15;
+    association.ProcessEntry(dataInventory_, context);
+    auto result = dataInventory_.GetPtr<std::vector<TopDownTask>>();
+    ASSERT_EQ(deviceDataS->begin()->first.streamId, TEST_ID);
+}
+
+TEST_F(AscendTaskAssociationUTest, TestProcessEntrySetStreamIdSuccessWhenStreamIdInfoEmpty)
+{
+    AscendTaskAssociation association;
+    DeviceContext context;
+    auto hostDataS = dataInventory_.GetPtr<std::map<TaskId, std::vector<HostTask>>>();
+    auto deviceDataS = dataInventory_.GetPtr<std::map<TaskId, std::vector<DeviceTask>>>();
+    TaskId taskId = {(uint16_t)1, (uint16_t)1, (uint16_t)1, 1};
+    deviceDataS->emplace(taskId, std::vector<DeviceTask>());
+    auto streamIdMap = dataInventory_.GetPtr<StreamIdInfo>();
+    streamIdMap->streamIdMap.emplace(TEST_ID, 100);
+    context.deviceContextInfo.deviceInfo.chipID = 15;
+    association.ProcessEntry(dataInventory_, context);
+    auto result = dataInventory_.GetPtr<std::vector<TopDownTask>>();
+    ASSERT_EQ(deviceDataS->begin()->first.streamId, 100);
 }
 }
 }

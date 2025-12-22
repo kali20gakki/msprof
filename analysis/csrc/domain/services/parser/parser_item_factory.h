@@ -25,6 +25,7 @@ namespace Analysis {
 namespace Domain {
 enum ParserType {
     LOG_PARSER,
+    LOG_PARSER_V6,
     PMU_PARSER,
     TRACK_PARSER,
     FREQ_PARSER

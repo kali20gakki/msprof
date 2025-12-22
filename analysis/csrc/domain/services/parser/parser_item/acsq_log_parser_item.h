@@ -39,9 +39,21 @@ struct AcsqLog {
     uint16_t resv5;
     uint32_t resv6[11];
 };
+struct AcsqLogV6 {
+    uint16_t funcType : 6;
+    uint16_t cnt : 4;
+    uint16_t taskType : 6;
+    uint16_t resv2;
+    uint32_t taskId;
+    uint64_t timestamp;
+    uint16_t resv4;
+    uint16_t resv5;
+    uint32_t resv6[3];
+};
 #pragma pack()
 
 int AcsqLogParseItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *halUniData, uint16_t expandStatus);
+int AcsqLogParseItem_V6(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *halUniData, uint16_t expandStatus);
 
 }
 }

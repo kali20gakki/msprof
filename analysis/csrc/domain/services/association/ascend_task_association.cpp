@@ -189,12 +189,32 @@ std::vector<TopDownTask> GenerateTopDownTask(std::map<TaskId, std::vector<HostTa
     return res;
 }
 
+void FillDeviceTaskStreamId(std::shared_ptr<StreamIdInfo> streamIdInfo,
+    std::shared_ptr<std::map<TaskId, std::vector<DeviceTask>>> deviceTasks)
+{
+    if (deviceTasks == nullptr || deviceTasks->empty()) {
+        WARN("There is no data in DeviceTask, fill task stream id failed.", deviceTasks);
+        return;
+    }
+    for (auto& task : *deviceTasks) {
+        auto streamIdPair = streamIdInfo->streamIdMap.find(task.first.taskId);
+        if (streamIdPair != streamIdInfo->streamIdMap.end()) {
+            // If multiple threads are processing the stream ID, please ensure that the operations are atomic.
+            task.first.streamId = streamIdPair->second;
+        }
+    }
+}
+
 uint32_t AscendTaskAssociation::ProcessEntry(DataInventory &dataInventory, const Context &context)
 {
     const DeviceContext& deviceContext = static_cast<const DeviceContext&>(context);
     auto params = GetSyscntConversionParams(deviceContext);
     auto hostTasks = dataInventory.GetPtr<std::map<TaskId, std::vector<HostTask>>>();
     auto deviceTasks = dataInventory.GetPtr<std::map<TaskId, std::vector<DeviceTask>>>();
+    if (context.GetChipID() == CHIP_V6_1_0) {
+        auto streamIdInfo = dataInventory.GetPtr<StreamIdInfo>();
+        FillDeviceTaskStreamId(streamIdInfo, deviceTasks);
+    }
     std::shared_ptr<std::vector<TopDownTask>> data;
     std::vector<TopDownTask> res;
     if (hostTasks->empty() && deviceTasks->empty()) {
@@ -215,7 +235,7 @@ uint32_t AscendTaskAssociation::ProcessEntry(DataInventory &dataInventory, const
 
 REGISTER_PROCESS_SEQUENCE(AscendTaskAssociation, true, LoadHostData);
 REGISTER_PROCESS_DEPENDENT_DATA(AscendTaskAssociation, std::map<TaskId, std::vector<DeviceTask>>,
-                                std::map<TaskId, std::vector<HostTask>>);
+                                std::map<TaskId, std::vector<HostTask>>, StreamIdInfo);
 REGISTER_PROCESS_SUPPORT_CHIP(AscendTaskAssociation, CHIP_ID_ALL);
 }
 }

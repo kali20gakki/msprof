@@ -110,7 +110,8 @@ std::vector<NpuModuleMemData> NpuModuleMemProcessor::FormatData(const OriNpuModu
     for (auto& row : oriData) {
         double syscnt = 0.0;
         std::tie(data.moduleId, syscnt, data.totalReserved, data.deviceType) = row;
-        HPFloat timestamp{GetTimeFromHostCnt(static_cast<uint64_t>(syscnt), params)};
+        HPFloat timestamp{GetTimeFromCnt(static_cast<uint64_t>(syscnt),
+            params.hostMonotonic, params.hostCnt, params.hostFreq)};
         data.timestamp = GetLocalTime(timestamp, localtimeContext.timeRecord).Uint64();
         processedData.push_back(data);
     }

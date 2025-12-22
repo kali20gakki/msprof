@@ -60,7 +60,6 @@ struct ClassToTypeIndexHelper {
 };
 }
 }
-
 /**
  * @brief 注册处理流程的自身属性和前身依赖次序
  *

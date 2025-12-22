@@ -43,7 +43,7 @@ TEST_F(TimeUtilsUTest, TestGetTimeFromSyscntShouldReturnOriSysCntWhenFreqIsDefau
     SyscntConversionParams params{DEFAULT_FREQ, 3666503140109, 36471130547330};
     uint64_t taskSysCnt = 3666510676667;
     double expectRes = 3666510676667.000;
-    EXPECT_DOUBLE_EQ(GetTimeFromSyscnt(taskSysCnt, params).Double(), expectRes);
+    EXPECT_DOUBLE_EQ(GetTimeFromHostCnt(taskSysCnt, params).Double(), expectRes);
 }
 
 TEST_F(TimeUtilsUTest, TestGetTimeFromSyscntShouldReturnTimestampWhenSyscntGraterBaseThenTimePlus)
