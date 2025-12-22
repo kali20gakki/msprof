@@ -394,6 +394,7 @@ TEST_F(CannDBDumperUtest, TestAddTaskInfoOpIsNullWhenProfLevel0)
     CANNTraceDBDumper::TaskInfoData taskInfoData;
     bool isLevel0 = true;
     cannTraceDbDumper.AddTaskInfo(hostTaskPtr, taskInfoData, isLevel0);
+    EXPECT_EQ(taskInfoData.size(), 0ul);
     hostTaskPtr->kernelName = 1;
     cannTraceDbDumper.AddTaskInfo(hostTaskPtr, taskInfoData, isLevel0);
     EXPECT_EQ(taskInfoData.size(), 1ul);
@@ -408,6 +409,7 @@ TEST_F(CannDBDumperUtest, TestAddTaskInfoOpIsNullWhenProfLevel1)
     CANNTraceDBDumper::TaskInfoData taskInfoData;
     bool isLevel0 = false;
     cannTraceDbDumper.AddTaskInfo(hostTaskPtr, taskInfoData, isLevel0);
+    EXPECT_EQ(taskInfoData.size(), 0ul);
     hostTaskPtr->kernelName = 1;
     cannTraceDbDumper.AddTaskInfo(hostTaskPtr, taskInfoData, isLevel0);
     EXPECT_EQ(taskInfoData.size(), 1ul);

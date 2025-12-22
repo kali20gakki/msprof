@@ -97,7 +97,20 @@ TEST_F(MsprofReporterMgrUtest, ReportAdditionalData)
     MsprofAdditionalInfo data;
     EXPECT_EQ(PROFILING_SUCCESS, MsprofReporterMgr::instance()->ReportData(true, data));
 }
- 
+
+TEST_F(MsprofReporterMgrUtest, ReportVariableData)
+{
+    GlobalMockObject::verify();
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::IsInited).stubs().then(returnValue(true));
+    std::shared_ptr<MsprofVariableInfo> data;
+    data = std::make_shared<MsprofVariableInfo>();
+    EXPECT_EQ(PROFILING_SUCCESS, MsprofReporterMgr::instance()->StopReporters());
+    EXPECT_EQ(PROFILING_NOTSUPPORT, MsprofReporterMgr::instance()->ReportVariableData(data, 1));
+
+    EXPECT_EQ(PROFILING_SUCCESS, MsprofReporterMgr::instance()->StartReporters());
+    EXPECT_EQ(PROFILING_SUCCESS, MsprofReporterMgr::instance()->ReportVariableData(data, 1));
+}
+
 TEST_F(MsprofReporterMgrUtest, RegReportTypeInfo)
 {
     GlobalMockObject::verify();

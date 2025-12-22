@@ -106,6 +106,7 @@ class DataTag(Enum):
     SOC_PMU = 87
     LPM_INFO = 88
     STREAM_EXPAND = 89
+    RUNTIME_OP_INFO = 90
 
 
 @unique

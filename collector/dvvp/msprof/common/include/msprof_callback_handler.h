@@ -37,6 +37,7 @@ public:
     void FlushDynProfCachedMsg(const std::string &devId);
     int SendData(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunk);
     template <typename T> int ReportData(const T &data) const;
+    int ReportVariableData(std::shared_ptr<MsprofVariableInfo> data, uint32_t len) const;
 
 public:
     static void InitReporters();

@@ -22,7 +22,7 @@ sample_config = {"model_id": 1, 'iter_id': 'dasfsd', 'result_dir': 'jasdfjfjs'}
 NAMESPACE = 'msmodel.add_info.tensor_add_info_model'
 
 
-class TestCtxIdModel(unittest.TestCase):
+class TestTensorAddInfoModel(unittest.TestCase):
 
     def test_flush(self):
         with mock.patch(NAMESPACE + '.TensorAddInfoModel.insert_data_to_db'):

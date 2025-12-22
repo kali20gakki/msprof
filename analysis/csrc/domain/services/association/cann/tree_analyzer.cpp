@@ -19,6 +19,7 @@
 #include <memory>
 #include <set>
 #include "analysis/csrc/domain/services/parser/host/cann/hash_data.h"
+#include "analysis/csrc/domain/services/parser/host/cann/rt_add_info_center.h"
 
 namespace Analysis {
 namespace Domain {
@@ -56,6 +57,12 @@ const std::set<std::string> CONTEXT_ID_WHITE_LIST = {KERNEL_AI_CORE_TASK_TYPE, K
 const std::set<std::string> KERNEL_COMPUTE_WHITE_LIST = {KERNEL_AI_CORE_TASK_TYPE, KERNEL_AI_VECTOR_CORE_TASK_TYPE,
                                                          KERNEL_AI_CPU_TASK_TYPE,
                                                          KERNEL_MIX_AIC_TASK_TYPE, KERNEL_MIX_AIV_TASK_TYPE};
+
+uint64_t GetModelId(const std::shared_ptr<MsprofApi> &api, uint16_t deviceId, uint32_t streamId, uint16_t taskId)
+{
+    return api != nullptr ? api->itemId : RTAddInfoCenter::GetInstance().Get(deviceId, streamId, taskId).modelId;
+}
+
 }
 
 void TreeAnalyzer::Analyze()
@@ -313,7 +320,6 @@ std::shared_ptr<HostTask> TreeAnalyzer::GenHostTask(const std::shared_ptr<Msprof
     task->taskId = static_cast<uint16_t>(track->data.runtimeTrack.taskId & TASK_ID_BIT);
     task->contextId = ctxId;
     task->op = opPtr;
-    task->modelId = modelApi != nullptr ? modelApi->itemId : INVALID_MODEL_ID;
     task->batchId = static_cast<uint16_t>(track->data.runtimeTrack.taskId >> TWO_BYTES);
     task->requestId = modelApi != nullptr ? modelApi->reserve : INVALID_VALUE;
     task->taskType = taskType;
@@ -321,6 +327,7 @@ std::shared_ptr<HostTask> TreeAnalyzer::GenHostTask(const std::shared_ptr<Msprof
     task->timeStamp = track->timeStamp;
     task->thread_id = track->threadId;
     task->kernelName = track->data.runtimeTrack.kernelName;
+    task->modelId = GetModelId(modelApi, task->deviceId, task->streamId, task->taskId);
     return task;
 }
 
@@ -410,7 +417,7 @@ void TreeAnalyzer::UpdateComputeDescForHcclSituation(ComputeOpDescs &descs,
         std::shared_ptr<OpDesc> desc;
         std::shared_ptr<Operator> op;
         MAKE_SHARED0_NO_OPERATION(desc, OpDesc);
-        MAKE_SHARED0_NO_OPERATION(op, Operator, desc, UINT64_MAX, OpType::OPTYPE_COMPUTE_HCCL);
+        MAKE_SHARED0_NO_OPERATION(op, Operator, desc, item_id, OpType::OPTYPE_COMPUTE_HCCL);
         auto name = Utils::Join("_", std::to_string(PLACEHOLDER_OP_NAME), std::to_string(UINT64_MAX));
         descs[name] = op;
     }

@@ -318,34 +318,35 @@ bool MetricProcessor::FormatTaskBasedData(const std::vector<std::vector<std::str
         for (size_t col = colSize - KEY_OFFSET; col < colSize; ++col) {
             uint16_t temp;
             if (Utils::StrToU16(temp, oriData[col][row])) {
-                WARN("Convert taskId info failed.");
-                continue;
+                break;
             }
             tmpId.emplace_back(temp);
         }
-        TaskId tempTaskId;
-        if (oriData[colSize - DATA_OFFSET][row] == NA) {
-            tempTaskId = {tmpId[0], tmpId[2], tmpId[1], UINT32_MAX, deviceId};
-        } else {
-            uint32_t tempContextId;
-            if (Utils::StrToU32(tempContextId, oriData[colSize - DATA_OFFSET][row])) {
+        if (tmpId.size() < 3) {
+            ERROR("Convert taskId info failed, row is %.", row);
+            continue;
+        }
+
+        uint32_t tempContextId = UINT32_MAX;
+        if (oriData[colSize - DATA_OFFSET][row] != NA) {
+            if (Utils::StrToU32(tempContextId, oriData[colSize - DATA_OFFSET][row]) == ANALYSIS_ERROR) {
                 WARN("Convert context id failed, the row data will be discarded.");
                 continue;
             }
-            tempTaskId = {tmpId[0], tmpId[2], tmpId[1], tempContextId, deviceId};
         }
+        TaskId tempTaskId = {tmpId[0], tmpId[2], tmpId[1], tempContextId, deviceId};
+
         if (processedData.find(tempTaskId) != processedData.end()) {
             processedData[tempTaskId].emplace_back(processedDatum);
-            continue;
+        } else {
+            processedData[tempTaskId] = std::vector<std::vector<std::string>>({processedDatum});
         }
-        processedData[tempTaskId] = std::vector<std::vector<std::string>>({processedDatum});
     }
 
     if (processedData.empty()) {
         ERROR("FormatTaskBasedData data processing error.");
-        return false;
     }
-    return true;
+    return !processedData.empty();
 }
 
 bool MetricProcessor::AddMemoryBound(std::map<TaskId, std::vector<std::vector<std::string>>> &processedData,

@@ -160,6 +160,7 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_RUNTIME_TIMELINE = "TimeLine"
     TABLE_RUNTIME_TRACK = "RuntimeTrack"
     TABLE_TASK_TRACK = "TaskTrack"
+    TABLE_RUNTIME_OP_INFO = "RuntimeOpInfo"
     TABLE_MEMCPY_INFO = "MemcpyInfo"
     TABLE_SUMMARY_GE = "ge_summary"
     TABLE_SUMMARY_METRICS = "ai_core_metrics"

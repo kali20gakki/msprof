@@ -26,6 +26,8 @@ class GeTensorBaseBean(StructDecoder):
     """
     class for ge tensor base bean
     """
+    INPUT = 0
+    OUTPUT = 1
 
     def __init__(self: any) -> None:
         self._input_format = []
@@ -111,14 +113,29 @@ class GeTensorBaseBean(StructDecoder):
     @classmethod
     def _process_tensor_format(cls: any, _input_format) -> list:
         enum_dict = GeDataFormat.member_map()
+        result_list = [0] * len(_input_format)
         for index, _format in enumerate(_input_format):
             tensor_format, tensor_sub_format = cls._process_with_sub_format(_format)
             if tensor_format not in enum_dict:
                 logging.error("Unsupported tensor format %d", tensor_format)
-                _input_format[index] = str(_input_format[index])
+                result_list[index] = str(_input_format[index])
                 continue
             enum_format = enum_dict.get(tensor_format).name
             if tensor_sub_format > 0:
                 enum_format = '{0}:{1}'.format(enum_format, str(tensor_sub_format))
-            _input_format[index] = enum_format
-        return _input_format
+            result_list[index] = enum_format
+        return result_list
+
+    def _deal_with_tensor_data(self, data_list: list, tensor_num: int, tensor_len: int):
+        tensor_data = []
+        for index in range(0, tensor_num):
+            tensor_data.append(list(data_list[tensor_len * index: tensor_len * index + tensor_len]))
+        for tensor in tensor_data:
+            if tensor[0] == self.INPUT:
+                self._input_format.append(tensor[1])
+                self._input_data_type.append(tensor[2])
+                self._input_shape.append(tensor[3:])
+            if tensor[0] == self.OUTPUT:
+                self._output_format.append(tensor[1])
+                self._output_data_type.append(tensor[2])
+                self._output_shape.append(tensor[3:])

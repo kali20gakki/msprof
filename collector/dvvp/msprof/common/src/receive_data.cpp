@@ -108,6 +108,9 @@ void ReceiveData::RunProfileData(std::vector<SHARED_PTR_ALIA<ProfileFileChunk>>&
         case MSPROF_ADDITIONAL_PROFILE_DATA_TYPE:
             RunTagData<MsprofAdditionalInfo>(dataBufAdditionalInfo_, fileChunks);
             break;
+        case MSPROF_VARIABLE_PROFILE_DATA_TYPE:
+            RunVariableData(dataBufVariableInfo_, fileChunks);
+            break;
         default:
             MSPROF_LOGE("Entry Run[%s] function is invalid.", moduleName_.c_str());
             break;
@@ -150,7 +153,7 @@ void ReceiveData::RunNoTagData(analysis::dvvp::common::queue::RingBuffer<T> &dat
 }
  
 /**
-* @brief RunNoTagData: read compact/additional datas from new struct data ring buffer to build ProfileFileChunk
+* @brief RunTagData: read compact/additional datas from new struct data ring buffer to build ProfileFileChunk
 * @param [out] fileChunks: data from user to write to local file or send to remote host
 */
 template<typename T>
@@ -189,10 +192,48 @@ void ReceiveData::RunTagData(analysis::dvvp::common::queue::RingBuffer<T> &dataB
     }
 }
 
+/**
+* @brief RunVariableData: read variable datas from new struct data ring buffer to build ProfileFileChunk
+* @param [out] fileChunks: data from user to write to local file or send to remote host
+*/
+void ReceiveData::RunVariableData(analysis::dvvp::common::queue::RingBuffer<VariableStruct> &dataBuffer,
+                                  std::vector<SHARED_PTR_ALIA<ProfileFileChunk>>& fileChunks)
+{
+    std::map<std::string, std::vector<VariableStruct>> dataMap; // data binding with tag
+    VariableStruct variableData;
+    for (uint64_t batchSizeMax = 0; batchSizeMax < MSVP_BATCH_MAX_LEN;) {
+        bool isOK = dataBuffer.TryPop(variableData);
+        if (!isOK) {
+            break;
+        }
+        totalCountFromRingBuff_++;
+        uint64_t size = static_cast<uint64_t>(sizeof(VariableStruct));
+        totalDataLengthFromRingBuff_ += size;
+        batchSizeMax += size;
+
+        auto tagWizSuffix = std::to_string(variableData.data->level) + "_" + std::to_string(variableData.data->type);
+        // classify data by tag.type
+        dataMap[tagWizSuffix].push_back(variableData);
+    }
+    for (auto iter = dataMap.begin(); iter != dataMap.end(); ++iter) {
+        if (iter->second.size() > 0) {
+            SHARED_PTR_ALIA<ProfileFileChunk> fileChunk = nullptr;
+            MSVP_MAKE_SHARED0_BREAK(fileChunk, ProfileFileChunk);
+            MSPROF_LOGD("Dump data, module:%s, key:%s, data.size:%llu, data[0].len:%llu",
+                        moduleName_.c_str(), iter->first.c_str(), iter->second.size(), sizeof(VariableStruct));
+            if (DumpVariableData(iter->second, fileChunk) == PROFILING_SUCCESS) {
+                fileChunks.push_back(fileChunk); // insert the data into the new vector
+            } else {
+                MSPROF_LOGE("Dump variable data failed");
+            }
+        }
+    }
+}
+
 void ReceiveData::StopReceiveData()
 {
     stopped_ = true;
-    MSPROF_LOGI("stop this reporter");
+    MSPROF_LOGI("stop this reporter, moduleName is %s", moduleName_.c_str());
 }
 
 void ReceiveData::WriteDone()
@@ -227,7 +268,8 @@ void ReceiveData::WaitBufferEmptyEvent(uint64_t us)
                 return this->dataChunkBuf_.GetUsedSize() == 0 &&
                     this->dataBufApi_.GetUsedSize() == 0 &&
                     this->dataBufCompactInfo_.GetUsedSize() == 0 &&
-                    this->dataBufAdditionalInfo_.GetUsedSize() == 0;
+                    this->dataBufAdditionalInfo_.GetUsedSize() == 0 &&
+                    this->dataBufVariableInfo_.GetUsedSize() == 0;
             });
     } while (!status);
 }
@@ -273,10 +315,14 @@ int ReceiveData::Init(size_t capacity)
         dataBufAdditionalInfo_.Init(capacity);
         dataBufAdditionalInfo_.SetName(moduleName_);
         profileDataType_ = MSPROF_ADDITIONAL_PROFILE_DATA_TYPE;
+    } else if (moduleName_.find("variable") != std::string::npos) {
+        dataBufVariableInfo_.Init(VARIABLE_RING_BUFF_CAPACITY);
+        dataBufVariableInfo_.SetName(moduleName_);
+        profileDataType_ = MSPROF_VARIABLE_PROFILE_DATA_TYPE;
     } else {
-        profileDataType_ = MSPROF_DEFAULT_PROFILE_DATA_TYPE;
         dataChunkBuf_.Init(capacity);
         dataChunkBuf_.SetName(moduleName_);
+        profileDataType_ = MSPROF_DEFAULT_PROFILE_DATA_TYPE;
     }
     return PROFILING_SUCCESS;
 }
@@ -355,7 +401,7 @@ void ReceiveData::DoReportRun()
 /**
 * @brief DoReportData: get the data from user and save the data to ring buffer
 * @param [in] dataChunk: the data from user
-* @return : success return PROFILING_SUCCESS, failed return PROFIING_FAILED
+* @return : success return PROFILING_SUCCESS, failed return PROFILING_FAILED
 */
 int ReceiveData::DoReportData(const ReporterDataChunk& dataChunk)
 {
@@ -382,7 +428,7 @@ int ReceiveData::DoReportData(const ReporterDataChunk& dataChunk)
 /**
 * @brief DoReportData: get the api/event data from user and save the data to ring buffer
 * @param [in] dataChunk: the data from user
-* @return : success return PROFILING_SUCCESS, failed return PROFIING_FAILED
+* @return : success return PROFILING_SUCCESS, failed return PROFILING_FAILED
 */
 int ReceiveData::DoReportData(const MsprofApi& dataChunk)
 {
@@ -407,7 +453,7 @@ int ReceiveData::DoReportData(const MsprofApi& dataChunk)
 /**
 * @brief DoReportData: get the compact info data from user and save the data to ring buffer
 * @param [in] dataChunk: the data from user
-* @return : success return PROFILING_SUCCESS, failed return PROFIING_FAILED
+* @return : success return PROFILING_SUCCESS, failed return PROFILING_FAILED
 */
 int ReceiveData::DoReportData(const MsprofCompactInfo& dataChunk)
 {
@@ -433,7 +479,7 @@ int ReceiveData::DoReportData(const MsprofCompactInfo& dataChunk)
 /**
 * @brief DoReportData: get the additional info data from user and save the data to ring buffer
 * @param [in] dataChunk: the data from user
-* @return : success return PROFILING_SUCCESS, failed return PROFIING_FAILED
+* @return : success return PROFILING_SUCCESS, failed return PROFILING_FAILED
 */
 int ReceiveData::DoReportData(const MsprofAdditionalInfo& dataChunk)
 {
@@ -453,6 +499,34 @@ int ReceiveData::DoReportData(const MsprofAdditionalInfo& dataChunk)
     }
     totalPushCounterSuccess_++;
     totalDataLengthSuccess_ += sizeof(MsprofAdditionalInfo);
+    return PROFILING_SUCCESS;
+}
+
+/**
+* @brief DoReportData: get the variable info data from user and save the data to ring buffer
+* @param [in] variableData: the data from user
+* @return : success return PROFILING_SUCCESS, failed return PROFILING_FAILED
+*/
+int32_t ReceiveData::DoReportVariableData(std::shared_ptr<MsprofVariableInfo> data, uint32_t len)
+{
+    totalPushCounter_.fetch_add(1, std::memory_order_relaxed);
+    VariableStruct variableData{data, len};
+    auto structLen = sizeof(VariableStruct);
+    bool ret = dataBufVariableInfo_.TryPush(variableData);
+    if (!ret) {
+        totalPushCounterFailed_++;
+        totalDataLengthFailed_ += structLen;
+        uint64_t totalLengthFailed = totalDataLengthFailed_.load(std::memory_order_relaxed);
+        uint64_t totalPushFailed = totalPushCounterFailed_.load(std::memory_order_relaxed);
+        size_t buffUsedSize = dataBufVariableInfo_.GetUsedSize();
+        MSPROF_LOGE("try push ring buff failed, deviceID:%d, module:%s, dataLen:%llu,"
+                    " totalPushCounterFailed_:%llu, totalDataLengthFailed_:%llu, buffUsedSize:%llu",
+                    DEFAULT_HOST_ID, moduleName_.c_str(), structLen, totalPushFailed, totalLengthFailed,
+                    buffUsedSize);
+        return PROFILING_FAILED;
+    }
+    totalPushCounterSuccess_++;
+    totalDataLengthSuccess_ += structLen;
     return PROFILING_SUCCESS;
 }
 
@@ -522,6 +596,45 @@ void ReceiveData::SetDataChunkTag(uint16_t level, uint32_t typeId, std::string &
             tag = "invalid";
             break;
     }
+}
+
+int32_t ReceiveData::DumpVariableData(std::vector<VariableStruct> &msgVec, SHARED_PTR_ALIA<ProfileFileChunk> fileChunk)
+{
+    if (fileChunk == nullptr) {
+        MSPROF_LOGE("fileChunk or dataPool is nullptr");
+        return PROFILING_FAILED;
+    }
+
+    size_t chunkLen = 0;
+    bool isFirstMessage = true;
+    for (auto& msg : msgVec) {
+        size_t messageLen = msg.len;
+        auto dataPtr = reinterpret_cast<CHAR_PTR>(msg.data.get());
+        if (dataPtr == nullptr) {
+            return PROFILING_FAILED;
+        }
+        if (isFirstMessage) { // deal with the data only need to init once
+            std::string tag;
+            MsprofReporterMgr::instance()->GetRegReportTypeInfo(msg.data->level, msg.data->type, tag);
+            fileChunk->fileName = Utils::PackDotInfo(moduleName_, tag);
+            fileChunk->offset = -1;
+            chunkLen = messageLen;
+            fileChunk->chunk = std::move(std::string(dataPtr, chunkLen));
+            fileChunk->isLastChunk = false;
+            fileChunk->extraInfo = Utils::PackDotInfo(NULL_CHUNK, std::to_string(DEFAULT_HOST_ID));
+            isFirstMessage = false;
+            fileChunk->chunkStartTime = 0U;
+            fileChunk->chunkEndTime = 0U;
+            devIds_.insert(std::to_string(DEFAULT_HOST_ID));
+        } else { // deal with the data need to update according every message
+            fileChunk->chunk.insert(chunkLen, std::string(dataPtr, messageLen));
+            chunkLen += messageLen;
+            fileChunk->chunkEndTime = 0U;
+        }
+    }
+    fileChunk->chunkModule = analysis::dvvp::common::config::FileChunkDataModule::PROFILING_IS_FROM_MSPROF_HOST;
+    fileChunk->chunkSize = chunkLen;
+    return PROFILING_SUCCESS;
 }
 
 template<typename T>

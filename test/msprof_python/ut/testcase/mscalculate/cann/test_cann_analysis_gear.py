@@ -30,6 +30,7 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.path_manager import PathManager
+from common_func.rt_add_info_center import RTAddInfoCenter
 from constant.constant import clear_dt_project
 from mscalculate.cann.additional_record import AdditionalRecord
 from mscalculate.cann.cann_analysis_gear import ACLGear
@@ -320,6 +321,8 @@ class TestCANNAnalysisGear(unittest.TestCase):
         task_dto5.task_type = "KERNEL_AIVEC"
         event18.additional_record = [self.create_addition_record(task_dto5, 550, record_db)]
 
+        RTAddInfoCenter("./test")
+
         gear.run(event1, {})
         gear.run(event2, {Constant.MODEL_LEVEL: Event.invalid_event(), Constant.NODE_LEVEL: Event.invalid_event(),
                           Constant.HCCL_LEVEL: Event.invalid_event()})
@@ -391,6 +394,8 @@ class TestCANNAnalysisGear(unittest.TestCase):
         event1.additional_record = [self.create_addition_record(task_dto, 125, record_db)]
         event2: Event = self.create_api_event(self.event_col(Constant.NODE_LEVEL, 1, 110, 140, "launch", "op"), api_db)
 
+        RTAddInfoCenter("./test")
+
         gear.run(event1, {Constant.MODEL_LEVEL: Event.invalid_event(), Constant.NODE_LEVEL: event2,
                           Constant.HCCL_LEVEL: Event.invalid_event()})
         gear.flush_data()
@@ -430,6 +435,8 @@ class TestCANNAnalysisGear(unittest.TestCase):
             self.create_addition_record(tensor_info_dto, 140, record_db),
             self.create_addition_record(node_attr_info_dto, 140, record_db)
         ]
+
+        RTAddInfoCenter("./test")
 
         gear.run(event1, {Constant.MODEL_LEVEL: Event.invalid_event(), Constant.NODE_LEVEL: event2,
                           Constant.HCCL_LEVEL: Event.invalid_event()})
@@ -573,6 +580,8 @@ class TestTaskGear(TestCANNAnalysisGear):
         model_event = Event.invalid_event()
         task_track_dto: TaskTrackDto = TaskTrackDto()
 
+        RTAddInfoCenter("./test")
+
         gear.add_hccl_task(hccl_event, model_event, task_track_dto)
         self.assertEqual(len(gear.hccl_task_info), 1)
 
@@ -586,6 +595,8 @@ class TestTaskGear(TestCANNAnalysisGear):
         model_event = Event.invalid_event()
         task_track_dto: TaskTrackDto = TaskTrackDto()
         hccl_descs = collections.OrderedDict([("1", gear.HcclDesc()), ("2", gear.HcclDesc()), ("3", gear.HcclDesc())])
+
+        RTAddInfoCenter("./test")
 
         with mock.patch(NAMESPACE + '.TaskGear.get_hccl_descs', return_value=hccl_descs):
             gear.add_hccl_task(model_event, hccl_event, task_track_dto)
