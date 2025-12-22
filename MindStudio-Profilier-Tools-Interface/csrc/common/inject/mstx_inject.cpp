@@ -163,6 +163,18 @@ bool MstxDomainMgr::isDomainEnable(const char* name)
 }
 
 namespace MsptiMstxApi {
+class MstxApiInject {
+public:
+    MstxApiInject() noexcept
+    {
+        Mspti::Common::RegisterFunction("libprofapi", "ProfRegisterMstxFunc");
+        Mspti::Common::RegisterFunction("libprofapi", "EnableMstxFunc");
+        MstxRegisterMstxFunc();
+    }
+    ~MstxApiInject() = default;
+};
+
+MstxApiInject g_mstxApiInject;
 
 static bool IsMsgValid(const char* msg)
 {
@@ -395,14 +407,41 @@ int InitInjectionMstx(MstxGetModuleFuncTableFunc getFuncTable)
     }
     return MSPTI_SUCCESS;
 }
+
+void ProfRegisterMstxFunc(MstxInitInjectionFunc mstxInitFunc, ProfModule module)
+{
+    using profRegisterMstxFunc = std::function<decltype(ProfRegisterMstxFunc)>;
+    static profRegisterMstxFunc func = nullptr;
+    if (func == nullptr) {
+        Mspti::Common::GetFunction("libprofapi", __FUNCTION__, func);
+    }
+    if (func == nullptr) {
+        MSPTI_LOGE("ProfRegisterMstxFunc can not be founded in libprofapi.so");
+        return;
+    }
+    MSPTI_LOGI("mspti registerMstxFunc to libprofapi.so");
+    return func(mstxInitFunc, module);
 }
 
-using namespace MsptiMstxApi;
-static msptiResult res = MstxRegisterMstxFunc();
+void EnableMstxFunc(ProfModule module)
+{
+    using enableMstxFunc = std::function<decltype(EnableMstxFunc)>;
+    static enableMstxFunc func = nullptr;
+    if (func == nullptr) {
+        Mspti::Common::GetFunction("libprofapi", __FUNCTION__, func);
+    }
+    if (func == nullptr) {
+        MSPTI_LOGE("EnableMstxFunc can not be founded in libprofapi.so");
+        return;
+    }
+    MSPTI_LOGI("mspti enable mstxFuncs");
+    return func(module);
+}
+}
 
 msptiResult msptiActivityEnableMarkerDomain(const char* name)
 {
-    if (!IsMsgValid(name)) {
+    if (!MsptiMstxApi::IsMsgValid(name)) {
         MSPTI_LOGE("domainHandle is nullptr, check your input params");
         return MSPTI_ERROR_INVALID_PARAMETER;
     }
@@ -412,7 +451,7 @@ msptiResult msptiActivityEnableMarkerDomain(const char* name)
 
 msptiResult msptiActivityDisableMarkerDomain(const char* name)
 {
-    if (!IsMsgValid(name)) {
+    if (!MsptiMstxApi::IsMsgValid(name)) {
         MSPTI_LOGE("domainHandle is nullptr, check your input params");
         return MSPTI_ERROR_INVALID_PARAMETER;
     }

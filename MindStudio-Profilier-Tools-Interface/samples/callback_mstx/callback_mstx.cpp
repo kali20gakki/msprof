@@ -147,11 +147,10 @@ void SetUpMspti(aclrtContext* context, aclrtStream* stream)
     if (memset_s(pUserData, sizeof(UserData), 0, sizeof(UserData)) != EOK) {
         free(pUserData);
         LOG_PRINT("ERROR memset failed!\n");
-            return;
-        }
-        pUserData->context = context;
-        pUserData->stream = stream;
+        return;
     }
+    pUserData->context = context;
+    pUserData->stream = stream;
 
     // 初始化订阅mspti
     msptiSubscriberHandle* handle = InitMspti((void *)MstxCallback, pUserData);
