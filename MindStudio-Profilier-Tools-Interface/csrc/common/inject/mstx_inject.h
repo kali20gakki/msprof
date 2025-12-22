@@ -70,8 +70,9 @@ typedef MstxFuncPointer** MstxFuncTable;
 typedef int (*MstxGetModuleFuncTableFunc)(MstxFuncModule module, MstxFuncTable *outTable, unsigned int *outSize);
 typedef int(*MstxInitInjectionFunc)(MstxGetModuleFuncTableFunc);
 
-inline void ProfRegisterMstxFunc(MstxInitInjectionFunc mstxInitFunc, ProfModule module) {}
-inline void EnableMstxFunc(ProfModule module) {}
+// 注册mstx接口
+void ProfRegisterMstxFunc(MstxInitInjectionFunc mstxInitFunc, ProfModule module);
+void EnableMstxFunc(ProfModule module);
 
 struct mstxDomainRegistration_st {};
 typedef struct mstxDomainRegistration_st MstxDomainHandle;
