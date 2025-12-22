@@ -172,6 +172,9 @@ class NumberConstant:
     # high-precision data threshold
     CSV_MAX_PRECISION = 15
 
+    # voltage, mV
+    DEFAULT_VOLTAGE = 900
+
     @property
     def conversion_time(self: any) -> float:
         """

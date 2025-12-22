@@ -15,7 +15,9 @@
 # -------------------------------------------------------------------------
 
 from common_func.db_name_constant import DBNameConstant
+from common_func.platform.chip_manager import ChipManager
 from profiling_bean.struct_info.step_trace import StepTrace
+from profiling_bean.struct_info.step_trace import StepTraceChipV6
 
 
 class StepTraceReader:
@@ -49,7 +51,8 @@ class StepTraceReader:
         :param bean_data: binary data
         :return: None
         """
-        step_trace_bean = StepTrace.decode(bean_data)
+        decoder = StepTraceChipV6 if ChipManager().is_chip_v6() else StepTrace
+        step_trace_bean = decoder.decode(bean_data)
         if step_trace_bean:
             self._data.append(
                 (step_trace_bean.index_id, step_trace_bean.model_id,

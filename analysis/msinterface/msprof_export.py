@@ -137,6 +137,16 @@ class ExportCommand:
              'handler': AiStackDataCheckManager.contain_sio_data},
             {'export_type': ExportDataType.QOS,
              'handler': SystemDataCheckManager.contain_qos_data},
+            {'export_type': ExportDataType.BLOCK_DETAIL,
+             'handler': AiStackDataCheckManager.contain_block_log_data},
+            {'export_type': ExportDataType.UB,
+             'handler': AiStackDataCheckManager.contain_ub_data},
+            {'export_type': ExportDataType.CCU_MISSION,
+             'handler': AiStackDataCheckManager.contain_ccu_mission_data},
+            {'export_type': ExportDataType.VOLTAGE,
+             'handler': SystemDataCheckManager.contain_lpm_data},
+            {'export_type': ExportDataType.FREQ,
+             'handler': lambda result_dir, device_id=None: True},
             {'export_type': ExportDataType.MSPROF,
              'handler': lambda result_dir, device_id=None: True}
         ],
@@ -228,6 +238,15 @@ class ExportCommand:
              'handler': AiStackDataCheckManager.contain_dp_aicpu_data},
             {'export_type': ExportDataType.STATIC_OP_MEM,
              'handler': AiStackDataCheckManager.contain_static_op_mem_data},
+            {'export_type': ExportDataType.UB,
+             'handler': AiStackDataCheckManager.contain_ub_data},
+            {'export_type': ExportDataType.CCU_MISSION,
+             'handler': AiStackDataCheckManager.contain_ccu_mission_data},
+            {'export_type': ExportDataType.CCU_CHANNEL,
+             'handler': SystemDataCheckManager.contain_ccu_channel_data},
+            {'export_type': ExportDataType.SOC_PMU,
+             'handler': SystemDataCheckManager.contain_soc_pmu_data},
+
         ]
     }
     MODEL_ID = "model_id"

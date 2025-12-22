@@ -18,10 +18,10 @@ import argparse
 import os
 import sys
 
-from common_func.common import call_sys_exit, print_info, is_linux
-from common_func.common import error
-from common_func.file_manager import check_parent_dir_invalid
-from common_func.msprof_common import check_path_valid, get_all_subdir, MsProfCommonConstant
+from common_func.common import call_sys_exit
+from common_func.common import error, warn
+from common_func.file_manager import check_parent_dir_invalid, is_root_user
+from common_func.msprof_common import check_path_valid, get_all_subdir
 from common_func.msprof_common import check_path_char_valid
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_exception import ProfException
@@ -118,20 +118,12 @@ class MsprofEntrance:
         try:
             check_path_char_valid(args.collection_path)
             check_path_valid(args.collection_path, False)
+            real_path = os.path.realpath(args.collection_path)
+            check_parent_dir_invalid(get_all_subdir(real_path))
         except ProfException as err:
             if err.message:
-                error(self.FILE_NAME, err)
+                error(self.FILE_NAME, str(err))
             call_sys_exit(err.code)
-        real_path = os.path.realpath(args.collection_path)
-        if is_linux() and check_parent_dir_invalid(get_all_subdir(real_path)):
-            error(self.FILE_NAME, "Please ensure subdir under '%s' can't be write by others" % real_path)
-            call_sys_exit(ProfException.PROF_INVALID_PARAM_ERROR)
-        path_len = len(real_path)
-        if path_len > NumberConstant.PROF_PATH_MAX_LEN:
-            error(self.FILE_NAME,
-                  "Please ensure the length of input dir absolute path(%s) less than %s" %
-                  (path_len, NumberConstant.PROF_PATH_MAX_LEN))
-            call_sys_exit(ProfException.PROF_INVALID_PARAM_ERROR)
         # when setting 'iteration-id' and 'model-id' args, export one iteration in one model
         if sys.argv[1] == 'export' and hasattr(args, "model_id") and hasattr(args, "iteration_id"):
             self._set_export_mode(args)
@@ -153,6 +145,11 @@ class MsprofEntrance:
                         'handler': self._handle_analyze_command}
         }
         handler = command_handler.get(sys.argv[1])
+
+        # parsing data with analysis should inform user of security warning
+        if is_root_user():
+            warn(self.FILE_NAME, "Msprof analysis is parsing data as root, "
+                                 "which may cause potential system security risks.")
         try:
             handler.get('handler')(handler.get('parser'), args)
         except ProfException as err:

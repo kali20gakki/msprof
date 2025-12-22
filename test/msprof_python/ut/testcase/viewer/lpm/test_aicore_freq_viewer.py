@@ -17,8 +17,9 @@
 # -------------------------------------------------------------------------
 """
 function:
-Copyright Huawei Technologies Co., Ltd. 2024. All rights reserved.
+Copyright Huawei Technologies Co., Ltd. 2024-2025. All rights reserved.
 """
+
 import json
 
 from common_func.db_name_constant import DBNameConstant
@@ -31,7 +32,8 @@ from model.test_dir_cr_base_model import TestDirCRBaseModel
 from msmodel.api.api_data_viewer_model import ApiDataViewModel
 from msmodel.freq.freq_data_viewer_model import FreqDataViewModel
 from profiling_bean.prof_enum.chip_model import ChipModel
-from viewer.ai_core_freq_viewer import AiCoreFreqViewer
+from viewer.lpm.ai_core_freq_viewer import AiCoreFreqViewer
+from constant.constant import clear_dt_project
 
 NAMESPACE = 'msmodel.freq.freq_data_viewer_model'
 
@@ -59,7 +61,7 @@ class TestAiCoreFreqViewer(TestDirCRBaseModel):
             "model_id": 4294967295
         }
         self.apis_data = [
-            # stuct_type TEXT, id TEXT, level TEXT, thread_id INTEGER, start INTEGER, end INTEGER, connection_id INTEGER
+        # struct_type TEXT, id TEXT, level TEXT, thread_id INTEGER, start INTEGER, end INTEGER, connection_id INTEGER
             ['ACL_OP', 'aclCreateTensorDesc1', 'acl1', 1, 'A', 4, 10, 1],
             ['ACL_OP_X', 'aclCreateTensorDesc2', 'acl2', 1, 'B', 5, 10, 1],
             ['ACL_OP_Z', 'aclCreateTensorDesc3', 'acl3', 1, 'C', 6, 10, 1]
@@ -69,6 +71,7 @@ class TestAiCoreFreqViewer(TestDirCRBaseModel):
         InfoConfReader()._info_json = {}
         InfoConfReader()._start_info = {}
         InfoConfReader()._end_info = {}
+        clear_dt_project(self.DIR_PATH)
 
     def test_freq_data_viewer_model_get_data_return_ok(self):
         """
@@ -77,7 +80,7 @@ class TestAiCoreFreqViewer(TestDirCRBaseModel):
         具体操作：插入几条变频数据，读取之后确认freq读取逻辑是否正确
         """
         data = [
-            # syscnt INTEGER, freqency INTEGER
+            # syscnt INTEGER, frequency INTEGER
             [1850, 2],
             [1950, 3],
             [2000, 4]
@@ -94,8 +97,8 @@ class TestAiCoreFreqViewer(TestDirCRBaseModel):
 
     def test_api_data_viewer_model_earliest_start_time_return_ok(self):
         """
-        目的：覆盖api_data_viewer_model。py 文件get_earliest_api方法
-        UT设计意图：获取api_event.db 中的ApiData表格中最好的事件开始时间，作为aicore频率起始时间戳。m
+        目的：覆盖api_data_viewer_model.py 文件get_earliest_api方法
+        UT设计意图：获取api_event.db 中的ApiData表格中最好的事件开始时间，作为aicore频率起始时间戳。
         具体操作：插入几条数据，获取其中的最早的开始时间
         """
         with ApiDataViewModel(self.params) as model:
@@ -104,54 +107,51 @@ class TestAiCoreFreqViewer(TestDirCRBaseModel):
             result = model.get_earliest_api()
             self.assertEqual(result[0].start, 4)
 
-
     def test_aicore_freq_viewer_get_all_data_return_ok(self):
         """
-        目的：覆盖ai_core_freq_viewer。py 文件get_all_data
-        UT设计意图：获取api_event.db 中的ApiData表格中最好的事件开始时间，作为aicore频率起始时间戳。m
+        目的：覆盖ai_core_freq_viewer.py 文件get_all_data
+        UT设计意图：获取api_event.db 中的ApiData表格中最好的事件开始时间，作为aicore频率起始时间戳。
         具体操作：插入几条数据，获取其中的最早的开始时间
         """
         ChipManager().chip_id = ChipModel.CHIP_V4_1_0
-        freqs_data = [
-            # syscnt INTEGER, frequency INTEGER
-            [10, 1850],
-            [100000, 1600],
-            [150000000, 1600],
+        freq_data = [
+            # frequency INTEGER, syscnt INTEGER
+            [2, 1850]
         ]
 
         with FreqDataViewModel(self.params) as freq_model, ApiDataViewModel(self.params) as api_model:
             # mock freq.db 和 apidata数据
             freq_model.create_table()
-            freq_model.insert_data_to_db(DBNameConstant.TABLE_FREQ_PARSE, freqs_data)
+            freq_model.insert_data_to_db(DBNameConstant.TABLE_FREQ_PARSE, freq_data)
             api_model.create_table()
             api_model.insert_data_to_db(DBNameConstant.TABLE_API_DATA, self.apis_data)
-            query_freqs = freq_model.get_data()
+            query_freq = freq_model.get_data()
             query_api_start_time = api_model.get_earliest_api()
-            self.assertEqual(len(query_freqs), 3)
+            self.assertEqual(len(query_freq), 1)
             self.assertEqual(query_api_start_time[0].start, 4)
-            freqs_list = AiCoreFreqViewer(self.params).get_all_data()
-            self.assertEqual(len(freqs_list), 30003)
-            self.assertEqual(json.dumps(freqs_list[0]),
+            freq_list = AiCoreFreqViewer(self.params).get_all_data()
+            self.assertEqual(len(freq_list), 3)
+            self.assertEqual(json.dumps(freq_list[0]),
                 '{"name": "process_name", "pid": 1, "tid": 0, "args": {"name": "AI Core Freq"}, "ph": "M"}')
-            self.assertEqual(freqs_list[1]['name'], "AI Core Freq")
-            self.assertEqual(freqs_list[1]['pid'], 1)
-            self.assertEqual(freqs_list[1]['tid'], 0)
-            self.assertEqual(freqs_list[1]['args']['MHz'], 1850.0)
-            self.assertEqual(freqs_list[1]['ph'], "C")
-            self.assertEqual(freqs_list[1]['name'], "AI Core Freq")
-            self.assertEqual(freqs_list[1]['pid'], 1)
-            self.assertEqual(freqs_list[1]['tid'], 0)
-            self.assertEqual(freqs_list[1]['args']['MHz'], 1850)
-            self.assertEqual(freqs_list[1]['ph'], "C")
+            self.assertEqual(freq_list[1]['name'], "AI Core Freq")
+            self.assertEqual(freq_list[1]['pid'], 1)
+            self.assertEqual(freq_list[1]['tid'], 0)
+            self.assertEqual(freq_list[1]['args']['MHz'], 1850.0)
+            self.assertEqual(freq_list[1]['ph'], "C")
+            self.assertEqual(freq_list[1]['name'], "AI Core Freq")
+            self.assertEqual(freq_list[1]['pid'], 1)
+            self.assertEqual(freq_list[1]['tid'], 0)
+            self.assertEqual(freq_list[1]['args']['MHz'], 1850)
+            self.assertEqual(freq_list[1]['ph'], "C")
 
     def test_aicore_freq_viewer_not_all_export_get_all_data_return_ok(self):
         """
         目的: 测试非全导场景下AiCoreFreqViewer.get_all_data函数
-        UT设计意图：获取api_event.db 中的ApiData表格中最好的事件开始时间，作为aicore频率起始时间戳。m
+        UT设计意图：获取api_event.db 中的ApiData表格中最好的事件开始时间，作为aicore频率起始时间戳。
         具体操作：插入几条数据，获取其中的最早的开始时间
         """
         ChipManager().chip_id = ChipModel.CHIP_V4_1_0
-        freqs_data = [
+        freq_data = [
             # frequency INTEGER, syscnt INTEGER
             [2, 1850]
         ]
@@ -159,69 +159,69 @@ class TestAiCoreFreqViewer(TestDirCRBaseModel):
         with FreqDataViewModel(self.params) as freq_model, ApiDataViewModel(self.params) as api_model:
             origin_mode = ProfilingScene()._mode
             ProfilingScene().set_mode(ExportMode.GRAPH_EXPORT)
-            # mock freq.db 和 apidata数据
+            # mock freq.db 和 api_data数据
             freq_model.create_table()
-            freq_model.insert_data_to_db(DBNameConstant.TABLE_FREQ_PARSE, freqs_data)
+            freq_model.insert_data_to_db(DBNameConstant.TABLE_FREQ_PARSE, freq_data)
             api_model.create_table()
             api_model.insert_data_to_db(DBNameConstant.TABLE_API_DATA, self.apis_data)
-            query_freqs = freq_model.get_data()
+            query_freq = freq_model.get_data()
             query_api_start_time = api_model.get_earliest_api()
-            self.assertEqual(len(query_freqs), 1)
+            self.assertEqual(len(query_freq), 1)
             self.assertEqual(query_api_start_time[0].start, 4)
-            freqs_list = AiCoreFreqViewer(self.params).get_all_data()
-            self.assertEqual(len(freqs_list), 3)
-            self.assertEqual(json.dumps(freqs_list[0]),
+            freq_list = AiCoreFreqViewer(self.params).get_all_data()
+            self.assertEqual(len(freq_list), 3)
+            self.assertEqual(json.dumps(freq_list[0]),
                 '{"name": "process_name", "pid": 1, "tid": 0, "args": {"name": "AI Core Freq"}, "ph": "M"}')
-            self.assertEqual(freqs_list[1]['name'], "AI Core Freq")
-            self.assertEqual(freqs_list[1]['pid'], 1)
-            self.assertEqual(freqs_list[1]['tid'], 0)
-            self.assertEqual(freqs_list[1]['args']['MHz'], 1850.0)
-            self.assertEqual(freqs_list[1]['ph'], "C")
-            self.assertTrue(isinstance(freqs_list[1]['ts'], str))
-            self.assertEqual(freqs_list[2]['name'], "AI Core Freq")
-            self.assertEqual(freqs_list[2]['pid'], 1)
-            self.assertEqual(freqs_list[2]['tid'], 0)
-            self.assertEqual(freqs_list[2]['args']['MHz'], 1850)
-            self.assertEqual(freqs_list[2]['ph'], "C")
-            self.assertTrue(isinstance(freqs_list[2]['ts'], str))
+            self.assertEqual(freq_list[1]['name'], "AI Core Freq")
+            self.assertEqual(freq_list[1]['pid'], 1)
+            self.assertEqual(freq_list[1]['tid'], 0)
+            self.assertEqual(freq_list[1]['args']['MHz'], 1850.0)
+            self.assertEqual(freq_list[1]['ph'], "C")
+            self.assertTrue(isinstance(freq_list[1]['ts'], str))
+            self.assertEqual(freq_list[2]['name'], "AI Core Freq")
+            self.assertEqual(freq_list[2]['pid'], 1)
+            self.assertEqual(freq_list[2]['tid'], 0)
+            self.assertEqual(freq_list[2]['args']['MHz'], 1850)
+            self.assertEqual(freq_list[2]['ph'], "C")
+            self.assertTrue(isinstance(freq_list[2]['ts'], str))
             ProfilingScene().set_mode(origin_mode)
 
     def test_aicore_freq_viewer_when_no_freq_return_ok(self):
         """
-        目的：覆盖ai_core_freq_viewer。py 文件get_all_data
+        目的：覆盖ai_core_freq_viewer.py 文件get_all_data
         UT设计意图：当不上报变频数据时，InfoConfReader().get_dev_cnt()作为开始时间，以默认频率作为freq。
         """
         ChipManager().chip_id = ChipModel.CHIP_V4_1_0
 
         with FreqDataViewModel(self.params) as freq_model, ApiDataViewModel(self.params) as api_model:
-            # mock freq.db 和 apidata数据
+            # mock freq.db 和 api_data数据
             freq_model.create_table()
-            query_freqs = freq_model.get_data()
-            self.assertEqual(len(query_freqs), 0)
-            freqs_list = AiCoreFreqViewer(self.params).get_all_data()
-            self.assertEqual(len(freqs_list), 3)
-            self.assertEqual(json.dumps(freqs_list[0]),
+            query_freq = freq_model.get_data()
+            self.assertEqual(len(query_freq), 0)
+            freq_list = AiCoreFreqViewer(self.params).get_all_data()
+            self.assertEqual(len(freq_list), 3)
+            self.assertEqual(json.dumps(freq_list[0]),
                 '{"name": "process_name", "pid": 1, "tid": 0, "args": {"name": "AI Core Freq"}, "ph": "M"}')
-            self.assertEqual(freqs_list[1]['name'], "AI Core Freq")
-            self.assertEqual(freqs_list[1]['pid'], 1)
-            self.assertEqual(freqs_list[1]['tid'], 0)
-            self.assertEqual(freqs_list[1]['args']['MHz'], 1850.0)
-            self.assertEqual(freqs_list[1]['ph'], "C")
-            self.assertEqual(freqs_list[1]['name'], "AI Core Freq")
-            self.assertEqual(freqs_list[1]['pid'], 1)
-            self.assertEqual(freqs_list[1]['tid'], 0)
-            self.assertEqual(freqs_list[1]['args']['MHz'], 1850)
-            self.assertEqual(freqs_list[1]['ph'], "C")
+            self.assertEqual(freq_list[1]['name'], "AI Core Freq")
+            self.assertEqual(freq_list[1]['pid'], 1)
+            self.assertEqual(freq_list[1]['tid'], 0)
+            self.assertEqual(freq_list[1]['args']['MHz'], 1850.0)
+            self.assertEqual(freq_list[1]['ph'], "C")
+            self.assertEqual(freq_list[1]['name'], "AI Core Freq")
+            self.assertEqual(freq_list[1]['pid'], 1)
+            self.assertEqual(freq_list[1]['tid'], 0)
+            self.assertEqual(freq_list[1]['args']['MHz'], 1850)
+            self.assertEqual(freq_list[1]['ph'], "C")
 
     def test_aicore_freq_viewer_no_lpm_data_return_ok(self):
         """
-        目的：覆盖ai_core_freq_viewer。py 文件get_all_data
-        UT设计意图：获取api_event.db 中的ApiData表格中最好的事件开始时间，作为aicore频率起始时间戳。m
+        目的：覆盖ai_core_freq_viewer.py 文件get_all_data
+        UT设计意图：获取api_event.db 中的ApiData表格中最好的事件开始时间，作为aicore频率起始时间戳。
         具体操作：插入几条数据，获取其中的最早的开始时间
         """
         ChipManager().chip_id = ChipModel.CHIP_V4_1_0
 
         with FreqDataViewModel(self.params) as freq_model:
-            # apidata数据
-            query_freqs = freq_model.get_data()
-            self.assertEqual(len(query_freqs), 0)
+            # api_data数据
+            query_freq = freq_model.get_data()
+            self.assertEqual(len(query_freq), 0)

@@ -58,6 +58,16 @@ class L2CacheConfig(MetaConfig):
             ('request_events', '0xfb,0xfc'),
             ('hit_events', '0x90,0x91'),
             ('victim_events', '0x9c')
+        ],
+        '15': [
+            ('request_events', '0x00'),
+            ('hit_events', '0x88,0x89,0x8a,-0x97'), # 寄存器带负号表示在计算中做减法
+            ('victim_events', '0x74,0x75')
+        ],
+        '16': [
+            ('request_events', '0x00'),
+            ('hit_events', '0x88,0x89,0x8a,-0x97'),  # 寄存器带负号表示在计算中做减法
+            ('victim_events', '0x74,0x75')
         ]
     }
 

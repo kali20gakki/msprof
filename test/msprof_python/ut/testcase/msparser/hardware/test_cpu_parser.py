@@ -16,6 +16,7 @@
 import sqlite3
 import unittest
 from unittest import mock
+from unittest.mock import Mock
 
 import pytest
 
@@ -162,6 +163,7 @@ class TestParsingCPUData(unittest.TestCase):
     def test_init_cpu_db(self):
         with mock.patch('os.path.exists', return_value=True), \
                 mock.patch('os.path.isdir', return_value=True), \
+                mock.patch('os.stat', return_value=Mock(st_mode=0o000, st_uid=0)), \
                 mock.patch('os.access', return_value=True):
             check = ParsingCPUData(CONFIG)
             check.init_cpu_db()

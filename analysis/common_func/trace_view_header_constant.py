@@ -72,6 +72,12 @@ class TraceViewHeaderConstant:
     PROCESS_OS_RUNTIME_API = "OS Runtime API"
     PROCESS_AI_CORE_FREQ = "AI Core Freq"
     PROCESS_HCCL = "Communication"
+    PROCESS_BLOCK_DETAIL = "Block Detail"
+    PROCESS_CCU = "CCU"
+    PROCESS_BIU_PERF = "Biu Perf"
+    PROCESS_VOLTAGE = "Voltage Info"
+    PROCESS_AI_CORE_VOLTAGE = "Aicore Voltage"
+    PROCESS_BUS_VOLTAGE = "Bus Voltage"
 
     # trace general layer
     GENERAL_LAYER_CPU = "CPU"
@@ -88,6 +94,7 @@ class TraceViewHeaderConstant:
     COMPONENT_LAYER_OS_RUNTIME_API = "OS Runtime API"
     COMPONENT_LAYER_AICORE_FREQ = "AI Core Freq"
     COMPONENT_LAYER_HCCL = "Communication"
+    COMPONENT_LAYER_VOLTAGE = "Voltage Info"
 
     # filtering msprof timeline trace
     MSPROF_TIMELINE_FILTER_LIST = (PROCESS_ALL_REDUCE, PROCESS_AI_CPU)
@@ -102,8 +109,9 @@ class TraceViewHeaderConstant:
     LAYER_OS_RUNTIME_API_SORT = 12
     LAYER_ASCEND_HW_SORT = 13
     LAYER_ASCEND_AICORE_FREQ_SORT = 14
-    LAYER_HCCL = 15
-    DEFAULT_LAYER_SORT_START = 16
+    LAYER_VOLTAGE_SORT = 15
+    LAYER_HCCL = 16
+    DEFAULT_LAYER_SORT_START = 17
 
     # namedtuple configuration of LayerInfo
     LayerInfo = namedtuple('LayerInfo', ['component_layer', 'general_layer', 'sort_index'])
@@ -126,6 +134,7 @@ class TraceViewHeaderConstant:
         PROCESS_DISK_USAGE: LayerInfo(COMPONENT_LAYER_DISK_USAGE, GENERAL_LAYER_CPU, LAYER_DISK_USAGE_SORT),
         PROCESS_OS_RUNTIME_API: LayerInfo(COMPONENT_LAYER_OS_RUNTIME_API, GENERAL_LAYER_CPU, LAYER_OS_RUNTIME_API_SORT),
         PROCESS_AI_CORE_FREQ: LayerInfo(COMPONENT_LAYER_AICORE_FREQ, GENERAL_LAYER_NPU, LAYER_ASCEND_AICORE_FREQ_SORT),
+        PROCESS_VOLTAGE: LayerInfo(COMPONENT_LAYER_VOLTAGE, GENERAL_LAYER_NPU, LAYER_VOLTAGE_SORT),
         PROCESS_HCCL: LayerInfo(COMPONENT_LAYER_HCCL, GENERAL_LAYER_NPU, LAYER_HCCL),
     }
 

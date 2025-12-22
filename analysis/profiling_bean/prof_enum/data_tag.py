@@ -96,6 +96,15 @@ class DataTag(Enum):
     MC2_COMM_INFO = 77
     CAPTURE_STREAM_INFO = 78
     NETDEV_STATS = 79
+    UB = 80
+    CCU_MISSION = 81
+    CCU_CHANNEL = 82
+    CCU_TASK = 83
+    CCU_WAIT_SIGNAL = 84
+    CCU_GROUP = 85
+    BIU_PERF_CHIP6 = 86
+    SOC_PMU = 87
+    LPM_INFO = 88
     STREAM_EXPAND = 89
 
 

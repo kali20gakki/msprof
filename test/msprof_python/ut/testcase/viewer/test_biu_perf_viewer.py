@@ -18,9 +18,9 @@ from collections import OrderedDict
 from unittest import mock
 
 from common_func.info_conf_reader import InfoConfReader
-from viewer.biu_perf_viewer import BiuPerfViewer
+from viewer.biu_perf.biu_perf_viewer import BiuPerfViewer
 
-NAMESPACE = 'viewer.biu_perf_viewer.'
+NAMESPACE = 'viewer.biu_perf.biu_perf_viewer.'
 
 
 class TestBiuPerfViewer(unittest.TestCase):

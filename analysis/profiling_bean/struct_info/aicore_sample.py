@@ -79,3 +79,17 @@ class AicoreSample(StructDecoder):
         :return: core_id
         """
         return self._core_id
+
+
+class AicoreSampleV6(AicoreSample):
+
+    def __init__(self: any, *args: any) -> None:
+        super().__init__(*args)
+        self._timestamp = None
+        filed = args[0]
+        self._mode = filed[0]
+        self._event_count = filed[5:15]
+        self._task_cyc = filed[15]
+        self._timestamp = filed[16]
+        self._count_num = filed[17]
+        self._core_id = filed[18]

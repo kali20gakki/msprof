@@ -104,6 +104,11 @@ class DBNameConstant(metaclass=ABCMeta):
     DB_MC2_COMM_INFO = "mc2_comm_info.db"
     DB_KFC_INFO = "kfc_info.db"
     DB_NETDEV_STATS = "netdev_stats.db"
+    DB_UB = "ub.db"
+    DB_CCU = "ccu.db"
+    DB_CCU_ADD_INFO = "ccu_add_info.db"
+    DB_SOC_PMU = "soc_pmu.db"
+    DB_VOLTAGE = "voltage.db"
 
     # DB tables
     TABLE_ACL_DATA = "AclData"
@@ -136,6 +141,7 @@ class DBNameConstant(metaclass=ABCMeta):
     # MetricSummary
     DB_METRICS_SUMMARY = "metric_summary.db"
     TABLE_METRIC_SUMMARY = "MetricSummary"
+    TABLE_V6_BLOCK_PMU = "V6BlockPmu"
     TABLE_AIV_METRIC_SUMMARY = "AivMetricSummary"
 
     DB_HCCL_SINGLE_DEVICE = "hccl_single_device.db"
@@ -193,6 +199,9 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_L2CACHE_PARSE = 'L2CacheParse'
     TABLE_L2CACHE_SAMPLE = 'L2CacheSample'
     TABLE_L2CACHE_SUMMARY = 'L2CacheSummary'
+    TABLE_BLOCK_LOG = "BlockLog"
+    TABLE_SOC_PMU = "SocPmu"
+    TABLE_SOC_PMU_SUMMARY = "SocPmuSummary"
 
     # dvpp
     TABLE_DVPP_ORIGIN = "DvppOriginalData"
@@ -227,6 +236,8 @@ class DBNameConstant(metaclass=ABCMeta):
     # hccs
     TABLE_HCCS_ORIGIN = 'HCCSOriginalData'
     TABLE_HCCS_EVENTS = 'HCCSEventsData'
+    # ub
+    TABLE_UB_BW = "UBBwData"
 
     # llc
     TABLE_LLC_ORIGIN = "LLCOriginalData"
@@ -257,6 +268,7 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_FFTS_LOG = "FftsLog"
     TABLE_STARS_PA_LINK = "PaLinkInfo"
     TABLE_STARS_PCIE = "PcieInfo"
+    TABLE_STARS_PCIE_V6 = "PcieInfoV6"
     TABLE_LOWPOWER = "LowPower"
     TABLE_SIO = "Sio"
 
@@ -275,6 +287,8 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_CYCLES_MONITOR = "MonitorCycles"
     TABLE_BIU_FLOW = "BiuFlow"
     TABLE_BIU_CYCLES = "BiuCycles"
+    TABLE_BIU_DATA = "OriBiuData"
+    TABLE_BIU_INSTR_STATUS = "BiuInstrStatus"
 
     # cluster
     TABLE_CLUSTER_RANK = "ClusterRank"
@@ -288,6 +302,13 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_CLUSTER_PIPELINE_PARALLEL = "ClusterPipelineParallel"
     TABLE_CLUSTER_PARALLEL_STRATEGY = "ClusterParallelStrategy"
     TABLE_HOST_QUEUE = "HostQueue"
+
+    # ccu
+    TABLE_CCU_MISSION = "OriginMission"
+    TABLE_CCU_CHANNEL = "OriginChannel"
+    TABLE_CCU_TASK_INFO = "CCUTaskInfo"
+    TABLE_CCU_WAIT_SIGNAL_INFO = "CCUWaitSignalInfo"
+    TABLE_CCU_GROUP_INFO = "CCUGroupInfo"
 
     # npu mem of process and device
     TABLE_NPU_MEM = "NpuMem"
@@ -306,6 +327,10 @@ class DBNameConstant(metaclass=ABCMeta):
 
     # freq
     TABLE_FREQ_PARSE = "FreqParse"
+
+    # voltage
+    TABLE_AIC_VOLTAGE = "AicVoltage"
+    TABLE_BUS_VOLTAGE = "BusVoltage"
 
     # new struct
     TABLE_API_DATA = 'ApiData'

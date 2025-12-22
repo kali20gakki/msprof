@@ -18,6 +18,7 @@ import sqlite3
 import unittest
 from unittest import mock
 
+from common_func.platform.ai_core_metrics_manager import AiCoreMetricsManager
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.str_constant import StrConstant
@@ -164,7 +165,7 @@ class TestModelSummaryTuningDataHandle(unittest.TestCase):
         param = {
             StrConstant.SAMPLE_CONFIG:
                 {
-                    StrConstant.AI_CORE_PROFILING_METRICS: Constant.PMU_PIPE
+                    StrConstant.AI_CORE_PROFILING_METRICS: AiCoreMetricsManager.PMU_PIPE
                 }
         }
         handler = ModelSummaryTuningDataHandle()
@@ -176,7 +177,7 @@ class TestModelSummaryTuningDataHandle(unittest.TestCase):
         param = {
             StrConstant.SAMPLE_CONFIG:
                 {
-                    StrConstant.AI_CORE_PROFILING_METRICS: Constant.PMU_PIPE
+                    StrConstant.AI_CORE_PROFILING_METRICS: AiCoreMetricsManager.PMU_PIPE
                 }
         }
         op1 = {

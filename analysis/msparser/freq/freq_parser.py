@@ -92,7 +92,7 @@ class FreqParser(IParser, MsMultiProcess):
             freq_data_bean.decode(freq_data)
             for lpm_data in freq_data_bean.lpm_data:
                 if lpm_data.syscnt < dev_cnt:
-                    self._freq_data[0][1] = lpm_data.freq
+                    self._freq_data[0][1] = lpm_data.value
                     continue
-                self._freq_data.append([lpm_data.syscnt, lpm_data.freq])
+                self._freq_data.append([lpm_data.syscnt, lpm_data.value])
         FileManager.add_complete_file(self._project_path, _file_path)

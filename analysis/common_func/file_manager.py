@@ -22,7 +22,6 @@ import stat
 from common_func.common import CommonConstant, print_info
 from common_func.common import error
 from common_func.common import is_linux
-from common_func.common import print_msg
 from common_func.constant import Constant
 from common_func.empty_class import EmptyClass
 from common_func.file_name_manager import FileNameManagerConstant
@@ -233,10 +232,18 @@ def check_path_valid(path: str, is_file: bool, max_size: int = Constant.MAX_READ
         if not os.path.isdir(path):
             raise ProfException(ProfException.PROF_INVALID_PATH_ERROR,
                                 f"The path \"{path}\" is not a directory. Please check the path.")
+    if is_root_user():
+        return
     if not os.access(path, os.R_OK):
         raise ProfException(ProfException.PROF_INVALID_PATH_ERROR,
                             f"The path \"{path}\" does not have permission to read. "
                             f"Please check that the path is readable.")
+    if is_other_writable(path):
+        raise ProfException(ProfException.PROF_INVALID_PATH_ERROR,
+                            f"The path \"{path}\" is writable by any other users.")
+    if not check_path_owner(path):
+        raise ProfException(ProfException.PROF_INVALID_PATH_ERROR,
+                            f"The path \"{path}\" owner is not root or current user.")
 
 
 def check_db_path_valid(path: str, is_create: bool = False, max_size: int = Constant.MAX_READ_DB_FILE_BYTES) -> None:
@@ -258,9 +265,6 @@ def check_file_readable(path: str) -> None:
     check path is file and readable
     """
     check_path_valid(path, True)
-    if os.path.getsize(path) > Constant.MAX_READ_FILE_BYTES:
-        raise ProfException(ProfException.PROF_INVALID_PATH_ERROR,
-                            f"The \"{path}\" is too large. Please check the path.")
 
 
 def check_file_writable(path: str) -> None:
@@ -287,6 +291,8 @@ def check_dir_writable(path: str) -> None:
     check path is dir and writable
     """
     check_path_valid(path, False)
+    if is_root_user():
+        return
     if not os.access(path, os.W_OK):
         raise ProfException(ProfException.PROF_INVALID_PATH_ERROR,
                             f"The path \"{path}\" does not have permission to write. "
@@ -302,7 +308,7 @@ def is_other_writable(path: str) -> bool:
     return bool(stat_info.st_mode & 0o022)
 
 
-def check_file_owner(path: str) -> bool:
+def check_path_owner(path: str) -> bool:
     """
     Check the file owner is the root user or the current user.
     """
@@ -316,11 +322,9 @@ def check_file_owner(path: str) -> bool:
         return current_uid == stat_info.st_uid
 
 
-def check_parent_dir_invalid(paths: list) -> bool:
+def check_parent_dir_invalid(paths: list) -> None:
     for path in paths:
-        if not check_file_owner(path) or is_other_writable(path):
-            return True
-    return False
+        check_path_valid(path, False)
 
 
 def check_so_valid(path: str) -> bool:
@@ -340,8 +344,12 @@ def check_so_valid(path: str) -> bool:
     elif is_other_writable(path):
         logging.warning("The path %s is writable by others", path)
         return False
-    elif not check_file_owner(path):
+    elif not check_path_owner(path):
         logging.warning("The path %s owner is not the current user.", path)
         return False
     else:
         return True
+
+
+def is_root_user() -> bool:
+    return not is_linux() or os.getuid() == 0

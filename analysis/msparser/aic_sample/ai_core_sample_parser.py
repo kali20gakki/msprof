@@ -34,6 +34,7 @@ from msmodel.aic.ai_core_sample_model import AiCoreSampleModel
 from msparser.data_struct_size_constant import StructFmt
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.struct_info.aicore_sample import AicoreSample
+from profiling_bean.struct_info.aicore_sample import AicoreSampleV6
 from viewer.calculate_rts_data import check_aicore_events, judge_custom_pmu_scene
 
 
@@ -56,6 +57,7 @@ class ParsingCoreSampleData(MsMultiProcess):
         self._metrics_type = StrConstant.AI_CORE_PROFILING_METRICS
         self._event = self.sample_config.get("ai_core_profiling_events", "").split(",")
         self._sample_metrics_key = self.sample_config.get(StrConstant.AI_CORE_PROFILING_METRICS)
+        self._set_fmt_size_and_bean()
 
     def get_aicore_type(self: any) -> str:
         """
@@ -121,7 +123,7 @@ class ParsingCoreSampleData(MsMultiProcess):
             return
         file_size = os.path.getsize(PathManager.get_data_file_path(self.result_dir, binary_data_path))
         file_name = PathManager.get_data_file_path(self.result_dir, binary_data_path)
-        calculate = OffsetCalculator(self.file_list, StructFmt.AICORE_SAMPLE_FMT_SIZE, self.result_dir)
+        calculate = OffsetCalculator(self.file_list, self._fmt_size, self.result_dir)
         try:
             with FileOpen(file_name, 'rb') as file_:
                 ai_core_data = calculate.pre_process(file_.file_reader, file_size)
@@ -133,13 +135,11 @@ class ParsingCoreSampleData(MsMultiProcess):
 
     def _insert_ai_core_data(self: any, file_size: int, ai_core_data: list) -> None:
         delta_dev = InfoConfReader().get_delta_time()
-        for _index in range(file_size // StructFmt.AICORE_SAMPLE_FMT_SIZE):
-            binary_data = ai_core_data[_index * StructFmt.AICORE_SAMPLE_FMT_SIZE:
-                                       (_index + 1) * StructFmt.AICORE_SAMPLE_FMT_SIZE]
-
+        for _index in range(file_size // self._fmt_size):
+            binary_data = ai_core_data[_index * self._fmt_size:(_index + 1) * self._fmt_size]
             if not binary_data[0]:
                 break
-            aicore_data_bean = AicoreSample.decode(binary_data)
+            aicore_data_bean = self._decoder.decode(binary_data)
             if aicore_data_bean is not None:
                 tmp = [
                     aicore_data_bean.count_num, aicore_data_bean.mode, self._replayid,
@@ -150,6 +150,14 @@ class ParsingCoreSampleData(MsMultiProcess):
                 self.ai_core_data.append(tmp)
             else:
                 break
+
+    def _set_fmt_size_and_bean(self):
+        if ChipManager().is_chip_v6():
+            self._fmt_size = StructFmt.AICORE_SAMPLE_V6_FMT_SIZE
+            self._decoder = AicoreSampleV6
+        else:
+            self._fmt_size = StructFmt.AICORE_SAMPLE_FMT_SIZE
+            self._decoder = AicoreSample
 
 
 class ParsingAICoreSampleData(ParsingCoreSampleData):
@@ -175,7 +183,7 @@ class ParsingAIVectorCoreSampleData(ParsingCoreSampleData):
         self._sample_metrics_key = self.sample_config.get(StrConstant.AIV_PROFILING_METRICS)
         self._core_type = 'aiv'
         self._metrics_type = StrConstant.AIV_PROFILING_METRICS
-        self.calculate = OffsetCalculator(self.file_list, StructFmt.AICORE_SAMPLE_FMT_SIZE, self.result_dir)
+        self.calculate = OffsetCalculator(self.file_list, self._fmt_size, self.result_dir)
 
     def get_aicore_type(self: any) -> str:
         """
@@ -193,7 +201,7 @@ class ParsingFftsAICoreSampleData(ParsingCoreSampleData):
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
         super().__init__(sample_config)
         self.file_list = sorted(file_list.get(DataTag.FFTS_PMU, []), key=lambda x: int(x.split("_")[-1]))
-        self.calculate = OffsetCalculator(self.file_list, StructFmt.AICORE_SAMPLE_FMT_SIZE, self.result_dir)
+        self.calculate = OffsetCalculator(self.file_list, self._fmt_size, self.result_dir)
         self.data_dict = {
             'aic': {
                 'data_list': [], 'db_name': DBNameConstant.DB_NAME_AICORE,
@@ -237,19 +245,18 @@ class ParsingFftsAICoreSampleData(ParsingCoreSampleData):
 
     def _insert_ai_core_data(self: any, file_size: int, ai_core_data: list) -> None:
         delta_dev = InfoConfReader().get_delta_time()
-        for _index in range(file_size // StructFmt.AICORE_SAMPLE_FMT_SIZE):
-            binary_data = ai_core_data[_index * StructFmt.AICORE_SAMPLE_FMT_SIZE:
-                                       (_index + 1) * StructFmt.AICORE_SAMPLE_FMT_SIZE]
+        for _index in range(file_size // self._fmt_size):
+            binary_data = ai_core_data[_index * self._fmt_size:(_index + 1) * self._fmt_size]
 
             if not binary_data[0]:
                 break
-            aicore_data_bean = AicoreSample.decode(binary_data)
-
+            aicore_data_bean = self._decoder.decode(binary_data)
             if aicore_data_bean is not None:
+                timestamp = self._calculate_timestamp(aicore_data_bean, delta_dev)
                 tmp = [
                     aicore_data_bean.count_num, aicore_data_bean.mode, self._replayid,
-                    aicore_data_bean.timestamp + delta_dev * NumberConstant.NANO_SECOND,
-                    aicore_data_bean.core_id, aicore_data_bean.task_cyc
+                    timestamp, aicore_data_bean.core_id, aicore_data_bean.task_cyc
+
                 ]
                 tmp.extend(aicore_data_bean.event_count[:aicore_data_bean.count_num])
             else:
@@ -260,3 +267,9 @@ class ParsingFftsAICoreSampleData(ParsingCoreSampleData):
                 self.data_dict.setdefault('aiv', {}).setdefault('data_list', []).append(tmp)
             else:
                 self.data_dict.setdefault('aic', {}).setdefault('data_list', []).append(tmp)
+
+    def _calculate_timestamp(self: any, aicore_data_bean: any, delta_dev: int) -> float:
+        if ChipManager().is_chip_v6():
+            # timestamp is syscnt on chip v6
+            return InfoConfReader().time_from_syscnt(aicore_data_bean.timestamp)
+        return aicore_data_bean.timestamp + delta_dev * NumberConstant.NANO_SECOND

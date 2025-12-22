@@ -35,7 +35,7 @@ from common_func.trace_view_manager import TraceViewManager
 from mscalculate.ascend_task.ascend_task import TopDownTask
 from msmodel.interface.view_model import ViewModel
 from msmodel.sqe_type_map import SqeType
-from msmodel.stars.ffts_log_model import FftsLogModel
+from msmodel.stars.op_summary_model import OpSummaryModel
 from msmodel.stars.sub_task_model import SubTaskTimeModel
 from msmodel.task_time.ascend_task_model import AscendTaskModel
 from msmodel.add_info.kfc_info_model import KfcInfoViewModel
@@ -338,7 +338,8 @@ class TaskTimeViewer(BaseViewer):
             setattr(data, 'thread_id', thread_id_dict.get(thread_id_key, 0))  # 给个默认值 避免后面使用thread_id计算出错
 
     def add_node_name_and_type(self: any, data_dict: dict) -> None:
-        node_info_dict = self.get_ge_data_dict()
+        with OpSummaryModel({"result_dir": self.params.get("project")}) as _model:
+            node_info_dict = _model.get_op_name_from_ge_by_id()
         ffts_plus_set = set()
         for data in data_dict.get("subtask_data_list", []):
             ffts_plus_set.add("{0}-{1}-{2}-{3}".format(
@@ -354,16 +355,3 @@ class TaskTimeViewer(BaseViewer):
                 tradition_list.append(data)
         data_dict["task_data_list"] = tradition_list
 
-    def get_ge_data_dict(self: any) -> dict:
-        node_dict = {}
-        view_model = ViewModel(self.params.get("project"), DBNameConstant.DB_AICORE_OP_SUMMARY,
-                               DBNameConstant.TABLE_GE_TASK)
-        view_model.init()
-        ge_data = view_model.get_all_data(DBNameConstant.TABLE_SUMMARY_GE, dto_class=GeTaskDto)
-        for data in ge_data:
-            node_key = "{0}-{1}-{2}-{3}".format(data.task_id, data.stream_id, data.context_id, data.batch_id)
-            node_dict[node_key] = {
-                "op_name": data.op_name,
-                "task_type": data.task_type
-            }
-        return node_dict

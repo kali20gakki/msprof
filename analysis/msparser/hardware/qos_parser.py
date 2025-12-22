@@ -65,7 +65,8 @@ class ParsingQosData(MsMultiProcess):
                                         qos_data)
             for i in range(struct_nums):
                 timestamp = InfoConfReader().time_from_syscnt(struct_data[i * 14 + 3])
-                self.qos_data.append([timestamp] + list(struct_data[i * 14 + 4:(i + 1) * 14]))
+                # 这里补齐一个None是因为qos.data里面没有die id,但是想共用一张表
+                self.qos_data.append([timestamp, None] + list(struct_data[i * 14 + 4:(i + 1) * 14]))
         return NumberConstant.SUCCESS
 
     def parse(self: any) -> None:
@@ -83,7 +84,7 @@ class ParsingQosData(MsMultiProcess):
         """
         if self.qos_data:
             with self._model as model:
-                model.flush(self.qos_data, DBNameConstant.TABLE_QOS_BW)
+                model.flush(self.qos_data)
 
     def ms_run(self: any) -> None:
         """

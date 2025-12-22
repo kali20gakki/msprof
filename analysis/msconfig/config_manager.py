@@ -27,6 +27,7 @@ from msconfig.l2_cache_config import L2CacheConfig
 from msconfig.meta_config import MetaConfig
 from msconfig.msprof_export_data_config import MsProfExportDataConfig
 from msconfig.prof_condition_config import ProfConditionConfig
+from msconfig.soc_pmu_config import SocPmuConfig
 from msconfig.stars_config import StarsConfig
 from msconfig.tables_config import TablesConfig
 from msconfig.tables_operator_config import TablesOperatorConfig
@@ -49,6 +50,7 @@ class ConfigManager:
     TS_CPU = "TsCPUConfig"
     CONSTANT = "ConstantConfig"
     L2_CACHE = "L2CacheConfig"
+    SOC_PMU = "SocPmuConfig"
     FILENAME_INTRODUCTION = "FilenameIntroductionConfig"
 
     CONFIG_MAP = {
@@ -66,6 +68,7 @@ class ConfigManager:
         TS_CPU: TsCPUConfig,
         CONSTANT: ConstantConfig,
         L2_CACHE: L2CacheConfig,
+        SOC_PMU: SocPmuConfig,
         FILENAME_INTRODUCTION: FilenameIntroductionConfig,
     }
 

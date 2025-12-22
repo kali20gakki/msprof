@@ -68,6 +68,7 @@ class TestHostToDevice(unittest.TestCase):
                 TraceViewHeaderConstant.TRACE_HEADER_TS: 134525368854.88
             }
         ]
+        InfoConfReader()._info_json = {"devices": 0}
         with mock.patch(NAMESPACE + '.HostToDevice.get_node_tasks',
                         return_value={(4, 33573, 23): (2287318, 4294967295), (4, 33574, 23): (2287318, 4294967295)}), \
                 mock.patch(NAMESPACE + ".HostToDevice.get_hccl_op_connection_ids", return_value={14983}), \

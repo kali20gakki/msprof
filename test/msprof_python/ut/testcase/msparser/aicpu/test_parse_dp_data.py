@@ -16,6 +16,7 @@
 import struct
 import unittest
 from unittest import mock
+from unittest.mock import Mock
 
 from common_func.info_conf_reader import InfoConfReader
 from msparser.aicpu.parse_dp_data import ParseDpData
@@ -59,6 +60,7 @@ def test_analyse_dp():
             mock.patch('os.path.exists', return_value=True), \
             mock.patch('os.path.isfile', return_value=True), \
             mock.patch('os.access', return_value=True), \
+            mock.patch('os.stat', return_value=Mock(st_mode=0o000, st_uid=0)), \
             mock.patch(NAMESPACE + '.logging.error'), \
             mock.patch('builtins.open', mock.mock_open(read_data=data)):
         result = ParseDpData.analyse_dp(dp_path, device_id)

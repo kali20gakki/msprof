@@ -20,6 +20,7 @@ import json
 import unittest
 from argparse import Namespace
 from unittest import mock
+from unittest.mock import Mock
 
 import pytest
 
@@ -499,6 +500,7 @@ class TestExportCommand(unittest.TestCase):
         with mock.patch('os.path.exists', return_value=True), \
                 mock.patch('os.path.isdir', return_value=True), \
                 mock.patch('os.access', return_value=True), \
+                mock.patch('os.stat', return_value=Mock(st_mode=0o000, st_uid=0)), \
                 mock.patch('common_func.msprof_common.check_path_valid'), \
                 mock.patch(NAMESPACE + '.ExportCommand._process_sub_dirs'), \
                 mock.patch('tuning.cluster_tuning.ClusterTuning.run'), \
@@ -524,7 +526,7 @@ class TestExportCommand(unittest.TestCase):
                     mock.patch('os.path.islink', return_value=False), \
                     mock.patch('os.access', return_value=True), \
                     mock.patch('common_func.file_manager.is_other_writable', return_value=False), \
-                    mock.patch('common_func.file_manager.check_file_owner', return_value=True), \
+                    mock.patch('common_func.file_manager.check_path_owner', return_value=True), \
                     mock.patch('msinterface.msprof_c_interface.run_in_subprocess'), \
                     mock.patch('importlib.import_module'):
                 # 调用so

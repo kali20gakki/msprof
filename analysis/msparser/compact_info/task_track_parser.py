@@ -26,6 +26,7 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.platform.chip_manager import ChipManager
 from msmodel.compact_info.task_track_model import TaskTrackModel
 from msparser.compact_info.task_track_bean import TaskTrackBean
+from msparser.compact_info.task_track_bean import TaskTrackChip6Bean
 from msparser.data_struct_size_constant import StructFmt
 from msparser.interface.data_parser import DataParser
 from profiling_bean.prof_enum.data_tag import DataTag
@@ -108,11 +109,12 @@ class TaskTrackParser(DataParser, MsMultiProcess):
         if not track_files:
             return
         bean_data = []
+        task_track_bean = TaskTrackChip6Bean if ChipManager().is_chip_v6() else TaskTrackBean
         for files in track_files.values():
             bean_data += self.parse_bean_data(
                 files,
                 StructFmt.TASK_TRACK_DATA_SIZE,
-                TaskTrackBean,
+                task_track_bean,
                 format_func=lambda x: x,
                 check_func=self.check_magic_num,
             )

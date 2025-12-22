@@ -33,8 +33,8 @@ from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msprof_exception import ProfException
 from common_func.msprof_object import CustomizedNamedtupleFactory
-from common_func.msvp_common import MsvpCommonConst
 from common_func.path_manager import PathManager
+from common_func.platform.ai_core_metrics_manager import AiCoreMetricsManager
 from common_func.platform.chip_manager import ChipManager
 from common_func.profiling_scene import ProfilingScene
 from common_func.utils import Utils
@@ -609,13 +609,11 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
         table_name_list[:2]:'total_time(ms)', 'total_cycles', unused
         """
         self.aic_table_name_list = get_metrics_from_sample_config(self._project_path,
-                                                                  StrConstant.AI_CORE_PROFILING_METRICS,
-                                                                  MsvpCommonConst.AI_CORE)[2:]
+                                                                  StrConstant.AI_CORE_PROFILING_METRICS)[2:]
         if self._is_mix_needed:
             self.aiv_table_name_list = get_metrics_from_sample_config(self._project_path,
-                                                                      StrConstant.AIV_PROFILING_METRICS,
-                                                                      MsvpCommonConst.AI_CORE)[2:]
-        if self._sample_json.get(StrConstant.AI_CORE_PROFILING_METRICS, "") == Constant.PMU_PIPE_EXECUT:
+                                                                      StrConstant.AIV_PROFILING_METRICS)[2:]
+        if self._sample_json.get(StrConstant.AI_CORE_PROFILING_METRICS, "") == AiCoreMetricsManager.PMU_PIPE_EXECUT:
             self.aic_table_name_list = [
                 "vec_exe_time", "vec_exe_ratio", "mac_time", "mac_ratio_extra",
                 "scalar_time", "scalar_ratio", "mte1_time", "mte1_ratio_extra",

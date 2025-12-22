@@ -53,7 +53,7 @@ class ProfilingScene:
         :return: cpp_parse
         """
         so_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "lib64", "msprof_analysis.so")
-        if not check_so_valid(so_path):
+        if not check_so_valid(so_path) or ChipManager().is_chip_v6():
             return False
         return True
 

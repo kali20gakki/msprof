@@ -18,9 +18,7 @@ from unittest import mock
 
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
-from common_func.msprof_exception import ProfException
 from msmodel.hardware.qos_model import QosModel
-from sqlite.db_manager import DBManager
 
 NAMESPACE = 'msmodel.hardware.qos_model'
 
@@ -43,4 +41,4 @@ class TestQosModel(unittest.TestCase):
         with mock.patch(NAMESPACE + '.QosModel.insert_data_to_db'):
             InfoConfReader()._info_json = {'devices': '0'}
             check = QosModel(TestQosModel.TEMP_DIR, DBNameConstant.DB_QOS, TestQosModel.TABLE_LIST)
-            check.flush(DBNameConstant.TABLE_QOS_BW, [])
+            check.flush([])

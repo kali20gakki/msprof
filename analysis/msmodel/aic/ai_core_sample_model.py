@@ -18,8 +18,8 @@ import logging
 import os
 from collections import OrderedDict
 
+from common_func.platform.ai_core_metrics_manager import AiCoreMetricsManager
 from common_func.config_mgr import ConfigMgr
-from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.number_constant import NumberConstant
@@ -42,6 +42,8 @@ class AiCoreSampleModel(BaseModel):
     """
     FILE_NAME = os.path.basename(__file__)
     TYPE = "ai_core"
+    PMU_LENGTH = 8
+    CHIPV6_PMU_LENGTH = 10
 
     def __init__(self: any, result_dir: str, db_name: str, table_list: list, metric_type: str) -> None:
         super().__init__(result_dir, db_name, table_list)
@@ -58,7 +60,9 @@ class AiCoreSampleModel(BaseModel):
         :param event: ai core event
         :return:
         """
-        ai_core_events = Utils.generator_to_list(event[i:i + 8] for i in range(0, len(event), 8))
+        pmu_length = AiCoreSampleModel.CHIPV6_PMU_LENGTH if ChipManager().is_chip_v6() \
+            else AiCoreSampleModel.PMU_LENGTH
+        ai_core_events = Utils.generator_to_list(event[i:i + pmu_length] for i in range(0, len(event), pmu_length))
         return ai_core_events
 
     @staticmethod
@@ -293,9 +297,9 @@ class AiCoreSampleModel(BaseModel):
         metrics = ["total_time(ms)"]
         if key.startswith("Custom"):
             return self.get_custom_pmu_metrics(key, metrics)
-        if key not in Constant.AICORE_METRICS_LIST:
+        if key not in AiCoreMetricsManager.AICORE_METRICS_LIST:
             return []
-        sample_metrics = Constant.AICORE_METRICS_LIST.get(key)
+        sample_metrics = AiCoreMetricsManager.AICORE_METRICS_LIST.get(key)
         if not sample_metrics:
             return []
         sample_metrics_lst = sample_metrics.split(",")

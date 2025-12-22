@@ -20,7 +20,7 @@ from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.msprof_exception import ProfException
 from common_func.singleton import singleton
-from profiling_bean.prof_enum.chip_model import ChipModel, ChipCoreNum
+from profiling_bean.prof_enum.chip_model import ChipModel, ChipMaxCoreId
 
 
 @singleton
@@ -37,13 +37,17 @@ class ChipManager:
         Constant.CHIP_V4_1_0: ChipModel.CHIP_V4_1_0,
         Constant.CHIP_V1_1_1: ChipModel.CHIP_V1_1_1,
         Constant.CHIP_V1_1_2: ChipModel.CHIP_V1_1_2,
-        Constant.CHIP_V1_1_3: ChipModel.CHIP_V1_1_3
+        Constant.CHIP_V1_1_3: ChipModel.CHIP_V1_1_3,
+        Constant.CHIP_V6_1_0: ChipModel.CHIP_V6_1_0,
+        Constant.CHIP_V6_2_0: ChipModel.CHIP_V6_2_0,
     }
-    CHIP_CORE_NUM_MAP = {
-        ChipModel.CHIP_V4_1_0: ChipCoreNum.CHIP_V4_1_0,
-        ChipModel.CHIP_V1_1_1: ChipCoreNum.CHIP_V1_1_1,
-        ChipModel.CHIP_V1_1_2: ChipCoreNum.CHIP_V1_1_2,
-        ChipModel.CHIP_V1_1_3: ChipCoreNum.CHIP_V1_1_3
+    CHIP_MAX_CORE_ID_MAP = {
+        ChipModel.CHIP_V4_1_0: ChipMaxCoreId.CHIP_V4_1_0,
+        ChipModel.CHIP_V1_1_1: ChipMaxCoreId.CHIP_V1_1_1,
+        ChipModel.CHIP_V1_1_2: ChipMaxCoreId.CHIP_V1_1_2,
+        ChipModel.CHIP_V1_1_3: ChipMaxCoreId.CHIP_V1_1_3,
+        ChipModel.CHIP_V6_1_0: ChipMaxCoreId.CHIP_V6_1_0,
+        ChipModel.CHIP_V6_2_0: ChipMaxCoreId.CHIP_V6_2_0,
     }
 
     ALL_DATA_EXPORT_CHIP_BLACKLIST = [
@@ -160,7 +164,14 @@ class ChipManager:
         check the scene of chip.v4.1.0 or chip.v1.1.x
         :return: True or False
         """
-        return self.is_chip_v1_1() or self.is_chip_v4()
+        return self.is_chip_v1_1() or self.is_chip_v4() or self.is_chip_v6()
+
+    def is_chip_v6(self: any) -> bool:
+        """
+        check the scene of chip.v6
+        :return: True or False
+        """
+        return self.chip_id in (ChipModel.CHIP_V6_1_0, ChipModel.CHIP_V6_2_0)
 
     def is_chip_all_data_export(self: any) -> bool:
         """
@@ -169,9 +180,9 @@ class ChipManager:
         """
         return self.chip_id not in self.ALL_DATA_EXPORT_CHIP_BLACKLIST
 
-    def get_max_core_id(self) -> ChipCoreNum:
-        if self.chip_id not in self.CHIP_CORE_NUM_MAP:
+    def get_max_core_id(self) -> ChipMaxCoreId:
+        if self.chip_id not in self.CHIP_MAX_CORE_ID_MAP:
             message = "Can't get ai core num or platform version isn't identified from info.json, " \
                       "please check the file."
             raise ProfException(ProfException.PROF_SYSTEM_EXIT, message)
-        return self.CHIP_CORE_NUM_MAP.get(self.chip_id).value
+        return self.CHIP_MAX_CORE_ID_MAP.get(self.chip_id).value
