@@ -29,7 +29,7 @@ int AcsqLogParseItem(uint8_t *binaryData, uint32_t binaryDataSize,
                      uint8_t *halUniData, uint16_t expandStatus)
 {
     if (binaryDataSize != sizeof(AcsqLog)) {
-        ERROR("binaryDataSize is not equal to the size of binaryData");
+        ERROR("binaryDataSize is not equal to the size of AcsqLog size.");
         return PARSER_ERROR_SIZE_MISMATCH;
     }
     auto *log = ReinterpretConvert<AcsqLog *>(binaryData);
@@ -40,14 +40,30 @@ int AcsqLogParseItem(uint8_t *binaryData, uint32_t binaryDataSize,
     unionData->hd.taskId.batchId = 0;
     unionData->hd.taskId.taskId = StarsCommon::GetTaskId(log->streamId, log->taskId, expandStatus, log->taskType);
     unionData->hd.taskId.contextId = INVALID_CONTEXT_ID;
-
     unionData->type = ACSQ_LOG;
+    unionData->acsq.isEndTimestamp = log->funcType != PARSER_ITEM_ACSQ_LOG_START;
+    unionData->hd.timestamp = log->timestamp;
+    unionData->acsq.taskType = log->taskType;
+    unionData->acsq.timestamp = log->timestamp;
+    return log->cnt;
+}
 
-    if (log->funcType == PARSER_ITEM_ACSQ_LOG_START) {
-        unionData->acsq.isEndTimestamp = false;
-    } else {
-        unionData->acsq.isEndTimestamp = true;
+int AcsqLogParseItem_V6(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *halUniData, uint16_t expandStatus)
+{
+    if (binaryDataSize != sizeof(AcsqLogV6)) {
+        ERROR("binaryDataSize is not equal to the size of AcsqLogV6 size.");
+        return PARSER_ERROR_SIZE_MISMATCH;
     }
+    auto *log = ReinterpretConvert<AcsqLogV6 *>(binaryData);
+
+    auto *unionData = ReinterpretConvert<HalLogData *>(halUniData);
+
+    unionData->hd.taskId.batchId = 0;
+    unionData->hd.taskId.streamId = 0;
+    unionData->hd.taskId.taskId = log->taskId;
+    unionData->hd.taskId.contextId = INVALID_CONTEXT_ID;
+    unionData->type = ACSQ_LOG;
+    unionData->acsq.isEndTimestamp = log->funcType != PARSER_ITEM_ACSQ_LOG_START;
     unionData->hd.timestamp = log->timestamp;
     unionData->acsq.taskType = log->taskType;
     unionData->acsq.timestamp = log->timestamp;
@@ -56,5 +72,7 @@ int AcsqLogParseItem(uint8_t *binaryData, uint32_t binaryDataSize,
 
 REGISTER_PARSER_ITEM(LOG_PARSER, PARSER_ITEM_ACSQ_LOG_START, AcsqLogParseItem);
 REGISTER_PARSER_ITEM(LOG_PARSER, PARSER_ITEM_ACSQ_LOG_END, AcsqLogParseItem);
+REGISTER_PARSER_ITEM(LOG_PARSER_V6, PARSER_ITEM_ACSQ_LOG_START, AcsqLogParseItem_V6);
+REGISTER_PARSER_ITEM(LOG_PARSER_V6, PARSER_ITEM_ACSQ_LOG_END, AcsqLogParseItem_V6);
 }
 }

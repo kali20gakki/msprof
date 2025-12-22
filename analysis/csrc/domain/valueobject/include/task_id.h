@@ -29,13 +29,13 @@ namespace Domain {
 struct TaskId {
     TaskId() = default;
 
-    TaskId(uint16_t _streamId, uint16_t _batchId, uint16_t _taskId, uint32_t _contextId, uint16_t _deviceId = 0)
+    TaskId(uint16_t _streamId, uint16_t _batchId, uint32_t _taskId, uint32_t _contextId, uint16_t _deviceId = 0)
         : streamId(_streamId), batchId(_batchId), taskId(_taskId), contextId(_contextId), deviceId(_deviceId) {}
 
     uint16_t deviceId = 0;
-    uint16_t streamId = 0;
+    mutable uint16_t streamId = 0;
     uint16_t batchId = 0;
-    uint16_t taskId = 0;
+    uint32_t taskId = 0;
     uint32_t contextId = INVALID_CONTEXT_ID;    // 有效值：0~65535，无效值：INVALID_CONTEXT_ID/UINT32_MAX/全f/-1
 
     bool operator==(const TaskId &other) const

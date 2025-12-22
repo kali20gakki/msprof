@@ -28,31 +28,25 @@ const int YEAR_DISPLAY_WIDTH = 4; // 年的固定宽度是4
 const int TIME_DISPLAY_WIDTH = 2; // 日期的固定宽度是2，不足的前面补零
 const int NS_US = 3; // NS到US的时间转换的数量级，3表示10^3的指数
 
-namespace {
-    /**
-     * 通过host_start.log或者device_start.log参数计算时间
-     * @param sysCnt
-     * @param hostMonotonic
-     * @param referenceCnt
-     * @param frequency
-     * @return
-     */
-    HPFloat GetTimeFromCnt(uint64_t sysCnt, uint64_t hostMonotonic, uint64_t referenceCnt, double frequency)
-    {
-        if (IsDoubleEqual(frequency, DEFAULT_FREQ)) {
-            // 当freq为默认值时,默认数据为 monotonic,直接返回即可
-            return {sysCnt};
-        }
-        uint64_t timeDiff = (sysCnt >= referenceCnt) ? (sysCnt - referenceCnt) : (referenceCnt - sysCnt);
-        HPFloat res = static_cast<double>(timeDiff) / frequency;
-        res = res << NS_US;
-        if (sysCnt >= referenceCnt) {
-            res = HPFloat(hostMonotonic) + res;
-        } else {
-            res = HPFloat(hostMonotonic) - res;
-        }
-        return res;
+/**
+ * 通过host_start.log或者device_start.log参数计算时间
+ * @param sysCnt
+ * @param hostMonotonic
+ * @param referenceCnt
+ * @param frequency
+ * @return
+ */
+HPFloat GetTimeFromCnt(uint64_t sysCnt, uint64_t hostMonotonic, uint64_t referenceCnt, double frequency)
+{
+    uint64_t timeDiff = (sysCnt >= referenceCnt) ? (sysCnt - referenceCnt) : (referenceCnt - sysCnt);
+    HPFloat res = static_cast<double>(timeDiff) / frequency;
+    res = res << NS_US;
+    if (sysCnt >= referenceCnt) {
+        res = HPFloat(hostMonotonic) + res;
+    } else {
+        res = HPFloat(hostMonotonic) - res;
     }
+    return res;
 }
 std::string GetFormatLocalTime()
 {
@@ -84,6 +78,7 @@ HPFloat GetTimeFromSyscnt(uint64_t syscnt, const SyscntConversionParams &params)
 {
     return GetTimeFromCnt(syscnt, params.hostMonotonic, params.sysCnt, params.freq);
 }
+
 /**
  * 无论host侧还是device侧 hostCnt取host_start.log,hostFreq取info.json->cpu->Frequency
  * @param syscnt
@@ -92,6 +87,10 @@ HPFloat GetTimeFromSyscnt(uint64_t syscnt, const SyscntConversionParams &params)
  */
 HPFloat GetTimeFromHostCnt(uint64_t syscnt, const SyscntConversionParams &params)
 {
+    if (IsDoubleEqual(params.hostFreq, DEFAULT_FREQ)) {
+        // 当freq为默认值时,默认数据为 monotonic,直接返回即可
+        return {syscnt};
+    }
     return GetTimeFromCnt(syscnt, params.hostMonotonic, params.hostCnt, params.hostFreq);
 }
 

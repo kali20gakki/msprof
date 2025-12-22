@@ -60,7 +60,8 @@ struct LocaltimeContext {
     uint64_t deviceMonotonic = UINT64_MAX;
     Utils::ProfTimeRecord timeRecord;
 };
-
+// 时间转换
+HPFloat GetTimeFromCnt(uint64_t sysCnt, uint64_t hostMonotonic, uint64_t referenceCnt, double frequency);
 std::string GetFormatLocalTime();
 // 将syscnt转为timestamp 返回结果为ns级
 HPFloat GetTimeFromSyscnt(uint64_t syscnt, const SyscntConversionParams &params);

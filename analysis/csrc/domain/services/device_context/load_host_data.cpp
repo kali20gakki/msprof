@@ -18,14 +18,12 @@
 #include <string>
 #include "analysis/csrc/infrastructure/db/include/database.h"
 #include "analysis/csrc/infrastructure/db/include/db_runner.h"
-#include "analysis/csrc/domain/services/persistence/host/number_mapping.h"
 #include "analysis/csrc/domain/entities/hccl/include/hccl_task.h"
 #include "analysis/csrc/domain/entities/hal/include/device_task.h"
 #include "analysis/csrc/domain/services/device_context/device_context.h"
 #include "analysis/csrc/domain/services/modeling/include/log_modeling.h"
 #include "analysis/csrc/infrastructure/resource/chip_id.h"
 #include "analysis/csrc/infrastructure/dfx/error_code.h"
-#include "analysis/csrc/domain/services/constant/default_value_constant.h"
 #include "analysis/csrc/domain/entities/hal/include/ascend_obj.h"
 
 using namespace Analysis;
@@ -106,7 +104,8 @@ uint32_t ReadHostGEInfo(DataInventory& dataInventory, const DeviceContext& devic
     return ANALYSIS_OK;
 }
 
-uint32_t ReadHostRuntime(DataInventory& dataInventory, const DeviceContext& deviceContext)
+bool ReadHostRuntimeFromDB(const DeviceContext& deviceContext,
+    DeviceId2HostRunTime& hostRuntime)
 {
     RuntimeDB runtimeDb;
     DeviceInfo deviceInfo{};
@@ -114,22 +113,21 @@ uint32_t ReadHostRuntime(DataInventory& dataInventory, const DeviceContext& devi
     auto hostPath = deviceContext.GetDeviceFilePath();
     std::string hostDbDirectory = Utils::File::PathJoin({hostPath, "../", "/host", "/sqlite", runtimeDb.GetDBName()});
     DBRunner hostRuntimeDBRunner(hostDbDirectory);
-    std::shared_ptr<DeviceId2HostRunTime> data;
-    DeviceId2HostRunTime hostRuntime;
+
     if (!CheckPathAndTableExists(hostDbDirectory, hostRuntimeDBRunner, HOST_TASK_TABLE)) {
-        MAKE_SHARED_RETURN_VALUE(data, DeviceId2HostRunTime, ANALYSIS_ERROR, std::move(hostRuntime));
-        dataInventory.Inject(data);
-        return ANALYSIS_OK;
+        return true; // 如果路径和表不存在，返回true表示没有错误，但hostRuntime为空
     }
+
     std::string sql{"SELECT stream_id, request_id, batch_id, task_id, context_ids, "
                     "model_id, task_type, connection_id FROM HostTask where device_id = "};
     sql += std::to_string(deviceInfo.deviceId);
     RuntimeOriDataFormat result(0);
-    bool rc =  hostRuntimeDBRunner.QueryData(sql, result);
+    bool rc = hostRuntimeDBRunner.QueryData(sql, result);
     if (!rc) {
         ERROR("Failed to obtain data from the % table.", runtimeDb.GetDBName());
-        return ANALYSIS_ERROR;
+        return false;
     }
+
     for (const auto& row : result) {
         int32_t request_id;
         uint32_t stream_id, task_id, context_id_u32;
@@ -152,6 +150,27 @@ uint32_t ReadHostRuntime(DataInventory& dataInventory, const DeviceContext& devi
         hostTask.requestId = request_id;
         hostRuntime[id].push_back(hostTask);
     }
+    return true;
+}
+
+uint32_t ReadHostRuntime(DataInventory& dataInventory,
+    const DeviceContext& deviceContext)
+{
+    DeviceId2HostRunTime hostRuntime;
+    if (!ReadHostRuntimeFromDB(deviceContext, hostRuntime)) {
+        return ANALYSIS_ERROR;
+    }
+
+    if (deviceContext.GetChipID() == CHIP_V6_1_0) {
+        std::shared_ptr<StreamIdInfo> streamIdInfo;
+        MAKE_SHARED_RETURN_VALUE(streamIdInfo, StreamIdInfo, ANALYSIS_ERROR);
+        for (auto& task : hostRuntime) {
+            streamIdInfo->streamIdMap.emplace(task.first.taskId, task.first.streamId);
+        }
+        dataInventory.Inject(streamIdInfo);
+    }
+
+    std::shared_ptr<DeviceId2HostRunTime> data;
     MAKE_SHARED_RETURN_VALUE(data, DeviceId2HostRunTime, ANALYSIS_ERROR, std::move(hostRuntime));
     dataInventory.Inject(data);
     return ANALYSIS_OK;
@@ -257,7 +276,7 @@ uint32_t LoadHostData::ProcessEntry(DataInventory& dataInventory, const Infra::C
            | ReadHcclTask(dataInventory, deviceContext) | ReadHcclOp(dataInventory, deviceContext);
 }
 
-REGISTER_PROCESS_SEQUENCE(LoadHostData, false, Analysis::Domain::LogModeling);
+REGISTER_PROCESS_SEQUENCE(LoadHostData, false, Analysis::Domain::LogModeling, Analysis::Domain::LogModelingV6);
 REGISTER_PROCESS_DEPENDENT_DATA(LoadHostData, std::map<TaskId, std::vector<Domain::DeviceTask>>);
 REGISTER_PROCESS_SUPPORT_CHIP(LoadHostData, CHIP_ID_ALL);
 

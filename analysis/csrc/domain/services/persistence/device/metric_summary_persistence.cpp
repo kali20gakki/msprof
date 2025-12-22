@@ -289,7 +289,7 @@ uint32_t MetricSummaryPersistence::ProcessEntry(DataInventory& dataInventory, co
     return ANALYSIS_ERROR;
 }
 
-REGISTER_PROCESS_SEQUENCE(MetricSummaryPersistence, true, PmuAssociation);
+REGISTER_PROCESS_SEQUENCE(MetricSummaryPersistence, false, PmuAssociation);
 REGISTER_PROCESS_DEPENDENT_DATA(MetricSummaryPersistence, std::map<TaskId, std::vector<Domain::DeviceTask>>);
 REGISTER_PROCESS_SUPPORT_CHIP(MetricSummaryPersistence, CHIP_ID_ALL);
 }

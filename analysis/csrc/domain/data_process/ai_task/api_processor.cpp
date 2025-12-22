@@ -126,8 +126,8 @@ std::vector<ApiData> ApiProcessor::FormatData(
     for (const auto& row : oriData) {
         std::tie(data.structType, data.id, level, data.threadId, data.itemId,
                  data.timestamp, data.end, data.connectionId) = row;
-        HPFloat startTimestamp = Utils::GetTimeFromSyscnt(data.timestamp, params);
-        HPFloat endTimestamp = Utils::GetTimeFromSyscnt(data.end, params);
+        HPFloat startTimestamp = Utils::GetTimeFromHostCnt(data.timestamp, params);
+        HPFloat endTimestamp = Utils::GetTimeFromHostCnt(data.end, params);
         data.level = GetEnumTypeValue(level, NAME_STR(API_LEVEL_TABLE), API_LEVEL_TABLE);
         data.apiName = data.structType;
         if (data.level == MSPROF_REPORT_ACL_LEVEL) {

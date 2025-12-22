@@ -297,4 +297,17 @@ TEST_F(LoadHostDataUtest, ReturnOKWhenNoTable)
 
     ASSERT_EQ(ANALYSIS_OK, loadHostData.Run(dataInventory_, deviceContext));
 }
+
+TEST_F(LoadHostDataUtest, TestProcessEntryReadHostRuntimeSuccess)
+{
+    CreateHostData();
+    auto deviceTaskS = dataInventory_.GetPtr<std::map<TaskId, std::vector<Domain::DeviceTask>>>();
+    DeviceContext deviceContext;
+    deviceContext.deviceContextInfo.deviceInfo.chipID = 15;
+    deviceContext.deviceContextInfo.deviceFilePath = HOST_PATH;
+    LoadHostData loadHostData;
+    loadHostData.ProcessEntry(dataInventory_, deviceContext);
+    auto streamInfo_ = dataInventory_.GetPtr<StreamIdInfo>();
+    ASSERT_EQ(1u, streamInfo_->streamIdMap.size());
+}
 }

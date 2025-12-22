@@ -27,21 +27,36 @@ namespace Analysis {
 
 namespace Domain {
 
-class LogModeling final : public Infra::Process {
+class LogModeling : public Infra::Process {
 private:
     uint32_t ProcessEntry(Infra::DataInventory& dataInventory, const Infra::Context& context) override;
 
     void SplitLogGroups(std::vector<HalLogData>& logData, std::shared_ptr<std::vector<HalTrackData>>& flipTrack);
     void OutputLogCounts(const std::vector<HalLogData>& logData) const;
-    void AddToDeviceTask(std::unordered_map<uint16_t, std::vector<HalLogData*>>& startTask,
-                         std::unordered_map<uint16_t, std::vector<HalLogData*>>& endTask,
+    void AddToDeviceTask(std::unordered_map<uint32_t, std::vector<HalLogData*>>& startTask,
+                         std::unordered_map<uint32_t, std::vector<HalLogData*>>& endTask,
                          std::unordered_map<uint16_t, std::vector<HalTrackData*>>& flipGroups,
                          std::map<TaskId, std::vector<DeviceTask>>& deviceTaskMap,
                          std::function<void(Domain::DeviceTask&, const HalLogData&, const HalLogData&)> mergeFunc);
 
+    virtual uint32_t GenGroupKey(const HalLogData& logData);
+    virtual uint64_t GenMergeTaskKey(const HalLogData& logData);
+
 private:
-    std::unordered_map<uint16_t, std::vector<HalLogData*>> acsqStart_, acsqEnd_, fftsStart_, fftsEnd_;
+    std::unordered_map<uint32_t, std::vector<HalLogData*>> acsqStart_, acsqEnd_, fftsStart_, fftsEnd_;
     std::unordered_map<uint16_t, std::vector<HalTrackData*>> flipData_;
+};
+
+class LogModelingV6 final : public LogModeling {
+private:
+    uint32_t GenGroupKey(const HalLogData& logData) override
+    {
+        return logData.hd.taskId.taskId;
+    }
+    uint64_t GenMergeTaskKey(const HalLogData& logData) override
+    {
+        return GenGroupKey(logData);
+    }
 };
 
 }

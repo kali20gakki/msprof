@@ -32,12 +32,6 @@ const int CONTEXT_OFFSET = 32;
 const int TASK_OFFSET = 16;
 constexpr uint32_t LOW_16BIT_MASK = 0xffff;
 
-inline uint64_t MakeKey(uint64_t contextId, uint32_t taskId, uint16_t streamId)
-{
-    uint64_t key = (contextId << CONTEXT_OFFSET) | (taskId << TASK_OFFSET) | streamId;
-    return key;
-}
-
 /*
  * 当开始的任务和结束的任务数量不一致时，按照相同streamId-taskId-contextId的数据，先执行的任务结束时间比后续执行任务的开始
  * 时间小的规则进行匹配。例如；
@@ -115,15 +109,15 @@ void LogModeling::SplitLogGroups(std::vector<HalLogData>& logData,
     for (auto& halLog : logData) {
         if (halLog.type == ACSQ_LOG) {
             if (halLog.acsq.isEndTimestamp) {
-                acsqEnd_[halLog.hd.taskId.streamId].push_back(&halLog);
+                acsqEnd_[GenGroupKey(halLog)].push_back(&halLog);
             } else {
-                acsqStart_[halLog.hd.taskId.streamId].push_back(&halLog);
+                acsqStart_[GenGroupKey(halLog)].push_back(&halLog);
             }
         } else if (halLog.type == FFTS_LOG) {
             if (halLog.ffts.isEndTimestamp) {
-                fftsEnd_[halLog.hd.taskId.streamId].push_back(&halLog);
+                fftsEnd_[GenGroupKey(halLog)].push_back(&halLog);
             } else {
-                fftsStart_[halLog.hd.taskId.streamId].push_back(&halLog);
+                fftsStart_[GenGroupKey(halLog)].push_back(&halLog);
             }
         }
     }
@@ -142,7 +136,7 @@ size_t GetDeviceTaskNodeSize(const std::map<TaskId, std::vector<DeviceTask>>& ta
     return total;
 }
 
-size_t GetTaskNodeSize(const std::unordered_map<uint16_t, std::vector<HalLogData*>>& tasks)
+size_t GetTaskNodeSize(const std::unordered_map<uint32_t, std::vector<HalLogData*>>& tasks)
 {
     size_t total{};
     for (const auto& node : tasks) {
@@ -160,8 +154,8 @@ void LogModeling::OutputLogCounts(const std::vector<HalLogData>& logData) const
     INFO("fftsE stream:%, total:%", fftsEnd_.size(), GetTaskNodeSize(fftsEnd_));
 }
 
-void LogModeling::AddToDeviceTask(std::unordered_map<uint16_t, std::vector<HalLogData*>>& startTask,
-    std::unordered_map<uint16_t, std::vector<HalLogData*>>& endTask,
+void LogModeling::AddToDeviceTask(std::unordered_map<uint32_t, std::vector<HalLogData*>>& startTask,
+    std::unordered_map<uint32_t, std::vector<HalLogData*>>& endTask,
     std::unordered_map<uint16_t, std::vector<HalTrackData*>>& flipGroups,
     std::map<TaskId, std::vector<DeviceTask>>& deviceTaskMap,
     std::function<void(Domain::DeviceTask&, const HalLogData&, const HalLogData&)> mergeFunc)
@@ -181,9 +175,9 @@ void LogModeling::AddToDeviceTask(std::unordered_map<uint16_t, std::vector<HalLo
                                          Utils::ReinterpretConvert<HalUniData**>(it->second.data()), it->second.size());
         }
 
-        uint16_t streamId = streamNode.first;
+        uint32_t streamId = streamNode.first;
         for (auto& node : streamNode.second) {
-            acsqTaskS[MakeKey(node->hd.taskId.contextId, node->hd.taskId.taskId, streamId)].push_back(node);
+            acsqTaskS[GenMergeTaskKey(*node)].push_back(node);
         }
 
         auto itE = endTask.find(streamId);
@@ -191,10 +185,12 @@ void LogModeling::AddToDeviceTask(std::unordered_map<uint16_t, std::vector<HalLo
             ERROR("start exist but end not exist, stream:%", streamId);
             continue;
         }
-        std::sort(itE->second.begin(), itE->second.end(),
-                  [](HalLogData* lhs, HalLogData* rhs) {return lhs->hd.timestamp < rhs->hd.timestamp;});
+        if (itE->second.size() > 1) {
+            std::sort(itE->second.begin(), itE->second.end(),
+                [](HalLogData* lhs, HalLogData* rhs) {return lhs->hd.timestamp < rhs->hd.timestamp;});
+        }
         for (auto& node : itE->second) {
-            acsqTaskE[MakeKey(node->hd.taskId.contextId, node->hd.taskId.taskId, streamId)].push_back(node);
+            acsqTaskE[GenMergeTaskKey(*node)].push_back(node);
         }
         
         MergeStartAndEnd(acsqTaskS, acsqTaskE, deviceTaskMap, mergeFunc);
@@ -239,9 +235,27 @@ uint32_t LogModeling::ProcessEntry(Infra::DataInventory& dataInventory, const In
     return Analysis::ANALYSIS_OK;
 }
 
+uint32_t LogModeling::GenGroupKey(const HalLogData& logData)
+{
+    return logData.hd.taskId.streamId;
+}
+uint64_t LogModeling::GenMergeTaskKey(const HalLogData& logData)
+{
+    return (static_cast<uint64_t>(logData.hd.taskId.contextId) << CONTEXT_OFFSET) |
+        (static_cast<uint16_t>(logData.hd.taskId.taskId) << TASK_OFFSET) | logData.hd.taskId.streamId;
+}
+
 REGISTER_PROCESS_SEQUENCE(Domain::LogModeling, true, Domain::StarsSocParser, Domain::TsTrackParser);
 REGISTER_PROCESS_DEPENDENT_DATA(Domain::LogModeling, std::vector<Domain::HalLogData>,
     std::vector<Domain::HalTrackData>, std::map<Domain::TaskId, std::vector<Domain::DeviceTask>>);
 REGISTER_PROCESS_SUPPORT_CHIP(Domain::LogModeling, CHIP_V4_1_0);
+
+namespace CHIP_V6 {
+    REGISTER_PROCESS_SEQUENCE(Domain::LogModelingV6, true, Domain::StarsSocParser, Domain::TsTrackParser);
+    REGISTER_PROCESS_DEPENDENT_DATA(Domain::LogModelingV6, std::vector<Domain::HalLogData>,
+        std::vector<Domain::HalTrackData>, std::map<Domain::TaskId, std::vector<Domain::DeviceTask>>);
+    REGISTER_PROCESS_SUPPORT_CHIP(Domain::LogModelingV6, CHIP_V6_1_0);
+}
+
 }
 }
