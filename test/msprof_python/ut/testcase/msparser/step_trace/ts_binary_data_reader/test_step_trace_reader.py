@@ -16,16 +16,28 @@
 import struct
 import unittest
 
+from common_func.platform.chip_manager import ChipManager
 from msparser.step_trace.ts_binary_data_reader.step_trace_reader import StepTraceReader
+from profiling_bean.prof_enum.chip_model import ChipModel
 
 
 class TestStepTraceReader(unittest.TestCase):
-    def test_read_binary_data(self):
+    def test_read_binary_data_should_success_when_chip4(self):
         # index id, model id, timestamp, stream_id, task_id, tag_id
         expect_res = [(1, 1, 101612167908, 3, 1, 0)]
 
+        ChipManager().chip_id = ChipModel.CHIP_V4_1_0
         file_data = struct.pack("=BBH4BQQQHHHH", 1, 10, 32, 0, 0, 0, 0, 101612167908, 1, 1, 3, 1, 0, 0)
+        step_trace_reader = StepTraceReader()
+        step_trace_reader.read_binary_data(file_data)
+        self.assertEqual(expect_res, step_trace_reader.data)
 
+    def test_read_binary_data_should_success_when_chip6(self):
+        # index id, model id, timestamp, stream_id, task_id, tag_id
+        expect_res = [(1, 1, 101612167908, 0, 5, 0)]
+
+        ChipManager().chip_id = ChipModel.CHIP_V6_1_0
+        file_data = struct.pack("=BBHLQQQHHI", 1, 10, 32, 0, 101612167908, 1, 1, 0, 0, 5)
         step_trace_reader = StepTraceReader()
         step_trace_reader.read_binary_data(file_data)
         self.assertEqual(expect_res, step_trace_reader.data)

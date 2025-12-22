@@ -21,6 +21,7 @@ from unittest import mock
 
 from constant.constant import CONFIG
 from msparser.compact_info.task_track_bean import TaskTrackBean
+from msparser.compact_info.task_track_bean import TaskTrackChip6Bean
 from msparser.compact_info.task_track_parser import TaskTrackParser
 from profiling_bean.prof_enum.data_tag import DataTag
 from common_func.hash_dict_constant import HashDictData
@@ -104,3 +105,26 @@ class TestTaskTrackParser(unittest.TestCase):
             check.reformat_data(task_data)
             self.assertEqual(len(check._task_track_data), 4)
             self.assertEqual(len(check._task_flip_data), 3)
+
+    def test_reformat_data_should_return_4_task_track_when_get_4_task(self):
+        InfoConfReader()._info_json = {"drvVersion": InfoConfReader().ALL_EXPORT_VERSION}
+        task_data = [
+            TaskTrackChip6Bean([23130, 5000, 1000, 270722, 12, 75838889645892, 0, 0, 0, 0, 1, 123456789]),
+            TaskTrackChip6Bean([23130, 5000, 1000, 270722, 12, 75838889645892, 0, 0, 0, 0, 1, 123456789]),
+            TaskTrackChip6Bean([23130, 5000, 1000, 270722, 12, 75838889645892, 0, 0, 0, 0, 2, 123456789]),
+            TaskTrackChip6Bean([23130, 5000, 1000, 270722, 12, 75838889645892, 0, 0, 0, 0, 2, 123456789])
+        ]
+
+        with mock.patch(GE_HASH_MODEL_NAMESPACE + '.GeHashViewModel.init'), \
+                mock.patch(GE_HASH_MODEL_NAMESPACE + '.GeHashViewModel.get_type_hash_data'), \
+                mock.patch(GE_HASH_MODEL_NAMESPACE + '.GeHashViewModel.finalize'):
+            HashDictData('./')._type_hash_dict = {
+                'runtime': {
+                    '1000': 'task_track',
+                    '97': 'FLIP_TASK',
+                    '6': 'MAINTENANCE',
+                },
+            }
+            check = TaskTrackParser(self.file_list, CONFIG)
+            check.reformat_data(task_data)
+            self.assertEqual(len(check._task_track_data), 4)

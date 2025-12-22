@@ -16,6 +16,7 @@
 import struct
 import unittest
 from unittest import mock
+from unittest.mock import Mock
 
 from common_func.create_runtime_db import ParsingRuntimeData
 from common_func.platform.chip_manager import ChipManager
@@ -213,6 +214,8 @@ class TestParsingRuntimeData(unittest.TestCase):
                              26050, 0, 526, 0, 14002, 26675, 224, 12, 58006, 101612566070, 2, 0, 0, 0)
         with mock.patch('os.path.join', return_value='test\\data'), \
                 mock.patch(NAMESPACE + '.ParsingRuntimeData.insert_data'), \
+                mock.patch('common_func.file_manager.is_linux', return_value=True), \
+                mock.patch('os.stat', return_value=Mock(st_mode=0o000, st_uid=0)), \
                 mock.patch(NAMESPACE + '.logging.info'):
             with mock.patch('builtins.open', mock.mock_open(read_data=data_1)), \
                     mock.patch('os.path.getsize', return_value=200), \

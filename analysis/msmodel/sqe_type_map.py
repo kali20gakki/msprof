@@ -65,5 +65,35 @@ class SqeType:
         SDMA_SQE = 9
         MAX_SQE = 10
 
+    @unique
+    class ChipV6SqeType(Enum):
+        """
+        Chip's sqetype whose task schedule is ChipV6 type
+        """
+        AI_CORE = 0
+        AIV_SQE = 1
+        FUSION = 2
+        PLACE_HOLDER_SQE = 3
+        AICPU_H = 4
+        AICPU_D = 5
+        NOTIFY_RECORD_SQE = 6
+        NOTIFY_WAIT_SQE = 7
+        WRITE_VALUE_SQE = 8
+        UBDMA = 9
+        ASYNCDMA = 10
+        SDMA_SQE = 11
+        VPC_SQE = 12
+        JPEGE_SQE = 13
+        JPEGD_SQE = 14
+        CMO_SQE = 15
+        CCU_SQE = 16
+        CONDITION_SQE = 20
+        END_SQE = 21
+
     def __init__(self):
-        self.instance = SqeType.StarsSqeType if ChipManager().is_stars_chip() else SqeType.HwSqeType
+        if ChipManager().is_chip_v6():
+            self.instance = SqeType.ChipV6SqeType
+        elif ChipManager().is_stars_chip():
+            self.instance = SqeType.StarsSqeType
+        else:
+            self.instance = SqeType.HwSqeType

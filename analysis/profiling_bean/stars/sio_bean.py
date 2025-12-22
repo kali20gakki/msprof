@@ -14,6 +14,7 @@
 # See the Mulan PSL v2 for more details.
 # -------------------------------------------------------------------------
 
+import logging
 from common_func.info_conf_reader import InfoConfReader
 from common_func.utils import Utils
 from profiling_bean.struct_info.struct_decoder import StructDecoder
@@ -25,18 +26,11 @@ class SioDecoder(StructDecoder):
     """
 
     def __init__(self: any, *args: tuple) -> None:
-        filed = args[0]
-        self._func_type = Utils.get_func_type(filed[0])
-        self._sys_cnt = filed[3]
-        self._acc_id = filed[5]
-        self._req_rx = filed[9]
-        self._rsp_rx = filed[10]
-        self._snp_rx = filed[11]
-        self._dat_rx = filed[12]
-        self._req_tx = filed[13]
-        self._rsp_tx = filed[14]
-        self._snp_tx = filed[15]
-        self._dat_tx = filed[16]
+        self._init_field(args[0])
+
+    def _init_field(self, fields: list):
+        logging.error("not set sio fields")
+        pass
 
     @property
     def func_type(self: any) -> str:
@@ -69,3 +63,36 @@ class SioDecoder(StructDecoder):
         for sys time
         """
         return InfoConfReader().time_from_syscnt(self._sys_cnt)
+
+
+# before V6 sio implement
+class SioDecoderImpl(SioDecoder):
+
+    def _init_field(self, fields: list):
+        self._func_type = Utils.get_func_type(fields[0])
+        self._acc_id = fields[5]
+        self._sys_cnt = fields[3]
+        self._req_rx = fields[9]
+        self._rsp_rx = fields[10]
+        self._snp_rx = fields[11]
+        self._dat_rx = fields[12]
+        self._req_tx = fields[13]
+        self._rsp_tx = fields[14]
+        self._snp_tx = fields[15]
+        self._dat_tx = fields[16]
+
+
+class SioDecoderV6(SioDecoder):
+
+    def _init_field(self, fields: list):
+        self._func_type = Utils.get_func_type(fields[0])
+        self._acc_id = (fields[1] & 0xFC) >> 2
+        self._sys_cnt = fields[4]
+        self._req_rx = fields[7]
+        self._rsp_rx = fields[8]
+        self._snp_rx = fields[9]
+        self._dat_rx = fields[10]
+        self._req_tx = fields[12]
+        self._rsp_tx = fields[13]
+        self._snp_tx = fields[14]
+        self._dat_tx = fields[15]

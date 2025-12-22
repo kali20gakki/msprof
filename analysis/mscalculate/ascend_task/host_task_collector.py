@@ -78,6 +78,16 @@ class HostTaskCollector:
 
         return dev_visible_host_tasks
 
+    def get_host_task_stream_table(self: any, device_id: int) -> dict:
+        host_task_stream_table = {}
+        host_tasks = self.get_host_tasks(device_id)
+        for host_task in host_tasks:
+            if host_task.task_id in host_task_stream_table:
+                logging.error(f"Duplicate task_id found: {host_task.task_id}")
+                continue
+            host_task_stream_table[host_task.task_id] = host_task.stream_id
+        return host_task_stream_table
+
     def _get_host_tasks(self: any, is_all: bool, model_id: int, iter_id: int, device_id: int) -> List[HostTask]:
         """
         get host tasks

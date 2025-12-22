@@ -19,6 +19,7 @@ from unittest import mock
 from common_func.db_name_constant import DBNameConstant
 from common_func.msvp_constant import MsvpConstant
 from common_func.platform.chip_manager import ChipManager
+from common_func.constant import Constant
 from profiling_bean.prof_enum.chip_model import ChipModel
 from sqlite.db_manager import DBManager
 from viewer.get_l2_cache_data import get_l2_cache_data, modify_l2_cache_headers, add_op_name, process_hit_rate
@@ -75,10 +76,18 @@ class TestL2Cache(unittest.TestCase):
 
     def test_process_hit_rate_when_chip_si_not_stars_then_return_origin_l2_data(self):
         l2_cache_header = ["Stream Id", "Task Id", "Hit Rate", "Victim Rate"]
-        l2_cache_data = [(1, 2, 0.9, 0.8), (2, 3, 1.1, 0.7)]
+        l2_cache_data = [("", 2, 0.9, 0.8), (2, 3, 1.1, 0.7)]
         ChipManager().chip_id = ChipModel.CHIP_V1_1_0
         ret = process_hit_rate(l2_cache_header, l2_cache_data)
         self.assertEqual(ret, l2_cache_data)
+
+    def test_process_hit_rate_when_chip_is_chip_v6_1_0_then_return_origin_l2_data(self):
+        l2_cache_header = ["Stream Id", "Task Id", "Hit Rate", "Victim Rate"]
+        l2_cache_data = [(1, 2, Constant.NA, 0.8), (2, 3, Constant.NA, 0.7)]
+        ChipManager().chip_id = ChipModel.CHIP_V6_1_0
+        ret = process_hit_rate(l2_cache_header, l2_cache_data)
+        self.assertEqual(ret, l2_cache_data)
+
 
     def test_process_hit_rate_when_chip_si_not_stars_then_refresh_hit_rate(self):
         l2_cache_header = ["Stream Id", "Task Id", "Hit Rate", "Victim Rate"]

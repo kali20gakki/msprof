@@ -40,3 +40,20 @@ class StarsChipTransModel(ParserModel):
             if not self.TYPE_TABLE_MAP.get(_type):
                 continue
             self.insert_data_to_db(self.TYPE_TABLE_MAP.get(_type), data_dict.get(_type))
+
+
+class StarsChipTransV6Model(ParserModel):
+    """
+    stars chip trans v6 parser model
+    """
+
+    def __init__(self: any, result_dir: str, db: str) -> None:
+        super().__init__(result_dir, db, [DBNameConstant.TABLE_STARS_PCIE_V6])
+
+    def flush(self: any, data_dict: dict) -> None:
+        """
+        insert stars data into database
+        """
+        data_list = data_dict.get(StarsConstant.TYPE_STAR_CHIP_TRANS)
+        if data_list:
+            self.insert_data_to_db(self.table_list[0], data_list)

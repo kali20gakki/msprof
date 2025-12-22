@@ -108,6 +108,28 @@ class TestParsingAICoreSampleData(unittest.TestCase):
             check = ParsingAICoreSampleData(self.file_list, CONFIG)
             check.read_binary_data(binary_data_path)
 
+    def test_read_binary_data_with_chipV6(self):
+        InfoJsonReaderManager(info_json=InfoJson(devices='0')).process()
+        binary_data_path = 'test.slice_0'
+        ChipManager().chip_id = ChipModel.CHIP_V6_1_0
+        data = struct.pack("=BBHHH10QQQBBHHH",
+                           1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 22, 23, 25, 33, 44, 55, 66, 77, 88, 99, 100)
+        with mock.patch('os.path.getsize', return_value=len(data)), \
+                mock.patch(NAMESPACE + '.PathManager.get_data_file_path'), \
+                mock.patch('common_func.file_manager.check_path_valid'), \
+                mock.patch('builtins.open', side_effect=OSError), \
+                mock.patch(NAMESPACE + '.logging.error'):
+            check = ParsingAICoreSampleData(self.file_list, CONFIG)
+            check.read_binary_data(binary_data_path)
+        with mock.patch('os.path.getsize', return_value=len(data)), \
+                mock.patch(NAMESPACE + '.PathManager.get_data_file_path'), \
+                mock.patch(NAMESPACE + '.OffsetCalculator.pre_process', return_value=data), \
+                mock.patch('common_func.file_manager.check_path_valid'), \
+                mock.patch('os.path.join', return_value='test\\test'), \
+                mock.patch('builtins.open', mock.mock_open(read_data=data)):
+            check = ParsingAICoreSampleData(self.file_list, CONFIG)
+            check.read_binary_data(binary_data_path)
+
     def test_start_parsing_data_file(self):
         InfoJsonReaderManager(info_json=InfoJson(devices='0')).process()
         with mock.patch('os.path.join', return_value='test\\test'), \

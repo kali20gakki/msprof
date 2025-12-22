@@ -25,6 +25,9 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msvp_common import path_check
 from common_func.path_manager import PathManager
+from common_func.platform.chip_manager import ChipManager
+from msmodel.stars.ffts_pmu_model import V6PmuViewModel
+from common_func.profiling_scene import ProfilingScene
 
 
 class AiStackDataCheckManager(DataCheckManager):
@@ -63,8 +66,8 @@ class AiStackDataCheckManager(DataCheckManager):
         """
         The data path contain l2_cache data or not
         """
-        return cls.check_data_exist(result_dir, file_name_manager.get_l2_cache_compiles(),
-                                    device_id=device_id)
+        return (cls.check_data_exist(result_dir, file_name_manager.get_l2_cache_compiles(), device_id=device_id)
+                or cls.check_data_exist(result_dir, file_name_manager.get_soc_pmu_compiles(), device_id=device_id))
 
     @classmethod
     def contain_ai_core_sample_based(cls: any, result_dir: str, device_id: any = None) -> bool:
@@ -316,8 +319,10 @@ class AiStackDataCheckManager(DataCheckManager):
         :param device_id: device id
         :return: if contained biu data, true or false
         """
-        return cls.check_data_exist(result_dir, file_name_manager.get_biu_compiles(),
-                                    device_id=device_id)
+        return cls._check_output(result_dir, device_id) and \
+            DBManager.check_tables_in_db(PathManager.get_db_path(result_dir, DBNameConstant.DB_BIU_PERF),
+                                         DBNameConstant.TABLE_BIU_INSTR_STATUS) or \
+            cls.check_data_exist(result_dir, file_name_manager.get_biu_compiles(), device_id=device_id)
 
     @classmethod
     def contain_op_mem_data(cls: any, result_dir: str, device_id: int = None) -> bool:
@@ -377,6 +382,42 @@ class AiStackDataCheckManager(DataCheckManager):
         """
         return cls.check_data_exist(result_dir, file_name_manager.get_ge_static_op_mem_compiles(),
                                     device_id=None)
+
+    @classmethod
+    def contain_block_log_data(cls: any, result_dir: str, device_id: any = None) -> bool:
+        """
+        The data path contain block log data or not
+        """
+        if not ChipManager().is_chip_v6():
+            return False
+
+        with V6PmuViewModel(result_dir) as _model:
+            if _model.check_table():
+                return True
+
+        return cls._check_output(result_dir, device_id) and \
+            DBManager.check_tables_in_db(PathManager.get_db_path(result_dir, DBNameConstant.DB_SOC_LOG),
+                                         DBNameConstant.TABLE_BLOCK_LOG)
+
+    @classmethod
+    def contain_ub_data(cls: any, result_dir: str, device_id: any = None) -> bool:
+        """
+        The data path contain ub data or not
+        """
+        if not ChipManager().is_chip_v6():
+            return False
+
+        return cls._check_output(result_dir, device_id) and \
+            DBManager.check_tables_in_db(PathManager.get_db_path(result_dir, DBNameConstant.DB_UB),
+                                         DBNameConstant.TABLE_UB_BW)
+
+    @classmethod
+    def contain_ccu_mission_data(cls: any, result_dir: str, device_id: any = None) -> bool:
+        """
+        The data path contain ccu mission data or not
+        """
+        return cls.check_data_exist(result_dir, file_name_manager.get_ccu_mission_compiles(),
+                                    device_id=device_id)
 
     @classmethod
     def _contain_stars_profiler_data(cls: any, result_dir: str, device_id: int = None) -> bool:

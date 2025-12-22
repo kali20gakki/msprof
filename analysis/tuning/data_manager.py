@@ -15,15 +15,15 @@
 # -------------------------------------------------------------------------
 
 import logging
-import os
 import sqlite3
-from abc import ABC, abstractmethod
+from abc import ABC
+from abc import abstractmethod
 from collections import defaultdict
 
 from common_func.ai_stack_data_check_manager import AiStackDataCheckManager
-from common_func.common import CommonConstant
-from common_func.config_mgr import ConfigMgr
+from common_func.platform.ai_core_metrics_manager import AiCoreMetricsManager
 from common_func.common_prof_rule import CommonProfRule
+from common_func.config_mgr import ConfigMgr
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
@@ -326,7 +326,7 @@ class ModelSummaryTuningDataHandle(OpSummaryTuningDataHandle):
         then summary task duration time by different bound type
         """
         param, op_data = args
-        ai_core_metrics_set = {Constant.PMU_PIPE, Constant.PMU_PIPE_EXCT}
+        ai_core_metrics_set = {AiCoreMetricsManager.PMU_PIPE, AiCoreMetricsManager.PMU_PIPE_EXCT}
         sample_config = param.get(StrConstant.SAMPLE_CONFIG, {})
         if sample_config.get(StrConstant.AI_CORE_PROFILING_METRICS, '') not in ai_core_metrics_set:
             return []

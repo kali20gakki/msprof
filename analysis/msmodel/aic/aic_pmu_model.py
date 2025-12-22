@@ -16,7 +16,6 @@
 
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
-from common_func.msvp_common import MsvpCommonConst
 from common_func.path_manager import PathManager
 from mscalculate.aic.aic_utils import AicPmuUtils
 from msmodel.interface.parser_model import ParserModel
@@ -38,7 +37,7 @@ class AicPmuModel(ParserModel):
         :return:
         """
         self.clear()
-        aic_profiling_events = get_metrics_from_sample_config(self.result_dir, cfg_name="ai_core")
+        aic_profiling_events = get_metrics_from_sample_config(self.result_dir)
         column_list = AicPmuUtils.remove_unused_column(aic_profiling_events)
         create_metric_table(self.conn, column_list, DBNameConstant.TABLE_METRIC_SUMMARY)
 

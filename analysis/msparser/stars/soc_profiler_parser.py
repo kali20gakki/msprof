@@ -27,4 +27,5 @@ class SocProfilerParser(StarsLogCalCulator):
         super().__init__(file_list, sample_config)
         self._file_list = file_list.get(DataTag.SOC_PROFILER, [])
         self._file_list.sort(key=lambda x: int(x.split("_")[-1]))
+        self._fmt_size = self.DEFAULT_FMT_SIZE
 

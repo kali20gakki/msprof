@@ -17,6 +17,7 @@
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from msmodel.interface.parser_model import ParserModel
+from msmodel.interface.view_model import ViewModel
 
 
 class QosModel(ParserModel):
@@ -27,10 +28,28 @@ class QosModel(ParserModel):
     def __init__(self: any, result_dir: str, db_name: str, table_list: list) -> None:
         super().__init__(result_dir, db_name, table_list)
 
-    def flush(self: any, data_list: list, table_name: str) -> None:
+    def flush(self: any, data_list: list) -> None:
         """
         flush qos data to db
         :param data_list: qos data list
         :return: None
         """
-        self.insert_data_to_db(table_name, data_list)
+        self.insert_data_to_db(DBNameConstant.TABLE_QOS_BW, data_list)
+
+
+class QosViewModel(ViewModel):
+    """
+    QoS view model class
+    """
+
+    def __init__(self: any, result_dir: str, db_name: str, table_list: list) -> None:
+        super().__init__(result_dir, db_name, table_list)
+
+    def get_timeline_data(self: any) -> list:
+        """
+        get qos bandwidth data
+        :return: list
+        """
+        sql = "select timestamp, die_id, bw1, bw2, bw3, bw4, bw5, bw6, bw7, bw8, bw9, bw10 from {};".format(
+            DBNameConstant.TABLE_QOS_BW)
+        return DBManager.fetch_all_data(self.cur, sql)

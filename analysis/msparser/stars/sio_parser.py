@@ -16,9 +16,11 @@
 
 from abc import abstractmethod
 
+from common_func.platform.chip_manager import ChipManager
 from msmodel.stars.sio_model import SioModel
 from msparser.interface.istars_parser import IStarsParser
-from profiling_bean.stars.sio_bean import SioDecoder
+from profiling_bean.stars.sio_bean import SioDecoderImpl
+from profiling_bean.stars.sio_bean import SioDecoderV6
 
 
 class SioParser(IStarsParser):
@@ -29,7 +31,7 @@ class SioParser(IStarsParser):
     def __init__(self: any, result_dir: str, db: str, table_list: list) -> None:
         super().__init__()
         self._model = SioModel(result_dir, db, table_list)
-        self._decoder = SioDecoder
+        self._decoder = SioDecoderV6 if ChipManager().is_chip_v6() else SioDecoderImpl
         self._data_list = []
 
     @property

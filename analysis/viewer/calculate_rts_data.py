@@ -33,6 +33,7 @@ from common_func.msvp_common import config_file_obj
 from common_func.msvp_common import MsvpCommonConst
 from common_func.msvp_common import error
 from common_func.path_manager import PathManager
+from common_func.platform.ai_core_metrics_manager import AiCoreMetricsManager
 from common_func.utils import Utils
 from framework.load_info_manager import LoadInfoManager
 from mscalculate.calculate_ai_core_data import CalculateAiCoreData
@@ -448,8 +449,7 @@ def get_limit_and_offset(result_dir: str, iter_range: IterationRange) -> list:
 
 
 def get_metrics_from_sample_config(project_path: str,
-                                   metrics_type: str = StrConstant.AI_CORE_PROFILING_METRICS,
-                                   cfg_name: str = MsvpCommonConst.AI_CORE) -> list:
+                                   metrics_type: str = StrConstant.AI_CORE_PROFILING_METRICS) -> list:
     """
     get ai core metric from sample json.
     """
@@ -458,28 +458,28 @@ def get_metrics_from_sample_config(project_path: str,
     if judge_custom_pmu_scene(sample_config, metrics_type=metrics_type):
         metrics.extend(sample_config.get('ai_core_profiling_events').replace('0x', 'r').split(','))
         return metrics
-
-    metrics_list = []
-    if cfg_name == MsvpCommonConst.AI_CORE:
-        metrics_list = Constant.AICORE_METRICS_LIST
+    metrics_list = AiCoreMetricsManager.AICORE_METRICS_LIST
 
     if sample_config.get(metrics_type) not in metrics_list:
         return []
     sample_metrics = metrics_list.get(sample_config.get(metrics_type)).split(",")
     for tmp in sample_metrics:
-        if tmp.lower() not in \
-                Utils.generator_to_list(item[0] for item in config_file_obj(file_name=cfg_name).items('metrics')):
-            logging.error(CalculateRtsDataConst.FILE_NAME, 'Invalid metric {} .'.format(tmp))
+        if tmp.lower() not in Utils.generator_to_list(
+                item[0] for item in config_file_obj(file_name=MsvpCommonConst.AI_CORE).items('metrics')
+        ):
+            logging.error('Invalid metric {} .'.format(tmp))
     new_metrics = []
-    if sample_config.get(metrics_type) in {Constant.PMU_PIPE, Constant.PMU_PIPE_EXCT, Constant.PMU_PIPE_EXECUT,
-                                           Constant.PMU_SCALAR_RATIO, Constant.PMU_PIPE_STALL_CYCLE}:
+    if sample_config.get(metrics_type) in {AiCoreMetricsManager.PMU_PIPE, AiCoreMetricsManager.PMU_PIPE_EXCT,
+                                           AiCoreMetricsManager.PMU_PIPE_EXECUT,
+                                           AiCoreMetricsManager.PMU_SCALAR_RATIO,
+                                           AiCoreMetricsManager.PMU_PIPE_STALL_CYCLE}:
         for metric in sample_metrics[:-1]:
             if metric.endswith(StrConstant.RATIO_EXTRA_NAME):
                 new_metrics.append(metric[:-NumberConstant.EXTRA_RATIO_NAME_LEN] + "time")
             elif metric.endswith(StrConstant.RATIO_NAME):
                 new_metrics.append(metric[:-NumberConstant.RATIO_NAME_LEN] + "time")
             new_metrics.append(metric)
-        if sample_config.get(metrics_type) == Constant.PMU_PIPE_EXECUT:
+        if sample_config.get(metrics_type) == AiCoreMetricsManager.PMU_PIPE_EXECUT:
             new_metrics.append(sample_metrics[-1][:-NumberConstant.RATIO_NAME_LEN] + "time")
         new_metrics.append(sample_metrics[-1])
     sample_metrics = new_metrics if new_metrics else sample_metrics

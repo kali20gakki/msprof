@@ -216,6 +216,10 @@ class PmuCalculateFunc:
         return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
 
     @staticmethod
+    def stu_pmu_wctl_ub_cflt(pmu, task_cyc):
+        return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
+
+    @staticmethod
     def ub_read_bw(pmu, task_cyc, freq):
         return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 4.0, pmu, task_cyc, freq)
 
@@ -303,6 +307,10 @@ class PmuCalculateFunc:
     def ub_write_bw_scalar(pmu, task_cyc, freq):
         return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 128.0, 1.0, pmu, task_cyc, freq)
 
+    @staticmethod
+    def fixp2ub_write_bw(pmu, task_cyc, freq):
+        return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 8.0, pmu, task_cyc, freq)
+
 
 class Constant:
     """
@@ -313,22 +321,17 @@ class Constant:
         "0x59", "0x5b", "0x5c", "0x62", "0x6a", "0x6c", "0x71",
         "0x74", "0x77", "0x78", "0x79", "0x7c", "0x7d", "0x7e",
         "0xf6", "0xfb", "0xfc", "0x90", "0x91", "0x9c", "0x9d",
-        "0xbf"
+        "0xbf", "0x00", "0x88", "0x89", "0x8a", "0x74", "0x75",
+        "0x97"
     ]
-    PMU_PIPE = 'PipeUtilization'
-    PMU_PIPE_EXCT = 'PipeUtilizationExct'
-    PMU_PIPE_EXECUT = 'PipelineExecuteUtilization'
-    PMU_ARITH = 'ArithmeticUtilization'
-    PMU_MEM = 'Memory'
-    PMU_MEM_L0 = 'MemoryL0'
-    PMU_RESOURCE = 'ResourceConflictRatio'
-    PMU_MEM_UB = 'MemoryUB'
-    PMU_L2_CACHE = 'L2Cache'
-    PMU_MEM_ACCESS = 'MemoryAccess'
-    PMU_PIPE_STALL_CYCLE = 'PipeStallCycle'
-    PMU_SCALAR_RATIO = 'ScalarRatio'
+    SOC_PMU_EVENTS = [
+        "0x2", "0x8a", "0x8b", "0x8b", "0x8c", "0x8d"
+    ]
 
-    INVALID_INDEX = -1
+    INVALID_INDEX_DICT = {
+        "coefficient": -1,
+        "index": -1
+    }
 
     AI_CORE_CALCULATION_FORMULA = {
         "mac_fp16_ratio": PmuCalculateFunc.mac_fp16_ratio,
@@ -403,36 +406,10 @@ class Constant:
         "ub_write_bw_vector(GB/s)": PmuCalculateFunc.ub_write_bw_vector,
         "ub_read_bw_scalar(GB/s)": PmuCalculateFunc.ub_read_bw_scalar,
         "ub_write_bw_scalar(GB/s)": PmuCalculateFunc.ub_write_bw_scalar,
+        "fixp2ub_write_bw(GB/s)": PmuCalculateFunc.fixp2ub_write_bw,
     }
 
     AICORE_PIPE_LIST = ["vec_time", "mac_time", "scalar_time", "mte1_time", "mte2_time", "mte3_time"]
-
-    AICORE_METRICS_LIST = {
-        PMU_PIPE_EXCT: "mac_ratio_extra,scalar_ratio,mte1_ratio_extra,"
-                       "mte2_ratio,fixpipe_ratio,icache_miss_rate",
-        PMU_PIPE_EXECUT: "vec_exe_ratio,mac_exe_ratio,scalar_exe_ratio,mte1_exe_ratio,"
-                         "mte2_exe_ratio,mte3_exe_ratio,fixpipe_exe_ratio",
-        PMU_ARITH: "mac_fp16_ratio,mac_int8_ratio,vec_fp32_ratio,"
-                   "vec_fp16_ratio,vec_int32_ratio,vec_misc_ratio",
-        PMU_PIPE: "vec_ratio,mac_ratio,scalar_ratio,mte1_ratio,"
-                  "mte2_ratio,mte3_ratio,icache_miss_rate",
-        PMU_MEM: "ub_read_bw(GB/s),ub_write_bw(GB/s),l1_read_bw(GB/s),"
-                 "l1_write_bw(GB/s),l2_read_bw(GB/s),l2_write_bw(GB/s),"
-                 "main_mem_read_bw(GB/s),main_mem_write_bw(GB/s)",
-        PMU_MEM_L0: "l0a_read_bw(GB/s),l0a_write_bw(GB/s),l0b_read_bw(GB/s),"
-                    "l0b_write_bw(GB/s),l0c_read_bw(GB/s),l0c_write_bw(GB/s),"
-                    "l0c_read_bw_cube(GB/s),l0c_write_bw_cube(GB/s)",
-        PMU_RESOURCE: "vec_bankgroup_cflt_ratio,vec_bank_cflt_ratio,"
-                      "vec_resc_cflt_ratio",
-        PMU_MEM_UB: "ub_read_bw_mte(GB/s),ub_write_bw_mte(GB/s),"
-                    "ub_read_bw_vector(GB/s),ub_write_bw_vector(GB/s),"
-                    "ub_read_bw_scalar(GB/s),ub_write_bw_scalar(GB/s)",
-        PMU_L2_CACHE: "write_cache_hit,write_cache_miss_allocate,"
-                      "r0_read_cache_hit,r0_read_cache_miss_allocate,"
-                      "r1_read_cache_hit,r1_read_cache_miss_allocate",
-        PMU_MEM_ACCESS: "read_main_memory_datas(KB),write_main_memory_datas(KB),gm_to_l1_datas(KB),"
-                        "l0c_to_l1_datas(KB),l0c_to_gm_datas(KB),gm_to_ub_datas(KB),ub_to_gm_datas(KB)"
-    }
 
     # add default limit for reader buffer size ->8196  * 1024 Byte
     MAX_READ_LINE_BYTES = 8196 * 1024
@@ -452,6 +429,8 @@ class Constant:
     CHIP_V1_1_1 = "7"
     CHIP_V1_1_2 = "8"
     CHIP_V1_1_3 = "11"
+    CHIP_V6_1_0 = "15"
+    CHIP_V6_2_0 = "16"
 
     MIX_OP_AND_GRAPH = "mix_operator_and_graph"
     STEP_INFO = "step_info"
@@ -475,6 +454,7 @@ class Constant:
     BIT_TO_BYTE = 8
     MBPS_TO_BYTES = MILLION // BIT_TO_BYTE
     L2_CACHE_ITEM = 8
+    SOC_PMU_ITEM = 8
     HEX_NUMBER = 16
     DVPP_TYPE_NAME = ['VDEC', 'JPEGD', 'PNGD', 'JPEGE', 'VPC']
     FILTER_DIRS = [
@@ -549,6 +529,10 @@ class Constant:
     KERNEL_MIX_AIC = "KERNEL_MIX_AIC"
     KERNEL_MIX_AIV = "KERNEL_MIX_AIV"
     COMP_TASK_TYPE = [KERNEL_AICORE, KERNEL_AIVEC, KERNEL_FFTS_PLUS_TASK_TYPE, KERNEL_MIX_AIC, KERNEL_MIX_AIV]
+
+    # data type
+    UINT16_MAX = 65535
+    UINT32_MAX = 4294967295
 
     def get_constant_class_name(self: any) -> any:
         """

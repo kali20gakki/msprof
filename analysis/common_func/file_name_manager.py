@@ -211,6 +211,8 @@ class FileNameManagerConstant:
 
     # biu perf
     BIU_PERF_FILE_PATTERN = r"^instr\.group_\d+_(aic|aiv0|aiv1).\d+.slice_\d+"
+    BIU_PERF_FILE_PATTERN_CHIP6 = r"^instr\.biu_perf_group\d+_(aic|aiv0|aiv1)\.\d+.slice_\d+"
+
 
     # parallel
     PARALLEL_STRATEGY_FILE_PATTERN = r"^Framework\.parallel_strategy\.(\d+)\.slice_\d+"
@@ -223,6 +225,9 @@ class FileNameManagerConstant:
 
     # freq
     FREQ_FILE_PATTERN = r"lpmFreqConv\.data\.(\d+)\.slice_\d+"
+
+    # lpm info
+    LPM_INFO_FILE_PATTERN = r"lpmInfoConv\.data\.(\d+)\.slice_\d+"
 
     # qos
     QOS_DATA_PATTERN = r"^qos\.data\.(\d+)\.slice_\d+"
@@ -252,6 +257,20 @@ class FileNameManagerConstant:
 
     # netdev stats
     NETDEV_STATS_FILE_PATTERN = r"^netdev_stats\.data\.(\d+)\.slice_\d+"
+
+    # ub
+    UB_DATA_PATTERN = r"^ub\.data\.(\d+)\.slice_\d+"
+
+    # ccu
+    # ccu(0|1) means die0/die1
+    CCU_MISSION_PATTERN = r"^ccu(0|1)\.instr\.(\d+)\.slice_\d+"
+    CCU_CHANNEL_PATTERN = r"^ccu(0|1)\.stat\.(\d+)\.slice_\d+"
+    CCU_TASK_INFO_PATTERN = r"^(unaging|aging)\.additional\.ccu_task_info\.slice_\d+"
+    CCU_GROUP_INFO_PATTERN = r"^(unaging|aging)\.additional\.ccu_group_info\.slice_\d+"
+    CCU_WAIT_SIGNAL_INFO_PATTERN = r"^(unaging|aging)\.additional\.ccu_wait_signal_info\.slice_\d+"
+
+    # soc pmu
+    SOC_PMU_PATTEN = r"^socpmu\.data\.(\d+)\.slice_\d+"
 
     # stream expand spec info
     STREAM_EXPAND_SPEC_INFO_PATTERN = r"^(aging|unaging)\.compact\.expand_stream_spec\.slice_\d+"
@@ -829,7 +848,8 @@ def get_biu_compiles() -> tuple:
     get biu perf files regex compiles
     :return: helper biu perf files regex
     """
-    return (re.compile(FileNameManagerConstant.BIU_PERF_FILE_PATTERN),)
+    return (re.compile(FileNameManagerConstant.BIU_PERF_FILE_PATTERN),
+            re.compile(FileNameManagerConstant.BIU_PERF_FILE_PATTERN_CHIP6))
 
 
 def get_parallel_strategy_compiles() -> tuple:
@@ -873,6 +893,16 @@ def get_freq_compiles() -> tuple:
     :return: freq files regex
     """
     return (re.compile(FileNameManagerConstant.FREQ_FILE_PATTERN),
+            )
+
+
+def get_lpm_info_compiles() -> tuple:
+    """
+    get lpm info && freq files regex compiles
+    :return: lpm info && freq files regex
+    """
+    return (re.compile(FileNameManagerConstant.LPM_INFO_FILE_PATTERN),
+            re.compile(FileNameManagerConstant.FREQ_FILE_PATTERN),
             )
 
 
@@ -1035,3 +1065,60 @@ def get_netdev_stats_compiles() -> tuple:
     get netdev stats compiles
     """
     return (re.compile(FileNameManagerConstant.NETDEV_STATS_FILE_PATTERN),)
+
+
+def get_ub_compiles() -> tuple:
+    """
+    get ub regex compiles
+    :return: ub data files regex
+    """
+    return (re.compile(FileNameManagerConstant.UB_DATA_PATTERN),)
+
+
+def get_ccu_mission_compiles() -> tuple:
+    """
+    get ccu mission regex compiles
+    :return: ccu mission data regex
+    """
+    return (re.compile(FileNameManagerConstant.CCU_MISSION_PATTERN),)
+
+
+def get_ccu_channel_compiles() -> tuple:
+    """
+    get ccu channel regex compiles
+    :return: ccu channel data regex
+    """
+    return (re.compile(FileNameManagerConstant.CCU_CHANNEL_PATTERN),)
+
+
+def get_soc_pmu_compiles() -> tuple:
+    """
+    get soc pmu regex compiles
+    :return: soc pmu data regex
+    """
+    return (re.compile(FileNameManagerConstant.SOC_PMU_PATTEN),)
+
+
+
+def get_ccu_task_info_compiles() -> tuple:
+    """
+    get ccu task info regex compiles
+    :return: ccu task info data regex
+    """
+    return (re.compile(FileNameManagerConstant. CCU_TASK_INFO_PATTERN),)
+
+
+def get_ccu_group_info_compiles() -> tuple:
+    """
+    get ccu group info regex compiles
+    :return: ccu group info data regex
+    """
+    return (re.compile(FileNameManagerConstant. CCU_GROUP_INFO_PATTERN),)
+
+
+def get_ccu_wait_signal_info_compiles() -> tuple:
+    """
+    get ccu wait signal info regex compiles
+    :return: ccu wait signal info data regex
+    """
+    return (re.compile(FileNameManagerConstant. CCU_WAIT_SIGNAL_INFO_PATTERN),)

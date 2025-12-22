@@ -79,3 +79,19 @@ class StepTrace(StructDecoder):
         :return: core_id
         """
         return self._tag_id
+
+
+class StepTraceChipV6(StepTrace):
+    """
+    step trace for chip v6
+    """
+
+    def __init__(self: any, *args: any) -> None:
+        super().__init__(*args)
+        step_trace = args[0]
+        self._timestamp = step_trace[4]
+        self._index_id = step_trace[5]
+        self._model_id = step_trace[6]
+        self._tag_id = step_trace[7]
+        self._stream_id = step_trace[8]
+        self._task_id = step_trace[9]

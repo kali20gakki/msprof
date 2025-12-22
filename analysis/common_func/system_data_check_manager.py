@@ -17,6 +17,9 @@
 from common_func import file_name_manager
 from common_func.config_mgr import ConfigMgr
 from common_func.data_check_manager import DataCheckManager
+from common_func.db_name_constant import DBNameConstant
+from common_func.msvp_common import path_check
+from common_func.path_manager import PathManager
 
 
 class SystemDataCheckManager(DataCheckManager):
@@ -186,5 +189,31 @@ class SystemDataCheckManager(DataCheckManager):
         """
         The data path contain qos data or not
         """
-        return cls.check_data_exist(result_dir, file_name_manager.get_qos_compiles(),
+        return (cls.check_data_exist(result_dir, file_name_manager.get_qos_compiles(), device_id=device_id) or
+                cls.check_data_exist(result_dir, file_name_manager.get_soc_profiler_compiles(),
+                                     device_id=device_id)) and \
+            path_check(PathManager.get_db_path(result_dir, DBNameConstant.DB_QOS))
+
+    @classmethod
+    def contain_ccu_channel_data(cls: any, result_dir: str, device_id: any = None) -> bool:
+        """
+        The data path contain ccu channel data or not
+        """
+        return cls.check_data_exist(result_dir, file_name_manager.get_ccu_channel_compiles(),
+                                    device_id=device_id)
+
+    @classmethod
+    def contain_soc_pmu_data(cls: any, result_dir: str, device_id: any = None) -> bool:
+        """
+        The data path contain soc pmu data or not
+        """
+        return cls.check_data_exist(result_dir, file_name_manager.get_soc_pmu_compiles(),
+                                    device_id=device_id)
+
+    @classmethod
+    def contain_lpm_data(cls: any, result_dir: str, device_id: any = None) -> bool:
+        """
+        The data path contain lpm data or not
+        """
+        return cls.check_data_exist(result_dir, file_name_manager.get_lpm_info_compiles(),
                                     device_id=device_id)

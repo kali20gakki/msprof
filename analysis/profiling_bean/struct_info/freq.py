@@ -19,29 +19,7 @@ import struct
 
 from msparser.data_struct_size_constant import StructFmt
 from msparser.interface.idata_bean import IDataBean
-
-
-class LpmData:
-    """
-    lpm data struct
-    """
-    def __init__(self: any, syscnt: int, freq: int) -> None:
-        self._syscnt = syscnt
-        self._freq = freq
-
-    @property
-    def syscnt(self: any) -> int:
-        """
-        cycle
-        """
-        return self._syscnt
-
-    @property
-    def freq(self: any) -> int:
-        """
-        frequency, MHz
-        """
-        return self._freq
+from profiling_bean.struct_info.lpm_info_struct import LpmData
 
 
 class FreqLpmConvBean(IDataBean):

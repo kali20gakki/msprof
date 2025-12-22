@@ -82,4 +82,14 @@ class ExportDataType(Enum):
     AICPU_MI = 65
     QOS = 66
     STATIC_OP_MEM = 67
+    BLOCK_DETAIL = 68
+    UB = 69
+    CCU_MISSION = 70
+    CCU_CHANNEL = 71
+    CCU_TASK_INFO = 72
+    CCU_GROUP_INFO = 73
+    CCU_WAIT_SIGNAL_INFO = 74
+    SOC_PMU = 75
+    FREQ = 76
+    VOLTAGE = 77
     MSPROF = 100

@@ -209,6 +209,12 @@ class MsProfExportDataConfig(MetaConfig):
         'msprof': [
             ('handler', '_get_bulk_data')
         ],
+        'freq': [
+            ('handler', '_get_freq_data')
+        ],
+        'voltage': [
+            ('handler', '_get_voltage_data')
+        ],
         'ffts_sub_task_time': [
             ('handler', '_get_task_timeline'),
             ('db', DBNameConstant.DB_SOC_LOG),
@@ -301,5 +307,39 @@ class MsProfExportDataConfig(MetaConfig):
         'static_op_mem': [
             ('handler', '_get_static_op_mem_data'),
             ('headers', 'Op Name,Model Name,Graph ID,Node Index Start,Node Index End,Size(KB)')
-        ]
+        ],
+        'block_detail': [
+            ('handler', '_get_block_detail_data'),
+            ('db', DBNameConstant.DB_SOC_LOG),
+            ('table', DBNameConstant.TABLE_BLOCK_LOG)
+        ],
+        'ub': [
+            ('handler', '_get_ub_data'),
+            ('db', DBNameConstant.DB_UB),
+            ('table', DBNameConstant.TABLE_UB_BW),
+            ('headers', 'PortId,TimeStamp,UDMARxPortBandWidth(MB/s),UDMATxPortBandWidth(MB/s),'
+                        'UNICRxPortBandWidth(MB/s),UNICTxPortBandWidth(MB/s),UNICRxPacketRate(Packet/us),UNICRxBytes(Byte),'
+                        'UNICRxPackets(Packet),UNICRxErrors(Packet),UNICRxDropped(Packet),'
+                        'UNICTxPacketRate(Packet/us),UNICTxBytes(Byte),UNICTxPackets(Packet),UNICTxErrors(Packet),'
+                        'UNICTxDropped(Packet)')
+        ],
+        'ccu_mission': [
+            ('handler', '_get_ccu_mission_data'),
+            ('db', DBNameConstant.DB_CCU),
+            ('table', DBNameConstant.TABLE_CCU_MISSION),
+            ('headers', 'Stream ID,Task Id,Instruction ID,Instruction Start Time(us),Instruction Duration(us),'
+                        'Notify Instruction ID,Notify Rank ID,Notify Duration(us)')
+        ],
+        'ccu_channel': [
+            ('handler', '_get_ccu_channel_data'),
+            ('db', DBNameConstant.DB_CCU),
+            ('table', DBNameConstant.TABLE_CCU_CHANNEL),
+            ('headers', 'Channel Id,Timestamp(us),Max Bandwidth(MB/s),Min Bandwidth(MB/s),Avg Bandwidth(MB/s)')
+        ],
+        'soc_pmu': [
+            ('handler', '_get_soc_pmu_data'),
+            ('db', DBNameConstant.DB_SOC_PMU),
+            ('table', DBNameConstant.TABLE_SOC_PMU_SUMMARY),
+            ('headers', 'Stream Id,Task Id,TLB Hit Rate,TLB Miss Rate')
+        ],
     }

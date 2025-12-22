@@ -26,6 +26,7 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.ge_enum_constant import GeTaskType
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_object import HighPerfDict
+from common_func.platform.chip_manager import ChipManager
 from mscalculate.cann.additional_record import AdditionalRecord
 from mscalculate.cann.cann_event_generator import CANNThreadDB
 from mscalculate.cann.event import Event
@@ -407,7 +408,7 @@ class TaskGear(CANNGear):
         request_id = model_dto.request_id if model_dto.request_id is not None else -1
         # 根据task type是否在白名单内对context_ids和connection_id进行处理，以应对Node@Launch下有多个Task的问题
         # 对于在白名单内的task正常生成context_ids，反之使用对应的默认值
-        if task_track_dto.task_type in self.CONTEXT_ID_WHITE_LIST:
+        if task_track_dto.task_type in self.CONTEXT_ID_WHITE_LIST and not ChipManager().is_chip_v6():
             context_ids = self.get_context_ids(call_stack, task_track_dto.task_type)
         else:
             context_ids = str(NumberConstant.DEFAULT_GE_CONTEXT_ID)
@@ -643,7 +644,8 @@ class TaskGear(CANNGear):
         task_type = Constant.NA if is_level0 else self.RTS_TASK_TYPE_MAP.get(rts_trk_dto.task_type,
                                                                              rts_trk_dto.task_type)
         op_type = Constant.NA if is_level0 else rts_trk_dto.kernel_name
-        context_id = 0 if task_type in [GeTaskType.MIX_AIC.name, GeTaskType.MIX_AIV.name] else self.INVALID_CONTEXT_ID
+        context_id = 0 if (task_type in [GeTaskType.MIX_AIC.name, GeTaskType.MIX_AIV.name] and
+                           not ChipManager().is_chip_v6()) else self.INVALID_CONTEXT_ID
         self.task_info.append([self.INVALID_MODEL_ID, rts_trk_dto.kernel_name,
                                rts_trk_dto.stream_id, rts_trk_dto.task_id, 0, 0,
                                Constant.NA, task_type, op_type, -1, rts_trk_dto.thread_id,

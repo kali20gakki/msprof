@@ -23,7 +23,6 @@ from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
-from common_func.msvp_common import MsvpCommonConst
 from common_func.path_manager import PathManager
 from common_func.file_manager import FileOpen
 from common_func.profiling_scene import ProfilingScene
@@ -62,8 +61,7 @@ class AicCalculator(PmuCalculator, MsMultiProcess):
         self.aic_calculator = CalculateAiCoreData(self._project_path)
         # table_name_list[:2]:'total_time(ms)', 'total_cycles', unused
         self.table_name_list = get_metrics_from_sample_config(self._project_path,
-                                                              StrConstant.AI_CORE_PROFILING_METRICS,
-                                                              MsvpCommonConst.AI_CORE)[2:]
+                                                              StrConstant.AI_CORE_PROFILING_METRICS)[2:]
 
     def calculate(self: any) -> None:
         """

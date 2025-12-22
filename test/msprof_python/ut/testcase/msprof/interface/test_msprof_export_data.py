@@ -698,6 +698,36 @@ class TestMsProfExportDataUtils(unittest.TestCase):
         self.assertEqual(3, len(res))
         self.assertEqual([], res[1])
 
+    def test_get_ub_data_should_return_empty_when_no_data(self):
+        InfoConfReader()._info_json = {"pid": 123}
+        summary_params = {"export_type": "summary"}
+        timeline_params = {"export_type": "timeline"}
+        # test timeline
+        with mock.patch(NAMESPACE + '.UBViewer.get_timeline_data', return_value={}):
+            res = MsProfExportDataUtils._get_ub_data({}, timeline_params)
+        self.assertEqual(res, {})
+        # test timeline
+        with mock.patch(NAMESPACE + '.UBViewer.get_summary_data', return_value={}):
+            res = MsProfExportDataUtils._get_ub_data({}, summary_params)
+        self.assertEqual(res, {})
+
+    def test_get_freq_data_should_return_empty_when_chip_not_support_freq(self):
+        InfoConfReader()._info_json = {"pid": 123}
+        timeline_params = {"export_type": "timeline"}
+        origin_chip_id = ChipManager().get_chip_id()
+        ChipManager().chip_id = ChipModel.CHIP_V2_1_0
+        res = MsProfExportDataUtils._get_freq_data({}, timeline_params)
+        self.assertEqual(res, [])
+        ChipManager().chip_id = origin_chip_id
+
+    def test_get_voltage_data_should_return_empty_when_chip_not_support_voltage(self):
+        InfoConfReader()._info_json = {"pid": 123}
+        timeline_params = {"export_type": "timeline"}
+        origin_chip_id = ChipManager().get_chip_id()
+        ChipManager().chip_id = ChipModel.CHIP_V2_1_0
+        res = MsProfExportDataUtils._get_voltage_data({}, timeline_params)
+        self.assertEqual(res, [])
+        ChipManager().chip_id = origin_chip_id
 
 if __name__ == '__main__':
     unittest.main()

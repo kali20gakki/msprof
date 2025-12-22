@@ -16,6 +16,7 @@
 
 from common_func.db_name_constant import DBNameConstant
 from msmodel.interface.parser_model import ParserModel
+from msmodel.interface.view_model import ViewModel
 
 
 class LowPowerModel(ParserModel):
@@ -26,11 +27,22 @@ class LowPowerModel(ParserModel):
     def __init__(self: any, result_dir: str, db: str, table_list: list) -> None:
         super().__init__(result_dir, db, table_list)
 
-    def flush(self: any, data_dict: dict) -> None:
+    def flush(self: any, data_list: list) -> None:
         """
         insert lowpower sample data into database
+        这里存的timestamp不是sys cnt,而是调用time_from_syscnt返回的sys time
         """
-        self.insert_data_to_db(DBNameConstant.TABLE_LOWPOWER, data_dict.get('data_list', []))
+        self.insert_data_to_db(DBNameConstant.TABLE_LOWPOWER, data_list)
+
+
+
+class LowPowerViewModel(ViewModel):
+    """
+    lowpower sample view model class
+    """
+
+    def __init__(self: any, result_dir: str, db: str, table_list: list) -> None:
+        super().__init__(result_dir, db, table_list)
 
     def get_timeline_data(self):
         """

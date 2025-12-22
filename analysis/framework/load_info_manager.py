@@ -14,9 +14,14 @@
 # See the Mulan PSL v2 for more details.
 # -------------------------------------------------------------------------
 
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
+from common_func.platform.ai_core_metrics_manager import AiCoreMetricsManager
 from common_func.info_conf_reader import InfoConfReader
 from common_func.platform.chip_manager import ChipManager
 from common_func.profiling_scene import ProfilingScene
+from msconfig.ai_core_config import AICoreConfig
 
 
 class LoadInfoManager:
@@ -40,4 +45,6 @@ class LoadInfoManager:
         """
         InfoConfReader().load_info(result_dir)
         ChipManager().load_chip_info()
+        AiCoreMetricsManager.set_aicore_metrics_list(ChipManager().chip_id)
+        AICoreConfig.set_config_data(ChipManager().chip_id)
         ProfilingScene().init(result_dir)

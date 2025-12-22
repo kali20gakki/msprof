@@ -18,6 +18,7 @@ from abc import ABC
 
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
+from common_func.platform.chip_manager import ChipManager
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
 from msmodel.stars.sio_model import SioModel
@@ -39,6 +40,11 @@ class SioViewer(BaseViewer, ABC):
         0: "die 0",
         1: "die 1",
     }
+    ACC_ID_KEY_V6 = {
+        0: "D-DIE0",
+        2: "U-DIE0",
+        3: "U-DIE1",
+    }
 
     def __init__(self: any, configs: dict, params: dict) -> None:
         super().__init__(configs, params)
@@ -58,14 +64,15 @@ class SioViewer(BaseViewer, ABC):
         timestamp_dict = {}
         event_dict = {}
         for data in datas:
-            self._compute_bandwidth(data, event_dict, timestamp_dict)
+            self._compute_bandwidth(data, event_dict, timestamp_dict,
+                                    self.ACC_ID_KEY_V6 if ChipManager().is_chip_v6() else self.ACC_ID_KEY)
         result = list(event_dict.values())
         _trace = TraceViewManager.column_graph_trace(TraceViewHeaderConstant.COLUMN_GRAPH_HEAD_LEAST, result)
         result = TraceViewManager.metadata_event([["process_name", self.pid, self.tid, self.DATA_TYPE]])
         result.extend(_trace)
         return result
 
-    def _compute_bandwidth(self, data: list, event_dict: dict, timestamp_dict: dict):
+    def _compute_bandwidth(self, data: list, event_dict: dict, timestamp_dict: dict, die_id_key_map: dict):
         acc_id = data[self.ACC_ID]
         timestamp = data[self.TIME_STAMP]
         if acc_id in timestamp_dict and timestamp_dict[acc_id] != timestamp:
@@ -76,7 +83,7 @@ class SioViewer(BaseViewer, ABC):
             for key, value in zip(self.BANDWIDTH_TYPE, bandwidth_data):
                 tmp_key = "{}_{}".format(key, local_time)
                 if tmp_key not in event_dict:
-                    event_dict[tmp_key] = [key, local_time, self.pid, self.tid, {self.ACC_ID_KEY.get(acc_id): value}]
+                    event_dict[tmp_key] = [key, local_time, self.pid, self.tid, {die_id_key_map.get(acc_id): value}]
                 else:
-                    event_dict.get(tmp_key)[self.ARGS_INDEX][self.ACC_ID_KEY.get(acc_id)] = value
+                    event_dict.get(tmp_key)[self.ARGS_INDEX][die_id_key_map.get(acc_id)] = value
         timestamp_dict[acc_id] = timestamp

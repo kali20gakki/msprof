@@ -41,11 +41,12 @@ class L2CacheCalculator(ICalculator, MsMultiProcess):
     REQUEST_EVENTS = "request_events"
     HIT_EVENTS = "hit_events"
     VICTIM_EVENTS = "victim_events"
+    NEGATIVE_STR = "-"
     NO_EVENT_LENGTH = 3
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
         super().__init__(sample_config)
-        self._file_list = file_list.get(DataTag.L2CACHE, [])
+        self._file_list = file_list
         self._sample_config = sample_config
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
         self._cfg_parser = configparser.ConfigParser(interpolation=None)
@@ -62,7 +63,7 @@ class L2CacheCalculator(ICalculator, MsMultiProcess):
         check if event index info is valid
         """
         for index_slice in index_dict.values():
-            if Constant.INVALID_INDEX in index_slice:
+            if Constant.INVALID_INDEX_DICT in index_slice:
                 return False
         return True
 
@@ -98,7 +99,7 @@ class L2CacheCalculator(ICalculator, MsMultiProcess):
         main
         :return: None
         """
-        if not self._file_list:
+        if not self._file_list.get(DataTag.L2CACHE, []) and not self._file_list.get(DataTag.SOC_PMU, []):
             return
         db_path = PathManager.get_db_path(self._project_path, DBNameConstant.DB_L2CACHE)
         if DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_L2CACHE_SUMMARY):
@@ -123,11 +124,15 @@ class L2CacheCalculator(ICalculator, MsMultiProcess):
         raw_l2_cache_ps_data = self._model.get_all_data(DBNameConstant.TABLE_L2CACHE_PARSE)
         return raw_l2_cache_ps_data
 
-    def _get_event_index(self: any, event_type: str) -> int:
-        if event_type not in self._l2_cache_events:
-            return Constant.INVALID_INDEX
+    def _get_event_index(self: any, event_type: str):
+        abs_event_type = event_type[1:] if event_type.startswith(self.NEGATIVE_STR) else event_type
+        if abs_event_type not in self._l2_cache_events:
+            return Constant.INVALID_INDEX_DICT
         else:
-            return self._l2_cache_events.index(event_type)
+            return {
+                "coefficient": 1 if abs_event_type == event_type else -1,
+                "index": self._l2_cache_events.index(abs_event_type)
+            }
 
     def _update_event_indexes_dict(self: any, used_event_type_list: list) -> None:
         for used_event_type in used_event_type_list:
@@ -157,11 +162,11 @@ class L2CacheCalculator(ICalculator, MsMultiProcess):
         """
         for _index, l2_cache_event_item in enumerate(self._l2_cache_ps_data):
             l2_cache_event_item = l2_cache_event_item[self.NO_EVENT_LENGTH:]
-            request_event_value = sum(int(l2_cache_event_item[idx])
+            request_event_value = sum(int(l2_cache_event_item[idx['index']]) * idx['coefficient']
                                       for idx in self._event_indexes.get(self.REQUEST_EVENTS))
-            hit_event_value = sum(int(l2_cache_event_item[idx])
+            hit_event_value = sum(int(l2_cache_event_item[idx['index']]) * idx['coefficient']
                                   for idx in self._event_indexes.get(self.HIT_EVENTS))
-            victim_event_value = sum(int(l2_cache_event_item[idx])
+            victim_event_value = sum(int(l2_cache_event_item[idx['index']]) * idx['coefficient']
                                      for idx in self._event_indexes.get(self.VICTIM_EVENTS))
             # calculate hit rate and victim rate
             hit_rate = HitRateMetric(hit_event_value, request_event_value).run_rules()

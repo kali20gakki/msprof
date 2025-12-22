@@ -27,6 +27,7 @@ from msmodel.interface.view_model import ViewModel
 from msmodel.add_info.mc2_comm_info_model import Mc2CommInfoViewModel
 from profiling_bean.db_dto.time_section_dto import TimeSectionDto
 from profiling_bean.db_dto.time_section_dto import CommunicationTimeSection
+from profiling_bean.db_dto.ge_task_dto import GeTaskDto
 
 
 def filter_aiv_communication(data_list: list) -> list:
@@ -112,3 +113,13 @@ class OpSummaryModel(ViewModel, IAnalysisModel):
     def get_operator_data_separated_by_kfc_stream(self: any) -> list:
         operator_data = self.get_operator_data_by_task_type()
         return filter_aiv_communication(self.separate_kfc_stream(operator_data))
+
+    def get_op_name_from_ge_by_id(self: any) -> dict:
+        ge_data = self.get_all_data(DBNameConstant.TABLE_SUMMARY_GE, dto_class=GeTaskDto)
+        return {
+            f"{data.task_id}-{data.stream_id}-{data.context_id}-{data.batch_id}": {
+                "op_name": data.op_name,
+                "task_type": data.task_type
+            }
+            for data in ge_data
+        }

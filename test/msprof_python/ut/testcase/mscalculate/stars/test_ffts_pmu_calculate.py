@@ -19,20 +19,23 @@
 function:
 Copyright Huawei Technologies Co., Ltd. 2022-2024. All rights reserved.
 """
+import unittest
 from unittest import TestCase
 from unittest import mock
 
 from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader
+from common_func.platform.ai_core_metrics_manager import AiCoreMetricsManager
 from common_func.platform.chip_manager import ChipManager
-from common_func.profiling_scene import ProfilingScene
 from common_func.profiling_scene import ExportMode
+from common_func.profiling_scene import ProfilingScene
 from constant.constant import CONFIG
 from mscalculate.stars.ffts_pmu_calculator import FftsPmuCalculator
 from profiling_bean.prof_enum.chip_model import ChipModel
 from profiling_bean.prof_enum.data_tag import DataTag
-from profiling_bean.stars.ffts_pmu import FftsPmuBean
 from profiling_bean.stars.ffts_block_pmu import FftsBlockPmuBean
+from profiling_bean.stars.ffts_pmu import FftsPmuBean
+from profiling_bean.stars.pmu_bean_v6 import PmuBeanV6
 
 NAMESPACE = 'mscalculate.stars.ffts_pmu_calculator'
 
@@ -193,6 +196,7 @@ class TestFftsPmuCalculator(TestCase):
             check._parse_all_file.assert_not_called()
 
     def test_save_no_data(self):
+        ChipManager().chip_id = ChipModel.CHIP_V1_1_0
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
                 mock.patch(NAMESPACE + '.logging.error'):
             check = FftsPmuCalculator(self.file_list, CONFIG)
@@ -458,7 +462,7 @@ class TestFftsPmuCalculator(TestCase):
             "mte3_time", "mte3_ratio", "fixpipe_time", "fixpipe_ratio"
         ]
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config",
-                        return_value={"ai_core_metrics": Constant.PMU_PIPE_EXECUT}), \
+                        return_value={"ai_core_metrics": AiCoreMetricsManager.PMU_PIPE_EXECUT}), \
                 mock.patch(NAMESPACE + '.get_metrics_from_sample_config',
                            side_effect=[table_name_list, table_name_list]):
             check = FftsPmuCalculator(self.file_list, CONFIG)
@@ -585,6 +589,7 @@ class TestFftsPmuCalculator(TestCase):
         }
         pmu_data_list = [None] * len(context_task)
         InfoConfReader()._info_json = {"DeviceInfo": [{'hwts_frequency': 1000}]}
+        ChipManager().chip_id = ChipModel.CHIP_V1_1_0
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
                 mock.patch(NAMESPACE + '.FftsPmuCalculator._get_current_block', return_value=10), \
                 mock.patch(NAMESPACE + '.FftsPmuCalculator._get_pmu_value', return_value=pmu_value):
@@ -634,3 +639,6 @@ class TestFftsPmuCalculator(TestCase):
             check.aic_table_name_list = list(pmu_value.keys())
             check.calculate_pmu_list(pmu_data_list)
             self.assertEqual(3, len(pmu_data_list))
+
+if __name__ == '__main__':
+    unittest.main()

@@ -39,7 +39,7 @@ class TestClusterLinkCalculate(unittest.TestCase):
                     mock.patch('os.path.islink', return_value=False), \
                     mock.patch('os.access', return_value=True), \
                     mock.patch('common_func.file_manager.is_other_writable', return_value=False), \
-                    mock.patch('common_func.file_manager.check_file_owner', return_value=True), \
+                    mock.patch('common_func.file_manager.check_path_owner', return_value=True), \
                     mock.patch('msinterface.msprof_c_interface.run_in_subprocess'), \
                     mock.patch('importlib.import_module'):
                 CANNCalculator({}, CONFIG).ms_run()

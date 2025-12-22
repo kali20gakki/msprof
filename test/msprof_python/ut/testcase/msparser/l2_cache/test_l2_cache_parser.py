@@ -22,6 +22,7 @@ Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
 import unittest
 from unittest import mock
+from unittest.mock import Mock
 
 from msparser.l2_cache.l2_cache_parser import L2CacheParser
 from profiling_bean.prof_enum.data_tag import DataTag
@@ -79,6 +80,7 @@ class TestL2CacheParser(unittest.TestCase):
                 mock.patch('os.path.getsize', return_value=100), \
                 mock.patch('common_func.file_manager.check_dir_writable'), \
                 mock.patch('os.access', return_value=True), \
+                mock.patch('os.stat', return_value=Mock(st_mode=0o000, st_uid=0)), \
                 mock.patch(BEAN_NAMESPACE + '.L2CacheDataBean.decode', return_value=data_bean):
             check = L2CacheParser(self.file_list, self.sample_config)
             check.parse()

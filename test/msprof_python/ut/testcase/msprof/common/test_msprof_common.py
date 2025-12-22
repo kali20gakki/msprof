@@ -17,6 +17,7 @@ import os
 import shutil
 import unittest
 from unittest import mock
+from unittest.mock import Mock
 
 import pytest
 
@@ -141,8 +142,9 @@ def test_get_valid_sub_path_should_return_real_path_when_collect_path_and_sub_di
     is_file = False
     with mock.patch('os.path.exists', return_value=True), \
          mock.patch('os.access', return_value=True), \
-         mock.patch('os.path.isdir', return_value=True):
-        unittest.TestCase().assertEqual(get_valid_sub_path(collect_path, sub_dir, is_file),
+         mock.patch('os.path.isdir', return_value=True), \
+         mock.patch('os.stat', return_value=Mock(st_mode=0o000, st_uid=0)):
+            unittest.TestCase().assertEqual(get_valid_sub_path(collect_path, sub_dir, is_file),
                                         os.path.realpath(expected_path))
 
 
@@ -153,7 +155,8 @@ def test_get_valid_sub_path_should_return_equal_real_path_when_collect_path_and_
     is_file = False
     with mock.patch('os.access', return_value=True), \
             mock.patch('os.path.exists', return_value=True), \
-            mock.patch('os.path.isdir', return_value=True):
+            mock.patch('os.path.isdir', return_value=True), \
+            mock.patch('os.stat', return_value=Mock(st_mode=0o000, st_uid=0)):
         unittest.TestCase().assertEqual(get_valid_sub_path(collect_path, sub_dir, is_file),
                                         os.path.realpath(joined_path))
 

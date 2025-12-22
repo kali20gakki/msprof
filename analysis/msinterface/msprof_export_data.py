@@ -42,7 +42,7 @@ from viewer.ai_core_report import AiCoreReport
 from viewer.aicpu_viewer import ParseAiCpuData
 from viewer.api_statistic_viewer import ApiStatisticViewer
 from viewer.api_viewer import ApiViewer
-from viewer.biu_perf_viewer import BiuPerfViewer
+from viewer.biu_perf.biu_perf_viewer import BiuPerfViewer
 from viewer.cpu_data_report import get_aictrl_pmu_events
 from viewer.cpu_data_report import get_cpu_hot_function
 from viewer.cpu_data_report import get_ts_pmu_events
@@ -77,8 +77,11 @@ from viewer.npu_mem.npu_module_mem_viewer import NpuModuleMemViewer
 from viewer.peripheral_report import get_peripheral_dvpp_data
 from viewer.peripheral_report import get_peripheral_nic_data
 from viewer.pipeline_overlap_viewer import PipelineOverlapViewer
+from viewer.qos_viewer import StarsQosViewer
 from viewer.runtime_report import get_task_scheduler_data
+from viewer.soc_pmu_viewer import SocPmuViewer
 from viewer.stars.acc_pmu_viewer import AccPmuViewer
+from viewer.stars.block_detail_viewer import BlockDetailViewer
 from viewer.stars.low_power_viewer import LowPowerViewer
 from viewer.stars.sio_viewer import SioViewer
 from viewer.stars.stars_chip_trans_view import StarsChipTransView
@@ -88,8 +91,13 @@ from viewer.task_time_viewer import TaskTimeViewer
 from viewer.training.step_trace_viewer import StepTraceViewer
 from viewer.training.task_op_viewer import TaskOpViewer
 from viewer.ts_cpu_report import TsCpuReport
-from viewer.ai_core_freq_viewer import AiCoreFreqViewer
+from viewer.lpm.ai_core_freq_viewer import AiCoreFreqViewer
 from viewer.qos_viewer import QosViewer
+from viewer.ub_viewer import UBViewer
+from viewer.ccu.ccu_mission_viewer import CCUMissionViewer
+from viewer.ccu.ccu_channel_viewer import CCUChannelViewer
+from viewer.biu_perf.biu_perf_chip6_viewer import BiuPerfChip6Viewer
+from viewer.lpm.voltage_viewer import VoltageViewer
 
 
 class MsProfExportDataUtils:
@@ -489,10 +497,20 @@ class MsProfExportDataUtils:
         row_timeline = PipelineOverlapViewer(configs, params).get_timeline_data()
         MsprofTimeline().add_export_data(row_timeline, params.get(StrConstant.PARAM_DATA_TYPE))
 
-        # only chip v4 support aicore freqs_list
-        freqs_list = AiCoreFreqViewer(params).get_all_data()
-        MsprofTimeline().add_export_data(freqs_list, params.get(StrConstant.PARAM_DATA_TYPE))
         return MsprofTimeline().export_all_data()
+
+    @staticmethod
+    def _get_freq_data(configs: dict, params: dict) -> any:
+        freq_list = AiCoreFreqViewer(params).get_all_data()
+        return freq_list
+
+    @staticmethod
+    def _get_voltage_data(configs: dict, params: dict) -> any:
+        voltage_list = []
+        # only chip v4 support voltage info data
+        if ChipManager().is_chip_v4():
+            voltage_list = VoltageViewer(params).get_all_data()
+        return voltage_list
 
     @staticmethod
     def _get_task_timeline(configs: dict, params: dict) -> list:
@@ -542,6 +560,8 @@ class MsProfExportDataUtils:
     @staticmethod
     def _get_biu_perf_timeline(configs: dict, params: dict) -> any:
         _ = configs
+        if ChipManager().is_chip_v6():
+            return BiuPerfChip6Viewer(configs, params).get_timeline_data()
         return BiuPerfViewer(params.get(StrConstant.PARAM_RESULT_DIR)).get_timeline()
 
     @staticmethod
@@ -581,11 +601,24 @@ class MsProfExportDataUtils:
 
     @staticmethod
     def _get_qos_data(configs: dict, params: dict) -> any:
-        return QosViewer(configs, params).get_timeline_data()
+        if ChipManager().is_chip_v4():
+            return QosViewer(configs, params).get_timeline_data()
+        else:
+            return StarsQosViewer(configs, params).get_timeline_data()
 
     @staticmethod
     def _get_static_op_mem_data(configs: dict, params: dict) -> any:
         return StaticOpMemViewer(configs, params).get_summary_data()
+
+    @staticmethod
+    def _get_ccu_mission_data(configs: dict, params: dict) -> any:
+        if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.TIMELINE:
+            return CCUMissionViewer(configs, params).get_timeline_data()
+        return CCUMissionViewer(configs, params).get_summary_data()
+
+    @staticmethod
+    def _get_ccu_channel_data(configs: dict, params: dict) -> any:
+        return CCUChannelViewer(configs, params).get_summary_data()
 
     @classmethod
     def export_data(cls: any, params: dict) -> str:
@@ -694,3 +727,17 @@ class MsProfExportDataUtils:
         params[StrConstant.CORE_DATA_TYPE] = StrConstant.AI_VECTOR_CORE_PMU_EVENTS
         return AiCoreReport.get_core_sample_data(params.get(StrConstant.PARAM_RESULT_DIR),
                                                  configs.get(StrConstant.CONFIG_DB), params)
+
+    @classmethod
+    def _get_block_detail_data(cls: any, configs: dict, params: dict) -> any:
+        return BlockDetailViewer(configs, params).get_timeline_data()
+
+    @classmethod
+    def _get_ub_data(cls: any, configs: dict, params: dict) -> any:
+        if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.TIMELINE:
+            return UBViewer(configs, params).get_timeline_data()
+        return UBViewer(configs, params).get_summary_data()
+
+    @classmethod
+    def _get_soc_pmu_data(cls: any, configs: dict, params: dict) -> any:
+        return SocPmuViewer(configs, params).get_summary_data()

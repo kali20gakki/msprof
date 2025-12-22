@@ -79,3 +79,18 @@ class TaskTrackBean(CompactInfoBean):
         task track batch_id
         """
         self._batch_id = batch_id
+
+
+class TaskTrackChip6Bean(TaskTrackBean):
+    """
+    task track bean for chip v6
+    task id use 32 bit, batch id is always 0
+    """
+    def __init__(self: any, *args) -> None:
+        super().__init__(*args)
+        data = args[0]
+        self._device_id = data[6]
+        self._stream_id = data[7]
+        self._task_id = data[9] << 16 | data[8]
+        self._batch_id = 0
+        self._task_type = data[10]

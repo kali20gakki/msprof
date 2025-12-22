@@ -45,8 +45,7 @@ class AivCalculator(AicCalculator, MsMultiProcess):
         self.core_type = 1
         # table_name_list[:2]:'total_time(ms)', 'total_cycles', unused
         self.table_name_list = get_metrics_from_sample_config(self._project_path,
-                                                              StrConstant.AIV_PROFILING_METRICS,
-                                                              MsvpCommonConst.AI_CORE)[2:]
+                                                              StrConstant.AIV_PROFILING_METRICS)[2:]
 
     def aiv_calculate(self: any) -> None:
         """

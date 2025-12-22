@@ -90,6 +90,14 @@ from common_func.file_name_manager import get_hccl_op_info_compiles
 from common_func.file_name_manager import get_qos_compiles
 from common_func.file_name_manager import get_mc2_comm_info_compiles
 from common_func.file_name_manager import get_netdev_stats_compiles
+from common_func.file_name_manager import get_ub_compiles
+from common_func.file_name_manager import get_ccu_mission_compiles
+from common_func.file_name_manager import get_ccu_channel_compiles
+from common_func.file_name_manager import get_ccu_task_info_compiles
+from common_func.file_name_manager import get_ccu_group_info_compiles
+from common_func.file_name_manager import get_ccu_wait_signal_info_compiles
+from common_func.file_name_manager import get_soc_pmu_compiles
+from common_func.file_name_manager import get_lpm_info_compiles
 from common_func.file_name_manager import get_host_stream_expand_spec_info_compiles
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.path_manager import PathManager
@@ -175,6 +183,15 @@ class FileDispatch:
         DataTag.MC2_COMM_INFO: get_mc2_comm_info_compiles(),
         DataTag.CAPTURE_STREAM_INFO: get_capture_stream_info_compiles(),
         DataTag.NETDEV_STATS: get_netdev_stats_compiles(),
+        DataTag.UB: get_ub_compiles(),
+        DataTag.CCU_MISSION: get_ccu_mission_compiles(),
+        DataTag.CCU_CHANNEL: get_ccu_channel_compiles(),
+        DataTag.CCU_TASK: get_ccu_task_info_compiles(),
+        DataTag.CCU_GROUP: get_ccu_group_info_compiles(),
+        DataTag.CCU_WAIT_SIGNAL: get_ccu_wait_signal_info_compiles(),
+        DataTag.BIU_PERF_CHIP6: get_biu_compiles(),
+        DataTag.SOC_PMU: get_soc_pmu_compiles(),
+        DataTag.LPM_INFO: get_lpm_info_compiles(),
         DataTag.STREAM_EXPAND: get_host_stream_expand_spec_info_compiles()
     }
 

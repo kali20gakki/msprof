@@ -21,6 +21,7 @@ from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
+from common_func.platform.ai_core_metrics_manager import AiCoreMetricsManager
 from common_func.platform.chip_manager import ChipManager
 
 
@@ -45,16 +46,27 @@ class CalculateAiCoreData:
         return vector_num
 
     @staticmethod
+    def get_exclude_calculation_formula_pmu_list() -> list:
+        """
+        get get_exclude_calculation_formula_pmu_list
+        :return: formula pmu list which is no need to calculate with task_cyc or freq,
+                 only use for the formula that is different from different chips
+        """
+        if ChipManager().is_chip_v6():
+            return ["vec_resc_cflt_ratio"]
+        return []
+
+    @staticmethod
     def add_pipe_time(pmu_dict: dict, total_time: float, metrics_type: str):
         """
         calculate pipe time data
         :return: pmu dict
         """
-        if metrics_type not in {Constant.PMU_PIPE, Constant.PMU_PIPE_EXCT,
-                                Constant.PMU_PIPE_EXECUT, Constant.PMU_SCALAR_RATIO}:
+        if metrics_type not in {AiCoreMetricsManager.PMU_PIPE, AiCoreMetricsManager.PMU_PIPE_EXCT,
+                                AiCoreMetricsManager.PMU_PIPE_EXECUT, AiCoreMetricsManager.PMU_SCALAR_RATIO}:
             return pmu_dict
         res_dict = {}
-        valid_metrics_set = CalculateAiCoreData.get_pmu_valid_metrics_set_by_chip()
+        valid_metrics_set = CalculateAiCoreData.get_pmu_valid_metrics_set()
         for pmu_key, pmu_value in pmu_dict.items():
             res_dict[pmu_key] = pmu_value
             if pmu_key not in valid_metrics_set:
@@ -68,12 +80,8 @@ class CalculateAiCoreData:
         return res_dict
 
     @staticmethod
-    def get_pmu_valid_metrics_set_by_chip() -> set:
-        pipe_pmu_list = Constant.AICORE_METRICS_LIST.get(Constant.PMU_PIPE).split(",")[:-1]
-        pipe_execut_pmu_list = Constant.AICORE_METRICS_LIST.get(Constant.PMU_PIPE_EXECUT).split(",")
-        pipe_exct_pmu_list = Constant.AICORE_METRICS_LIST.get(Constant.PMU_PIPE_EXCT).split(",")[:-1]
-        valid_metrics_set = set(pipe_pmu_list + pipe_exct_pmu_list + pipe_execut_pmu_list)
-        return valid_metrics_set
+    def get_pmu_valid_metrics_set() -> set:
+        return AiCoreMetricsManager.VALID_METRICS_SET
 
     @staticmethod
     def update_fops_data(field: str, algo: str) -> str:
@@ -96,20 +104,6 @@ class CalculateAiCoreData:
             algo = algo.replace("r4e_num", "64.0")
             algo = algo.replace("r4f_num", "32.0")
         return algo
-
-    @staticmethod
-    def _cal_pmu_metrics(ai_core_profiling_events: dict, events_name_list: list, pmu_data: list, task_cyc: int) -> None:
-        freq = InfoConfReader().get_freq(StrConstant.AIC)
-        for pmu_name, pmu_value in zip(events_name_list, pmu_data):
-            if task_cyc and pmu_name in list(Constant.AI_CORE_CALCULATION_FORMULA.keys()):
-                if StrConstant.BANDWIDTH in pmu_name:
-                    ai_core_profiling_events.setdefault(pmu_name, []).append(
-                        Constant.AI_CORE_CALCULATION_FORMULA.get(pmu_name)(pmu_value, task_cyc, freq))
-                else:
-                    ai_core_profiling_events.setdefault(pmu_name, []).append(
-                        Constant.AI_CORE_CALCULATION_FORMULA.get(pmu_name)(pmu_value, task_cyc))
-            else:
-                ai_core_profiling_events.setdefault(pmu_name, []).append(pmu_value)
 
     @classmethod
     def _calculate_vec_fp16_ratio(cls, events_name_list: list, ai_core_profiling_events: dict) -> dict:
@@ -222,6 +216,50 @@ class CalculateAiCoreData:
             ]
         return ai_core_profiling_events
 
+    @classmethod
+    def _calculate_vec_bank_cflt_ratio(cls, events_name_list: list, ai_core_profiling_events: dict) -> dict:
+        if ChipManager().is_chip_v6():
+            names = ["vec_bank_cflt_ratio", "stu_pmu_wctl_ub_cflt"]
+            if all(map(lambda name: name in events_name_list, names)):
+                vec_bank_cflt_ratio = ai_core_profiling_events["vec_bank_cflt_ratio"][-1] + \
+                                      ai_core_profiling_events["stu_pmu_wctl_ub_cflt"][-1]
+                ai_core_profiling_events["vec_bank_cflt_ratio"] = [vec_bank_cflt_ratio]
+        return ai_core_profiling_events
+
+    @classmethod
+    def _calculate_vec_resc_cflt_ratio(cls, events_name_list: list, ai_core_profiling_events: dict) -> dict:
+        if ChipManager().is_chip_v6():
+            names = ["vec_resc_cflt_ratio", "pmu_idc_aic_vec_instr_vf_busy_o"]
+            if all(map(lambda name: name in events_name_list, names)):
+                if not ai_core_profiling_events["pmu_idc_aic_vec_instr_vf_busy_o"][-1]:
+                    logging.warning("pmu_idc_aic_vec_instr_vf_busy_o value is zero!")
+                    ai_core_profiling_events["vec_resc_cflt_ratio"] = [0]
+                else:
+                    vec_resc_cflt_ratio = ai_core_profiling_events["vec_resc_cflt_ratio"][-1] / \
+                                          ai_core_profiling_events["pmu_idc_aic_vec_instr_vf_busy_o"][-1]
+                    ai_core_profiling_events["vec_resc_cflt_ratio"] = [vec_resc_cflt_ratio]
+        return ai_core_profiling_events
+
+    @classmethod
+    def _calculate_ub_read_bw(cls, events_name_list: list, ai_core_profiling_events: dict) -> dict:
+        if ChipManager().is_chip_v6():
+            names = ["ub_read_bw(GB/s)", "ub_read_bw_vector(GB/s)"]
+            if all(map(lambda name: name in events_name_list, names)):
+                ub_read_bw = ai_core_profiling_events["ub_read_bw(GB/s)"][-1] + \
+                             ai_core_profiling_events["ub_read_bw_vector(GB/s)"][-1]
+                ai_core_profiling_events["ub_read_bw(GB/s)"] = [ub_read_bw]
+        return ai_core_profiling_events
+
+    @classmethod
+    def _calculate_vec_ub_write_bw(cls, events_name_list: list, ai_core_profiling_events: dict) -> dict:
+        if ChipManager().is_chip_v6():
+            names = ["ub_write_bw(GB/s)", "stu_pmu_wctl_ub_cflt"]
+            if all(map(lambda name: name in events_name_list, names)):
+                ub_write_bw = ai_core_profiling_events["ub_write_bw(GB/s)"][-1] + \
+                              ai_core_profiling_events["ub_write_bw_vector(GB/s)"][-1]
+                ai_core_profiling_events["ub_write_bw(GB/s)"] = [ub_write_bw]
+        return ai_core_profiling_events
+
     def add_fops_header(self: any, metric_key: str, metrics: list) -> None:
         """
         add fops index item to metrics in ArithmeticUtilization
@@ -230,8 +268,13 @@ class CalculateAiCoreData:
         :return: None
         """
         sample_config = ConfigMgr.read_sample_config(self.project_path)
+        cube_ratio_metrics = {"mac_fp16_ratio", "mac_int8_ratio"}
+        vector_ratio_metrics = {"vec_fp16_ratio", "vec_fp32_ratio", "vec_int32_ratio", "vec_misc_ratio"}
         if sample_config.get(metric_key) == "ArithmeticUtilization":
-            metrics.extend(["cube_fops", "vector_fops"])
+            if all(map(lambda name: name in metrics, cube_ratio_metrics)):
+                metrics.append("cube_fops")
+            if all(map(lambda name: name in metrics, vector_ratio_metrics)):
+                metrics.append("vector_fops")
 
     def compute_ai_core_data(self: any, events_name_list: list, ai_core_profiling_events: dict, task_cyc: int,
                              pmu_data: list) -> tuple:
@@ -268,6 +311,23 @@ class CalculateAiCoreData:
             ai_core_profiling_events.setdefault("vector_fops",
                                                 []).append(vector_fops)
 
+    def _cal_pmu_metrics(
+            self: any, ai_core_profiling_events: dict, events_name_list: list, pmu_data: list,
+            task_cyc: int) -> None:
+        freq = InfoConfReader().get_freq(StrConstant.AIC)
+        exclude_calculation_formula_pmu_list = self.get_exclude_calculation_formula_pmu_list()
+        for pmu_name, pmu_value in zip(events_name_list, pmu_data):
+            if task_cyc and pmu_name in [item for item in list(Constant.AI_CORE_CALCULATION_FORMULA.keys()) \
+                                         if item not in exclude_calculation_formula_pmu_list]:
+                if StrConstant.BANDWIDTH in pmu_name:
+                    ai_core_profiling_events.setdefault(pmu_name, []).append(
+                        Constant.AI_CORE_CALCULATION_FORMULA.get(pmu_name)(pmu_value, task_cyc, freq))
+                else:
+                    ai_core_profiling_events.setdefault(pmu_name, []).append(
+                        Constant.AI_CORE_CALCULATION_FORMULA.get(pmu_name)(pmu_value, task_cyc))
+            else:
+                ai_core_profiling_events.setdefault(pmu_name, []).append(pmu_value)
+
     def __cal_addition(self: any, events_name_list: list, ai_core_profiling_events: dict, task_cyc: int) -> dict:
         """
         calculate additional ai core metrics
@@ -282,6 +342,10 @@ class CalculateAiCoreData:
         ai_core_profiling_events = self._calculate_memory_bandwidth(events_name_list, ai_core_profiling_events)
         ai_core_profiling_events = self._calculate_control_flow_mis_prediction_rate(events_name_list,
                                                                                     ai_core_profiling_events)
+        ai_core_profiling_events = self._calculate_vec_bank_cflt_ratio(events_name_list, ai_core_profiling_events)
+        ai_core_profiling_events = self._calculate_vec_resc_cflt_ratio(events_name_list, ai_core_profiling_events)
+        ai_core_profiling_events = self._calculate_ub_read_bw(events_name_list, ai_core_profiling_events)
+        ai_core_profiling_events = self._calculate_vec_ub_write_bw(events_name_list, ai_core_profiling_events)
 
         self.add_vector_data(events_name_list, ai_core_profiling_events, task_cyc)
         return ai_core_profiling_events

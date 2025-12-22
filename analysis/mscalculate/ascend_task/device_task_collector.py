@@ -52,6 +52,8 @@ class DeviceTaskCollector:
             ChipModel.CHIP_V1_1_1: self._gather_chip_stars_device_tasks,
             ChipModel.CHIP_V1_1_2: self._gather_chip_stars_device_tasks,
             ChipModel.CHIP_V1_1_3: self._gather_chip_stars_device_tasks,
+            ChipModel.CHIP_V6_1_0: self._gather_chip_stars_device_tasks,
+            ChipModel.CHIP_V6_2_0: self._gather_chip_stars_device_tasks,
         }
 
         self.check_dbs = {
@@ -64,6 +66,8 @@ class DeviceTaskCollector:
             ChipModel.CHIP_V1_1_1: [DBNameConstant.DB_SOC_LOG],
             ChipModel.CHIP_V1_1_2: [DBNameConstant.DB_SOC_LOG],
             ChipModel.CHIP_V1_1_3: [DBNameConstant.DB_SOC_LOG],
+            ChipModel.CHIP_V6_1_0: [DBNameConstant.DB_SOC_LOG],
+            ChipModel.CHIP_V6_2_0: [DBNameConstant.DB_SOC_LOG],
         }
 
     def get_all_device_tasks(self: any) -> List[DeviceTask]:

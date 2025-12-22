@@ -45,12 +45,12 @@ class TestL2CacheCalculator(unittest.TestCase):
     file_list = {DataTag.L2CACHE: ['l2cache.data.0.slice_0']}
 
     def test_is_valid_index(self: any):
-        valid_dict = {"request_events": [0, 1],
-                      "hit_events": [4],
-                      "victim_events": [3]}
-        not_valid_dict = {"request_events": [0, -1],
-                          "hit_events": [4],
-                          "victim_events": [3]}
+        valid_dict = {"request_events": [{'coefficient': 1, 'index': 0}, {'coefficient': 1, 'index': 1}],
+                      "hit_events": [{'coefficient': 1, 'index': 4}],
+                      "victim_events": [{'coefficient': 1, 'index': 3}]}
+        not_valid_dict = {"request_events": [{'coefficient': -1, 'index': -1}],
+                          "hit_events": [{'coefficient': 1, 'index': 4}],
+                          "victim_events": [{'coefficient': 1, 'index': 3}]}
         self.assertEqual(L2CacheCalculator._is_valid_index(valid_dict), True)
         self.assertEqual(L2CacheCalculator._is_valid_index(not_valid_dict), False)
 
@@ -66,8 +66,17 @@ class TestL2CacheCalculator(unittest.TestCase):
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value=self.sample_config):
             check = L2CacheCalculator({}, self.sample_config)
             check._l2_cache_events = ['0x78', '0x79', '0x77', '0x71', '0x6a', '0x6c', '0x74', '0x62']
-            self.assertEqual(check._get_event_index(event_type_ok), 0)
-            self.assertEqual(check._get_event_index(event_type_fail), -1)
+            self.assertEqual(check._get_event_index(event_type_ok), {'coefficient': 1, 'index': 0})
+            self.assertEqual(check._get_event_index(event_type_fail), {'coefficient': -1, 'index': -1})
+
+    def test_get_event_index_when_event_type_is_negative_then_get_index_success(self: any):
+        event_type_ok = '0x88'
+        event_type_ok_neg = '-0x97'
+        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value=self.sample_config):
+            check = L2CacheCalculator({}, self.sample_config)
+            check._l2_cache_events = ['0x00','0x88','0x89,''0x8A','0x74','0x75','0x97']
+            self.assertEqual(check._get_event_index(event_type_ok), {'coefficient': 1, 'index': 1})
+            self.assertEqual(check._get_event_index(event_type_ok_neg), {'coefficient': -1, 'index': 5})
 
     def test_pre_check(self: any):
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value=self.sample_config):
@@ -95,14 +104,14 @@ class TestL2CacheCalculator(unittest.TestCase):
 
     def test_set_l2_cache_events_indexes(self: any):
         expected_event_indexes_1951 = {
-            "request_events": [0, 1],
-            "hit_events": [4],
-            "victim_events": [3]
+            "request_events": [{'coefficient': 1, 'index': 0}, {'coefficient': 1, 'index': 1}],
+            "hit_events": [{'coefficient': 1, 'index': 4}],
+            "victim_events": [{'coefficient': 1, 'index': 3}]
         }
         expected_event_indexes_1980 = {
-            "request_events": [1],
-            "hit_events": [0],
-            "victim_events": [2]
+            "request_events": [{'coefficient': 1, 'index': 1}],
+            "hit_events": [{'coefficient': 1, 'index': 0}],
+            "victim_events": [{'coefficient': 1, 'index': 2}]
         }
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value=self.sample_config):
             check = L2CacheCalculator({}, self.sample_config)
@@ -150,9 +159,9 @@ class TestL2CacheCalculator(unittest.TestCase):
                                   [0, 3, 5, 0.517857, 0.0],
                                   [0, 3, 6, 0.602096, 0.0]]
             check._event_indexes = {
-                "request_events": [0, 1],
-                "hit_events": [4],
-                "victim_events": [3]
+                "request_events": [{'coefficient': 1, 'index': 0}, {'coefficient': 1, 'index': 1}],
+                "hit_events": [{'coefficient': 1, 'index': 4}],
+                "victim_events": [{'coefficient': 1, 'index': 3}]
             }
             check._cal_metrics()
             self.assertEqual(check._l2_cache_cal_data, except_data_result)

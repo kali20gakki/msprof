@@ -15,8 +15,8 @@
 # -------------------------------------------------------------------------
 import json
 import unittest
-from unittest import mock
 from collections import OrderedDict
+from unittest import mock
 
 from common_func.info_conf_reader import InfoConfReader
 from common_func.platform.chip_manager import ChipManager
@@ -124,15 +124,6 @@ class TestTaskTimeViewer(unittest.TestCase):
             ret = check.get_trace_timeline(data)
             self.assertEqual(ret, [])
 
-    def test_get_node_name(self):
-        configs, params = {}, {}
-        data = [TestData(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 1, 0)]
-        with mock.patch(NAMESPACE + '.ViewModel.init'), \
-                mock.patch(NAMESPACE + '.ViewModel.get_all_data', return_value=data):
-            check = TaskTimeViewer(configs, params)
-            ret = check.get_ge_data_dict()
-            self.assertEqual(ret.get('0-1-3-0'), {'op_name': 4, 'task_type': 5})
-
     def test_get_device_task_type_should_return_device_type_when_device_is_not_number(self):
         configs, params = {}, {'data_type': 'ffts_sub_task_time'}
         check = TaskTimeViewer(configs, params)
@@ -212,7 +203,10 @@ class TestTaskTimeViewer(unittest.TestCase):
                 TopDownTask(0, 1, 36, 2, 47, 0, 38140480645103, 12400, "FFTS_PLUS", "AIV", 1),
             ],
         }
-        with mock.patch(NAMESPACE + '.TaskTimeViewer.get_ge_data_dict', return_value=node_dict):
+        InfoConfReader()._info_json = {'pid': '0'}
+        with mock.patch('msmodel.stars.op_summary_model.OpSummaryModel.init', return_value=True), \
+                mock.patch('msmodel.stars.op_summary_model.OpSummaryModel.get_op_name_from_ge_by_id',
+                           return_value=node_dict):
             check = TaskTimeViewer(configs, params)
             check.add_node_name_and_type(data)
             self.assertEqual(data.get('subtask_data_list', [])[0].op_name, 'MatMul_1_lxslice1')
@@ -238,7 +232,10 @@ class TestTaskTimeViewer(unittest.TestCase):
                 TopDownTask(0, 1, 36, 2, 47, 0, 38140480645103, 12400, "FFTS_PLUS", "AIV", 1),
             ],
         }
-        with mock.patch(NAMESPACE + '.TaskTimeViewer.get_ge_data_dict', return_value=node_dict):
+        InfoConfReader()._info_json = {"pid": "0"}
+        with mock.patch('msmodel.stars.op_summary_model.OpSummaryModel.init', return_value=True), \
+                mock.patch('msmodel.stars.op_summary_model.OpSummaryModel.get_op_name_from_ge_by_id',
+                           return_value=node_dict):
             check = TaskTimeViewer(configs, params)
             check.add_node_name_and_type(data)
             self.assertEqual(data.get('subtask_data_list', [])[0].op_name, 'AIV')
@@ -264,7 +261,9 @@ class TestTaskTimeViewer(unittest.TestCase):
                 TopDownTask(0, 1, 36, 2, 47, 0, 38140480645103, 12400, "UNKNOWN", "AIV", 1),
             ],
         }
-        with mock.patch(NAMESPACE + '.TaskTimeViewer.get_ge_data_dict', return_value=node_dict):
+        with mock.patch('msmodel.stars.op_summary_model.OpSummaryModel.init', return_value=True), \
+                mock.patch('msmodel.stars.op_summary_model.OpSummaryModel.get_op_name_from_ge_by_id',
+                           return_value=node_dict):
             check = TaskTimeViewer(configs, params)
             check.add_node_name_and_type(data)
             self.assertEqual(data.get('subtask_data_list', [])[0].op_name, 'MatMul_1_lxslice1')
@@ -290,7 +289,9 @@ class TestTaskTimeViewer(unittest.TestCase):
                 TopDownTask(0, 1, 36, 2, 47, 0, 38140480645103, 12400, "UNKNOWN", "25", 1),
             ],
         }
-        with mock.patch(NAMESPACE + '.TaskTimeViewer.get_ge_data_dict', return_value=node_dict):
+        with mock.patch('msmodel.stars.op_summary_model.OpSummaryModel.init', return_value=True), \
+                mock.patch('msmodel.stars.op_summary_model.OpSummaryModel.get_op_name_from_ge_by_id',
+                           return_value=node_dict):
             check = TaskTimeViewer(configs, params)
             ChipManager().chip_id = ChipModel.CHIP_V3_1_0
             check.add_node_name_and_type(data)
@@ -317,7 +318,9 @@ class TestTaskTimeViewer(unittest.TestCase):
                 TopDownTask(0, 1, 36, 2, 47, 0, 38140480645103, 12400, "UNKNOWN", "5", 1),
             ],
         }
-        with mock.patch(NAMESPACE + '.TaskTimeViewer.get_ge_data_dict', return_value=node_dict):
+        with mock.patch('msmodel.stars.op_summary_model.OpSummaryModel.init', return_value=True), \
+                mock.patch('msmodel.stars.op_summary_model.OpSummaryModel.get_op_name_from_ge_by_id',
+                           return_value=node_dict):
             check = TaskTimeViewer(configs, params)
             ChipManager().chip_id = ChipModel.CHIP_V1_1_0
             check.add_node_name_and_type(data)
@@ -344,7 +347,9 @@ class TestTaskTimeViewer(unittest.TestCase):
                 TopDownTask(0, 1, 36, 2, 47, 0, 38140480645103, 12400, "UNKNOWN", "AIV", 1),
             ],
         }
-        with mock.patch(NAMESPACE + '.TaskTimeViewer.get_ge_data_dict', return_value=node_dict):
+        with mock.patch('msmodel.stars.op_summary_model.OpSummaryModel.init', return_value=True), \
+                mock.patch('msmodel.stars.op_summary_model.OpSummaryModel.get_op_name_from_ge_by_id',
+                           return_value=node_dict):
             check = TaskTimeViewer(configs, params)
             ChipManager().chip_id = ChipModel.CHIP_V2_1_0
             check.add_node_name_and_type(data)
@@ -371,7 +376,9 @@ class TestTaskTimeViewer(unittest.TestCase):
                 TopDownTask(0, 1, 36, 2, 47, 0, 38140480645103, 12400, "UNKNOWN", "SDMA", 1),
             ],
         }
-        with mock.patch(NAMESPACE + '.TaskTimeViewer.get_ge_data_dict', return_value=node_dict):
+        with mock.patch('msmodel.stars.op_summary_model.OpSummaryModel.init', return_value=True), \
+                mock.patch('msmodel.stars.op_summary_model.OpSummaryModel.get_op_name_from_ge_by_id',
+                           return_value=node_dict):
             check = TaskTimeViewer(configs, params)
             ChipManager().chip_id = ChipModel.CHIP_V1_1_0
             check.add_node_name_and_type(data)
@@ -398,7 +405,9 @@ class TestTaskTimeViewer(unittest.TestCase):
                 TopDownTask(0, 1, 36, 2, 47, 0, 38140480645103, 12400, "UNKNOWN", "5", 1),
             ],
         }
-        with mock.patch(NAMESPACE + '.TaskTimeViewer.get_ge_data_dict', return_value=node_dict):
+        with mock.patch('msmodel.stars.op_summary_model.OpSummaryModel.init', return_value=True), \
+                mock.patch('msmodel.stars.op_summary_model.OpSummaryModel.get_op_name_from_ge_by_id',
+                           return_value=node_dict):
             check = TaskTimeViewer(configs, params)
             ChipManager().chip_id = ChipModel.CHIP_V1_1_0
             check.add_node_name_and_type(data)
@@ -425,7 +434,9 @@ class TestTaskTimeViewer(unittest.TestCase):
                 TopDownTask(0, 1, 36, 2, 47, 0, 38140480645103, 12400, "UNKNOWN", "15", 1),
             ],
         }
-        with mock.patch(NAMESPACE + '.TaskTimeViewer.get_ge_data_dict', return_value=node_dict):
+        with mock.patch('msmodel.stars.op_summary_model.OpSummaryModel.init', return_value=True), \
+                mock.patch('msmodel.stars.op_summary_model.OpSummaryModel.get_op_name_from_ge_by_id',
+                           return_value=node_dict):
             check = TaskTimeViewer(configs, params)
             ChipManager().chip_id = ChipModel.CHIP_V2_1_0
             check.add_node_name_and_type(data)
@@ -452,7 +463,9 @@ class TestTaskTimeViewer(unittest.TestCase):
                 TopDownTask(0, 1, 36, 2, 47, 0, 38140480645103, 12400, "UNKNOWN", "25", 1),
             ],
         }
-        with mock.patch(NAMESPACE + '.TaskTimeViewer.get_ge_data_dict', return_value=node_dict):
+        with mock.patch('msmodel.stars.op_summary_model.OpSummaryModel.init', return_value=True), \
+                mock.patch('msmodel.stars.op_summary_model.OpSummaryModel.get_op_name_from_ge_by_id',
+                           return_value=node_dict):
             check = TaskTimeViewer(configs, params)
             ChipManager().chip_id = ChipModel.CHIP_V2_1_0
             check.add_node_name_and_type(data)
