@@ -28,6 +28,14 @@
 #define MSPTI_API __attribute__((visibility("default")))
 #endif
 
+using AclError = int;
+using AclrtStream = void *;
+using AclrtContext = void *;
+using AclrtFuncHandle = void *;
+using AclrtArgsHandle = void *;
+using AclrtBinHandle = void *;
+using AclrtFuncHandle = void *;
+
 using RtErrorT = uint32_t;
 using RtStreamT = void *;
 using RtSmDescT = void;
@@ -35,6 +43,46 @@ using VOID_PTR = void*;
 using CONST_VOID_PTR = const void *;
 using VOID_PTR_PTR = void**;
 using RtMemTypeT = uint32_t;
+
+typedef enum AclrtLaunchKernelAttrId {
+    ACL_RT_LAUNCH_KERNEL_ATTR_SCHEM_MODE = 1,
+    ACL_RT_LAUNCH_KERNEL_ATTR_ENGINE_TYPE = 3,
+    ACL_RT_LAUNCH_KERNEL_ATTR_BLOCKDIM_OFFSET,
+    ACL_RT_LAUNCH_KERNEL_ATTR_BLOCK_TASK_PREFETCH,
+    ACL_RT_LAUNCH_KERNEL_ATTR_DATA_DUMP,
+    ACL_RT_LAUNCH_KERNEL_ATTR_TIMEOUT,
+} AclrtLaunchKernelAttrId;
+
+typedef enum {
+    ACL_RT_ENGINE_TYPE_AIC = 0,
+    ACL_RT_ENGINE_TYPE_AIV,
+} AclrtEngineType;
+
+typedef union AclrtLaunchKernelAttrValue {
+    uint8_t schemMode;
+    uint32_t localMemorySize;
+    AclrtEngineType engineType;
+    uint32_t blockDimOffset;
+    uint8_t isBlockTaskPrefetch;
+    uint8_t isDataDump;
+    uint16_t timeout;
+    uint32_t rsv[4];
+} AclrtLaunchKernelAttrValue;
+
+typedef struct AclrtLaunchKernelAttr {
+    AclrtLaunchKernelAttrId id;
+    AclrtLaunchKernelAttrValue value;
+} aclrtLaunchKernelAttr;
+
+typedef struct AclrtLaunchKernelCfg {
+    aclrtLaunchKernelAttr *attrs;
+    size_t numAttrs;
+} AclrtLaunchKernelCfg;
+
+typedef struct AclrtPlaceHolderInfo {
+    uint32_t addrOffset;
+    uint32_t dataOffset;
+} AclrtPlaceHolderInfo;
 
 enum DrvError {
     DRV_ERROR_NONE = 0,
