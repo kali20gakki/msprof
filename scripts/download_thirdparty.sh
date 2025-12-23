@@ -27,19 +27,14 @@ if [ -n "$1" ]; then
 fi
 
 mkdir -p ${OPENSOURCE_DIR} && cd ${OPENSOURCE_DIR}
-git clone ssh://git@szv-open.codehub.huawei.com:2222/OpenSourceCenter/nlohmann/json.git json -b v3.11.3
-git clone ssh://git@szv-open.codehub.huawei.com:2222/OpenSourceCenter/Tencent/rapidjson.git -b 6089180ecb704cb2b136777798fa1be303618975-htrunk1
-git clone ssh://git@szv-open.codehub.huawei.com:2222/OpenSourceCenter/megastep/makeself.git -b 2.5.0-h0.computing.cann.r2
+[ ! -d "json" ] && git clone https://gitcode.com/GitHub_Trending/js/json.git -b v3.11.3
+[ ! -d "rapidjson" ] && git clone https://gitcode.com/GitHub_Trending/ra/rapidjson.git
+[ ! -d "makeself" ] && git clone https://gitcode.com/gh_mirrors/ma/makeself.git -b release-2.5.0
 
 mkdir -p ${LLT_DIR} && cd ${LLT_DIR}
-git clone ssh://git@szv-open.codehub.huawei.com:2222/OpenSourceCenter/google/googletest.git -b release-1.12.1
-git clone ssh://git@szv-y.codehub.huawei.com:2222/mindstudio/MindStudio_Opensource/mock_cpp.git -b msprof
-mv mock_cpp mockcpp
-if [ "$1" == "fuzz" ]; then
-    git clone ssh://git@lfg-y.codehub.huawei.com:2222/software-engineering-research-community/fuzz/SecTracy.git
-    git clone ssh://git@szv-open.codehub.huawei.com:2222/innersource/Fuzz/secodefuzz.git
-    cd secodefuzz && bash build.sh gcc
-fi
+[ ! -d "googletest" ] && git clone https://gitcode.com/GitHub_Trending/go/googletest.git -b release-1.12.1
+[ ! -d "mockcpp" ] && git clone ssh://git@szv-y.codehub.huawei.com:2222/mindstudio/MindStudio_Opensource/mock_cpp.git mockcpp -b msprof
 
 mkdir -p ${PLATFORM_DIR} && cd ${PLATFORM_DIR}
-git clone ssh://git@codehub-dg-y.huawei.com:2222/hwsecurec_group/huawei_secure_c.git securec -b tag_Huawei_Secure_C_V100R001C01SPC012B002_00001
+[ ! -d "securec" ] && git clone ssh://git@codehub-dg-y.huawei.com:2222/hwsecurec_group/huawei_secure_c.git securec -b tag_Huawei_Secure_C_V100R001C01SPC012B002_00001
+cd ${TOP_DIR}
