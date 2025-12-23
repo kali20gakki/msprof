@@ -25,7 +25,7 @@
 #include "analysis/csrc/domain/entities/tree/include/event_queue.h"
 #include "analysis/csrc/domain/entities/tree/include/tree.h"
 #include "analysis/csrc/domain/services/parser/host/cann/cann_warehouse.h"
-#include "collector/inc/toolchain/prof_common.h"
+#include "analysis/csrc/infrastructure/utils/prof_common.h"
 #include "analysis/csrc/infrastructure/utils/thread_pool.h"
 
 namespace Analysis {

@@ -30,7 +30,7 @@
 #include "analysis/csrc/domain/services/parser/host/cann/api_event_parser.h"
 #include "analysis/csrc/domain/services/parser/host/cann/cann_warehouse.h"
 #include "analysis/csrc/domain/services/parser/host/cann/compact_info_parser.h"
-#include "collector/inc/toolchain/prof_common.h"
+#include "analysis/csrc/infrastructure/utils/prof_common.h"
 #include "analysis/csrc/infrastructure/utils/safe_unordered_map.h"
 #include "analysis/csrc/infrastructure/utils/thread_pool.h"
 #include "analysis/csrc/infrastructure/utils/time_logger.h"

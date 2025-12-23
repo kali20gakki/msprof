@@ -16,7 +16,7 @@
 #ifndef ANALYSIS_CSRC_VIEWER_DATABASE_MODEL_NAME_DB_DUMPER_H
 #define ANALYSIS_CSRC_VIEWER_DATABASE_MODEL_NAME_DB_DUMPER_H
 
-#include "collector/inc/toolchain/prof_common.h"
+#include "analysis/csrc/infrastructure/utils/prof_common.h"
 #include "analysis/csrc/domain/services/persistence/host/base_dumper.h"
 
 namespace Analysis {

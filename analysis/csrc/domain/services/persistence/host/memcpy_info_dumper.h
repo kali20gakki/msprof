@@ -17,7 +17,7 @@
 #define ANALYSIS_CSRC_VIEWER_DATABASE_MEMCPY_INFO_DUMPER_H
 
 #include "analysis/csrc/domain/services/persistence/host/base_dumper.h"
-#include "collector/inc/toolchain/prof_common.h"
+#include "analysis/csrc/infrastructure/utils/prof_common.h"
 
 namespace Analysis {
 namespace Domain {

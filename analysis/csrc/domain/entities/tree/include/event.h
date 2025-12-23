@@ -22,7 +22,7 @@
 #include <atomic>
 #include <vector>
 
-#include "collector/inc/toolchain/prof_common.h"
+#include "analysis/csrc/infrastructure/utils/prof_common.h"
 
 namespace Analysis {
 namespace Domain {

@@ -21,7 +21,7 @@
 #include "gtest/gtest.h"
 #include "analysis/csrc/domain/entities/tree/include/event.h"
 #include "analysis/csrc/domain/entities/tree/include/event_queue.h"
-#include "collector/inc/toolchain/prof_common.h"
+#include "analysis/csrc/infrastructure/utils/prof_common.h"
 
 using namespace Analysis::Domain;
 
