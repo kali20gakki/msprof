@@ -36,13 +36,9 @@ using AclrtArgsHandle = void *;
 using AclrtBinHandle = void *;
 using AclrtFuncHandle = void *;
 
-using RtErrorT = uint32_t;
-using RtStreamT = void *;
-using RtSmDescT = void;
 using VOID_PTR = void*;
 using CONST_VOID_PTR = const void *;
 using VOID_PTR_PTR = void**;
-using RtMemTypeT = uint32_t;
 
 typedef enum AclrtLaunchKernelAttrId {
     ACL_RT_LAUNCH_KERNEL_ATTR_SCHEM_MODE = 1,

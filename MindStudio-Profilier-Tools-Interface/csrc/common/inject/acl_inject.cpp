@@ -14,12 +14,12 @@
  * See the Mulan PSL v2 for more details.
  * -------------------------------------------------------------------------
 */
-#include "common/inject/acl_inject.h"
+#include "csrc/common/inject/acl_inject.h"
 
 #include <functional>
 
-#include "activity/activity_manager.h"
-#include "callback/callback_manager.h"
+#include "csrc/activity/activity_manager.h"
+#include "csrc/callback/callback_manager.h"
 
 namespace {
 const std::string SO_NAME = "libascendcl";

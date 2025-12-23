@@ -24,14 +24,14 @@
 #include <mutex>
 #include <memory>
 
-#include "csrc/common/inject/runtime_inject.h"
+#include "csrc/common/inject/acl_inject.h"
 #include "csrc/activity/ascend/channel/channel_data.h"
 #include "csrc/common/context_manager.h"
 
 namespace Mspti {
 namespace Parser {
 struct RangeStartContext {
-    RtStreamT stream;
+    AclrtStream stream;
     Common::DevTimeInfo devTimeInfo;
 };
 
@@ -39,9 +39,9 @@ class MstxParser {
 public:
     static MstxParser* GetInstance();
 
-    msptiResult ReportMark(const char *msg, RtStreamT stream, const char *domain);
+    msptiResult ReportMark(const char *msg, AclrtStream stream, const char *domain);
 
-    msptiResult ReportRangeStartA(const char *msg, RtStreamT stream, uint64_t &markId, const char *domain);
+    msptiResult ReportRangeStartA(const char *msg, AclrtStream stream, uint64_t &markId, const char *domain);
 
     msptiResult ReportRangeEnd(uint64_t rangeId);
 
@@ -49,7 +49,7 @@ public:
 
     bool IsInnerMarker(uint64_t markId);
 
-    msptiResult InnerDeviceStartA(RtStreamT stream, uint64_t& markId);
+    msptiResult InnerDeviceStartA(AclrtStream stream, uint64_t& markId);
 
     msptiResult InnerDeviceEndA(uint64_t rangeId);
 
@@ -75,7 +75,7 @@ private:
 
     // Inner Marker
     static std::mutex innerMarkerMutex_;
-    static std::unordered_map<uint64_t, RtStreamT> innerMarkIds;
+    static std::unordered_map<uint64_t, AclrtStream> innerMarkIds;
 };
 }
 }

@@ -17,8 +17,8 @@
 #ifndef MSPTI_PROJECT_ACL_MEM_INJECT_H
 #define MSPTI_PROJECT_ACL_MEM_INJECT_H
 
-#include "common/inject/inject_base.h"
-#include "external/mspti_result.h"
+#include "csrc/common/inject/inject_base.h"
+#include "csrc/include/mspti_result.h"
 
 #if defined(__cplusplus)
 extern "C" {

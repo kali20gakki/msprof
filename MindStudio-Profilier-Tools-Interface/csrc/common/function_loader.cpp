@@ -47,7 +47,7 @@ std::string FunctionLoader::CanonicalSoPath()
     static const std::set<std::string> soNameList = {
         "libascend_hal.so",
         "libascendalog.so",
-        "libruntime.so",
+        "libascendcl.so",
         "libhccl.so",
         "libprofapi.so",
     };

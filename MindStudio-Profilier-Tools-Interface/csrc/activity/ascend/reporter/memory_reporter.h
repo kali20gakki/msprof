@@ -22,7 +22,7 @@
 #include <mutex>
 #include <unordered_map>
 #include "csrc/include/mspti_activity.h"
-#include "csrc/common/inject/runtime_mem_inject.h"
+#include "csrc/common/inject/acl_mem_inject.h"
 
 namespace Mspti {
 namespace Reporter {
@@ -40,24 +40,24 @@ struct MemoryRecord {
 };
 
 struct MemsetRecord {
-    MemsetRecord(uint32_t value, uint64_t bytes, RtStreamT stream, uint8_t isAsync);
+    MemsetRecord(uint32_t value, uint64_t bytes, AclrtStream stream, uint8_t isAsync);
     ~MemsetRecord();
 
     uint32_t value{0};
     uint64_t bytes{0};
-    RtStreamT stream{nullptr};
+    AclrtStream stream{nullptr};
     uint8_t isAsync{0};
     uint64_t start{0};
     uint64_t end{0};
 };
 
 struct MemcpyRecord {
-    MemcpyRecord(RtMemcpyKindT copyKind, uint64_t bytes, RtStreamT stream, uint8_t isAsync);
+    MemcpyRecord(AclrtMemcpyKind copyKind, uint64_t bytes, AclrtStream stream, uint8_t isAsync);
     ~MemcpyRecord();
 
-    RtMemcpyKindT copyKind{};
+    AclrtMemcpyKind copyKind{};
     uint64_t bytes{0};
-    RtStreamT stream{nullptr};
+    AclrtStream stream{nullptr};
     uint8_t isAsync{0};
     uint64_t start{0};
     uint64_t end{0};

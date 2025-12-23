@@ -78,8 +78,8 @@ struct mstxDomainRegistration_st {};
 typedef struct mstxDomainRegistration_st MstxDomainHandle;
 typedef MstxDomainHandle* mstxDomainHandle_t;
 
-void MstxMarkAFunc(const char* msg, RtStreamT stream);
-uint64_t MstxRangeStartAFunc(const char* msg, RtStreamT stream);
+void MstxMarkAFunc(const char* msg, AclrtStream stream);
+uint64_t MstxRangeStartAFunc(const char* msg, AclrtStream stream);
 void MstxRangeEndFunc(uint64_t rangeId);
 
 namespace Mspti {

@@ -26,19 +26,18 @@
 namespace Mspti {
 namespace Reporter {
 namespace {
-msptiActivityMemcpyKind GetMsptiMemcpyKind(RtMemcpyKindT rtMemcpykind)
+msptiActivityMemcpyKind GetMsptiMemcpyKind(AclrtMemcpyKind rtMemcpykind)
 {
-    static const std::unordered_map<RtMemcpyKindT, msptiActivityMemcpyKind> memoryKindMap = {
-        {RT_MEMCPY_HOST_TO_HOST, MSPTI_ACTIVITY_MEMCPY_KIND_HTOH},
-        {RT_MEMCPY_HOST_TO_DEVICE, MSPTI_ACTIVITY_MEMCPY_KIND_HTOD},
-        {RT_MEMCPY_DEVICE_TO_HOST, MSPTI_ACTIVITY_MEMCPY_KIND_DTOH},
-        {RT_MEMCPY_DEVICE_TO_DEVICE, MSPTI_ACTIVITY_MEMCPY_KIND_DTOD},
-        {RT_MEMCPY_MANAGED, MSPTI_ACTIVITY_MEMCPY_KIND_HTOH},
-        {RT_MEMCPY_ADDR_DEVICE_TO_DEVICE, MSPTI_ACTIVITY_MEMCPY_KIND_DTOD},
-        {RT_MEMCPY_HOST_TO_DEVICE_EX, MSPTI_ACTIVITY_MEMCPY_KIND_HTOD},
-        {RT_MEMCPY_DEVICE_TO_HOST_EX, MSPTI_ACTIVITY_MEMCPY_KIND_DTOH},
-        {RT_MEMCPY_DEFAULT, MSPTI_ACTIVITY_MEMCPY_KIND_DEFAULT},
-        {RT_MEMCPY_RESERVED, MSPTI_ACTIVITY_MEMCPY_KIND_UNKNOWN}
+    static const std::unordered_map<AclrtMemcpyKind, msptiActivityMemcpyKind> memoryKindMap = {
+        {ACL_MEMCPY_HOST_TO_HOST, MSPTI_ACTIVITY_MEMCPY_KIND_HTOH},
+        {ACL_MEMCPY_HOST_TO_DEVICE, MSPTI_ACTIVITY_MEMCPY_KIND_HTOD},
+        {ACL_MEMCPY_DEVICE_TO_HOST, MSPTI_ACTIVITY_MEMCPY_KIND_DTOH},
+        {ACL_MEMCPY_DEVICE_TO_DEVICE, MSPTI_ACTIVITY_MEMCPY_KIND_DTOD},
+        {ACL_MEMCPY_HOST_TO_BUF_TO_DEVICE, MSPTI_ACTIVITY_MEMCPY_KIND_HTOD},
+        {ACL_MEMCPY_DEFAULT, MSPTI_ACTIVITY_MEMCPY_KIND_DEFAULT},
+        // 未知的memcpy类型
+        {ACL_MEMCPY_INNER_DEVICE_TO_DEVICE, MSPTI_ACTIVITY_MEMCPY_KIND_UNKNOWN},
+        {ACL_MEMCPY_INTER_DEVICE_TO_DEVICE, MSPTI_ACTIVITY_MEMCPY_KIND_UNKNOWN},
     };
     auto iter = memoryKindMap.find(rtMemcpykind);
     return (iter == memoryKindMap.end() ? MSPTI_ACTIVITY_MEMCPY_KIND_UNKNOWN : iter->second);
@@ -106,7 +105,7 @@ MemoryRecord::~MemoryRecord()
     }
 }
 
-MemsetRecord::MemsetRecord(uint32_t value, uint64_t bytes, RtStreamT stream, uint8_t isAsync)
+MemsetRecord::MemsetRecord(uint32_t value, uint64_t bytes, AclrtStream stream, uint8_t isAsync)
     : value(value), bytes(bytes), stream(stream), isAsync(isAsync),
       start(Common::ContextManager::GetInstance()->GetHostTimeStampNs()) {}
 
@@ -118,7 +117,7 @@ MemsetRecord::~MemsetRecord()
     }
 }
 
-MemcpyRecord::MemcpyRecord(RtMemcpyKindT copyKind, uint64_t bytes, RtStreamT stream, uint8_t isAsync)
+MemcpyRecord::MemcpyRecord(AclrtMemcpyKind copyKind, uint64_t bytes, AclrtStream stream, uint8_t isAsync)
     : copyKind(copyKind), bytes(bytes), stream(stream), isAsync(isAsync),
       start(Common::ContextManager::GetInstance()->GetHostTimeStampNs()) {}
 

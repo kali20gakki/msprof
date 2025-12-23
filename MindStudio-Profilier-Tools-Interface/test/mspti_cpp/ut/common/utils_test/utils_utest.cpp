@@ -102,7 +102,7 @@ TEST_F(UtilsUtest, GetDeviceIdTest)
 TEST_F(UtilsUtest, GetStreamIdTest)
 {
     const uint32_t expectStreamId = 0U;
-    RtStreamT stm = nullptr;
+    AclrtStream stm = nullptr;
     EXPECT_EQ(expectStreamId, Mspti::Common::GetStreamId(stm));
 }
 

@@ -17,7 +17,7 @@ add_executable(dev_prof_task_utest
     ${TOP_DIR}/csrc/common/inject/mstx_inject.cpp
     ${UT_TOP_DIR}/stub/inject/profapi_inject_stub.cpp
     ${UT_TOP_DIR}/stub/inject/driver_inject_stub.cpp
-    ${UT_TOP_DIR}/stub/inject/runtime_inject_stub.cpp
+    ${UT_TOP_DIR}/stub/inject/acl_inject_stub.cpp
 )
 
 target_include_directories(dev_prof_task_utest PRIVATE

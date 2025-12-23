@@ -24,8 +24,9 @@
 #include "csrc/activity/ascend/parser/mstx_parser.h"
 #include "csrc/activity/ascend/parser/device_task_calculator.h"
 #include "csrc/activity/ascend/parser/kernel_parser.h"
-#include "csrc/common/inject/runtime_inject.h"
+#include "csrc/common/inject/acl_inject.h"
 #include "csrc/common/utils.h"
+#include "csrc/common/runtime_utils.h"
 #include "securec.h"
 
 namespace {
@@ -97,12 +98,12 @@ TEST_F(ParserUtest, ShouldRetSuccessWhenReportKernelInfo)
 TEST_F(ParserUtest, ShouldRetSuccessWhenReportMstxData)
 {
     GlobalMockObject::verify();
-    MOCKER_CPP(rtProfilerTraceEx)
+    MOCKER_CPP(Mspti::Common::profTrace)
         .stubs()
-        .will(returnValue(static_cast<RtErrorT>(MSPTI_SUCCESS)));
+        .will(returnValue(static_cast<AclError>(MSPTI_SUCCESS)));
     auto instance = Mspti::Parser::MstxParser::GetInstance();
     const char* message = "UserMark";
-    RtStreamT stream = (void*)0x1234567;
+    AclrtStream stream = (void*)0x1234567;
     const char* domain = "UserDomain";
     EXPECT_EQ(MSPTI_SUCCESS, instance->ReportMark(message, stream, domain));
     EXPECT_EQ(MSPTI_SUCCESS, instance->ReportMark(message, nullptr, domain));
@@ -151,11 +152,11 @@ TEST_F(ParserUtest, ShouldRetErrorWhenMarkFail)
 {
     GlobalMockObject::verify();
     std::shared_ptr<std::string> nullPtr{nullptr};
-    MOCKER_CPP(rtProfilerTraceEx)
+    MOCKER_CPP(Mspti::Common::profTrace)
         .stubs()
-        .will(returnValue(static_cast<RtErrorT>(MSPTI_ERROR_INNER)));
+        .will(returnValue(static_cast<AclError>(MSPTI_ERROR_INNER)));
     uint64_t markId = 0;
-    RtStreamT stream = (void*)0x1234567;
+    AclrtStream stream = (void*)0x1234567;
     auto instance = Mspti::Parser::MstxParser::GetInstance();
     EXPECT_EQ(MSPTI_ERROR_INNER, instance->InnerDeviceStartA(stream, markId));
     EXPECT_EQ(MSPTI_SUCCESS, instance->InnerDeviceEndA(markId));
@@ -166,12 +167,12 @@ TEST_F(ParserUtest, ShouldRetErrorWhenStreamNull)
     GlobalMockObject::verify();
     std::shared_ptr<std::string> nullPtr{nullptr};
     uint64_t markId = 0;
-    RtStreamT stream = (void*)0x1234567;
+    AclrtStream stream = (void*)0x1234567;
     auto instance = Mspti::Parser::MstxParser::GetInstance();
     EXPECT_EQ(MSPTI_SUCCESS, instance->InnerDeviceStartA(stream, markId));
-    MOCKER_CPP(rtProfilerTraceEx)
+    MOCKER_CPP(Mspti::Common::profTrace)
     .stubs()
-    .will(returnValue(static_cast<RtErrorT>(MSPTI_ERROR_INNER)));
+    .will(returnValue(static_cast<AclError>(MSPTI_ERROR_INNER)));
     EXPECT_EQ(MSPTI_ERROR_INNER, instance->InnerDeviceEndA(markId));
 }
 
@@ -179,17 +180,17 @@ TEST_F(ParserUtest, ShouldRetSuccessWhenInnerMark)
 {
     GlobalMockObject::verify();
     std::shared_ptr<std::string> nullPtr{nullptr};
-    MOCKER_CPP(rtProfilerTraceEx)
+    MOCKER_CPP(Mspti::Common::profTrace)
         .stubs()
-        .will(returnValue(static_cast<RtErrorT>(MSPTI_SUCCESS)));
-    RtStreamT stream = (void*)0x1234567;
+        .will(returnValue(static_cast<AclError>(MSPTI_SUCCESS)));
+    AclrtStream stream = (void*)0x1234567;
     uint64_t markId = 0;
     auto instance = Mspti::Parser::MstxParser::GetInstance();
     EXPECT_EQ(MSPTI_SUCCESS, instance->InnerDeviceStartA(stream, markId));
     EXPECT_EQ(MSPTI_SUCCESS, instance->InnerDeviceEndA(markId));
-    MOCKER_CPP(rtProfilerTraceEx)
+    MOCKER_CPP(Mspti::Common::profTrace)
     .stubs()
-    .will(returnValue(static_cast<RtErrorT>(MSPTI_ERROR_INNER)));
+    .will(returnValue(static_cast<AclError>(MSPTI_ERROR_INNER)));
     uint64_t modelId = 0;
     uint64_t timestamp = 100;
     uint16_t streamId = 1;

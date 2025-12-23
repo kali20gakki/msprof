@@ -115,9 +115,9 @@ TEST_F(MemoryReporterUtest, ShouldRetSuccessWhenReportMemcpyActivity)
     void* stream = malloc(8);
     auto instance = Mspti::Reporter::MemoryReporter::GetInstance();
     {
-        auto sync_record = Mspti::Reporter::MemcpyRecord(RT_MEMCPY_HOST_TO_DEVICE, size, nullptr, 0);
+        auto sync_record = Mspti::Reporter::MemcpyRecord(ACL_MEMCPY_HOST_TO_DEVICE, size, nullptr, 0);
         EXPECT_EQ(MSPTI_SUCCESS, instance->ReportMemcpyActivity(sync_record));
-        auto async_record = Mspti::Reporter::MemcpyRecord(RT_MEMCPY_DEVICE_TO_HOST, size, stream, 1);
+        auto async_record = Mspti::Reporter::MemcpyRecord(ACL_MEMCPY_DEVICE_TO_HOST, size, stream, 1);
         EXPECT_EQ(MSPTI_SUCCESS, instance->ReportMemcpyActivity(async_record));
     }
     EXPECT_EQ(MSPTI_SUCCESS, Mspti::Activity::ActivityManager::GetInstance()->FlushAll());

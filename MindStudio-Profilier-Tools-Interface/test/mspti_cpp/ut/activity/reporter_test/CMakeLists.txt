@@ -29,7 +29,7 @@ add_executable(mspti_reporter_utest
     ${TOP_DIR}/csrc/activity/ascend/channel/stars_common.cpp
     ${UT_TOP_DIR}/stub/inject/profapi_inject_stub.cpp
     ${UT_TOP_DIR}/stub/inject/driver_inject_stub.cpp
-    ${UT_TOP_DIR}/stub/inject/runtime_inject_stub.cpp
+    ${UT_TOP_DIR}/stub/inject/acl_inject_stub.cpp
     ${UT_TOP_DIR}/stub/inject/hccl_inject_stub.cpp
 )
 

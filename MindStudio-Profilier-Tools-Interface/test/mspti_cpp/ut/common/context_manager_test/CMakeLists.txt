@@ -20,16 +20,16 @@ add_executable(context_manager_utest
     ${TOP_DIR}/csrc/activity/activity_manager.cpp
     ${TOP_DIR}/csrc/common/context_manager.cpp
     ${TOP_DIR}/csrc/common/utils.cpp
+    ${TOP_DIR}/csrc/common/runtime_utils.cpp
     ${TOP_DIR}/csrc/common/function_loader.cpp
     ${TOP_DIR}/csrc/common/thread_pool.cpp
     ${TOP_DIR}/csrc/activity/ascend/parser/kernel_parser.cpp
     ${TOP_DIR}/csrc/activity/ascend/channel/soclog_convert.cpp
     ${TOP_DIR}/csrc/activity/ascend/channel/stars_common.cpp
-    ${UT_TOP_DIR}/stub/inject/runtime_inject_stub.cpp
+    ${UT_TOP_DIR}/stub/inject/acl_inject_stub.cpp
     ${UT_TOP_DIR}/stub/inject/driver_inject_stub.cpp
     ${UT_TOP_DIR}/stub/inject/hccl_inject_stub.cpp
     ${UT_TOP_DIR}/stub/inject/profapi_inject_stub.cpp
-    ${UT_TOP_DIR}/stub/inject/runtime_inject_stub.cpp
 )
 
 set_target_properties(context_manager_utest

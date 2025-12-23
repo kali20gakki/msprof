@@ -14,14 +14,14 @@
  * See the Mulan PSL v2 for more details.
  * -------------------------------------------------------------------------
 */
-#include "csrc/common/inject/runtime_inject.h"
+#include "csrc/common/inject/acl_inject.h"
 
-RtErrorT rtProfilerTraceEx(uint64_t id, uint64_t modelId, uint16_t tagId, RtStreamT stm)
+AclError aclrtProfTrace(void *userdata, int32_t length, AclrtStream stream)
 {
     return 0;
 }
 
-RtErrorT rtGetDevice(int32_t* devId)
+AclError aclrtGetDevice(int32_t* devId)
 {
     if (devId != nullptr) {
         *devId = 0;
@@ -29,7 +29,7 @@ RtErrorT rtGetDevice(int32_t* devId)
     return 0;
 }
 
-RtErrorT rtGetStreamId(RtStreamT stm, int32_t *streamId)
+AclError aclrtStreamGetId(AclrtStream stm, int32_t *streamId)
 {
     if (streamId != nullptr) {
         *streamId = 0;

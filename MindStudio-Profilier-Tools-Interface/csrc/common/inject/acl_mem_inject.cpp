@@ -14,15 +14,15 @@
  * See the Mulan PSL v2 for more details.
  * -------------------------------------------------------------------------
 */
-#include "acl_mem_inject.h"
+#include "csrc/common/inject/acl_mem_inject.h"
 
 #include <functional>
 
-#include "activity/activity_manager.h"
-#include "activity/ascend/reporter/memory_reporter.h"
-#include "callback/callback_manager.h"
-#include "common/context_manager.h"
-#include "common/function_loader.h"
+#include "csrc/activity/activity_manager.h"
+#include "csrc/activity/ascend/reporter/memory_reporter.h"
+#include "csrc/callback/callback_manager.h"
+#include "csrc/common/context_manager.h"
+#include "csrc/common/function_loader.h"
 
 namespace {
 const std::string SO_NAME = "libascendcl";

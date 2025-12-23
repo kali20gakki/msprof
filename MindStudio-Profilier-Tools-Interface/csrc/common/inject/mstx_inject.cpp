@@ -189,7 +189,7 @@ static bool IsMsgValid(const char* msg)
     return true;
 }
 
-void MstxMarkAFunc(const char* msg, RtStreamT stream)
+void MstxMarkAFunc(const char* msg, AclrtStream stream)
 {
     if (!ActivityManager::GetInstance()->IsActivityKindEnable(MSPTI_ACTIVITY_KIND_MARKER)) {
         return;
@@ -206,7 +206,7 @@ void MstxMarkAFunc(const char* msg, RtStreamT stream)
     }
 }
  
-uint64_t MstxRangeStartAFunc(const char* msg, RtStreamT stream)
+uint64_t MstxRangeStartAFunc(const char* msg, AclrtStream stream)
 {
     if (!ActivityManager::GetInstance()->IsActivityKindEnable(MSPTI_ACTIVITY_KIND_MARKER)) {
         return MSTX_INVALID_RANGE_ID;
@@ -252,7 +252,7 @@ void MstxDomainDestroyFunc(mstxDomainHandle_t domain)
     Mspti::MstxDomainMgr::GetInstance()->DestroyDomainHandle(domain);
 }
 
-void MstxDomainMarkAFunc(mstxDomainHandle_t domain, const char* msg, RtStreamT stream)
+void MstxDomainMarkAFunc(mstxDomainHandle_t domain, const char* msg, AclrtStream stream)
 {
     if (!ActivityManager::GetInstance()->IsActivityKindEnable(MSPTI_ACTIVITY_KIND_MARKER)) {
         return;
@@ -273,7 +273,7 @@ void MstxDomainMarkAFunc(mstxDomainHandle_t domain, const char* msg, RtStreamT s
     }
 }
 
-uint64_t MstxDomainRangeStartAFunc(mstxDomainHandle_t domain, const char* msg, RtStreamT stream)
+uint64_t MstxDomainRangeStartAFunc(mstxDomainHandle_t domain, const char* msg, AclrtStream stream)
 {
     if (!ActivityManager::GetInstance()->IsActivityKindEnable(MSPTI_ACTIVITY_KIND_MARKER)) {
         return MSTX_INVALID_RANGE_ID;

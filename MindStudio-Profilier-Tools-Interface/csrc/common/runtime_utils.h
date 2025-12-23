@@ -25,7 +25,8 @@ namespace Mspti {
 namespace Common {
 
 uint32_t GetDeviceId();
-uint32_t GetStreamId(RtStreamT stm);
+uint32_t GetStreamId(AclrtStream stm);
+AclError profTrace(uint64_t indexId, uint64_t modelId, uint16_t tagId, AclrtStream stream);
 
 } // Common
 } // Mspti

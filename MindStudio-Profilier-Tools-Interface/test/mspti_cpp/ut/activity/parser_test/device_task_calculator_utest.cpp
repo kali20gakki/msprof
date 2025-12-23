@@ -23,7 +23,7 @@
 #include "csrc/activity/ascend/parser/cann_hash_cache.h"
 #include "csrc/activity/ascend/parser/mstx_parser.h"
 #include "csrc/activity/ascend/parser/device_task_calculator.h"
-#include "csrc/common/inject/runtime_inject.h"
+#include "csrc/common/inject/acl_inject.h"
 #include "csrc/common/utils.h"
 #include "securec.h"
 

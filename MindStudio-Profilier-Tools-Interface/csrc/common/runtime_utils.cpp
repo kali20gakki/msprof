@@ -16,29 +16,42 @@
 */
 
 #include "csrc/common/runtime_utils.h"
-#include "csrc/common/inject/runtime_inject.h"
+#include "csrc/common/inject/acl_inject.h"
 #include "csrc/include/mspti_activity.h"
 #include "csrc/include/mspti_result.h"
 
 namespace Mspti {
 namespace Common {
-
+namespace {
+#pragma pack(1)
+struct TraceData {
+    uint64_t indexId;
+    uint64_t modelId;
+    uint16_t tagId;
+};
+}
 uint32_t GetDeviceId()
 {
     int32_t deviceId = 0;
-    if (rtGetDevice(&deviceId) != MSPTI_SUCCESS) {
+    if (aclrtGetDevice(&deviceId) != MSPTI_SUCCESS) {
         return MSPTI_INVALID_DEVICE_ID;
     }
     return static_cast<uint32_t>(deviceId);
 }
 
-uint32_t GetStreamId(RtStreamT stm)
+uint32_t GetStreamId(AclrtStream stm)
 {
     int32_t streamId = 0;
-    if (rtGetStreamId(stm, &streamId) != MSPTI_SUCCESS) {
+    if (aclrtStreamGetId(stm, &streamId) != MSPTI_SUCCESS) {
         return MSPTI_INVALID_STREAM_ID;
     }
     return static_cast<uint32_t>(streamId);
+}
+
+AclError profTrace(uint64_t indexId, uint64_t modelId, uint16_t tagId, AclrtStream stream)
+{
+    TraceData traceData{.indexId = indexId, .modelId = modelId, .tagId = tagId};
+    return aclrtProfTrace((void *)&traceData, sizeof(TraceData), stream);
 }
 
 } // Common
