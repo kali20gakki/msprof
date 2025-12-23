@@ -23,7 +23,7 @@
 #include "analysis/csrc/domain/entities/tree/include/event.h"
 #include "analysis/csrc/domain/entities/tree/include/tree.h"
 #include "analysis/csrc/domain/services/parser/host/cann/cann_warehouse.h"
-#include "collector/inc/toolchain/prof_common.h"
+#include "analysis/csrc/infrastructure/utils/prof_common.h"
 #include "test/msprof_cpp/analysis_ut/fake/fake_trace_generator.h"
 
 using namespace Analysis::Domain::Host::Cann;

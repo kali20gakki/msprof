@@ -25,7 +25,7 @@
 #include "analysis/csrc/domain/services/parser/host/cann/cann_warehouse.h"
 #include "analysis/csrc/domain/services/association/cann/include/tree_builder.h"
 #include "analysis/csrc/domain/services/association/cann/include/tree_analyzer.h"
-#include "collector/inc/toolchain/prof_common.h"
+#include "analysis/csrc/infrastructure/utils/prof_common.h"
 #include "analysis/csrc/domain/services/parser/host/cann/hash_data.h"
 
 using namespace Analysis::Domain::Host::Cann;

@@ -15,38 +15,19 @@ function add_gcov_excl_line_for_analysis() {
     find ${TOP_DIR}/analysis/csrc -name "*.cpp" -type f -exec sed -i -e 's/^[[:blank:]]*MAKE_SHARED.*;$/& \/\/ LCOV_EXCL_LINE/g' -e '/^[[:blank:]]*MAKE_SHARED.*[,"]$/,/.*;$/ s/;$/& \/\/ LCOV_EXCL_LINE/g' {} \;
 }
 
-function add_gcov_excl_line_for_collector() {
-    find ${TOP_DIR}/collector/dvvp \( -name "*.cpp" -o -name "*.h" \) -type f ! -name "op_desc_parser.cpp" -exec sed -i -e '/^[[:blank:]]*MSPROF_.*[,"]$/,/.*;$/ s/;$/& \/\/ LCOV_EXCL_LINE/g' -e 's/^[[:blank:]]*MSPROF_.*[;,"]$/& \/\/ LCOV_EXCL_LINE/g' {} \;
-    find ${TOP_DIR}/collector/dvvp \( -name "*.cpp" -o -name "*.h" \) -type f -exec sed -i -e '/^[[:blank:]]*MSVP_MAKE_.*[,"]$/,/.*;$/ s/;$/& \/\/ LCOV_EXCL_LINE/g' -e 's/^[[:blank:]]*MSVP_MAKE_.*[;,"]$/& \/\/ LCOV_EXCL_LINE/g' {} \;
-    find ${TOP_DIR}/collector/dvvp -name "*.cpp" -type f -exec sed -i -e '/^[[:blank:]]*FUNRET_.*[,"]$/,/.*;$/ s/;$/& \/\/ LCOV_EXCL_LINE/g' -e 's/^[[:blank:]]*FUNRET_.*[;,"]$/& \/\/ LCOV_EXCL_LINE/g' {} \;
-    sed -i -e 's/^[[:blank:]]*CHECK_.*;/& \/\/ LCOV_EXCL_LINE/g' -e 's/^[[:blank:]]*MSPROF_.*;$/& \/\/ LCOV_EXCL_LINE/g' ${TOP_DIR}/collector/dvvp/analyze/src/op_desc_parser.cpp
-    sed -i -e 's/^[[:blank:]]*static.*;/& \/\/ LCOV_EXCL_LINE/g' ${TOP_DIR}/collector/dvvp/common/singleton/singleton.h
-    sed -i -e 's/^[[:blank:]]*func.*;/& \/\/ LCOV_EXCL_LINE/g' ${TOP_DIR}/collector/dvvp/depend/inc/plugin/plugin_handle.h
-    sed -i -e 's/^[[:blank:]]*if.*{/& \/\/ LCOV_EXCL_LINE/g' -e '/)dlogInnerForC_/s/$/\/\/LCOV_EXCL_LINE/' -e 's/^[[:blank:]]*func.*;/& \/\/ LCOV_EXCL_LINE/g' ${TOP_DIR}/collector/dvvp/depend/inc/plugin/slog_plugin.h
-    find ${TOP_DIR}/collector/dvvp -name "*.cpp" -type f -exec sed -i -e 's/^[[:blank:]]*};/&\/\/ LCOV_EXCL_LINE/' {} \;
-    sed -i -e 's/^[[:blank:]]*GET_JSON_STRING_VALUE.*;/& \/\/ LCOV_EXCL_LINE/g' ${TOP_DIR}/collector/dvvp/message/prof_json_config.cpp
-    sed -i -e 's/^[[:blank:]]*GET_JSON_INT_VALUE.*;/& \/\/ LCOV_EXCL_LINE/g' ${TOP_DIR}/collector/dvvp/message/prof_json_config.cpp
-    find ${TOP_DIR}/collector/dvvp/params_adapter -name "*.cpp" -type f -exec sed -i -e 's/^[[:blank:]]*}).swap.*;/& \/\/ LCOV_EXCL_LINE/g' {} \;
-    sed -i -e 's/^[[:blank:]]*};/&\/\/ LCOV_EXCL_LINE/' ${TOP_DIR}/collector/dvvp/message/prof_json_config.h
-}
-
 function add_gcov_excl_line() {
     add_gcov_excl_line_for_analysis
-    add_gcov_excl_line_for_collector
 }
 
 function change_file_to_unix_format()
 {
     find ${TOP_DIR}/analysis/csrc -type f -exec sed -i 's/\r$//' {} +
-    find ${TOP_DIR}/collector/dvvp -type f -exec sed -i 's/\r$//' {} +
 }
 
 mkdir -p ${TOP_DIR}/test/build_llt
 cd ${TOP_DIR}/test/build_llt
 if [[ -n "$1" && "$1" == "analysis" ]]; then
     cmake ../ -DPACKAGE=ut -DMODE=analysis
-elif [[ -n "$1" && "$1" == "collector" ]]; then
-    cmake ../ -DPACKAGE=ut -DMODE=collector
 elif [[ -n "$1" && "$1" == "all" ]]; then
     cmake ../ -DPACKAGE=ut -DMODE=all
 else

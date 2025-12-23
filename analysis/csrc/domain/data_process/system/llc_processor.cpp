@@ -16,7 +16,7 @@
 #include "analysis/csrc/domain/data_process/system/llc_processor.h"
 #include <unordered_set>
 #include "analysis/csrc/domain/services/environment/context.h"
-#include "collector/dvvp/common/config/config.h"
+#include "analysis/csrc/infrastructure/utils/config.h"
 
 namespace Analysis {
 namespace Domain {

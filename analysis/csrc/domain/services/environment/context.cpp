@@ -20,7 +20,7 @@
 #include "analysis/csrc/infrastructure/dfx/log.h"
 #include "analysis/csrc/infrastructure/utils/utils.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
-#include "collector/dvvp/common/config/config.h"
+#include "analysis/csrc/infrastructure/utils/config.h"
 
 namespace Analysis {
 namespace Domain {

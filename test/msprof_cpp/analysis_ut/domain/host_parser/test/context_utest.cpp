@@ -22,7 +22,7 @@
 #include "analysis/csrc/infrastructure/utils/file.h"
 #include "analysis/csrc/infrastructure/utils/utils.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
-#include "collector/dvvp/common/config/config.h"
+#include "analysis/csrc/infrastructure/utils/config.h"
 
 using namespace Analysis::Utils;
 using namespace Analysis::Domain::Environment;

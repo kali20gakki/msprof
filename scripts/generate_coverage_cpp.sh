@@ -31,18 +31,6 @@ generate_coverage(){
 }
 #----------------------------------------------------------
 test_obj=(
-    job_wrapper_utest
-    driver_utest
-    common_utest
-    msprof_bin_utest
-    streamio_common_utest
-    plugin_utest
-    application_utest
-    message_utest
-    msprofiler_utest
-    transport_utest
-    params_adapter_utest
-    stub_file_utest
     entities_utest
     utils_utest
     device_init_utest

@@ -1,4 +1,3 @@
-# msprofbin libmsprofiler.so stub/libmsprofiler.so
 cmake_minimum_required(VERSION 3.14.1)
 project(msprof)
 
@@ -17,6 +16,3 @@ if (DEFINED HITEST AND HITEST STREQUAL "on")
     set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE hitestwrapper)
     set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK hitestwrapper)
 endif()
-
-########################## securec ###################################
-add_subdirectory(collector)
