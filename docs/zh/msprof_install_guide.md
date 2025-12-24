@@ -12,13 +12,13 @@
 
 当前源码编译仅支持linux版本为ubuntu20.04
 
-1. 安装依赖
+1. 安装依赖。
 
     下载并安装cmake、autoconf、gperf等编译依赖，命令如下。
 
     ```shell
-      apt install -y cmake python3 python3-pip ccache autoconf gperf libtool libssl-dev
-   ```
+    apt install -y cmake python3 python3-pip ccache autoconf gperf libtool libssl-dev
+    ```
    
 2. 下载源码。
     ```shell
@@ -47,7 +47,7 @@
        cd msprof
        # 下载三方依赖包
        bash scripts/download_thirdparty.sh
-       # 编译解析包
+       # 编译采集包
        bash build/build.sh --mode=collector --version=[<version>]
      ```
    - 编译解析包
@@ -90,7 +90,7 @@
     安装完成后，若显示如下信息，则说明软件安装成功。
 
     ```text
-    MindStudio-Profilier package install success.
+    MindStudio-Profiler package install success.
     ```
 
 ## 附录

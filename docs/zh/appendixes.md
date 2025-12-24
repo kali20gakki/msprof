@@ -15,13 +15,13 @@
 
 **功能说明<a name="zh-cn_topic_0000001276273570_section4362143220451"></a>**
 
-性能数据采集完成后可以通过“get\_msprof\_info.py“脚本工具在PROF\_XXX目录下的device_\_\{__id__\}_或host目录文件获取设备信息。“get\_msprof\_info.py“功能及安装路径如下：
+性能数据采集完成后可以通过“get\_msprof\_info.py”脚本工具在PROF\_XXX目录下的device_\{__id__\} 或host目录文件获取设备信息。“get\_msprof\_info.py”功能及安装路径如下：
 
 **表 1**  脚本介绍
 
-|脚本名|功能|路径|
-|--|--|--|
-|get_msprof_info.py|获取设备信息。|${INSTALL_DIR}/tools/profiler/profiler_tool/analysis/interface，${INSTALL_DIR}请替换为CANN软件安装后文件存储路径。若安装的Toolkit软件包，以root安装举例，则安装后文件存储路径为：/usr/local/Ascend/cann。|
+|脚本名|功能| 路径                                                                                                                                                             |
+|--|--|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|get_msprof_info.py|获取设备信息。| ${INSTALL\_DIR}/tools/profiler/profiler_tool/analysis/interface，${INSTAL\_DIR}请替换为CANN软件安装后文件存储路径。若安装的Toolkit软件包，以root安装举例，则安装后文件存储路径为：/usr/local/Ascend/cann。 |
 
 
 **命令格式<a name="zh-cn_topic_0000001276273570_section25968322563"></a>**
@@ -42,8 +42,8 @@ python3 get_msprof_info.py -dir <dir> [-help]
 **使用示例<a name="zh-cn_topic_0000001276273570_section20415205113454"></a>**
 
 1.  以运行用户登录工具所在环境。
-2.  切换至“get\_msprof\_info.py“脚本所在目录。
-3.  执行“get\_msprof\_info.py“脚本，命令示例如下。
+2.  切换至“get\_msprof\_info.py”脚本所在目录。
+3.  执行“get\_msprof\_info.py”脚本，命令示例如下。
 
     -   非集群场景
 
@@ -59,10 +59,10 @@ python3 get_msprof_info.py -dir <dir> [-help]
 
     **表 3**  参数说明
 
-|参数|**可选/必选**|说明|
-|--|--|--|
-|-dir或--collection-dir|必选|收集到的Profiling数据目录。非集群场景须指定为PROF_XXX目录下的host或device*_{id}*目录；集群场景须指定为PROF*_*XXX目录的父目录。|
-|-h或--help|可选|显示帮助信息，仅在获取使用方式时使用。|
+|参数|**可选/必选**| 说明                                                                                  |
+|--|--|-------------------------------------------------------------------------------------|
+|-dir或--collection-dir|必选| 收集到的Profiling数据目录。非集群场景须指定为PROF_XXX目录下的host或device_{id}目录；集群场景须指定为PROF*_*XXX目录的父目录。 |
+|-h或--help|可选| 显示帮助信息，仅在获取使用方式时使用。                                                                 |
 
 **输出说明<a name="zh-cn_topic_0000001276273570_section1320820550911"></a>**
 
@@ -117,7 +117,7 @@ python3 get_msprof_info.py -dir <dir> [-help]
 |Rank Id|集群场景的节点标识ID，集群场景下设备的唯一标识。|
 |Device Id|设备ID，集群场景下不作为设备唯一标识。|
 |Prof Dir|集群场景下当前Rank Id对应设备上的PROF_XXX目录。|
-|Device Dir|集群场景PROF_XXX目录下的device*_{id}*目录。|
+|Device Dir|集群场景PROF_XXX目录下的device_{id}目录。|
 |Models|模型信息，包含当前Rank Id对应设备的所有模型ID（Model ID）及该模型下的迭代次数（Iterations）。|
 
 
@@ -137,7 +137,7 @@ python3 get_msprof_info.py -dir <dir> [-help]
 
 **功能说明<a name="zh-cn_topic_0000001265229666_section1598625522114"></a>**
 
-性能数据文件分片是对于解析完成的timeline数据文件（.json），系统会识别.json文件在Chrome浏览器（“chrome://tracing“）上打开时间的长短，适当将.json文件切分成合适的数量，以方便用户快速打开。分片操作是在执行性能数据导出时自动启动。
+性能数据文件分片是对于解析完成的timeline数据文件（.json），系统会识别.json文件在Chrome浏览器（“chrome://tracing”）上打开时间的长短，适当将.json文件切分成合适的数量，以方便用户快速打开。分片操作是在执行性能数据导出时启动。
 
 **文件格式<a name="zh-cn_topic_0000001265229666_section18515142717224"></a>**
 
@@ -187,7 +187,7 @@ msprof.py脚本需要执行如下步骤才能完成性能数据的最终导出�
 >![](public_sys-resources/icon-note.gif) **说明：** 
 >-   以下产品不支持在设备上直接解析、查询和导出，需要将采集到的PROF\_XXX目录拷贝到安装了Toolkit包的环境下进行操作：
 >    -   Ascend 310B的Ascend RC场景
->-   msprof.py工具使用安装时创建的普通用户运行。
+>    -   msprof.py工具使用安装时创建的用户运行。
 
 
 ### 解析性能数据
@@ -242,19 +242,9 @@ python3 msprof.py import -dir <dir>
     python3 msprof.py import -dir /home/profiler_data/PROF_XXX
     ```
 
-    **表 2**  解析命令参数说明
-
-|参数|**可选/必选**|说明|
-|--|--|--|
-|import|必选|通过import方式解析性能数据。<br/>使用import方式解析性能数据时，即使原始性能数据目录中已经生成.db文件，该方式会重新生成.db文件。|
-|--cluster|集群场景时必选|解析集群场景的性能数据并进行汇总。仅配置import参数时支持。<br/>**-dir**参数需指定PROF_XXX目录的父目录，指定后的解析结果在PROF_XXX目录同级目录下生成sqlite目录。|
-|-dir或--collection-dir|必选|收集到的性能数据目录。须指定为PROF*_*XXX目录或PROF*_*XXX目录的父目录，例如：*/home/profiler_data/PROF_XXX*。|
-|-h或--help|可选|显示帮助信息，仅在获取使用方式时使用。|
-
-
 **输出说明<a name="zh-cn_topic_0000001265229758_section435433185314"></a>**
 
-执行完上述命令，解析完成后对应的PROF\_XXX的device_\_\{id\}_和host目录下会生成sqlite目录，sqlite目录下会有db文件生成（该db文件为中间结果，无须关注）。
+执行完上述命令，解析完成后对应的PROF\_XXX的device_\{id\}和host目录下会生成sqlite目录，sqlite目录下会有db文件生成（该db文件为中间结果，无须关注）。
 
 需要继续导出最终结果的timeline数据或db文件，可执行[导出性能数据](#导出性能数据)。
 

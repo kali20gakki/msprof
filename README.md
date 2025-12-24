@@ -1,8 +1,5 @@
 # 📖MindStudio Profiler
 
-![python](https://img.shields.io/badge/python-3.8|3.9|3.10-blue)
-![platform](https://img.shields.io/badge/platform-Linux-yellow)
-
 ## 📖简介
 
 MindStudio Profiler（简称msProf）是性能调试命令行工具。msProf提供了AI任务运行性能数据、昇腾AI处理器系统数据等性能数据的采集和解析功能，这些功能侧重不同的训练或推理场景，可以定位模型训练或推理中的性能问题。
@@ -12,7 +9,7 @@ MindStudio Profiler（简称msProf）是性能调试命令行工具。msProf提�
 关键目录如下，详细目录介绍参见[项目目录](docs/zh/dir_structure.md)。
 
 ```sh
-└── .gitsubmodule             // 声明依赖的submodule文件
+└── .gitmodules             // 声明依赖的modules文件
 └── docs                      // 文档
     └── zh                    // 中文文档
 └── thirdparty                // 第三方依赖存放目录

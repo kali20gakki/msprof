@@ -21,7 +21,7 @@
 │    └── data
 ├── host
 ...
-      └── data
+     └── data
 ```
 
 \*表示\{timestamp\}时间戳。
@@ -59,9 +59,9 @@ msprof\_\*.db为汇总整体性能数据的文件，mindstudio\_profiler\_output
 
 **查看timeline文件<a name="zh-cn_topic_0000001798537961_section2083110814512"></a>**
 
-使用Perfetto UI打开：在Chrome浏览器中输入“https://ui.perfetto.dev/“地址，将.json文件拖到空白处打开，通过键盘上的快捷键（w：放大，s：缩小，a：左移，d：右移）进行查看。
+使用Perfetto UI打开：在Chrome浏览器中输入https://ui.perfetto.dev/地址，将.json文件拖到空白处打开，通过键盘上的快捷键（w：放大，s：缩小，a：左移，d：右移）进行查看。
 
-使用tracing打开：在Chrome浏览器中输入“chrome://tracing“地址，将.json文件拖到空白处打开，通过键盘上的快捷键（w：放大，s：缩小，a：左移，d：右移）进行查看。
+使用tracing打开：在Chrome浏览器中输入chrome://tracing地址，将.json文件拖到空白处打开，通过键盘上的快捷键（w：放大，s：缩小，a：左移，d：右移）进行查看。
 
 >![](public_sys-resources/icon-note.gif) **说明：** 
 >超大文件推荐使用Perfetto UI打开。
@@ -82,9 +82,9 @@ msprof命令执行完成后，会生成一个汇总所有性能数据的msprof\_
 **单位相关<a name="zh-cn_topic_0000002076410600_section1053014715533"></a>**
 
 1.  时间相关，统一使用纳秒（ns），且为本地Unix时间。
-2.  内存相关，统一使用字节（Byte）
-3.  带宽相关，统一使用Byte/s
-4.  频率相关，统一使用MHz
+2.  内存相关，统一使用字节（Byte）。
+3.  带宽相关，统一使用Byte/s。
+4.  频率相关，统一使用MHz。
 
 **ENUM\_API\_TYPE<a name="zh-cn_topic_0000002076410600_section8466235152619"></a>**
 
@@ -326,10 +326,10 @@ msprof命令执行完成后，会生成一个汇总所有性能数据的msprof\_
 
 **表 13**  格式
 
-|字段名|类型|含义|
-|--|--|--|
-|id|INTEGER|索引，Host侧tx打点数据event类型对应的ID|
-|name|INTEGER|Host侧tx打点数据event类型|
+|字段名| 类型     |含义|
+|--|--------|--|
+|id| INTEGER |索引，Host侧tx打点数据event类型对应的ID|
+|name| TEXT   |Host侧tx打点数据event类型|
 
 
 **表 14**  内容
@@ -1623,7 +1623,7 @@ step\_trace\_\*.csv文件内容格式示例如下：
 
 ## dp（数据增强信息）<a name="ZH-CN_TOPIC_0000002509383187"></a>
 
-数据增强数据仅在训练场景下生成且仅生成summary数据dp\_\*.csv。
+数据增强信息仅在训练场景下生成且仅生成summary数据dp\_\*.csv。
 
 在TensorFlow训练场景开启数据预处理下沉（即enable\_data\_pre\_proc开关配置为True）时可生成dp\_\*.csv文件。详情请参见《TensorFlow 1.15模型迁移指南》中的“训练迭代循环下沉”章节。
 
