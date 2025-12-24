@@ -27,12 +27,12 @@ if [ -n "$1" ]; then
 fi
 
 mkdir -p ${OPENSOURCE_DIR} && cd ${OPENSOURCE_DIR}
-[ ! -d "json" ] && git clone https://gitcode.com/GitHub_Trending/js/json.git -b v3.11.3
-[ ! -d "rapidjson" ] && git clone https://gitcode.com/GitHub_Trending/ra/rapidjson.git
-[ ! -d "makeself" ] && git clone https://gitcode.com/gh_mirrors/ma/makeself.git -b release-2.5.0
+[ ! -d "json" ] && git clone https://gitcode.com/GitHub_Trending/js/json.git -b json v3.11.3
+[ ! -d "rapidjson" ] && git clone https://gitcode.com/GitHub_Trending/ra/rapidjson.git rapidjson
+[ ! -d "makeself" ] && git clone https://gitcode.com/gh_mirrors/ma/makeself.git makeself -b release-2.5.0
 
 mkdir -p ${LLT_DIR} && cd ${LLT_DIR}
-[ ! -d "googletest" ] && git clone https://gitcode.com/GitHub_Trending/go/googletest.git -b release-1.12.1
+[ ! -d "googletest" ] && git clone https://gitcode.com/GitHub_Trending/go/googletest.git googletest -b release-1.12.1
 [ ! -d "mockcpp" ] && git clone ssh://git@szv-y.codehub.huawei.com:2222/mindstudio/MindStudio_Opensource/mock_cpp.git mockcpp -b msprof
 
 mkdir -p ${PLATFORM_DIR} && cd ${PLATFORM_DIR}
