@@ -36,5 +36,5 @@ mkdir -p ${LLT_DIR} && cd ${LLT_DIR}
 [ ! -d "mockcpp" ] && git clone ssh://git@szv-y.codehub.huawei.com:2222/mindstudio/MindStudio_Opensource/mock_cpp.git mockcpp -b msprof
 
 mkdir -p ${PLATFORM_DIR} && cd ${PLATFORM_DIR}
-[ ! -d "securec" ] && git clone https://gitcode.com/openeuler/libboundscheck.git
+[ ! -d "securec" ] && git clone https://gitcode.com/openeuler/libboundscheck.git securec
 cd ${TOP_DIR}
