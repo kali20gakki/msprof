@@ -27,7 +27,7 @@ if [ -n "$1" ]; then
 fi
 
 mkdir -p ${OPENSOURCE_DIR} && cd ${OPENSOURCE_DIR}
-[ ! -d "json" ] && git clone https://gitcode.com/GitHub_Trending/js/json.git -b json v3.11.3
+[ ! -d "json" ] && git clone https://gitcode.com/GitHub_Trending/js/json.git json -b v3.11.3
 [ ! -d "rapidjson" ] && git clone https://gitcode.com/GitHub_Trending/ra/rapidjson.git rapidjson
 [ ! -d "makeself" ] && git clone https://gitcode.com/gh_mirrors/ma/makeself.git makeself -b release-2.5.0
 
