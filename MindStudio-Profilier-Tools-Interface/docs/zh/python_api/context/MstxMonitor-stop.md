@@ -57,5 +57,5 @@ def stop(self) -> MsptiResult:
 
 ## 返回值说明<a name="section776014535188"></a>
 
-返回MsptiResult.MSPTI\_SUCCESS表示成功，返回MsptiResult.MSPTI\_ERROR\_INVALID\_PARAMETER表示失败。
+返回MsptiResult.MSPTI\_SUCCESS表示成功；返回MsptiResult.MSPTI\_ERROR\_INVALID\_PARAMETER表示失败。
 

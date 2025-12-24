@@ -75,5 +75,5 @@ def start(self, cb: Callable[[KernelData], None]) -> MsptiResult:
 
 ## 返回值说明<a name="section776014535188"></a>
 
-返回MsptiResult.MSPTI\_SUCCESS则表示成功，返回MsptiResult.MSPTI\_ERROR\_INVALID\_PARAMETER，则表示回调函数类型不正确，操作失败。
+返回MsptiResult.MSPTI\_SUCCESS则表示成功；返回MsptiResult.MSPTI\_ERROR\_INVALID\_PARAMETER，则表示回调函数类型不正确，操作失败。
 

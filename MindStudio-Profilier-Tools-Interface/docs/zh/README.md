@@ -24,9 +24,7 @@
 
 - 硬件环境请参见《[昇腾产品形态说明](https://www.hiascend.com/document/detail/zh/AscendFAQ/ProduTech/productform/hardwaredesc_0001.html)》。
 
-- 软件环境请参见《[CANN 软件安装指南](https://www.hiascend.com/document/detail/zh/canncommercial/83RC1/softwareinst/instg/instg_quick.html?Mode=PmIns&InstallType=local&OS=openEuler&Software=cannToolKit)》安装昇腾设备开发或运行环境，即toolkit软件包。
-
-以上环境依赖请根据实际环境选择适配的版本。
+- 软件环境请参见《[CANN 软件安装指南](https://www.hiascend.com/document/detail/zh/canncommercial/83RC1/softwareinst/instg/instg_quick.html?Mode=PmIns&InstallType=local&OS=openEuler&Software=cannToolKit)》安装配套版本的CANN Toolkit开发套件包和ops算子包并配置CANN环境变量。
 
 **约束**
 
@@ -50,7 +48,7 @@ msPTI工具不可与任何其他性能数据采集工具同时使用，否则会
 
 **构建样例执行<a name="zh-cn_topic_0000002257378834_section6122533557"></a>**
 
-1. 安装CANN软件后，使用CANN运行用户进行编译、运行时，需要以CANN运行用户登录环境，执行source $_\{install\_path\}_/set\_env.sh命令设置环境变量。其中$\{install\_path\}为CANN软件的安装目录，例如：/usr/local/Ascend/ascend-toolkit。
+1. 安装CANN软件后，使用CANN运行用户进行编译、运行时，需要以CANN运行用户登录环境，执行source ${install_path}/set\_env.sh命令设置环境变量。其中${install_path}为CANN软件的安装目录，例如：/usr/local/Ascend/cann。
 
 2. 进入样例目录。
 
@@ -85,9 +83,9 @@ msPTI工具不可与任何其他性能数据采集工具同时使用，否则会
   | ------------------------------------------------------------ | ------------------------------------------------------------ | --------------------------- |
   | [mspti_activity](../../samples/mspti_activity)               | 1. 展示Activity API接口的基本功能，样例展示如何采集Kernel和Memory等数据。<br/> 2. 演示Activity API的基本运行，讲述Activity API的基本使用，包括Activity Buffer内存分配，Buffer消费等逻辑。 | Ascend 910B<br/>Ascend 910C |
   | [mspti_correlation](../../samples/mspti_correlation)         | 1. 展示Activity API接口的基本功能，展示如何通过correlationId字段将API和Kernel数据做关联。<br/> 2. 演示runtime API下发与Kernel实际执行数据的关联，关联后可以将算子的下发和执行一一对应，方便分析性能瓶颈。 | Ascend 910B<br/>Ascend 910C |
-  | [mspti_external_correlation](../../samples/mspti_external_correlation) | 1. 展示MSPTI External Correlation功能。<br/>2. 演示msptiActivityPopExternalCorrelationId和msptiActivityPushExternalCorrelationId两接口使用方法，用户可以通过接口将各种API关联到一起，方便回溯函数的调用栈。 | Ascend 910B<br/>Ascend 910C |
+  | [mspti_external_correlation](../../samples/mspti_external_correlation) | 1. 展示msPTI External Correlation功能。<br/>2. 演示msptiActivityPopExternalCorrelationId和msptiActivityPushExternalCorrelationId两接口使用方法，用户可以通过接口将各种API关联到一起，方便回溯函数的调用栈。 | Ascend 910B<br/>Ascend 910C |
   | [mspti_hccl_activity](../../samples/mspti_hccl_activity)     | 1. 展示Activity API接口的基本功能，样例展示如何通过Hccl开关采集通信数据。 | Ascend 910B<br/>Ascend 910C |
-  | [mspti_mstx_activity_domain](../../samples/mspti_mstx_activity_domain) | 1. 展示MSPTI控制mstxDomain功能，通过开关控制打点数据是否采集。<br/> 2. 用户可以通过MSPTI开关实时开关采集打点，减小性能损耗。 | Ascend 910B<br/>Ascend 910C |
+  | [mspti_mstx_activity_domain](../../samples/mspti_mstx_activity_domain) | 1. 展示msPTI控制mstxDomain功能，通过开关控制打点数据是否采集。<br/> 2. 用户可以通过MSPTI开关实时开关采集打点，减小性能损耗。 | Ascend 910B<br/>Ascend 910C |
 
 - Python API
 

@@ -62,7 +62,7 @@ def start(self, cb: Callable[[HcclData], None]) -> MsptiResult:
 </th>
 </tr>
 </thead>
-<tbody><tr id="row10379818172019"><td class="cellrowborder" valign="top" width="14.000000000000002%" headers="mcps1.1.4.1.1 "><p id="p10791153923311"><a name="p10791153923311"></a><a name="p10791153923311"></a>cb：回调函数</p>
+<tbody><tr id="row10379818172019"><td class="cellrowborder" valign="top" width="14.000000000000002%" headers="mcps1.1.4.1.1 "><p id="p10791153923311"><a name="p10791153923311"></a><a name="p10791153923311"></a>cb：Callable</p>
 </td>
 <td class="cellrowborder" valign="top" width="14.000000000000002%" headers="mcps1.1.4.1.2 "><p id="p187904392335"><a name="p187904392335"></a><a name="p187904392335"></a>输入</p>
 </td>
@@ -71,6 +71,7 @@ def start(self, cb: Callable[[HcclData], None]) -> MsptiResult:
 </tr>
 </tbody>
 </table>
+
 
 ## 返回值说明<a name="section776014535188"></a>
 

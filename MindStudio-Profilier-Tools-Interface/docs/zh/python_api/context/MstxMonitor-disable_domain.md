@@ -75,5 +75,5 @@ def disable_domain(self, domain_name: str):
 
 ## 返回值说明<a name="section776014535188"></a>
 
-返回MsptiResult.MSPTI\_SUCCESS表示成功，domain\_name为空字符串时返回MsptiResult.MSPTI\_ERROR\_INVALID\_PARAMETER，表示失败。
+返回MsptiResult.MSPTI\_SUCCESS表示成功；domain\_name为空字符串时返回MsptiResult.MSPTI\_ERROR\_INVALID\_PARAMETER，表示失败。
 

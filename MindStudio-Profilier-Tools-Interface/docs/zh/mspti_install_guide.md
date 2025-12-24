@@ -5,9 +5,7 @@
 ## ⚠️安装前准备
 - 硬件环境请参见《[昇腾产品形态说明](https://www.hiascend.com/document/detail/zh/AscendFAQ/ProduTech/productform/hardwaredesc_0001.html)》。
 
-- 软件环境请参见《[CANN 软件安装指南](https://www.hiascend.com/document/detail/zh/canncommercial/83RC1/softwareinst/instg/instg_quick.html?Mode=PmIns&InstallType=local&OS=openEuler&Software=cannToolKit)》安装昇腾设备开发或运行环境，即Toolkit软件包。
-
-以上环境依赖请根据实际环境选择适配的版本。
+- 软件环境请参见《[CANN 软件安装指南](https://www.hiascend.com/document/detail/zh/canncommercial/83RC1/softwareinst/instg/instg_quick.html?Mode=PmIns&InstallType=local&OS=openEuler&Software=cannToolKit)》安装配套版本的CANN Toolkit开发套件包和ops算子包并配置CANN环境变量。
 
 ## ✅安装run包
 
@@ -19,7 +17,7 @@ cd mspti
 bash scripts/build.sh [<version>]
 ```
 编译完成后，会在mspti/output目录下生成msPTI工具的run包，run包名称格式为`Ascend-mindstudio-mspti_<version>_linux-<arch>.run`。
-上述编译命令中的version参数即为软包名称中的version，表示该run包的版本号，默认为“none”。
+上述编译命令中的version参数即为软件包名称中的version，表示该run包的版本号，默认为“none”。
 run包中的arch表示系统架构，根据实际运行系统自动适配。
 
 ### 安装步骤

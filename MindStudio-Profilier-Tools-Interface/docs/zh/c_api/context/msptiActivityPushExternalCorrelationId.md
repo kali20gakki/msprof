@@ -45,7 +45,7 @@
 
 为调用线程推送外部关联ID。
 
-此函数通知MSPTI调用线程进入外部API区域。当在外部API区域内创建MSPTI活动API记录并且启用了[MSPTI\_ACTIVITY\_KIND\_EXTERNAL\_CORRELATION](msptiActivityKind.md)时，对于每个[msptiExternalCorrelationKind](msptiExternalCorrelationKind.md)，活动API记录的前面将有一个[msptiActivityExternalCorrelation](msptiActivityExternalCorrelation.md)记录。
+此函数通知MSPTI调用线程进入外部API区域。当在外部API区域内创建MSPTI活动，API记录并且启用了[MSPTI\_ACTIVITY\_KIND\_EXTERNAL\_CORRELATION](msptiActivityKind.md)时，对于每个[msptiExternalCorrelationKind](msptiExternalCorrelationKind.md)，活动API记录的前面将有一个[msptiActivityExternalCorrelation](msptiActivityExternalCorrelation.md)记录。
 
 ## 函数原型<a name="section1121883194711"></a>
 

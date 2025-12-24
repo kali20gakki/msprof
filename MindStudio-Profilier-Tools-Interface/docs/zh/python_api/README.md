@@ -2,7 +2,7 @@
 
 ## 接口简介<a name="section172424491588"></a>
 
-Profiling模块提供msPTI Python接口，用于实现采集各模块性能数据。
+Profiling模块提供msPTI Python接口，用于采集各模块性能数据。
 
 msPTI API的功能介绍和使用示例请参见[msPTI工具](../README.md)。
 
@@ -34,7 +34,7 @@ msPTI API的功能介绍和使用示例请参见[msPTI工具](../README.md)。
 |**[Data Structure类型](./context/Data-Structure.md)**|**Data Structure说明**|
 |[HcclData](./context/HcclData.md)|Activity Record类型MSPTI_ACTIVITY_KIND_HCCL对应的结构体。|
 |[KernelData](./context/KernelData.md)|Activity Record类型MSPTI_ACTIVITY_KIND_KERNEL对应的结构体。|
-|[MarkerData](./context/MarkerData)|Activity Record类型MSPTI_ACTIVITY_KIND_MARKER对应的结构体。|
+|[MarkerData](./context/MarkerData.md)|Activity Record类型MSPTI_ACTIVITY_KIND_MARKER对应的结构体。|
 |[RangeMarkerData](./context/RangeMarkerData.md)|Activity Record类型MSPTI_ACTIVITY_KIND_MARKER对应的结构体。|
 |**[Enumeration类型](./context/Enumeration.md)**|**Enumeration说明**|
 |[msptiResult](./context/msptiResult.md)|MSPTI返回的错误和结果代码。|

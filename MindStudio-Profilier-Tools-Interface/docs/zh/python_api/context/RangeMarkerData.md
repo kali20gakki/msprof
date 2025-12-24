@@ -1,6 +1,6 @@
 # RangeMarkerData<a name="ZH-CN_TOPIC_0000002279641170"></a>
 
-展示mstx接口的Range打点数据，mstx接口详细介绍请参见《mstx API使用示例》。
+展示mstx接口的Range打点数据，mstx接口详细介绍请参见[《mstx API使用示例》](https://www.hiascend.com/document/detail/zh/mindstudio/82RC1/API/mstxAPIReference/msprof_tx_0001.html)。
 
 RangeMarkerData为[MstxMonitor.start](MstxMonitor-start.md)调用的结构体，定义如下：
 
