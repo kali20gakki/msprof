@@ -35,6 +35,7 @@ function change_file_to_unix_format()
 
 bash ${CUR_DIR}/download_thirdparty.sh
 
+rm -rf ${TOP_DIR}/test/build_llt
 mkdir -p ${TOP_DIR}/test/build_llt
 cd ${TOP_DIR}/test/build_llt
 change_file_to_unix_format  # change file from dos to unix format, so that gcov exclude comment can be added

@@ -14,11 +14,11 @@
  * See the Mulan PSL v2 for more details.
  * -------------------------------------------------------------------------
 */
-#include "hccl_reporter.h"
+#include "csrc/activity/ascend/parser/hccl_reporter.h"
 #include "csrc/activity/activity_manager.h"
 #include "csrc/common/plog_manager.h"
 #include "csrc/common/utils.h"
-#include "hccl_calculator.h"
+#include "csrc/activity/ascend/parser/hccl_calculator.h"
 #include "securec.h"
 
 namespace Mspti {

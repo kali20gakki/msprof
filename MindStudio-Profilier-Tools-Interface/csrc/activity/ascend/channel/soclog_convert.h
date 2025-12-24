@@ -23,7 +23,7 @@
 #include <memory>
 #include <vector>
 #include "csrc/activity/ascend/entity/soclog.h"
-#include "basic_convert.h"
+#include "csrc/activity/ascend/channel/basic_convert.h"
 
 namespace Mspti {
 namespace Convert {

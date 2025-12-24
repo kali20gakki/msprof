@@ -50,7 +50,7 @@ function parse_script_args() {
             continue
             ;;
         *)
-            print $LEVEL_ERROR "Input option is invalid. Please try --help."
+            print $LEVEL_ERROR "Input option '$3' is invalid. Please try --help."
             exit 1
             ;;
         esac

@@ -35,7 +35,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include "mspti_result.h"
+#include "csrc/include/mspti_result.h"
 
 #define MSPTI_INVALID_DEVICE_ID ((uint32_t) 0xFFFFFFFFU)
 #define MSPTI_INVALID_STREAM_ID ((uint32_t) 0xFFFFFFFFU)

@@ -15,7 +15,7 @@
  * -------------------------------------------------------------------------
 */
 
-#include "soclog_convert.h"
+#include "csrc/activity/ascend/channel/soclog_convert.h"
 
 #include <functional>
 

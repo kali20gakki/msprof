@@ -14,7 +14,7 @@
  * See the Mulan PSL v2 for more details.
  * -------------------------------------------------------------------------
 */
-#include "hccl_inject.h"
+#include "csrc/common/inject/hccl_inject.h"
 
 #include <functional>
 #include <utility>
@@ -22,7 +22,7 @@
 
 #include "csrc/callback/callback_manager.h"
 #include "csrc/common/function_loader.h"
-#include "hccl_range_mark.h"
+#include "csrc/common/inject/hccl_range_mark.h"
 #include "csrc/common/context_manager.h"
 #include "csrc/common/plog_manager.h"
 

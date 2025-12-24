@@ -14,7 +14,7 @@
  * See the Mulan PSL v2 for more details.
  * -------------------------------------------------------------------------
 */
-#include "hccl_range_mark.h"
+#include "csrc/common/inject/hccl_range_mark.h"
 #include "csrc/activity/ascend/parser/mstx_parser.h"
 #include "csrc/common/utils.h"
 #include "csrc/activity/activity_manager.h"

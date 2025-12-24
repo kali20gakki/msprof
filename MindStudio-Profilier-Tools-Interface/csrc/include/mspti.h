@@ -18,9 +18,9 @@
 #ifndef MSPTI_H
 #define MSPTI_H
 
-#include "mspti_activity.h"
-#include "mspti_result.h"
-#include "mspti_callback.h"
-#include "mspti_cbid.h"
+#include "csrc/include/mspti_activity.h"
+#include "csrc/include/mspti_result.h"
+#include "csrc/include/mspti_callback.h"
+#include "csrc/include/mspti_cbid.h"
 
 #endif

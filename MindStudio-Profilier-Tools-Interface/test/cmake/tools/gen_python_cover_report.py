@@ -1,9 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-# ----------------------------------------------------------------------------
-# Purpose:
-# Copyright Huawei Technologies Co., Ltd. 2010-2020. All rights reserved.
-# ----------------------------------------------------------------------------
+# -------------------------------------------------------------------------
+# Copyright (c) 2025 Huawei Technologies Co., Ltd.
+# This file is part of the MindStudio project.
+#
+# MindStudio is licensed under Mulan PSL v2.
+# You can use this software according to the terms and conditions of the Mulan PSL v2.
+# You may obtain a copy of Mulan PSL v2 at:
+#
+#    http://license.coscl.org.cn/MulanPSL2
+#
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+# EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+# MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+# See the Mulan PSL v2 for more details.
+# -------------------------------------------------------------------------
 """
 python_llt_run_and_check.sh脚本会在coverage_result目录下生成
 各编译目标的覆盖率数据文件`.coverage.[local_module]`
@@ -119,13 +130,9 @@ def print_command_line(args):
     logging.info('command line is %s', command_line)
 
 
-def shell_exec(cmds, with_quote=True):
-    if with_quote:
-        command_line = ' '.join(quote_params(cmds))
-    else:
-        command_line = ' '.join(cmds)
-    logging.info(command_line)
-    return subprocess.run(command_line, shell=True, check=False)
+def shell_exec(cmds):
+    logging.info(f"run command: {cmds}")
+    return subprocess.run(cmds)
 
 
 def get_classify_rule(classifies_str: str) -> str:
@@ -258,7 +265,7 @@ def generate_inc_coverage_data(python_version, classify_rule, top_dir,
         # 根据classify_rule中的条目，只统计跟组件相关的代码
         include_str = ",".join(classify_rule_item_list)
         cmds.append("--include=" + include_str)
-    result = shell_exec(envs + cmds, with_quote=False)
+    result = shell_exec(envs + cmds)
     if result.returncode != 0:
         logging.error('coverage xml %s to %s failed!',
                       coveragefile_path,
@@ -374,7 +381,6 @@ def generate_coverage_json(coverage_result_path):
                                        'output/llt', json_file_name)
     with open(json_file_full_name, 'w') as F:
         F.write(result_json)
-    return json_file_full_name
 
 
 def get_manifest_branch(topdir=None):
@@ -383,13 +389,17 @@ def get_manifest_branch(topdir=None):
     else:
         manifest_path = os.path.join('.repo', 'manifests')
 
-    cmd = 'echo $(cd "{0}" && git config branch.default.merge) | cut -d "/" -f 3'.format(
-        manifest_path)
+    cmd = ['git', 'config', '--get', 'branch.default.merge']
     result = subprocess.run(cmd,
-                            stdout=subprocess.PIPE,
-                            shell=True,
-                            check=False)
-    return result.stdout.decode().strip()
+                           cwd=manifest_path,
+                           stdout=subprocess.PIPE,
+                           stderr=subprocess.PIPE,
+                           check=False)
+    if result.returncode == 0:
+        output = result.stdout.decode().strip()
+        return output.split(os.path.sep)[-1] if os.path.sep in output else output
+    else:
+        return ""
 
 
 def main(argv):

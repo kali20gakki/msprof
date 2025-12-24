@@ -23,7 +23,8 @@
 #include "csrc/activity/ascend/parser/mstx_parser.h"
 #include "csrc/common/utils.h"
 #include "csrc/common/plog_manager.h"
-#include "mstx_inject.h"
+#include "csrc/common/inject/mstx_inject.h"
+#include "csrc/common/function_loader.h"
 
 using namespace Mspti::Activity;
 using namespace Mspti::Common;
@@ -407,6 +408,7 @@ int InitInjectionMstx(MstxGetModuleFuncTableFunc getFuncTable)
     }
     return MSPTI_SUCCESS;
 }
+}
 
 void ProfRegisterMstxFunc(MstxInitInjectionFunc mstxInitFunc, ProfModule module)
 {
@@ -436,7 +438,6 @@ void EnableMstxFunc(ProfModule module)
     }
     MSPTI_LOGI("mspti enable mstxFuncs");
     return func(module);
-}
 }
 
 msptiResult msptiActivityEnableMarkerDomain(const char* name)

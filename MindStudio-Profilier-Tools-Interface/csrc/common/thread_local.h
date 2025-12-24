@@ -47,7 +47,8 @@ public:
             pthread_setspecific(key_, ptr);
             auto ret = pthread_setspecific(key_, ptr);
             if (ret != 0) {
-                MSPTI_LOGE("pthread_setspecific failed: %s (%d)", strerror(ret), ret);
+                std::error_code ec(ret, std::generic_category());
+                MSPTI_LOGE("pthread_setspecific failed: %s (ret=%d)", ec.message().c_str(), ret);
                 delete static_cast<T*>(ptr);
                 return nullptr;
             }
@@ -62,7 +63,8 @@ public:
             delete static_cast<T*>(ptr);
             auto ret = pthread_setspecific(key_, nullptr);
             if (ret != 0) {
-                MSPTI_LOGE("pthread_setspecific (clear) failed: %s (%d)", strerror(ret), ret);
+                std::error_code ec(ret, std::generic_category());
+                MSPTI_LOGE("pthread_setspecific failed: %s (ret=%d)", ec.message().c_str(), ret);
             }
         }
     }

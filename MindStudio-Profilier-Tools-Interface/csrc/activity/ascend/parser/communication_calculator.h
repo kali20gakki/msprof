@@ -22,8 +22,8 @@
 #include <vector>
 #include "csrc/common/inject/profapi_inject.h"
 #include "csrc/common/bound_queue.h"
-#include "cann_track_cache.h"
-#include "device_task_calculator.h"
+#include "csrc/activity/ascend/parser/cann_track_cache.h"
+#include "csrc/activity/ascend/parser/device_task_calculator.h"
 #include "csrc/include/mspti_activity.h"
 #include "csrc/activity/ascend/entity/communication_op_desc.h"
 

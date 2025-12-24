@@ -15,7 +15,7 @@
  * -------------------------------------------------------------------------
 */
 
-#include "mstx_parser.h"
+#include "csrc/activity/ascend/parser/mstx_parser.h"
 
 #include "csrc/activity/activity_manager.h"
 #include "csrc/include/mspti_activity.h"
@@ -23,9 +23,9 @@
 #include "csrc/common/context_manager.h"
 #include "csrc/common/config.h"
 #include "csrc/common/utils.h"
-#include "csrc/common/runtime_utils.cpp"
+#include "csrc/common/runtime_utils.h"
 #include "csrc/common/thread_local.h"
-#include "hccl_reporter.h"
+#include "csrc/activity/ascend/parser/hccl_reporter.h"
 
 namespace Mspti {
 namespace Parser {
@@ -86,7 +86,7 @@ msptiResult MstxParser::ReportMark(const char* msg, AclrtStream stream, const ch
         return MSPTI_ERROR_INNER;
     }
     uint64_t markId = ++gMarkId_;
-    if (stream != nullptr && Common::profTrace(markId,
+    if (stream != nullptr && Common::ProfTrace(markId,
         static_cast<uint64_t>(MSPTI_ACTIVITY_FLAG_MARKER_INSTANTANEOUS_WITH_DEVICE), MARK_TAG_ID, stream) !=
                               MSPTI_SUCCESS) {
         MSPTI_LOGE("Failed to run markA func.");
@@ -128,7 +128,7 @@ msptiResult MstxParser::ReportRangeStartA(const char* msg, AclrtStream stream, u
         return MSPTI_ERROR_INNER;
     }
     markId = ++gMarkId_;
-    if (stream != nullptr && Common::profTrace(markId,
+    if (stream != nullptr && Common::ProfTrace(markId,
                                                static_cast<uint64_t>(MSPTI_ACTIVITY_FLAG_MARKER_START_WITH_DEVICE),
                                                MARK_TAG_ID, stream) != MSPTI_SUCCESS) {
         MSPTI_LOGE("Failed to run range startA func.");
@@ -172,7 +172,7 @@ msptiResult MstxParser::ReportRangeEnd(uint64_t rangeId)
         timestamp = Common::ContextManager::CalculateRealTime(Mspti::Common::Utils::GetHostSysCnt(),
                                                               iter->second.devTimeInfo);
         if (iter->second.stream) {
-            if (Common::profTrace(rangeId, static_cast<uint64_t>(MSPTI_ACTIVITY_FLAG_MARKER_END_WITH_DEVICE),
+            if (Common::ProfTrace(rangeId, static_cast<uint64_t>(MSPTI_ACTIVITY_FLAG_MARKER_END_WITH_DEVICE),
                                   MARK_TAG_ID, iter->second.stream) != MSPTI_SUCCESS) {
                 MSPTI_LOGE("Failed to run range end func.");
                 return MSPTI_ERROR_INNER;
@@ -248,7 +248,7 @@ bool MstxParser::IsInnerMarker(uint64_t markId)
 msptiResult MstxParser::InnerDeviceStartA(AclrtStream stream, uint64_t& markId)
 {
     markId = ++gMarkId_;
-    if (stream != nullptr && Common::profTrace(markId,
+    if (stream != nullptr && Common::ProfTrace(markId,
                                                static_cast<uint64_t>(MSPTI_ACTIVITY_FLAG_MARKER_START_WITH_DEVICE),
                                                MARK_TAG_ID, stream) != MSPTI_SUCCESS) {
         MSPTI_LOGE("Failed to run range startA func.");
@@ -270,7 +270,7 @@ msptiResult MstxParser::InnerDeviceEndA(uint64_t rangeId)
             MSPTI_LOGW("Input rangeId[%lu] is invalid.", rangeId);
             return MSPTI_SUCCESS;
         }
-        if (iter->second && Common::profTrace(rangeId,
+        if (iter->second && Common::ProfTrace(rangeId,
                                               static_cast<uint64_t>(MSPTI_ACTIVITY_FLAG_MARKER_END_WITH_DEVICE),
                                               MARK_TAG_ID, iter->second) != MSPTI_SUCCESS) {
             MSPTI_LOGE("Failed to run range end func.");

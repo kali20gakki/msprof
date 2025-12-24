@@ -15,7 +15,7 @@
  * -------------------------------------------------------------------------
 */
 
-#include "stars_common.h"
+#include "csrc/activity/ascend/channel/stars_common.h"
 
 namespace Mspti {
 namespace Convert {

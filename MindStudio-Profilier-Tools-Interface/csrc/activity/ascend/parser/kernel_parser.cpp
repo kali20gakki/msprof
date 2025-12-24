@@ -15,7 +15,7 @@
  * -------------------------------------------------------------------------
 */
 
-#include "kernel_parser.h"
+#include "csrc/activity/ascend/parser/kernel_parser.h"
 
 #include <tuple>
 #include <list>
@@ -27,7 +27,7 @@
 #include "csrc/common/context_manager.h"
 #include "csrc/common/object_pool.h"
 #include "csrc/activity/activity_manager.h"
-#include "cann_hash_cache.h"
+#include "csrc/activity/ascend/parser/cann_hash_cache.h"
 #include "csrc/activity/ascend/channel/stars_common.h"
 #include "csrc/activity/ascend/entity/device_task.h"
 

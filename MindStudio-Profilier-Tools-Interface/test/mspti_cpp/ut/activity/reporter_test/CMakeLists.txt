@@ -3,6 +3,7 @@ add_executable(mspti_reporter_utest
     main.cpp
     memory_reporter_utest.cpp
     ${TOP_DIR}/csrc/common/inject/mstx_inject.cpp
+    ${TOP_DIR}/csrc/common/function_loader.cpp
     ${TOP_DIR}/csrc/activity/activity_manager.cpp
     ${TOP_DIR}/csrc/activity/ascend/reporter/memory_reporter.cpp
     ${TOP_DIR}/csrc/activity/ascend/reporter/external_correlation_reporter.cpp

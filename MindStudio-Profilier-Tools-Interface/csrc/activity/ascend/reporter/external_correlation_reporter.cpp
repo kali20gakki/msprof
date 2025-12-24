@@ -15,7 +15,7 @@
  * -------------------------------------------------------------------------
 */
 
-#include "external_correlation_reporter.h"
+#include "csrc/activity/ascend/reporter/external_correlation_reporter.h"
 
 #include "csrc/activity/activity_manager.h"
 #include "csrc/include/mspti_activity.h"

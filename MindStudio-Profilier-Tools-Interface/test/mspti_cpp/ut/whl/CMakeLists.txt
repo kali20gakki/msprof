@@ -27,6 +27,7 @@ add_executable(mspti_adapter_utest
     ${UT_TOP_DIR}/stub/inject/acl_inject_stub.cpp
     ${UT_TOP_DIR}/stub/inject/hccl_inject_stub.cpp
     ${TOP_DIR}/csrc/common/inject/mstx_inject.cpp
+    ${TOP_DIR}/csrc/common/function_loader.cpp
 )
 
 target_include_directories(mspti_adapter_utest PRIVATE

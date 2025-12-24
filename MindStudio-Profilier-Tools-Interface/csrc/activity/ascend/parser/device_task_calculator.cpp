@@ -15,7 +15,7 @@
  * -------------------------------------------------------------------------
 */
 
-#include "device_task_calculator.h"
+#include "csrc/activity/ascend/parser/device_task_calculator.h"
 
 #include "csrc/activity/ascend/channel/stars_common.h"
 #include "csrc/common/context_manager.h"

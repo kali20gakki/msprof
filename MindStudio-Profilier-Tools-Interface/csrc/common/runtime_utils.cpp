@@ -48,7 +48,7 @@ uint32_t GetStreamId(AclrtStream stm)
     return static_cast<uint32_t>(streamId);
 }
 
-AclError profTrace(uint64_t indexId, uint64_t modelId, uint16_t tagId, AclrtStream stream)
+AclError ProfTrace(uint64_t indexId, uint64_t modelId, uint16_t tagId, AclrtStream stream)
 {
     TraceData traceData{.indexId = indexId, .modelId = modelId, .tagId = tagId};
     return aclrtProfTrace((void *)&traceData, sizeof(TraceData), stream);

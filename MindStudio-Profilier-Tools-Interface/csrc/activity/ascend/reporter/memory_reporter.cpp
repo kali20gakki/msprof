@@ -14,7 +14,7 @@
  * See the Mulan PSL v2 for more details.
  * -------------------------------------------------------------------------
 */
-#include "memory_reporter.h"
+#include "csrc/activity/ascend/reporter/memory_reporter.h"
 #include "csrc/activity/activity_manager.h"
 #include "csrc/common/context_manager.h"
 #include "csrc/common/plog_manager.h"

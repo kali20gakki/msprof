@@ -21,8 +21,8 @@
 #include "csrc/activity/ascend/reporter/external_correlation_reporter.h"
 #include "csrc/common/thread_local.h"
 #include "csrc/common/utils.h"
-#include "mstx_parser.h"
-#include "cann_hash_cache.h"
+#include "csrc/activity/ascend/parser/mstx_parser.h"
+#include "csrc/activity/ascend/parser/cann_hash_cache.h"
 
 namespace Mspti {
 namespace Parser {

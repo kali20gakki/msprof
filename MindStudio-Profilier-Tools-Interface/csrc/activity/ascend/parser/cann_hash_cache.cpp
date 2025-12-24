@@ -15,7 +15,7 @@
  * -------------------------------------------------------------------------
 */
 
-#include "cann_hash_cache.h"
+#include "csrc/activity/ascend/parser/cann_hash_cache.h"
 
 #include "csrc/common/utils.h"
 

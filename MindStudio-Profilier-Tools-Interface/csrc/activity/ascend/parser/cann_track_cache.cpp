@@ -15,14 +15,14 @@
  * -------------------------------------------------------------------------
 */
 
-#include "cann_track_cache.h"
+#include "csrc/activity/ascend/parser/cann_track_cache.h"
 
 #include <functional>
 #include <unordered_map>
 #include <algorithm>
 #include "securec.h"
-#include "cann_hash_cache.h"
-#include "communication_calculator.h"
+#include "csrc/activity/ascend/parser/cann_hash_cache.h"
+#include "csrc/activity/ascend/parser/communication_calculator.h"
 #include "csrc/common/plog_manager.h"
 #include "csrc/common/utils.h"
 #include "csrc/common/mpsc_queue.h"

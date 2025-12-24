@@ -36,6 +36,7 @@ add_executable(mspti_channel_utest
     channel_utest.cpp
     convert_utest.cpp
     ${TOP_DIR}/csrc/common/inject/mstx_inject.cpp
+    ${TOP_DIR}/csrc/common/function_loader.cpp
     ${UT_TOP_DIR}/stub/inject/profapi_inject_stub.cpp
     ${UT_TOP_DIR}/stub/inject/driver_inject_stub.cpp
     ${UT_TOP_DIR}/stub/inject/acl_inject_stub.cpp

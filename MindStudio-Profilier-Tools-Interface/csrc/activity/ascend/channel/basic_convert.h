@@ -40,7 +40,7 @@ public:
         auto chipType = Common::ContextManager::GetInstance()->GetChipType(deviceId);
         auto parseFunc = this->GetTransFunc(deviceId, chipType);
         size_t structSize = this->GetStructSize(deviceId, chipType);
-        if (parseFunc == nullptr || structSize == INVALID_STRUCT_SIZE) {
+        if (parseFunc == nullptr || structSize == INVALID_STRUCT_SIZE || structSize == 0) {
             return {};
         }
 

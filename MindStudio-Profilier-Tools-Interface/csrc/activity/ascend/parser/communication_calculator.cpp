@@ -15,12 +15,12 @@
  * -------------------------------------------------------------------------
 */
 
-#include "communication_calculator.h"
-#include "cann_hash_cache.h"
+#include "csrc/activity/ascend/parser/communication_calculator.h"
+#include "csrc/activity/ascend/parser/cann_hash_cache.h"
 
 #include <algorithm>
 
-#include "device_task_calculator.h"
+#include "csrc/activity/ascend/parser/device_task_calculator.h"
 #include "csrc/common/plog_manager.h"
 #include "csrc/common/utils.h"
 #include "csrc/activity/activity_manager.h"

@@ -20,8 +20,8 @@
 #define MSPTI_CALLBACK_H
 
 #include <stdint.h>
-#include "mspti_result.h"
-#include "mspti_cbid.h"
+#include "csrc/include/mspti_result.h"
+#include "csrc/include/mspti_cbid.h"
 
 #if defined(__cplusplus)
 extern "C" {

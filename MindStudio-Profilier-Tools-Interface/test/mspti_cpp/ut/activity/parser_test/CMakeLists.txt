@@ -7,6 +7,7 @@ add_executable(mspti_parser_utest
     device_task_calculator_utest.cpp
     communication_calculator_utest.cpp
     ${TOP_DIR}/csrc/common/inject/mstx_inject.cpp
+    ${TOP_DIR}/csrc/common/function_loader.cpp
     ${TOP_DIR}/csrc/activity/activity_manager.cpp
     ${TOP_DIR}/csrc/activity/ascend/parser/parser_manager.cpp
     ${TOP_DIR}/csrc/activity/ascend/parser/cann_hash_cache.cpp

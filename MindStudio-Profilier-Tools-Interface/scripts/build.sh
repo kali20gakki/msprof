@@ -37,28 +37,9 @@ elif [ $# -eq 1 ] && [ "$1" != "Debug" ]; then
     VERSION=$1
 fi
 
-# binary check
-function bep_env_init() {
-    source /etc/profile
-    local bep_env_config=${CUR_DIR}/bep/bep_env.conf
-    local bep_sh=$(which bep_env.sh)
-    echo "has bep sh :${bep_sh}"
-    if [ ! -d "${SECBEPKIT_HOME}" ] && [ ! -f "$bep_sh" ]; then
-        echo "BepKit is not installed, Please install the tool and configure the env var \$SECBEPKIT_HOME"
-    else
-        source ${SECBEPKIT_HOME}/bep_env.sh -s $bep_env_config
-        if [ $? -ne 0 ]; then
-            echo "build bep failed!"
-            exit 1
-        else
-            echo "build bep success."
-        fi
-    fi
-}
-bep_env_init
-
 bash ${CUR_DIR}/download_thirdparty.sh
-echo "download thirdparty start."
+
+rm -rf  ${TOP_DIR}/build
 cmake -S ${TOP_DIR} -B ${TOP_DIR}/build -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=${TOP_DIR}/prefix -DSECUREC_LIB_DIR=${TOP_DIR}/prefix/securec_shared
 cd ${TOP_DIR}/build; make -j$(nproc); make install
 

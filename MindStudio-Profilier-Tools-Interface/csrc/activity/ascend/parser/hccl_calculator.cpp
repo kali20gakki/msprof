@@ -14,7 +14,7 @@
  * See the Mulan PSL v2 for more details.
  * -------------------------------------------------------------------------
 */
-#include "hccl_calculator.h"
+#include "csrc/activity/ascend/parser/hccl_calculator.h"
 #include <cstring>
 #include <functional>
 #include <unordered_map>

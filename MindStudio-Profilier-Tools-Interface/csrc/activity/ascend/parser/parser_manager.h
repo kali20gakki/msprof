@@ -22,7 +22,7 @@
 #include "csrc/common/inject/profapi_inject.h"
 #include "csrc/activity/ascend/channel/channel_data.h"
 #include "csrc/include/mspti_activity.h"
-#include "cann_track_cache.h"
+#include "csrc/activity/ascend/parser/cann_track_cache.h"
 
 namespace Mspti {
 namespace Parser {

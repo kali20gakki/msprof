@@ -15,6 +15,7 @@ add_executable(dev_prof_task_utest
     main.cpp
     dev_prof_task_utest.cpp
     ${TOP_DIR}/csrc/common/inject/mstx_inject.cpp
+    ${TOP_DIR}/csrc/common/function_loader.cpp
     ${UT_TOP_DIR}/stub/inject/profapi_inject_stub.cpp
     ${UT_TOP_DIR}/stub/inject/driver_inject_stub.cpp
     ${UT_TOP_DIR}/stub/inject/acl_inject_stub.cpp
