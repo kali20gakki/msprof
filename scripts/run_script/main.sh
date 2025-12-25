@@ -74,4 +74,4 @@ install_path=$(get_default_install_path)
 parse_script_args $*
 check_args
 execute_run
-print "INFO" "${MSPROF_RUN_NAME} package install success."
+print "INFO" "${MSPROF_RUN_NAME} package install success, the path is: '${install_path}'."

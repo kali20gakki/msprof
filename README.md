@@ -4,23 +4,22 @@
 
 MindStudio Profiler（简称msProf）是性能调试命令行工具。msProf提供了AI任务运行性能数据、昇腾AI处理器系统数据等性能数据的采集和解析功能，这些功能侧重不同的训练或推理场景，可以定位模型训练或推理中的性能问题。
 
-## 🗂️目录结构
+## 目录结构
 
 关键目录如下，详细目录介绍参见[项目目录](docs/zh/dir_structure.md)。
 
 ```sh
-└── .gitmodules             // 声明依赖的modules文件
-└── docs                      // 文档
-    └── zh                    // 中文文档
-└── thirdparty                // 第三方依赖存放目录
-└── example                   // 工具样例存放目录
-    ├── README.md             // 工具样例说明
-└── src                       // 基础能力
-    ├── parse                 // 数据解析目录
-└── scripts                   // 存放run包安装、升级相关脚本
-└── test                      // 测试部分，存放覆盖率统计脚本
+└── .gitcode                  // 存放仓库中的元数据
+└── analysis                  // 数据解析目录
 └── build                     // 构建目录
     ├── build.sh              // 构建脚本
+└── cmake                     // 存放解析C化部分cmake文件
+└── docs                      // 文档
+    └── zh                    // 中文文档
+└── samples                   // 工具样例存放目录
+    ├── README.md             // 工具样例说明
+└── scripts                   // 存放run包安装、升级相关脚本
+└── test                      // 测试部分，存放覆盖率统计脚本
 └── README.md                 // 整体仓说明文档
 
 ```
