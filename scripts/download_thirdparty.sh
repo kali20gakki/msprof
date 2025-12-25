@@ -33,7 +33,7 @@ function patch_makeself() {
     tar -zxf makeself-release-2.5.0.tar.gz
     cd makeself-release-2.5.0
     ulimit -n 8192
-    git apply --ignore-whitespace --ignore-space-change ../makeself-2.5.0.patch
+    patch -p1 < ../makeself-2.5.0.patch
     cd ${OPENSOURCE_DIR}/makeself
     cp -r makeself-release-2.5.0 ${OPENSOURCE_DIR}
     cd ${OPENSOURCE_DIR}
