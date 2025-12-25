@@ -38,14 +38,13 @@ HETE_PATH="hetero-arch-scripts"
 
 function print() {
     local log_file="$1"
-    local level="$2"
-    local message="$3"
+    local message="$2"
     local timestamp=$(date +"%Y-%m-%d %H:%M:%S")
 
     if [ ! -f "$log_file" ]; then
-        echo "[${MSPROF_RUN_NAME}] [${timestamp}] [${level}] ${message}"
+        echo "[${MSPROF_RUN_NAME}] [${timestamp}] ${message}"
     else
-        echo "[${MSPROF_RUN_NAME}] [${timestamp}] [${level}] ${message}" | tee -a "$log_file"
+        echo "[${MSPROF_RUN_NAME}] [${timestamp}] ${message} | tee -a "$log_file"
     fi
 }
 
