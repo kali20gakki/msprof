@@ -1,0 +1,43 @@
+# -------------------------------------------------------------------------
+# Copyright (c) 2025 Huawei Technologies Co., Ltd.
+# This file is part of the MindStudio project.
+#
+# MindStudio is licensed under Mulan PSL v2.
+# You can use this software according to the terms and conditions of the Mulan PSL v2.
+# You may obtain a copy of Mulan PSL v2 at:
+#
+#    http://license.coscl.org.cn/MulanPSL2
+#
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+# EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+# MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+# See the Mulan PSL v2 for more details.
+# -------------------------------------------------------------------------
+
+from enum import Enum
+from enum import unique
+
+
+@unique
+class LevelDataType(Enum):
+    """
+    DataType enum for level data
+    """
+
+    PYTORCH_TX = 30000
+    PTA = 25000
+    MSPROFTX = 20500
+    ACL = 20000
+    MODEL = 15000
+    NODE = 10000
+    AICPU = 6000
+    COMMUNICATION = 5500
+    RUNTIME = 5000
+
+    @classmethod
+    def member_map(cls: any) -> dict:
+        """
+        enum map for DataFormat value and data format member
+        :return:
+        """
+        return cls._value2member_map_

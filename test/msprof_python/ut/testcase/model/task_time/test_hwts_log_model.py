@@ -1,0 +1,57 @@
+# -------------------------------------------------------------------------
+# Copyright (c) 2025 Huawei Technologies Co., Ltd.
+# This file is part of the MindStudio project.
+#
+# MindStudio is licensed under Mulan PSL v2.
+# You can use this software according to the terms and conditions of the Mulan PSL v2.
+# You may obtain a copy of Mulan PSL v2 at:
+#
+#    http://license.coscl.org.cn/MulanPSL2
+#
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+# EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+# MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+# See the Mulan PSL v2 for more details.
+# -------------------------------------------------------------------------
+from unittest import mock
+
+from common_func.db_name_constant import DBNameConstant
+from model.test_dir_cr_base_model import TestDirCRBaseModel
+from msmodel.task_time.hwts_log_model import HwtsLogModel
+
+NAMESPACE = 'msmodel.task_time.hwts_log_model'
+
+
+class TestHwtsLogModel(TestDirCRBaseModel):
+    def test_flush(self):
+        with mock.patch(NAMESPACE + '.HwtsLogModel.insert_data_to_db'):
+            check = HwtsLogModel('test')
+            check.flush([], 'hwts')
+
+    def test_clear(self):
+        with mock.patch(NAMESPACE + '.PathManager.get_db_path'), \
+                mock.patch('os.path.exists', return_value=True), \
+                mock.patch('os.remove'):
+            check = HwtsLogModel('test')
+            check.clear()
+
+    def test_get_hwts_data_within_time_range_by_different_time_staggered_situation(self):
+        hwts_data = [
+            [2, 23, 1000, 2000, "AI_CORE", 1, 1],
+            [2, 24, 3000, 4000, "AI_CORE", 1, 1],
+            [2, 25, 5000, 6000, "AI_CORE", 1, 1],
+        ]
+        model = HwtsLogModel(self.PROF_DEVICE_DIR)
+        model.init()
+        model.flush(hwts_data, DBNameConstant.TABLE_HWTS_TASK_TIME)
+
+        device_tasks = model.get_hwts_data_within_time_range(float("-inf"), float("inf"))
+        self.assertEqual(len(device_tasks), 3)
+
+        device_tasks = model.get_hwts_data_within_time_range(1500, 4000)
+        self.assertEqual(len(device_tasks), 2)
+
+        device_tasks = model.get_hwts_data_within_time_range(9000, 10000)
+        self.assertEqual(len(device_tasks), 0)
+
+        model.finalize()

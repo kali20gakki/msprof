@@ -1,0 +1,49 @@
+/* -------------------------------------------------------------------------
+ * Copyright (c) 2025 Huawei Technologies Co., Ltd.
+ * This file is part of the MindStudio project.
+ *
+ * MindStudio is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *
+ *    http://license.coscl.org.cn/MulanPSL2
+ *
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ * -------------------------------------------------------------------------*/
+
+#ifndef MSPROF_ANALYSIS_DOMAIN_SERVICES_PARSER_PARSER_ITEM_TASK_TYPE_PARSER_ITEM_H
+#define MSPROF_ANALYSIS_DOMAIN_SERVICES_PARSER_PARSER_ITEM_TASK_TYPE_PARSER_ITEM_H
+
+#include <cstdint>
+
+namespace Analysis {
+namespace Domain {
+#define PARSER_ITEM_TS_TASK_TYPE 0x0C
+
+#pragma pack(1)
+struct TaskType {
+    uint8_t resv1;
+    uint8_t funcType;
+    uint16_t resv2;
+    uint32_t resv3;
+    uint64_t timestamp;
+    uint16_t streamId : 11;
+    uint16_t resv4 : 5;
+    uint16_t taskId;
+    uint16_t taskType;
+    uint8_t taskStatus;
+    uint8_t resv5;
+    uint64_t resv6;
+    uint64_t resv7;
+};
+#pragma pack()
+
+int TaskTypeParseItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *halUniData, uint16_t expandStatus);
+}
+}
+
+
+#endif // MSPROF_ANALYSIS_DOMAIN_SERVICES_PARSER_PARSER_ITEM_TASK_TYPE_PARSER_ITEM_H

@@ -1,0 +1,2 @@
+  --full                            Install full mode
+  --install-path=<path>             Install  to specific path

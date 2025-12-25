@@ -1,0 +1,134 @@
+/* -------------------------------------------------------------------------
+ * Copyright (c) 2025 Huawei Technologies Co., Ltd.
+ * This file is part of the MindStudio project.
+ *
+ * MindStudio is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *
+ *    http://license.coscl.org.cn/MulanPSL2
+ *
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ * -------------------------------------------------------------------------*/
+
+#include "analysis/csrc/domain/data_process/ai_task/msproftx_device_processor.h"
+#include <algorithm>
+#include "analysis/csrc/domain/services/environment/context.h"
+
+namespace Analysis {
+namespace Domain {
+using namespace Analysis::Domain::Environment;
+using namespace Analysis::Utils;
+MsprofTxDeviceProcessor::MsprofTxDeviceProcessor(const std::string &profPath) : DataProcessor(profPath) {}
+
+bool MsprofTxDeviceProcessor::ProcessOneDevice(std::vector<MsprofTxDeviceData> &res, const std::string &devPath)
+{
+    uint16_t deviceId = GetDeviceIdByDevicePath(devPath);
+    if (deviceId == INVALID_DEVICE_ID) {
+        ERROR("the invalid deviceId cannot to be identified.");
+        return false;
+    }
+    ProfTimeRecord record;
+    if (!Context::GetInstance().GetProfTimeRecordInfo(record, profPath_, deviceId)) {
+        ERROR("GetProfTimeRecordInfo failed, profPath is %, device id is %.", profPath_, deviceId);
+        return false;
+    }
+    Utils::SyscntConversionParams params;
+    if (!Context::GetInstance().GetSyscntConversionParams(params, deviceId, profPath_)) {
+        ERROR("GetSyscntConversionParams failed, profPath is %.", profPath_);
+        return false;
+    }
+    DBInfo stepTraceDB("step_trace.db", "StepTrace");
+    std::string dbPath = Utils::File::PathJoin({devPath, SQLITE, stepTraceDB.dbName});
+    if (!stepTraceDB.ConstructDBRunner(dbPath)) {
+        return false;
+    }
+    auto status = CheckPathAndTable(dbPath, stepTraceDB, false);
+    if (status != CHECK_SUCCESS) {
+        if (status == CHECK_FAILED) {
+            return false;
+        }
+        return true;
+    }
+    auto oriData = LoadData(stepTraceDB, dbPath);
+    if (oriData.empty()) {
+        WARN("StepTrace for msprofTx original data is empty. DBPath is %", dbPath);
+        return true;
+    }
+    auto formatData = FormatData(oriData, record, deviceId, params);
+    if (formatData.empty()) {
+        ERROR("StepTrace for msprofTx data format failed, DBPath is %", dbPath);
+        return false;
+    }
+    FilterDataByStartTime(formatData, record.startTimeNs, PROCESSOR_NAME_TASK);
+    res.insert(res.end(), formatData.begin(), formatData.end());
+    return true;
+}
+
+bool MsprofTxDeviceProcessor::Process(DataInventory &dataInventory)
+{
+    bool flag = true;
+    auto deviceList = Utils::File::GetFilesWithPrefix(profPath_, DEVICE_PREFIX);
+    std::vector<MsprofTxDeviceData> res;
+    for (const auto& devicePath : deviceList) {
+        flag = ProcessOneDevice(res, devicePath) && flag;
+    }
+    if (!SaveToDataInventory<MsprofTxDeviceData>(std::move(res), dataInventory, PROCESSOR_NAME_TASK)) {
+        ERROR("Save data failed, %.", PROCESSOR_NAME_TASK);
+        flag = false;
+    }
+    return flag;
+}
+
+OriMsprofTxDeviceData MsprofTxDeviceProcessor::LoadData(const DBInfo &stepTraceDB, const std::string &dbPath)
+{
+    OriMsprofTxDeviceData oriData;
+    if (stepTraceDB.dbRunner == nullptr) {
+        ERROR("Create % connection failed.", dbPath);
+        return oriData;
+    }
+    std::string sql{"SELECT model_id, index_id, stream_id, task_id, timestamp FROM " + stepTraceDB.tableName +
+                    " WHERE tag_id = 11"};
+    if (!stepTraceDB.dbRunner->QueryData(sql, oriData)) {
+        ERROR("Failed to obtain data from the % table.", stepTraceDB.tableName);
+    }
+    return oriData;
+}
+
+std::vector<MsprofTxDeviceData> MsprofTxDeviceProcessor::FormatData(
+    OriMsprofTxDeviceData &oriData, const ProfTimeRecord &record, const uint16_t deviceId,
+    const SyscntConversionParams &params)
+{
+    std::vector<MsprofTxDeviceData> processedData;
+    if (!Utils::Reserve(processedData, oriData.size())) {
+        ERROR("Reserve for AscendTask data failed.");
+        return processedData;
+    }
+    MsprofTxDeviceData data;
+    uint64_t start;
+    data.deviceId = deviceId;
+    std::sort(oriData.begin(), oriData.end(), [](TxDeviceData &lData, TxDeviceData rData) {
+        if (std::get<1>(lData) != std::get<1>(rData)) { // 按照index_id、timestamp排序，即第1、4位
+            return std::get<1>(lData) < std::get<1>(rData);  // 第1为为index_id
+        } else {
+            return std::get<4>(lData) < std::get<4>(rData); // 第4位为timestamp
+        }
+    });
+    for (const auto& row : oriData) {
+        std::tie(data.modelId, data.indexId, data.streamId, data.taskId, start) = row;
+        data.connectionId = data.indexId + START_CONNECTION_ID_MSTX;
+        HPFloat startTimestamp = Utils::GetTimeFromSyscnt(start, params);
+        data.timestamp = GetLocalTime(startTimestamp, record).Uint64();
+        if (!processedData.empty() && data.indexId == processedData.back().indexId) {
+            processedData.back().duration = static_cast<double>(data.timestamp - processedData.back().timestamp);
+        } else {
+            processedData.push_back(data);
+        }
+    }
+    return processedData;
+}
+}
+}
