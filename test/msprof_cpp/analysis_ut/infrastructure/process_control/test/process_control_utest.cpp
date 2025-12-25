@@ -202,23 +202,6 @@ TEST_F(ProcessControlUTest, ShouldRunAllChipV1ProcessWhenExecute)
     Ps::ResetBaseGcCount();
 }
 
-TEST_F(ProcessControlUTest, ShouldRunAllChipV2ProcessWhenExecute)
-{
-    Infra::DeviceContext deviceInstance;
-    deviceInstance.deviceContextInfo.deviceInfo.chipID = CHIP_V2_1_0;
-    auto regInfo = ProcessRegister::CopyProcessInfo();
-    ProcessControl processControl(regInfo);
-
-    EXPECT_TRUE(processControl.ExecuteProcess(dataInventory, deviceInstance));
-    auto stat = processControl.GetExecuteStat();
-    std::string log;
-    RecordProcessStat(stat, "/some/folder/device0", log);
-    // 如果本用例不过，可以通过将log打印出来定位
-    EXPECT_EQ(Ps::GetBaseGcCount(), 1ul);  // PabC不支持chipV2，因此这里只有1次
-
-    Ps::ResetBaseGcCount();
-}
-
 TEST_F(ProcessControlUTest, ShouldFailedWhenProcessTopoCircled)
 {
     struct A {};

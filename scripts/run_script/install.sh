@@ -5,14 +5,6 @@ package_arch=${2}
 install_for_all_flag=${3}
 pylocal=y
 
-function get_right() {
-	if [ "$install_for_all_flag" = 1 ] || [ "$UID" = "0" ]; then
-		right=${root_right}
-	else
-		right=${user_right}
-	fi
-}
-
 function install_whl_package() {
     local _pylocal=$1
     local _package=$2
@@ -85,7 +77,7 @@ function copy_file() {
 		rm -r ${target_file}
 		
 		cp -r ${filename} ${target_file}
-		chmod -R ${right} ${target_file}
+		chmod -R ${parent_right} ${target_file}
 		chmod ${parent_right} ${parent_dir}
 		
 		print "INFO" "$filename is replaced."
@@ -131,7 +123,6 @@ source utils.sh
 
 right=${user_right}
 arch_name="${package_arch}-linux"
-get_right
 implement_install
 chmod_ini_file
 set_libmsprofiler_right
