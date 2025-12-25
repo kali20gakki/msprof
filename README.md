@@ -26,7 +26,7 @@ MindStudio Profiler（简称msProf）是性能调试命令行工具。msProf提�
 ```
 ## 🏷️版本说明
 
-msProf的版本说明包含msProf的软件版本配套关系和软件包下载以及每个版本的特性变更说明。
+msProf的版本说明包含msProf的软件版本配套关系和软件包下载以及每个版本的特性变更说明，详情请参见《[版本说明](docs/zh/release_notes.md)》。
 
 ## ⚙️环境部署
 
