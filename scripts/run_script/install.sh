@@ -28,6 +28,7 @@ function install_whl_package() {
         print "ERROR" "Install ${_package} failed."
         return 1
     fi
+    chmod -R u+rwx,go+rx,go-w "${_pythonlocalpath}"
     print "INFO" "Install ${_package} success."
     return 0
 }
