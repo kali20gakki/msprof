@@ -43,9 +43,9 @@ function print() {
     local timestamp=$(date +"%Y-%m-%d %H:%M:%S")
 
     if [ ! -f "$log_file" ]; then
-        echo "[${MSPROF_RUN_NAME}] [${timestamp}] [${level}] ${message}"
+        echo "[${MSPROF_RUN_NAME}] [${timestamp}] ${level} ${message}"
     else
-        echo "[${MSPROF_RUN_NAME}] [${timestamp}] [${level}] ${message}" | tee -a "$log_file"
+        echo "[${MSPROF_RUN_NAME}] [${timestamp}] ${level} ${message}" | tee -a "$log_file"
     fi
 }
 
