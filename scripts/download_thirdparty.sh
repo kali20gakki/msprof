@@ -33,8 +33,8 @@ function patch_makeself() {
     tar -zxf makeself-release-2.5.0.tar.gz
     cd makeself-release-2.5.0
     ulimit -n 8192
-    patch -p1 < ../makeself-2.5.0.patch
-    cd ..
+    git apply --ignore-whitespace --ignore-space-change ../makeself-2.5.0.patch
+    cd ${OPENSOURCE_DIR}/makeself
     cp -r makeself-release-2.5.0 ${OPENSOURCE_DIR}
     cd ${OPENSOURCE_DIR}
     rm -rf makeself
@@ -48,7 +48,7 @@ mkdir -p ${OPENSOURCE_DIR} && cd ${OPENSOURCE_DIR}
 
 mkdir -p ${LLT_DIR} && cd ${LLT_DIR}
 [ ! -d "googletest" ] && git clone https://gitcode.com/GitHub_Trending/go/googletest.git googletest -b release-1.12.1
-[ ! -d "mockcpp" ] && git clone ssh://git@szv-y.codehub.huawei.com:2222/mindstudio/MindStudio_Opensource/mock_cpp.git mockcpp -b msprof
+[ ! -d "mockcpp" ] && git clone https://gitcode.com/hhz0/mockcpp.git mockcpp
 
 mkdir -p ${PLATFORM_DIR} && cd ${PLATFORM_DIR}
 [ ! -d "securec" ] && git clone https://gitcode.com/openeuler/libboundscheck.git securec

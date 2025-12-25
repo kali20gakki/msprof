@@ -10,6 +10,10 @@
 
 ### 源码编译
 
+#### 编译采集run包
+
+采集run包包含msProf的采集功能，采集的是原始性能数据（不可直接查看，需通过msProf解析工具解析出交付件查看）。
+
 当前源码编译仅支持linux版本为ubuntu20.04
 
 1. 安装依赖。
@@ -26,23 +30,9 @@
     ```
 
 3. 编译run包。
-
-   编译命令支持通过--mode参数，分别编译包含msProf采集和解析功能的软件包或仅包含msProf采集功能以及仅包含msProf解析功能的软件包，更多编译参数详细介绍请参见[编译run包参数说明](#编译run包参数说明)。
-
-   其中msProf采集功能采集的是原始性能数据（不可直接查看，需通过msProf解析工具解析出交付件查看）；msProf解析功能将原始性能数据进行解析，并导出可查看的交付件。
    
    操作方式如下：
 
-   - 编译采集和解析包
-       ```shell
-       cd msprof
-       # 下载三方依赖包
-       bash scripts/download_thirdparty.sh
-       # 编译采集、解析包
-       bash build/build.sh --mode=all --version=[<version>]
-       ```
-       
-   - 编译采集包
       ```shell
        cd msprof
        # 下载三方依赖包
@@ -50,20 +40,45 @@
        # 编译采集包
        bash build/build.sh --mode=collector --version=[<version>]
      ```
+     
+     编译命令支持通过--mode参数，分别编译包含msProf采集和解析功能的软件包或仅包含msProf采集功能以及仅包含msProf解析功能的软件包，更多编译参数详细介绍请参见[编译run包参数说明](#编译run包参数说明)。
+     
+     编译完成后，会在msprof/output目录下生成msProf工具的run包，run包名称格式为`Ascend-mindstudio-msprof_<version>_linux-<arch>.run`。
+   
+     上述编译命令中的version参数即为软包名称中的version，表示该run包的版本号，默认为“none”。
+   
+     run包中的arch表示系统架构，根据实际运行系统自动适配。
+   
+#### 编译解析run包
+
+1. 下载源码。
+    ```shell
+    git clone https://gitcode.com/Ascend/msprof.git
+    ```
+
+2. 编译run包。
+
+   编译命令支持通过--mode参数，分别编译包含msProf采集和解析功能的软件包或仅包含msProf采集功能以及仅包含msProf解析功能的软件包，更多编译参数详细介绍请参见[编译run包参数说明](#编译run包参数说明)。
+
+   其中msProf采集功能采集的是原始性能数据（不可直接查看，需通过msProf解析工具解析出交付件查看）；msProf解析功能将原始性能数据进行解析，并导出可查看的交付件。
+   
+   操作方式如下：
+
    - 编译解析包
       ```shell
        cd msprof
        # 下载三方依赖包
        bash scripts/download_thirdparty.sh
        # 编译解析包
-       bash build/build.sh --version=[<version>]
+       bash build/build.sh --mode=analysis --version=[<version>]
       ```
-
+     编译命令支持通过--mode参数，分别编译包含msProf采集和解析功能的软件包或仅包含msProf采集功能以及仅包含msProf解析功能的软件包，更多编译参数详细介绍请参见[编译run包参数说明](#编译run包参数说明)。
+     
      编译完成后，会在msprof/output目录下生成msProf工具的run包，run包名称格式为`Ascend-mindstudio-msprof_<version>_linux-<arch>.run`。
    
      上述编译命令中的version参数即为软包名称中的version，表示该run包的版本号，默认为“none”。
    
-      run包中的arch表示系统架构，根据实际运行系统自动适配。
+     run包中的arch表示系统架构，根据实际运行系统自动适配。
 
 ### 安装步骤
 

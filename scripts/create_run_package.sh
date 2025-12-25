@@ -49,7 +49,6 @@ function parse_script_args() {
 function build_python_whl() {
   cd ${TOP_DIR}/build/build
   python3  ${TOP_DIR}/build/setup.py bdist_wheel --python-tag=py3 --py-limited-api=cp37
-  rm -rf ${TOP_DIR}/mspti.egg-info
   cd - > /dev/null
 }
 
