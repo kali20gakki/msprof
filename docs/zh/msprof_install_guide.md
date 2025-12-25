@@ -14,11 +14,11 @@
 
 采集run包包含msProf的采集功能，采集的是原始性能数据（不可直接查看，需通过msProf解析工具解析出交付件查看）。
 
-当前源码编译仅支持linux版本为ubuntu20.04
+当前源码编译仅支持linux版本为ubuntu20.04。
 
 1. 安装依赖。
 
-    下载并安装cmake、autoconf、gperf等编译依赖，命令如下。
+    下载并安装cmake、autoconf、gperf等编译依赖，命令如下：
 
     ```shell
     apt install -y cmake python3 python3-pip ccache autoconf gperf libtool libssl-dev
