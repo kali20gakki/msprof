@@ -33,19 +33,11 @@ MSPROF_PATH="tools/profiler/bin"
 # msprof analysis whl
 MSPROF_ANALYSIS_WHL="msprof-0.0.1-py3-none-any.whl"
 
-# hete path
-HETE_PATH="hetero-arch-scripts"
-
 function print() {
-    local log_file="$1"
-    local level="$2"
-    local message="$3"
-    local timestamp=$(date +"%Y-%m-%d %H:%M:%S")
-
     if [ ! -f "$log_file" ]; then
-        echo "[${MSPROF_RUN_NAME}] [${timestamp}] [${level}] ${message}"
+        echo "[${MSPROF_RUN_NAME}] [$(date +"%Y-%m-%d %H:%M:%S")] [$1]: $2"
     else
-        echo "[${MSPROF_RUN_NAME}] [${timestamp}] [${level}] ${message}" | tee -a "$log_file"
+        echo "[${MSPROF_RUN_NAME}] [$(date +"%Y-%m-%d %H:%M:%S")] [$1]: $2" | tee -a $log_file
     fi
 }
 
