@@ -1,0 +1,20 @@
+aux_source_directory(${TOP_DIR}/analysis/csrc/application/credential SOURCES)
+aux_source_directory(${TOP_DIR}/analysis/csrc/infrastructure/data_inventory SOURCES)
+aux_source_directory(${TOP_DIR}/analysis/csrc/infrastructure/db SOURCES)
+aux_source_directory(${TOP_DIR}/analysis/csrc/domain/data_process SOURCES)
+aux_source_directory(${TOP_DIR}/analysis/csrc/domain/data_process/ai_task SOURCES)
+aux_source_directory(${TOP_DIR}/analysis/csrc/domain/data_process/system SOURCES)
+aux_source_directory(${TOP_DIR}/analysis/csrc/infrastructure/utils SOURCES)
+aux_source_directory(${TOP_DIR}/analysis/csrc/infrastructure/dfx SOURCES)
+aux_source_directory(${TOP_DIR}/analysis/csrc/domain/services/environment SOURCES)
+aux_source_directory(${TOP_DIR}/test/msprof_cpp/analysis_ut/domain/data_process/test SOURCES)
+
+add_executable(data_process_utest
+        ${SOURCES}
+)
+
+target_link_libraries(data_process_utest PRIVATE
+        -lsqlite3
+)
+
+run_test(data_process_utest)

@@ -1,0 +1,26 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Visual Studio Code files
+.vscode
+.vs
+
+# analisys
+analysis/lib64
+
+# PyCharm files
+.idea
+
+# third-party
+/opensource/
+platform/
+
+# build
+build/prefix
+build/build
+
+# test cache file
+test/build_llt
+test/output

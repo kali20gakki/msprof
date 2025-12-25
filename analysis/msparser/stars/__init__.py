@@ -1,0 +1,34 @@
+# -------------------------------------------------------------------------
+# Copyright (c) 2025 Huawei Technologies Co., Ltd.
+# This file is part of the MindStudio project.
+#
+# MindStudio is licensed under Mulan PSL v2.
+# You can use this software according to the terms and conditions of the Mulan PSL v2.
+# You may obtain a copy of Mulan PSL v2 at:
+#
+#    http://license.coscl.org.cn/MulanPSL2
+#
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+# EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+# MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+# See the Mulan PSL v2 for more details.
+# -------------------------------------------------------------------------
+
+
+from msparser.stars.acc_pmu_parser import AccPmuParser
+from msparser.stars.acsq_task_parser import AcsqTaskParser
+from msparser.stars.block_log_parser import BlockLogParser
+from msparser.stars.ffts_log_parser import FftsLogParser
+from msparser.stars.inter_soc_parser import InterSocParser
+from msparser.stars.low_power_parser import LowPowerParser
+from msparser.stars.sio_parser import SioParser
+from msparser.stars.stars_chip_trans_parser import StarsChipTransParser
+from msparser.stars.stars_qos_parser import StarsQosParser
+
+__all__ = [
+    "AcsqTaskParser", "FftsLogParser",
+    "InterSocParser", "AccPmuParser",
+    "StarsChipTransParser", "LowPowerParser",
+    "SioParser", "BlockLogParser",
+    "StarsQosParser"
+]

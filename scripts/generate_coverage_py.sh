@@ -1,0 +1,24 @@
+#!/bin/bash
+# This script is used to generate llt-python coverage.
+# Copyright Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+
+set -e
+real_path=$(readlink -f "$0")
+script_dir=$(dirname "$real_path")
+output_dir="${script_dir}/../test/build_llt/output/python_coverage"
+src_code="${script_dir}/../analysis"
+test_code="${script_dir}/../test/msprof_python/ut/testcase"
+export PYTHONPATH=${src_code}:${test_code}:${PYTHONPATH}
+mkdir -p "${output_dir}"
+cd "${output_dir}"
+rm -f .coverage
+coverage run --branch --source="${src_code}" -m pytest -s "${test_code}" --junit-xml=./final.xml
+coverage xml -o coverage.xml
+coverage report > python_coverage_report.log
+if [[ -n "$1" && "$1" == "diff" ]];then
+  targetBranch=${targetBranch:-master}
+  diff-cover coverage.xml --compare-branch="origin/${targetBranch}"  --html-report inc_coverage_result.html --fail-under=80
+fi
+echo "report: ${output_dir}"
+find "${script_dir}/.." -name "__pycache__" | xargs rm -r
+

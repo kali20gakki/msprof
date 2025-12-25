@@ -1,0 +1,48 @@
+# -------------------------------------------------------------------------
+# Copyright (c) 2025 Huawei Technologies Co., Ltd.
+# This file is part of the MindStudio project.
+#
+# MindStudio is licensed under Mulan PSL v2.
+# You can use this software according to the terms and conditions of the Mulan PSL v2.
+# You may obtain a copy of Mulan PSL v2 at:
+#
+#    http://license.coscl.org.cn/MulanPSL2
+#
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+# EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+# MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+# See the Mulan PSL v2 for more details.
+# -------------------------------------------------------------------------
+
+from common_func.msprof_query_data import MsprofQueryData
+from profiling_bean.basic_info.query_data_bean import QueryDataBean
+
+
+class ModelInfo:
+    """
+    model info class
+    """
+
+    def __init__(self: any) -> None:
+        self.iterations = []
+
+    def run(self: any, project_path: str) -> None:
+        """
+        run model info
+        :return: None
+        """
+        query_data = MsprofQueryData(project_path).query_data()
+        for data in query_data:
+            if data.device_id.isdigit():
+                self.iterations.append(IterationInfo(data))
+
+
+class IterationInfo:
+    """
+    iteration info class
+    """
+
+    def __init__(self: any, data: QueryDataBean) -> None:
+        self._device_id = int(data.device_id)
+        self._model_id = data.model_id
+        self._iteration_num = data.iteration_id
