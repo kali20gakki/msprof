@@ -1,4 +1,4 @@
-# 📖MindStudio Profiler
+# MindStudio Profiler
 
 ## 📖简介
 
