@@ -48,7 +48,7 @@ mkdir -p ${OPENSOURCE_DIR} && cd ${OPENSOURCE_DIR}
 
 mkdir -p ${LLT_DIR} && cd ${LLT_DIR}
 [ ! -d "googletest" ] && git clone https://gitcode.com/GitHub_Trending/go/googletest.git googletest -b release-1.12.1
-[ ! -d "mockcpp" ] && git clone https://gitcode.com/hhz0/mockcpp.git mockcpp
+[ ! -d "mockcpp" ] && git clone https://gitcode.com/hhz0/mockcpp.git mockcpp -b msprof
 
 mkdir -p ${PLATFORM_DIR} && cd ${PLATFORM_DIR}
 [ ! -d "securec" ] && git clone https://gitcode.com/openeuler/libboundscheck.git securec
