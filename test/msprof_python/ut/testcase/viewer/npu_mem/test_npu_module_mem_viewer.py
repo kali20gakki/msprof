@@ -91,7 +91,7 @@ class TestNpuModuleMemViewer(TestDirCRBaseModel):
         expected_headers = ['component', 'timestamp', 'total_reserve_memory', 'device_type']
         expected_data = [
             ['RUNTIME', '10.000\t', 4, 'NPU:0'],
-            ['HDC', '11.000\t', 2, 'NPU:0'],
+            ['other', '11.000\t', 2, 'NPU:0'],
             ['CCE', '11.000\t', -1, 'NPU:0'],
             ['AML', '12.333\t', -1, 'NPU:0'],
             ['MBUFF', '12.333\t', -1, 'NPU:0'],
@@ -99,7 +99,7 @@ class TestNpuModuleMemViewer(TestDirCRBaseModel):
         ]
         module_mem_data = [
             [7, 0, 4096, 'NPU:0'],
-            [9, 1000, 2048, 'NPU:0'],
+            [15, 1000, 2048, 'NPU:0'],
             [8, 1000, -1, 'NPU:0'],
             [74, 2333, -1, 'NPU:0'],
             [76, 2333, -1, 'NPU:0'],
