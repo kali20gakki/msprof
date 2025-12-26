@@ -42,13 +42,13 @@ function patch_makeself() {
 }
 
 mkdir -p ${OPENSOURCE_DIR} && cd ${OPENSOURCE_DIR}
-[ ! -d "json" ] && git clone https://gitcode.com/GitHub_Trending/js/json.git -b v3.11.3
-[ ! -d "rapidjson" ] && git clone https://gitcode.com/GitHub_Trending/ra/rapidjson.git
+[ ! -d "json" ] && git clone https://gitcode.com/GitHub_Trending/js/json.git json -b v3.11.3
+[ ! -d "rapidjson" ] && git clone https://gitcode.com/GitHub_Trending/ra/rapidjson.git rapidjson
 [ ! -d "makeself" ] && patch_makeself
 
 mkdir -p ${LLT_DIR} && cd ${LLT_DIR}
-[ ! -d "googletest" ] && git clone https://gitcode.com/GitHub_Trending/go/googletest.git -b release-1.12.1
-[ ! -d "mockcpp" ] && git clone https://gitcode.com/hhz0/mockcpp.git -b msprof
+[ ! -d "googletest" ] && git clone https://gitcode.com/GitHub_Trending/go/googletest.git googletest -b release-1.12.1
+[ ! -d "mockcpp" ] && git clone https://gitcode.com/Ascend/mockcpp.git mockcpp -b ascend_mindstudio_mockcpp_master
 
 mkdir -p ${PLATFORM_DIR} && cd ${PLATFORM_DIR}
 [ ! -d "securec" ] && git clone https://gitcode.com/openeuler/libboundscheck.git securec
