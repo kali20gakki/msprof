@@ -6,7 +6,7 @@ MindStudio Profiler（简称msProf）是性能调试命令行工具。msProf提�
 
 ## 目录结构
 
-关键目录如下，详细目录介绍参见[项目目录](docs/zh/dir_structure.md)。
+关键目录如下，详细目录介绍参见[项目目录](docs/zh/dir_structure.md)。 
 
 ```sh
 └── .gitcode                  // 存放仓库中的元数据
