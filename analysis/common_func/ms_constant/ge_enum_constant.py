@@ -151,7 +151,10 @@ class GeDataFormat(Enum):
     C1HWC0 = 49
     FRACTAL_NZ_C0_16 = 50
     FRACTAL_NZ_C0_32 = 51
-    END = 52
+    FRACTAL_NZ_C0_2 = 52
+    FRACTAL_NZ_C0_4 = 53
+    FRACTAL_NZ_C0_8 = 54
+    END = 55
     MAX = 0xff  # 256
     UNKNOWN_ = 200
     DEFAULT_ = 201
