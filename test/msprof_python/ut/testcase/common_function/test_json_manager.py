@@ -1,0 +1,36 @@
+# -------------------------------------------------------------------------
+# Copyright (c) 2025 Huawei Technologies Co., Ltd.
+# This file is part of the MindStudio project.
+#
+# MindStudio is licensed under Mulan PSL v2.
+# You can use this software according to the terms and conditions of the Mulan PSL v2.
+# You may obtain a copy of Mulan PSL v2 at:
+#
+#    http://license.coscl.org.cn/MulanPSL2
+#
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+# EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+# MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+# See the Mulan PSL v2 for more details.
+# -------------------------------------------------------------------------
+import unittest
+
+from common_func.json_manager import JsonManager
+
+
+class TestTraceViewer(unittest.TestCase):
+
+    def test_loads_0(self):
+        expect_res = {}
+        res = JsonManager.loads(10)
+        self.assertEqual(expect_res, res)
+
+    def test_loads_1(self):
+        expect_res = {}
+        res = JsonManager.loads("123dsads")
+        self.assertEqual(expect_res, res)
+
+    def test_loads_2(self):
+        expect_res = {'status': 2, 'info': 'Can not get aicore utilization'}
+        res = JsonManager.loads('{"status": 2, "info": "Can not get aicore utilization"}')
+        self.assertEqual(expect_res, res)
