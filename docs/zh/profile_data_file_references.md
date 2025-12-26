@@ -704,7 +704,7 @@ RoCE通信接口带宽数据。
 -   Ascend PyTorch Profiler的aic\_metrics
 -   MindSpore Profiler的aic\_metrics
 
-仅Ascend 310B和Ascend 910B支持采集该数据。
+仅Atlas 200I/500 A2 推理产品和Atlas A2 训练系列产品/Atlas A2 推理系列产品支持采集该数据。
 
 **表 33**  格式
 
@@ -1111,18 +1111,18 @@ rankId和deviceId的映射关系数据。
 
 ## msprof（timeline数据总表）<a name="ZH-CN_TOPIC_0000002477303238"></a>
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001751419248_section5889102116569"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001751419248_section5889102116569"></a>**
 
 >![](public_sys-resources/icon-note.gif) **说明：** 
 >AI处理器与昇腾产品的对应关系，请参见《[昇腾产品形态说明](https://www.hiascend.com/document/detail/zh/AscendFAQ/ProduTech/productform/hardwaredesc_0001.html)》
 
 |AI处理器类型|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 timeline数据总表文件为msprof\_\*.json。
@@ -1175,9 +1175,9 @@ msprof\_\*.json在“chrome://tracing“中展示如下。
 
 支持的型号：
 
--   Ascend 310B
--   Ascend 910B
--   Ascend 910C
+-   Atlas 200I/500 A2 推理产品
+-   Atlas A2 训练系列产品/Atlas A2 推理系列产品
+-   Atlas A3 训练系列产品/Atlas A3 推理系列产品
 
 msprof\_\*.json下的“AI Core Freq”层级展示AI Core芯片在执行AI任务的过程中频率的变化情况，如[图4](#zh-cn_topic_0000001751419248_fig66071155154219)所示。
 
@@ -1192,14 +1192,14 @@ msprof\_\*.json下的“AI Core Freq”层级展示AI Core芯片在执行AI任�
 
 支持的型号：
 
--   对于Ascend 910B，该数据均为0，不具有参考性。
--   Ascend 910C
+-   对于Atlas A2 训练系列产品/Atlas A2 推理系列产品，该数据均为0，不具有参考性。
+-   Atlas A3 训练系列产品/Atlas A3 推理系列产品
 
 msprof\_\*.json下的“SIO”层级展示通道间传输带宽的信息。
 
-Ascend 910C中，SIO数据的每条流使用两条虚拟通道，die 0和die 1。
+Atlas A3 训练系列产品/Atlas A3 推理系列产品中，SIO数据的每条流使用两条虚拟通道，die 0和die 1。
 
-**图 5**  SIO（Ascend 910C）<a name="zh-cn_topic_0000001751419248_fig1090119416103"></a>  
+**图 5**  SIO（Atlas A3 训练系列产品/Atlas A3 推理系列产品）<a name="zh-cn_topic_0000001751419248_fig1090119416103"></a>  
 ![](figures/SIO（Ascend-910C）.png "SIO（Ascend-910C）")
 
 图中色块横坐标对应时间Time，单位ms，纵坐标对应带宽Value，单位MB/s。
@@ -1224,8 +1224,8 @@ msprof\_\*.json下的“QoS”层级展示设备QoS带宽信息。
 
 支持的型号：
 
--   Ascend 910B
--   Ascend 910C
+-   Atlas A2 训练系列产品/Atlas A2 推理系列产品
+-   Atlas A3 训练系列产品/Atlas A3 推理系列产品
 
 **图 6**  QoS OTHERS<a name="zh-cn_topic_0000001751419248_fig109246157107"></a>  
 ![](figures/QoS-OTHERS.png "QoS-OTHERS")
@@ -1236,8 +1236,8 @@ msprof\_\*.json下的“QoS”层级展示设备QoS带宽信息。
 
 支持的型号：
 
--   Ascend 310P
--   Ascend 910B
+-   Atlas 推理系列产品
+-   Atlas A2 训练系列产品/Atlas A2 推理系列产品
 
 存在计算和通信算子融合的场景。
 
@@ -1283,8 +1283,8 @@ msprof\*.json下的“Voltage Info”层级展示设备电压变压信息。
 
 支持的型号：
 
--   Ascend 910B
--   Ascend 910C
+-   Atlas A2 训练系列产品/Atlas A2 推理系列产品
+-   Atlas A3 训练系列产品/Atlas A3 推理系列产品
 
 变压特性曲线结果示例如下：
 
@@ -1304,15 +1304,15 @@ msprof\*.json下的“Voltage Info”层级展示设备电压变压信息。
 
 ## msproftx数据说明<a name="ZH-CN_TOPIC_0000002509383185"></a>
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001798418925_section5889102116569"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001798418925_section5889102116569"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **总体说明<a name="zh-cn_topic_0000001798418925_section132087265710"></a>**
@@ -1383,15 +1383,15 @@ msprof\_tx\_\*.csv文件内容格式示例如下：
 
 任务调度信息数据timeline信息在msprof\_\*.json文件的Ascend Hardware层级展示，summary信息在task\_time\_\*.csv文件汇总，用于识别AI任务运行时的调度耗时。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001679380154_section5889102116569"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001679380154_section5889102116569"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **msprof\_\*.json文件中的任务调度信息数据说明<a name="zh-cn_topic_0000001679380154_section11622953115117"></a>**
@@ -1429,7 +1429,7 @@ msprof\_\*.json文件中的任务调度信息数据示例如下：
 |operation|拷贝类型，host to device或device to host等。仅MemcopyAsync接口展示。|
 
 
-**task\_time\_\*.csv文件说明（Ascend 310P）（Ascend 910）（Ascend 910B）（Ascend 910C）（Ascend 310B）<a name="zh-cn_topic_0000001679380154_section586724384714"></a>**
+**task\_time\_\*.csv文件说明（Atlas 推理系列产品）（Atlas 训练系列产品）（Atlas A2 训练系列产品/Atlas A2 推理系列产品）（Atlas A3 训练系列产品/Atlas A3 推理系列产品）（Atlas 200I/500 A2 推理产品）<a name="zh-cn_topic_0000001679380154_section586724384714"></a>**
 
 task\_time\_\*.csv文件内容格式示例如下：
 
@@ -1463,18 +1463,18 @@ API耗时信息统计数据timeline信息在msprof\_\*.json文件的CANN层级�
 -   Model：模型，内部分析使用，无须关注。
 -   Communication：集合通信算子。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001656264690_section5889102116569"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001656264690_section5889102116569"></a>**
 
 >![](public_sys-resources/icon-note.gif) **说明：** 
 >AI处理器与昇腾产品的对应关系，请参见《[昇腾产品形态说明](https://www.hiascend.com/document/detail/zh/AscendFAQ/ProduTech/productform/hardwaredesc_0001.html)》
 
 |AI处理器类型|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **msprof\_\*.json文件的CANN层级数据说明<a name="zh-cn_topic_0000001656264690_section344219426541"></a>**
@@ -1529,15 +1529,15 @@ api\_statistic\_\*.csv文件内容格式示例如下：
 
 单算子场景（如PyTorch场景）下无此性能数据文件。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001706482137_section5889102116569"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001706482137_section5889102116569"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **step\_trace\_\*.json文件说明<a name="zh-cn_topic_0000001706482137_section8123844101012"></a>**
@@ -1627,15 +1627,15 @@ step\_trace\_\*.csv文件内容格式示例如下：
 
 在TensorFlow训练场景开启数据预处理下沉（即enable\_data\_pre\_proc开关配置为True）时可生成dp\_\*.csv文件。详情请参见《TensorFlow 1.15模型迁移指南》中的“训练迭代循环下沉”章节。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001752181593_section91616487538"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001752181593_section91616487538"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|x|
-|Ascend 910B|x|
-|Ascend 310B|x|
-|Ascend 310P|x|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|x|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|x|
+|Atlas 200I/500 A2 推理产品|x|
+|Atlas 推理系列产品|x|
+|Atlas 训练系列产品|√|
 
 
 **dp\_\*.csv文件说明<a name="zh-cn_topic_0000001752181593_section5874203112014"></a>**
@@ -1663,15 +1663,15 @@ step\_trace\_\*.csv文件内容格式示例如下：
 
 集合通信算子数据只有在多卡、多机或集群等存在卡间通信的场景下才能被采集并解析出性能数据。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001658339478_section5889102116569"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001658339478_section5889102116569"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **msprof\_\*.json文件的Communication层级数据说明<a name="zh-cn_topic_0000001658339478_section8123844101012"></a>**
@@ -1703,8 +1703,8 @@ msprof\_\*.json文件Communication层数据如下图所示。
 |data_type|数据类型。|
 |alg_type|通信算子各阶段的算法类型，包含：MESH、RING、NB、HD、NHR、PIPELINE、PAIRWISE、STAR等。|
 |count|数据传输的数量。|
-|relay|通信算子是否发生借轨。显示为yes（表示发生了借轨）或no（表示没有发生借轨）。支持型号：<br/>Ascend 910B：仅显示为no，无意义<br/>Ascend 910C|
-|retry|通信算子是否发生重执行。显示为yes（表示发生了重执行）或no（表示没有发生重执行）。支持型号：<br/>Ascend 910B<br/>Ascend 910C|
+|relay|通信算子是否发生借轨。显示为yes（表示发生了借轨）或no（表示没有发生借轨）。支持型号：<br/>Atlas A2 训练系列产品/Atlas A2 推理系列产品：仅显示为no，无意义<br/>Atlas A3 训练系列产品/Atlas A3 推理系列产品|
+|retry|通信算子是否发生重执行。显示为yes（表示发生了重执行）或no（表示没有发生重执行）。支持型号：<br/>Atlas A2 训练系列产品/Atlas A2 推理系列产品<br/>Atlas A3 训练系列产品/Atlas A3 推理系列产品|
 |**通信小算子信息**||
 |notify id|notify唯一ID。|
 |duration estimated(us)|预估任务持续时间，单位us。|
@@ -1769,18 +1769,18 @@ communication\_statistic\_\*.csv为集合通信算子统计信息，通过集合
 
 AI Core、AI Vector Core和AI CPU算子汇总信息无timeline信息，summary信息在op\_summary\_\*.csv文件汇总，用于统计算子的具体信息和耗时情况。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001686107246_section5889102116569"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001686107246_section5889102116569"></a>**
 
 >![](public_sys-resources/icon-note.gif) **说明：** 
 >AI处理器与昇腾产品的对应关系，请参见《[昇腾产品形态说明](https://www.hiascend.com/document/detail/zh/AscendFAQ/ProduTech/productform/hardwaredesc_0001.html)》
 
 |AI处理器类型|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **op\_summary\_\*.csv文件说明<a name="zh-cn_topic_0000001686107246_section1214520215155"></a>**
@@ -1795,8 +1795,8 @@ Task Duration字段为算子耗时信息，可以按照Task Duration排序，找
 >![](public_sys-resources/icon-note.gif) **说明：** 
 >-   下文字段说明中，不同产品支持的字段略有不同，请以实际结果文件呈现字段为准。
 >-   task\_time配置为l0或off时，op\_summary\_\*.csv不呈现AI Core、AI Vector Core的PMU数据。
->-   Ascend 910B：MatMul算子的输入a、b矩阵满足：内轴大于1000，MAC理论计算耗时大于50us，内轴大小非516B对齐时，MatMul会转化为MIX算子，此时op\_summary.csv中的MatMul算子数量减少且Task Type由原来的AI\_Core转变为MIX\_AIC。
->-   Ascend 910C：MatMul算子的输入a、b矩阵满足：内轴大于1000，MAC理论计算耗时大于50us，内轴大小非516B对齐时，MatMul会转化为MIX算子，此时op\_summary.csv中的MatMul算子数量减少且Task Type由原来的AI\_Core转变为MIX\_AIC。
+>-   Atlas A2 训练系列产品/Atlas A2 推理系列产品：MatMul算子的输入a、b矩阵满足：内轴大于1000，MAC理论计算耗时大于50us，内轴大小非516B对齐时，MatMul会转化为MIX算子，此时op\_summary.csv中的MatMul算子数量减少且Task Type由原来的AI\_Core转变为MIX\_AIC。
+>-   Atlas A3 训练系列产品/Atlas A3 推理系列产品：MatMul算子的输入a、b矩阵满足：内轴大于1000，MAC理论计算耗时大于50us，内轴大小非516B对齐时，MatMul会转化为MIX算子，此时op\_summary.csv中的MatMul算子数量减少且Task Type由原来的AI\_Core转变为MIX\_AIC。
 >-   对于部分算子，执行时间过长，导致metric相关数据失准，不再具有参考意义，此类数据统一置为N/A，不做相关呈现。
 >-   由于Task Type为communication类型的算子通常包含一系列通信任务，每个通信任务均有独立的Task ID和Stream ID等标识，此处不作展示，因此该类算子的Task ID和Stream ID为N/A。
 >-   算子的输入维度Input Shapes取值为空，即表示为“; ; ; ;“格式时，表示当前输入的为标量，其中“;”为每个维度的分隔符。算子的输出维度同理。
@@ -1834,8 +1834,8 @@ op\_summary\_\*.csv文件根据msprof采集参数取值不同，文件呈现结�
 |Output Formats|算子输出数据格式。task_time为l0时，不采集该字段，显示为N/A。|
 |Context ID|Context ID，用于标识Sub Task粒度的小算子，不存在小算子时显示为N/A。|
 |aiv_time(us)|当所有的Block被同时调度，且每个Block的执行时长相等时，该Task在AI Vector Core上的理论执行时间，单位us。通常情况下，不同的Block开始调度时间略有差距，故该字段值略小于Task在AI Vector Core上的实际执行时间。--task-time=l1、--aic-mode=task-based时生成。|
-|aicore_time(us)|当所有的Block被同时调度，且每个Block的执行时长相等时，该Task在AI Core上的理论执行时间，单位us。通常情况下，不同的Block开始调度时间略有差距，故该字段值略小于Task在AI Core上的实际执行时间。<br>当AI Core频率变化（比如进行手动调频、功耗超出阈值时动态调频以及Atlas 300V/Atlas 300I Pro产品）时该数据不准确，不建议参考。<br/>Ascend 310B：具体频率变化点请参考查看AI Core频率。<br/>Ascend 910B：具体频率变化点请参考查看AI Core频率。<br/>Ascend 910C：具体频率变化点请参考查看AI Core频率。<br/>--task-time=l1、--aic-mode=task-based时生成。|
-|total_cycles|该Task在AI Core上执行的cycle总数，由所有的Block的执行cycle数累加而成。<br/>--task-time=l1、--aic-mode=task-based时生成。<br/>对于Ascend 310B拆分为aic_total_cycles（该Task在AI Cube Core上执行的cycle总数）和aiv_total_cycles（该Task在AI Vector Core上执行的cycle总数）。<br/>对于Ascend 910B拆分为aic_total_cycles（该Task在AI Cube Core上执行的cycle总数）和aiv_total_cycles（该Task在AI Vector Core上执行的cycle总数）。<br/>对于Ascend 910C拆分为aic_total_cycles（该Task在AI Cube Core上执行的cycle总数）和aiv_total_cycles（该Task在AI Vector Core上执行的cycle总数）。|
+|aicore_time(us)|当所有的Block被同时调度，且每个Block的执行时长相等时，该Task在AI Core上的理论执行时间，单位us。通常情况下，不同的Block开始调度时间略有差距，故该字段值略小于Task在AI Core上的实际执行时间。<br>当AI Core频率变化（比如进行手动调频、功耗超出阈值时动态调频以及Atlas 300V/Atlas 300I Pro产品）时该数据不准确，不建议参考。<br/>Atlas 200I/500 A2 推理产品：具体频率变化点请参考查看AI Core频率。<br/>Atlas A2 训练系列产品/Atlas A2 推理系列产品：具体频率变化点请参考查看AI Core频率。<br/>Atlas A3 训练系列产品/Atlas A3 推理系列产品：具体频率变化点请参考查看AI Core频率。<br/>--task-time=l1、--aic-mode=task-based时生成。|
+|total_cycles|该Task在AI Core上执行的cycle总数，由所有的Block的执行cycle数累加而成。<br/>--task-time=l1、--aic-mode=task-based时生成。<br/>对于Atlas 200I/500 A2 推理产品拆分为aic_total_cycles（该Task在AI Cube Core上执行的cycle总数）和aiv_total_cycles（该Task在AI Vector Core上执行的cycle总数）。<br/>对于Atlas A2 训练系列产品/Atlas A2 推理系列产品拆分为aic_total_cycles（该Task在AI Cube Core上执行的cycle总数）和aiv_total_cycles（该Task在AI Vector Core上执行的cycle总数）。<br/>对于Atlas A3 训练系列产品/Atlas A3 推理系列产品拆分为aic_total_cycles（该Task在AI Cube Core上执行的cycle总数）和aiv_total_cycles（该Task在AI Vector Core上执行的cycle总数）。|
 |寄存器值|自定义采集的寄存器的数值。由--aic-metrics配置自定义寄存器控制。|
 
 
@@ -1845,8 +1845,8 @@ op\_summary\_\*.csv文件根据msprof采集参数取值不同，文件呈现结�
 
 |字段名|字段含义|
 |--|--|
-|*_vec_time(us)|vec类型指令（向量类运算指令）耗时，单位us。Ascend 310B不支持该字段，给予默认值N/A。|
-|*_vec_ratio|vec类型指令（向量类运算指令）的cycle数在total cycle数中的占用比。Ascend 310B不支持该字段，给予默认值N/A。|
+|*_vec_time(us)|vec类型指令（向量类运算指令）耗时，单位us。Atlas 200I/500 A2 推理产品不支持该字段，给予默认值N/A。|
+|*_vec_ratio|vec类型指令（向量类运算指令）的cycle数在total cycle数中的占用比。Atlas 200I/500 A2 推理产品不支持该字段，给予默认值N/A。|
 |*_mac_time(us)|cube类型指令（矩阵类运算指令）耗时，单位us。|
 |*_mac_ratio|cube类型指令（矩阵类运算指令）的cycle数在total cycle数中的占用比。|
 |*_scalar_time(us)|scalar类型指令（标量类运算指令）耗时，单位us。|
@@ -1871,10 +1871,10 @@ op\_summary\_\*.csv文件根据msprof采集参数取值不同，文件呈现结�
 |--|--|
 |*_mac_fp16_ratio|cube fp16类型指令的cycle数在total cycle数中的占用比。|
 |*_mac_int8_ratio|cube int8类型指令的cycle数在total cycle数中的占用比。|
-|*_vec_fp32_ratio|vec fp32类型指令的cycle数在total cycle数中的占用比。Ascend 310B不支持该字段，给予默认值N/A。|
+|*_vec_fp32_ratio|vec fp32类型指令的cycle数在total cycle数中的占用比。Atlas 200I/500 A2 推理产品不支持该字段，给予默认值N/A。|
 |*_vec_fp16_ratio|vec fp16类型指令的cycle数在total cycle数中的占用比。|
-|*_vec_int32_ratio|vec int32类型指令的cycle数在total cycle数中的占用比。Ascend 310B不支持该字段，给予默认值N/A。|
-|*_vec_misc_ratio|vec misc类型指令的cycle数在total cycle数中的占用比。Ascend 310B不支持该字段，给予默认值N/A。|
+|*_vec_int32_ratio|vec int32类型指令的cycle数在total cycle数中的占用比。Atlas 200I/500 A2 推理产品不支持该字段，给予默认值N/A。|
+|*_vec_misc_ratio|vec misc类型指令的cycle数在total cycle数中的占用比。Atlas 200I/500 A2 推理产品不支持该字段，给予默认值N/A。|
 |*_cube_fops|cube类型的浮点运算数，即计算量，可用于衡量算法/模型的复杂度，其中fops表示floating point operations，缩写为FLOPs。|
 |*_vector_fops|vector类型浮点运算数，即计算量，可用于衡量算法/模型的复杂度，其中fops表示floating point operations，缩写为FLOPs。|
 
@@ -1884,14 +1884,14 @@ op\_summary\_\*.csv文件根据msprof采集参数取值不同，文件呈现结�
 
 |字段名|字段含义|
 |--|--|
-|*_ub_read_bw(GB/s)|ub读带宽速率，单位GB/s。Ascend 310B不支持该字段，给予默认值N/A。|
-|*_ub_write_bw(GB/s)|ub写带宽速率，单位GB/s。Ascend 310B不支持该字段，给予默认值N/A。|
+|*_ub_read_bw(GB/s)|ub读带宽速率，单位GB/s。Atlas 200I/500 A2 推理产品不支持该字段，给予默认值N/A。|
+|*_ub_write_bw(GB/s)|ub写带宽速率，单位GB/s。Atlas 200I/500 A2 推理产品不支持该字段，给予默认值N/A。|
 |*_l1_read_bw(GB/s)|l1读带宽速率，单位GB/s。|
 |*_l1_write_bw(GB/s)|l1写带宽速率，单位GB/s。|
 |*_l2_read_bw|l2读带宽速率，单位GB/s。|
-|*_l2_write_bw|l2写带宽速率，单位GB/s。Ascend 310B不支持该字段，给予默认值N/A。|
+|*_l2_write_bw|l2写带宽速率，单位GB/s。Atlas 200I/500 A2 推理产品不支持该字段，给予默认值N/A。|
 |*_main_mem_read_bw(GB/s)|主存储器读带宽速率，单位GB/s。|
-|*_main_mem_write_bw(GB/s)|主存储器写带宽速率，单位GB/s。Ascend 310B不支持该字段，给予默认值N/A。|
+|*_main_mem_write_bw(GB/s)|主存储器写带宽速率，单位GB/s。Atlas 200I/500 A2 推理产品不支持该字段，给予默认值N/A。|
 
 注：对于部分产品，部分字段在该表中使用*前缀指代aic或aiv，表示该数据是在Cube Core或Vector Core上执行的结果。
 
@@ -1925,9 +1925,9 @@ op\_summary\_\*.csv文件根据msprof采集参数取值不同，文件呈现结�
 
 |字段名|字段含义|
 |--|--|
-|*_vec_bankgroup_cflt_ratio|vec_bankgroup_stall_cycles类型指令执行cycle数在total cycle数中的占用比。由于vector指令的block stride的值设置不合理，造成bankgroup冲突。Ascend 310B不支持该字段，给予默认值N/A。|
-|*_vec_bank_cflt_ratio|vec_bank_stall_cycles类型指令执行cycle数在total cycle数中的占用比。由于vector指令操作数的读写指针地址不合理，造成bank冲突。Ascend 310B不支持该字段，给予默认值N/A。|
-|*_vec_resc_cflt_ratio|vec_resc_cflt_ratio类型指令执行cycle数在total cycle数中的占用比。当算子中涉及多个计算单元，应该尽量保证多个单元并发调度。当某个计算单元正在执行计算，但算子逻辑仍然往该单元下发指令，就会造成整体的算力没有得到充分应用。Ascend 310B不支持该字段，给予默认值N/A。|
+|*_vec_bankgroup_cflt_ratio|vec_bankgroup_stall_cycles类型指令执行cycle数在total cycle数中的占用比。由于vector指令的block stride的值设置不合理，造成bankgroup冲突。Atlas 200I/500 A2 推理产品不支持该字段，给予默认值N/A。|
+|*_vec_bank_cflt_ratio|vec_bank_stall_cycles类型指令执行cycle数在total cycle数中的占用比。由于vector指令操作数的读写指针地址不合理，造成bank冲突。Atlas 200I/500 A2 推理产品不支持该字段，给予默认值N/A。|
+|*_vec_resc_cflt_ratio|vec_resc_cflt_ratio类型指令执行cycle数在total cycle数中的占用比。当算子中涉及多个计算单元，应该尽量保证多个单元并发调度。当某个计算单元正在执行计算，但算子逻辑仍然往该单元下发指令，就会造成整体的算力没有得到充分应用。Atlas 200I/500 A2 推理产品不支持该字段，给予默认值N/A。|
 
 注：对于部分产品，部分字段在该表中使用*前缀指代aic或aiv，表示该数据是在Cube Core或Vector Core上执行的结果。
 
@@ -1947,8 +1947,8 @@ op\_summary\_\*.csv文件根据msprof采集参数取值不同，文件呈现结�
 
 仅支持产品：
 
-- Ascend 910B
-- Ascend 910C
+- Atlas A2 训练系列产品/Atlas A2 推理系列产品
+- Atlas A3 训练系列产品/Atlas A3 推理系列产品
 
 **表 9**  字段说明（L2Cache）
 
@@ -1963,16 +1963,16 @@ op\_summary\_\*.csv文件根据msprof采集参数取值不同，文件呈现结�
 
 仅支持产品：
 
-- Ascend 910B
-- Ascend 910C
-- Ascend 310B
+- Atlas A2 训练系列产品/Atlas A2 推理系列产品
+- Atlas A3 训练系列产品/Atlas A3 推理系列产品
+- Atlas 200I/500 A2 推理产品
 
 **表 10**  字段说明（PipelineExecuteUtilization）
 
 |字段名|字段含义|
 |--|--|
 |vec_exe_time(us)|vec类型指令（向量类运算指令）耗时，单位us。|
-|vec_exe_ratio|vec类型指令（向量类运算指令）的cycle数在total cycle数中的占用比。Ascend 310B不支持该字段，给予默认值N/A。|
+|vec_exe_ratio|vec类型指令（向量类运算指令）的cycle数在total cycle数中的占用比。Atlas 200I/500 A2 推理产品不支持该字段，给予默认值N/A。|
 |mac_exe_time(us)|cube类型指令（fp16及s16矩阵类运算指令）耗时，单位us。|
 |mac_exe_ratio|cube类型指令（fp16及s16矩阵类运算指令）的cycle数在total cycle数中的占用比。|
 |scalar_exe_time(us)|scalar类型指令（标量类运算指令）耗时，单位us。|
@@ -1988,24 +1988,24 @@ op\_summary\_\*.csv文件根据msprof采集参数取值不同，文件呈现结�
 |memory_bound|用于识别AICore执行算子计算过程是否存在Memory瓶颈，由mte2_ratio/max(mac_ratio, vec_ratio)计算得出。计算结果小于1，表示没有Memory瓶颈；计算结果大于1则表示AI Core在执行Task过程中大部分时间都在做内存搬运而不是计算，且数值越大Memory瓶颈越严重。|
 |cube_utilization(%)|cube算子利用率，查看cube算子在单位时间内的运算次数是否达到理论上限，越接近于100%则表示越接近理论上限。计算公式：cube_utilization=total_cycles / (freq * core_num * task_duration)。|
 
-仅支持产品：Ascend 310B
+仅支持产品：Atlas 200I/500 A2 推理产品
 
 ## op\_statistic（算子调用次数及耗时）<a name="ZH-CN_TOPIC_0000002509383189"></a>
 
 AI Core和AI CPU算子调用的次数及耗时数据无timeline信息，summary信息在op\_statistic\_\*.csv文件汇总。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001686266978_section5889102116569"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001686266978_section5889102116569"></a>**
 
 >![](public_sys-resources/icon-note.gif) **说明：** 
 >AI处理器与昇腾产品的对应关系，请参见《[昇腾产品形态说明](https://www.hiascend.com/document/detail/zh/AscendFAQ/ProduTech/productform/hardwaredesc_0001.html)》
 
 |AI处理器类型|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **op\_statistic\_\*.csv文件数据说明<a name="zh-cn_topic_0000001686266978_section142961814104116"></a>**
@@ -2034,18 +2034,18 @@ AI Core和AI CPU算子调用的次数及耗时数据无timeline信息，summary�
 
 AI Core指令占比数据timeline信息在msprof\_\*.json文件的AI Core Utilization层级展示，summary信息在ai\_core\_utilization\_\*.csv文件汇总。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001731321225_section5889102116569"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001731321225_section5889102116569"></a>**
 
 >![](public_sys-resources/icon-note.gif) **说明：** 
 >AI处理器与昇腾产品的对应关系，请参见《[昇腾产品形态说明](https://www.hiascend.com/document/detail/zh/AscendFAQ/ProduTech/productform/hardwaredesc_0001.html)》
 
 |AI处理器类型|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **msprof\_\*.json文件的AI Core指令占比数据说明<a name="zh-cn_topic_0000001731321225_section432932191111"></a>**
@@ -2081,15 +2081,15 @@ ai\_core\_utilization\_\*.csv文件内容格式示例如下：
 
 |字段名|字段含义|
 |--|--|
-|vec_ratio|vec类型指令（向量类运算指令）的cycle数在total cycle数中的占用比。Ascend 310B不支持该字段，给予默认值N/A。Ascend 910B不支持该字段。Ascend 910C不支持该字段。|
+|vec_ratio|vec类型指令（向量类运算指令）的cycle数在total cycle数中的占用比。Atlas 200I/500 A2 推理产品不支持该字段，给予默认值N/A。Atlas A2 训练系列产品/Atlas A2 推理系列产品不支持该字段。Atlas A3 训练系列产品/Atlas A3 推理系列产品不支持该字段。|
 |mac_ratio|cube类型指令（矩阵类运算指令）的cycle数在total cycle数中的占用比。|
 |scalar_ratio|scalar类型指令（标量类运算指令）的cycle数在total cycle数中的占用比。|
 |mte1_ratio|mte1类型指令（L1->L0A/L0B搬运类指令）的cycle数在total cycle数中的占用比。|
 |mte2_ratio|mte2类型指令（DDR->AICORE搬运类指令）的cycle数在total cycle数中的占用比。|
-|mte3_ratio|mte3类型指令（AICORE->DDR搬运类指令）的cycle数在total cycle数中的占用比。Ascend 910B不支持该字段。Ascend 910C不支持该字段。|
+|mte3_ratio|mte3类型指令（AICORE->DDR搬运类指令）的cycle数在total cycle数中的占用比。Atlas A2 训练系列产品/Atlas A2 推理系列产品不支持该字段。Atlas A3 训练系列产品/Atlas A3 推理系列产品不支持该字段。|
 |icache_miss_rate|icache是为instruction预留的L2 Cache，icache_miss_rate数值高代表AI Core读取指令的效率低。|
 |fixpipe_ratio|fixpipe类型指令（L0C->OUT/L1搬运类指令）的cycle数在total cycle数中的占用比。|
-|memory_bound|用于识别AICore执行算子计算过程是否存在Memory瓶颈，由mte2_ratio/max(mac_ratio, vec_ratio)计算得出。计算结果小于1，表示没有Memory瓶颈；计算结果大于1则表示AI Core在执行Task过程中大部分时间都在做内存搬运而不是计算，且数值越大Memory瓶颈越严重。Ascend 910B不支持该字段。Ascend 910C不支持该字段。|
+|memory_bound|用于识别AICore执行算子计算过程是否存在Memory瓶颈，由mte2_ratio/max(mac_ratio, vec_ratio)计算得出。计算结果小于1，表示没有Memory瓶颈；计算结果大于1则表示AI Core在执行Task过程中大部分时间都在做内存搬运而不是计算，且数值越大Memory瓶颈越严重。Atlas A2 训练系列产品/Atlas A2 推理系列产品不支持该字段。Atlas A3 训练系列产品/Atlas A3 推理系列产品不支持该字段。|
 
 
 **表 3**  字段说明（ArithmeticUtilization）
@@ -2098,10 +2098,10 @@ ai\_core\_utilization\_\*.csv文件内容格式示例如下：
 |--|--|
 |mac_fp16_ratio|cube fp16类型指令的cycle数在total cycle数中的占用比。|
 |mac_int8_ratio|cube int8类型指令的cycle数在total cycle数中的占用比。|
-|vec_fp32_ratio|vec fp32类型指令的cycle数在total cycle数中的占用比。Ascend 310B不支持该字段，给予默认值N/A。|
-|vec_fp16_ratio|vec fp16类型指令的cycle数在total cycle数中的占用比。Ascend 310B不支持该字段，给予默认值N/A。|
-|vec_int32_ratio|vec int32类型指令的cycle数在total cycle数中的占用比。Ascend 310B不支持该字段，给予默认值N/A。|
-|vec_misc_ratio|vec misc类型指令的cycle数在total cycle数中的占用比。Ascend 310B不支持该字段，给予默认值N/A。|
+|vec_fp32_ratio|vec fp32类型指令的cycle数在total cycle数中的占用比。Atlas 200I/500 A2 推理产品不支持该字段，给予默认值N/A。|
+|vec_fp16_ratio|vec fp16类型指令的cycle数在total cycle数中的占用比。Atlas 200I/500 A2 推理产品不支持该字段，给予默认值N/A。|
+|vec_int32_ratio|vec int32类型指令的cycle数在total cycle数中的占用比。Atlas 200I/500 A2 推理产品不支持该字段，给予默认值N/A。|
+|vec_misc_ratio|vec misc类型指令的cycle数在total cycle数中的占用比。Atlas 200I/500 A2 推理产品不支持该字段，给予默认值N/A。|
 |cube_fops|cube类型的浮点运算数，即计算量，可用于衡量算法/模型的复杂度，其中fops表示floating point operations，缩写为FLOPs。|
 |vector_fops|vector类型浮点运算数，即计算量，可用于衡量算法/模型的复杂度，其中fops表示floating point operations，缩写为FLOPs。|
 
@@ -2110,14 +2110,14 @@ ai\_core\_utilization\_\*.csv文件内容格式示例如下：
 
 |字段名|字段含义|
 |--|--|
-|ub_read_bw(GB/s)|ub读带宽速率，单位GB/s。Ascend 310B不支持该字段，给予默认值N/A。|
-|ub_write_bw(GB/s)|ub写带宽速率，单位GB/s。Ascend 310B不支持该字段，给予默认值N/A。|
+|ub_read_bw(GB/s)|ub读带宽速率，单位GB/s。Atlas 200I/500 A2 推理产品不支持该字段，给予默认值N/A。|
+|ub_write_bw(GB/s)|ub写带宽速率，单位GB/s。Atlas 200I/500 A2 推理产品不支持该字段，给予默认值N/A。|
 |l1_read_bw(GB/s)|l1读带宽速率，单位GB/s。|
 |l1_write_bw(GB/s)|l1写带宽速率，单位GB/s。|
 |l2_read_bw|l2读带宽速率，单位GB/s。|
-|l2_write_bw|l2写带宽速率，单位GB/s。Ascend 310B不支持该字段，给予默认值N/A。|
+|l2_write_bw|l2写带宽速率，单位GB/s。Atlas 200I/500 A2 推理产品不支持该字段，给予默认值N/A。|
 |main_mem_read_bw(GB/s)|主存储器读带宽速率，单位GB/s。|
-|main_mem_write_bw(GB/s)|主存储器写带宽速率，单位GB/s。Ascend 310B不支持该字段，给予默认值N/A。|
+|main_mem_write_bw(GB/s)|主存储器写带宽速率，单位GB/s。Atlas 200I/500 A2 推理产品不支持该字段，给予默认值N/A。|
 
 
 **表 5**  字段说明（MemoryL0）
@@ -2149,9 +2149,9 @@ ai\_core\_utilization\_\*.csv文件内容格式示例如下：
 
 |字段名|字段含义|
 |--|--|
-|vec_bankgroup_cflt_ratio|vec_bankgroup_stall_cycles类型指令执行cycle数在total cycle数中的占用比。由于vector指令的block stride的值设置不合理，造成bankgroup冲突。Ascend 310B不支持该字段，给予默认值N/A。|
-|vec_bank_cflt_ratio|vec_bank_stall_cycles类型指令执行cycle数在total cycle数中的占用比。由于vector指令操作数的读写指针地址不合理，造成bank冲突。Ascend 310B不支持该字段，给予默认值N/A。|
-|vec_resc_cflt_ratio|vec_resc_cflt_ratio类型指令执行cycle数在total cycle数中的占用比。当算子中涉及多个计算单元，应该尽量保证多个单元并发调度。当某个计算单元正在执行计算，但算子逻辑仍然往该单元下发指令，就会造成整体的算力没有得到充分应用。Ascend 310B不支持该字段，给予默认值N/A。|
+|vec_bankgroup_cflt_ratio|vec_bankgroup_stall_cycles类型指令执行cycle数在total cycle数中的占用比。由于vector指令的block stride的值设置不合理，造成bankgroup冲突。Atlas 200I/500 A2 推理产品不支持该字段，给予默认值N/A。|
+|vec_bank_cflt_ratio|vec_bank_stall_cycles类型指令执行cycle数在total cycle数中的占用比。由于vector指令操作数的读写指针地址不合理，造成bank冲突。Atlas 200I/500 A2 推理产品不支持该字段，给予默认值N/A。|
+|vec_resc_cflt_ratio|vec_resc_cflt_ratio类型指令执行cycle数在total cycle数中的占用比。当算子中涉及多个计算单元，应该尽量保证多个单元并发调度。当某个计算单元正在执行计算，但算子逻辑仍然往该单元下发指令，就会造成整体的算力没有得到充分应用。Atlas 200I/500 A2 推理产品不支持该字段，给予默认值N/A。|
 
 
 **表 8**  字段说明（L2Cache）
@@ -2171,9 +2171,9 @@ ai\_core\_utilization\_\*.csv文件内容格式示例如下：
 
 仅支持产品：
 
-- Ascend 910B
-- Ascend 910C
-- Ascend 310B
+- Atlas A2 训练系列产品/Atlas A2 推理系列产品
+- Atlas A3 训练系列产品/Atlas A3 推理系列产品
+- Atlas 200I/500 A2 推理产品
 
 **表 9**  字段说明（MemoryAccess）
 
@@ -2186,26 +2186,26 @@ ai\_core\_utilization\_\*.csv文件内容格式示例如下：
 |l0c_to_gm_datas(KB)|L0C到GM的数据搬运量，单位KB。|
 |gm_to_ub_datas(KB)|GM到UB的数据搬运量，单位KB。|
 |ub_to_gm_datas(KB)|UB到GM的数据搬运量，单位KB。|
-|仅支持产品：Ascend 910BAscend 910C|
+|仅支持产品：Atlas A2 训练系列产品/Atlas A2 推理系列产品Atlas A3 训练系列产品/Atlas A3 推理系列产品|
 
 仅支持产品：
 
-- Ascend 910B
-- Ascend 910C
+- Atlas A2 训练系列产品/Atlas A2 推理系列产品
+- Atlas A3 训练系列产品/Atlas A3 推理系列产品
 
 ## ai\_vector\_core\_utilization（AI Vector Core指令占比）<a name="ZH-CN_TOPIC_0000002477463228"></a>
 
 AI Vector Core指令占比数据无timeline信息，summary信息在ai\_vector\_core\_utilization\_\*.csv文件汇总。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001750641108_section91616487538"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001750641108_section91616487538"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|x|
-|Ascend 910|x|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|x|
+|Atlas 训练系列产品|x|
 
 
 **ai\_vector\_core\_utilization\_\*.csv文件说明<a name="zh-cn_topic_0000001750641108_section44809124408"></a>**
@@ -2219,14 +2219,14 @@ ai\_vector\_core\_utilization\_\*.csv文件内容格式示例如下：
 
 |字段名|字段含义|
 |--|--|
-|vec_ratio|代表vec类型指令（向量类运算指令）的cycle数在total cycle数中的占用比。Ascend 310B不支持该字段，给予默认值N/A。|
+|vec_ratio|代表vec类型指令（向量类运算指令）的cycle数在total cycle数中的占用比。Atlas 200I/500 A2 推理产品不支持该字段，给予默认值N/A。|
 |mac_ratio|代表cube类型指令（fp16及s16矩阵类运算指令）的cycle数在total cycle数中的占用比。|
 |scalar_ratio|代表scalar类型指令（标量类运算指令）的cycle数在total cycle数中的占用比。|
 |mte1_ratio|代表mte1类型指令（L1->L0A/L0B搬运类指令）的cycle数在total cycle数中的占用比。|
-|mte2_ratio|代表mte2类型指令（DDR->AICORE搬运类指令）的cycle数在total cycle数中的占用比。（Ascend 310B）|
-|mte2_ratio|代表mte2类型指令（片上内存->AICORE搬运类指令）的cycle数在total cycle数中的占用比。（Ascend 910B）（Ascend 910C）|
-|mte3_ratio|代表mte3类型指令（AICORE->DDR搬运类指令）的cycle数在total cycle数中的占用比。（Ascend 310B）|
-|mte3_ratio|代表mte3类型指令（AICORE->片上内存搬运类指令）的cycle数在total cycle数中的占用比。（Ascend 910B）（Ascend 910C）|
+|mte2_ratio|代表mte2类型指令（DDR->AICORE搬运类指令）的cycle数在total cycle数中的占用比。（Atlas 200I/500 A2 推理产品）|
+|mte2_ratio|代表mte2类型指令（片上内存->AICORE搬运类指令）的cycle数在total cycle数中的占用比。（Atlas A2 训练系列产品/Atlas A2 推理系列产品）（Atlas A3 训练系列产品/Atlas A3 推理系列产品）|
+|mte3_ratio|代表mte3类型指令（AICORE->DDR搬运类指令）的cycle数在total cycle数中的占用比。（Atlas 200I/500 A2 推理产品）|
+|mte3_ratio|代表mte3类型指令（AICORE->片上内存搬运类指令）的cycle数在total cycle数中的占用比。（Atlas A2 训练系列产品/Atlas A2 推理系列产品）（Atlas A3 训练系列产品/Atlas A3 推理系列产品）|
 |icache_miss_rate|代表icache缺失率，即未命中指令的L1 cache，数值越小越好。|
 |memory_bound|用于识别AICore执行算子计算过程是否存在Memory瓶颈，由mte2_ratio/max(mac_ratio, vec_ratio)计算得出。计算结果小于1，表示没有Memory瓶颈；计算结果大于1则表示有Memory瓶颈，且数值越大瓶颈越严重。|
 
@@ -2236,15 +2236,15 @@ ai\_vector\_core\_utilization\_\*.csv文件内容格式示例如下：
 
 aicpu算子详细耗时数据无timeline信息，summary信息在aicpu\_\*.csv文件汇总。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001752101817_section91616487538"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001752101817_section91616487538"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **aicpu\_\*.csv文件说明<a name="zh-cn_topic_0000001752101817_section98641131621"></a>**
@@ -2277,15 +2277,15 @@ AI CPU数据aicpu\_\*.csv文件内容格式示例如下：
 
 数据准备的队列大小。数据下沉场景下开启aicpu时生成。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000002013989984_section91616487538"></a>**
+**产品支持情况<a name="zh-cn_topic_0000002013989984_section91616487538"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **aicpu\_mi\_\*.csv文件说明<a name="zh-cn_topic_0000002013989984_section98641131621"></a>**
@@ -2311,15 +2311,15 @@ AI CPU数据aicpu\_\*.csv文件内容格式示例如下：
 
 L2 Cache数据无timeline信息，summary信息在l2\_cache\_\*.csv文件汇总。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001704262430_section91616487538"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001704262430_section91616487538"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **l2\_cache\_\*.csv文件说明<a name="zh-cn_topic_0000001704262430_section98641131621"></a>**
@@ -2331,16 +2331,16 @@ L2 Cache数据l2\_cache\_\*.csv文件内容格式示例如下：
 
 对于下列产品：
 
--   Ascend 310P
--   Ascend 910
+-   Atlas 推理系列产品
+-   Atlas 训练系列产品
 
 该文件中第一个算子的Hit Rate和Victim Rate数据不作为参考。
 
 对于下列产品
 
--   Ascend 310B
--   Ascend 910B
--   Ascend 910C
+-   Atlas 200I/500 A2 推理产品
+-   Atlas A2 训练系列产品/Atlas A2 推理系列产品
+-   Atlas A3 训练系列产品/Atlas A3 推理系列产品
 
 该文件中第一个算子数据缺失，不影响整体的性能分析。
 
@@ -2351,8 +2351,8 @@ L2 Cache数据l2\_cache\_\*.csv文件内容格式示例如下：
 |Device_id|设备ID。|
 |Stream Id|该Task所处的Stream ID。|
 |Task Id|Task任务的ID。|
-|Hit Rate|内存访问请求命中L2次数与内存访问请求总次数的比值。<br>对于Ascend 310B、Ascend 910B、Ascend 910C，Hit Rate数据推荐使用aic_metrics的L2 Cache分组实现，此采集方式下Hit Rate数据在op\_summary\_\*.csv文件中呈现。|
-|Victim Rate|内存访问请求未命中并触发Cache中数据被换出的次数与内存访问请求总次数的比值。<br>对于Ascend 310B、Ascend 910B、Ascend 910C，Victim Rate数据可能出现大于1的情况。|
+|Hit Rate|内存访问请求命中L2次数与内存访问请求总次数的比值。<br>对于Atlas 200I/500 A2 推理产品、Atlas A2 训练系列产品/Atlas A2 推理系列产品、Atlas A3 训练系列产品/Atlas A3 推理系列产品，Hit Rate数据推荐使用aic_metrics的L2 Cache分组实现，此采集方式下Hit Rate数据在op\_summary\_\*.csv文件中呈现。|
+|Victim Rate|内存访问请求未命中并触发Cache中数据被换出的次数与内存访问请求总次数的比值。<br>对于Atlas 200I/500 A2 推理产品、Atlas A2 训练系列产品/Atlas A2 推理系列产品、Atlas A3 训练系列产品/Atlas A3 推理系列产品，Victim Rate数据可能出现大于1的情况。|
 |Op Name|算子名称。|
 
 
@@ -2363,18 +2363,18 @@ L2 Cache数据l2\_cache\_\*.csv文件内容格式示例如下：
 
 单算子场景（如PyTorch场景）下无此性能数据文件。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001704421886_section5889102116569"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001704421886_section5889102116569"></a>**
 
 >![](public_sys-resources/icon-note.gif) **说明：** 
 >AI处理器与昇腾产品的对应关系，请参见《[昇腾产品形态说明](https://www.hiascend.com/document/detail/zh/AscendFAQ/ProduTech/productform/hardwaredesc_0001.html)》
 
 |AI处理器类型|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **fusion\_op\_\*.csv文件说明<a name="zh-cn_topic_0000001704421886_section98641131621"></a>**
@@ -2405,15 +2405,15 @@ L2 Cache数据l2\_cache\_\*.csv文件内容格式示例如下：
 
 NPU内存占用数据timeline信息在msprof\_\*.json文件的NPU MEM层级展示，summary信息在npu\_mem\_\*.csv文件汇总。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001704360086_section91616487538"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001704360086_section91616487538"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **msprof\_\*.json文件的NPU MEM层级数据说明<a name="zh-cn_topic_0000001704360086_section11622953115117"></a>**
@@ -2439,15 +2439,15 @@ npu\_mem\_\*.csv文件内容格式示例如下：
 
 NPU组件内存占用数据无timeline信息，summary信息在npu\_module\_mem\_\*.csv文件汇总。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001797276317_section165442389381"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001797276317_section165442389381"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **npu\_module\_mem\_\*.csv文件数据说明<a name="zh-cn_topic_0000001797276317_section104048511517"></a>**
@@ -2473,15 +2473,15 @@ npu\_module\_mem\_\*.csv文件内容格式示例如下：
 
 CANN算子的内存占用记录无timeline信息，summary信息在memory\_record\_\*.csv文件汇总，主要记录CANN层级的GE组件申请的内存及占用时间。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001704519578_section5889102116569"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001704519578_section5889102116569"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **memory\_record\_\*.csv文件数据说明<a name="zh-cn_topic_0000001704519578_section104048511517"></a>**
@@ -2508,15 +2508,15 @@ memory\_record\_\*.csv文件内容格式示例如下：
 
 CANN算子的内存占用明细无timeline信息，summary信息在operator\_memory\_\*.csv文件汇总，主要记录CANN层级的算子在NPU上执行时所需内存及占用时间。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001752279281_section5889102116569"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001752279281_section5889102116569"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **operator\_memory\_\*.csv文件数据说明<a name="zh-cn_topic_0000001752279281_section104048511517"></a>**
@@ -2560,15 +2560,15 @@ operator\_memory\_\*.csv文件中的部分信息存在空值或负值，是因�
 
 静态图算子内存无timeline信息，summary信息在static\_op\_mem\_\*.csv文件汇总。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001924444106_section5889102116569"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001924444106_section5889102116569"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **static\_op\_mem\_\*.csv文件数据说明<a name="zh-cn_topic_0000001924444106_section104048511517"></a>**
@@ -2600,15 +2600,15 @@ static\_op\_mem\_\*.csv文件内容格式示例如下：
 
 系统内存数据无timeline信息，summary信息在sys\_mem\_\*.csv文件汇总。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001751484586_section5889102116569"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001751484586_section5889102116569"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **sys\_mem\_\*.csv文件数据说明<a name="zh-cn_topic_0000001751484586_section104048511517"></a>**
@@ -2639,15 +2639,15 @@ sys\_mem\_\*.csv文件内容格式示例如下：
 
 进程内存占用数据无timeline信息，summary信息在process\_mem\_\*.csv文件汇总。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001798284369_section5889102116569"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001798284369_section5889102116569"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **process\_mem\_\*.csv文件数据说明<a name="zh-cn_topic_0000001798284369_section104048511517"></a>**
@@ -2674,15 +2674,15 @@ process\_mem\_\*.csv文件内容格式示例如下：
 
 AI CPU（执行AI CPU算子）、Ctrl CPU（执行Driver任务）利用率数据无timeline信息，summary信息在cpu\_usage\_\*.csv文件汇总。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001798325329_section5889102116569"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001798325329_section5889102116569"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **cpu\_usage\_\*.csv文件数据说明<a name="zh-cn_topic_0000001798325329_section104048511517"></a>**
@@ -2711,15 +2711,15 @@ cpu\_usage\_\*.csv文件内容格式示例如下：
 
 进程CPU占用率数据无timeline信息，summary信息在process\_cpu\_usage文件汇总。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001751325670_section5889102116569"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001751325670_section5889102116569"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **process\_cpu\_usage\_\*.csv文件数据说明<a name="zh-cn_topic_0000001751325670_section104048511517"></a>**
@@ -2744,15 +2744,15 @@ process\_cpu\_usage\_\*.csv文件内容格式示例如下：
 
 片上内存读写速率数据timeline信息在msprof\_\*.json文件展示，summary信息在ddr\_\*.csv和hbm\_\*.csv文件汇总。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001704519574_section91616487538"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001704519574_section91616487538"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **msprof\_\*.json文件的片上内存数据说明<a name="zh-cn_topic_0000001704519574_section1861610200457"></a>**
@@ -2806,15 +2806,15 @@ hbm\_\*.csv文件内容格式示例如下：
 
 HCCS集合通信带宽数据timeline信息在msprof\_\*.json文件的HCCS层级展示，summary信息在hccs\_\*.csv文件汇总。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001752359493_section91616487538"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001752359493_section91616487538"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|x|
-|Ascend 310P|x|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|x|
+|Atlas 推理系列产品|x|
+|Atlas 训练系列产品|√|
 
 
 **msprof\_\*.json文件的HCCS层级数据说明<a name="zh-cn_topic_0000001752359493_section279614455011"></a>**
@@ -2854,15 +2854,15 @@ hccs\_\*.csv文件内容格式示例如下：
 
 每个时间节点网络信息数据timeline信息在msprof\_\*.json文件的NIC层级展示，summary信息在nic\_\*.csv文件汇总。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001750414058_section91616487538"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001750414058_section91616487538"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **msprof\_\*.json文件的NIC层级数据说明<a name="zh-cn_topic_0000001750414058_section10870339706"></a>**
@@ -2912,15 +2912,15 @@ nic\_\*.csv文件内容格式示例如下：
 
 RoCE通信接口带宽数据timeline信息在msprof\_\*.json文件的RoCE层级展示，summary信息在roce\_\*.csv文件汇总。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001750572972_section91616487538"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001750572972_section91616487538"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|x|
-|Ascend 310P|x|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|x|
+|Atlas 推理系列产品|x|
+|Atlas 训练系列产品|√|
 
 
 **msprof\_\*.json文件的RoCE层级数据说明<a name="zh-cn_topic_0000001750572972_section11622953115117"></a>**
@@ -2970,15 +2970,15 @@ roce\_\*.csv文件内容格式示例如下：
 
 PCIe带宽数据timeline信息在msprof\_\*.json文件的PCIe层级展示，summary信息在pcie\_\*.csv文件汇总。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001797493789_section91616487538"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001797493789_section91616487538"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|x|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|x|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **msprof\_\*.json文件的PCIe层级数据说明<a name="zh-cn_topic_0000001797493789_section11622953115117"></a>**
@@ -3019,15 +3019,15 @@ pcie\_\*.csv文件内容格式示例如下：
 
 AI Core和AI Vector的带宽和延时数据无summary信息，timeline信息在msprof\_\*.json文件的biu\_group、aic\_core\_group、aiv\_core\_group层级展示。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001797600917_section91616487538"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001797600917_section91616487538"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|x|
-|Ascend 310P|x|
-|Ascend 910|x|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|x|
+|Atlas 推理系列产品|x|
+|Atlas 训练系列产品|x|
 
 
 **msprof\_\*.json文件的biu\_group、aic\_core\_group、aiv\_core\_group层级数据说明<a name="zh-cn_topic_0000001797600917_section432932191111"></a>**
@@ -3068,15 +3068,15 @@ AI Core和AI Vector的带宽和延时数据无summary信息，timeline信息在m
 
 加速器带宽及并发数据无summary信息，timeline信息在msprof\_\*.json文件的Acc PMU层级展示。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001750723840_section91616487538"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001750723840_section91616487538"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|x|
-|Ascend 910|x|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|x|
+|Atlas 训练系列产品|x|
 
 
 **msprof\_\*.json文件的Acc PMU层级数据说明<a name="zh-cn_topic_0000001750723840_section432932191111"></a>**
@@ -3101,15 +3101,15 @@ msprof\_\*.json文件Acc PMU层级数据如下图所示。
 
 SoC传输带宽信息数据无summary信息，timeline信息在msprof\_\*.json文件的Stars Soc Info层级展示。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001797682569_section91616487538"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001797682569_section91616487538"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|x|
-|Ascend 910|x|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|x|
+|Atlas 训练系列产品|x|
 
 
 **msprof\_\*.json文件的Stars Soc Info层级数据说明<a name="zh-cn_topic_0000001797682569_section432932191111"></a>**
@@ -3132,15 +3132,15 @@ msprof\_\*.json文件Stars Soc Info层级数据如下图所示。
 
 片间传输带宽信息数据无summary信息，timeline信息在msprof\_\*.json文件的Stars Chip Trans层级展示。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001750882752_section91616487538"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001750882752_section91616487538"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|x|
-|Ascend 310P|x|
-|Ascend 910|x|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|x|
+|Atlas 推理系列产品|x|
+|Atlas 训练系列产品|x|
 
 
 **msprof\_\*.json文件的Stars Chip Trans层级数据说明<a name="zh-cn_topic_0000001750882752_section11622953115117"></a>**
@@ -3165,15 +3165,15 @@ msprof\_\*.json文件Stars Chip Trans层级数据如下图所示。
 
 三级缓存读写速率数据timeline信息在msprof\_\*.json文件的LLC层级展示，summary信息在llc\_read\_write\_\*.csv文件汇总。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001750960004_section1413114612162"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001750960004_section1413114612162"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **msprof\_\*.json文件的LLC层级数据说明<a name="zh-cn_topic_0000001750960004_section12203141812107"></a>**
@@ -3216,15 +3216,15 @@ llc\_read\_write\_\*.csv文件内容格式示例如下：
 
 DVPP数据无timeline信息，summary信息在dvpp\_\*.csv文件汇总。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001798325341_section91616487538"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001798325341_section91616487538"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|x|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|x|
+|Atlas 训练系列产品|√|
 
 
 **dvpp\_\*.csv文件说明<a name="zh-cn_topic_0000001798325341_section11791341554"></a>**
@@ -3252,15 +3252,15 @@ dvpp\_\*.csv文件内容格式示例如下：
 
 AI CPU热点函数数据无timeline信息，summary信息在ai\_cpu\_top\_function\_\*.csv文件汇总。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001798284377_section91616487538"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001798284377_section91616487538"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **ai\_cpu\_top\_function\_\*.csv文件说明<a name="zh-cn_topic_0000001798284377_section11791341554"></a>**
@@ -3286,15 +3286,15 @@ ai\_cpu\_top\_function\_\*.csv文件内容格式示例如下：
 
 AI CPU PMU事件数据无timeline信息，summary信息在ai\_cpu\_pmu\_events\_\*.csv文件汇总。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001751325686_section91616487538"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001751325686_section91616487538"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **ai\_cpu\_pmu\_events\_\*.csv文件说明<a name="zh-cn_topic_0000001751325686_section11791341554"></a>**
@@ -3319,15 +3319,15 @@ ai\_cpu\_pmu\_events\_\*.csv文件内容格式示例如下：
 
 Ctrl CPU热点函数数据无timeline信息，summary信息在ctrl\_cpu\_top\_function\_\*.csv文件汇总。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001798325349_section91616487538"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001798325349_section91616487538"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **ctrl\_cpu\_top\_function\_\*.csv文件说明<a name="zh-cn_topic_0000001798325349_section11791341554"></a>**
@@ -3353,15 +3353,15 @@ ctrl\_cpu\_top\_function\_\*.csv文件内容格式示例如下：
 
 Ctrl CPU PMU事件数据无timeline信息，summary信息在ctrl\_cpu\_pmu\_events\_\*.csv文件汇总。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001751484602_section91616487538"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001751484602_section91616487538"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **ctrl\_cpu\_pmu\_events\_\*.csv文件说明<a name="zh-cn_topic_0000001751484602_section11791341554"></a>**
@@ -3386,15 +3386,15 @@ ctrl\_cpu\_pmu\_events\_\*.csv文件内容格式示例如下：
 
 TS CPU热点函数数据无timeline信息，summary信息在ts\_cpu\_top\_function\_\*.csv文件汇总。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001798284385_section91616487538"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001798284385_section91616487538"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **ts\_cpu\_top\_function\_\*.csv文件说明<a name="zh-cn_topic_0000001798284385_section11791341554"></a>**
@@ -3419,15 +3419,15 @@ ts\_cpu\_top\_function\_\*.csv文件内容格式示例如下：
 
 TS CPU PMU事件数据无timeline信息，summary信息在ts\_cpu\_pmu\_events\_\*.csv文件汇总。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001751325694_section91616487538"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001751325694_section91616487538"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **ts\_cpu\_pmu\_events\_\*.csv文件说明<a name="zh-cn_topic_0000001751325694_section11791341554"></a>**
@@ -3452,15 +3452,15 @@ ts\_cpu\_pmu\_events\_\*.csv文件内容格式示例如下：
 
 Host侧CPU利用率数据在msprof\_\*.json文件的CPU Usage层级展示，summary信息在host\_cpu\_usage\_\*.csv文件汇总。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001751778214_section91616487538"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001751778214_section91616487538"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **msprof\_\*.json文件的CPU Usage层级数据说明<a name="zh-cn_topic_0000001751778214_section11622953115117"></a>**
@@ -3501,15 +3501,15 @@ host\_cpu\_usage\_\*.csv文件内容格式示例如下：
 
 Host侧内存利用率数据timeline信息在msprof\_\*.json文件的Memory Usage层级展示，summary信息在host\_mem\_usage\_\*.csv文件汇总。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001751619310_section91616487538"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001751619310_section91616487538"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **msprof\_\*.json文件的Memory Usage层级数据说明<a name="zh-cn_topic_0000001751619310_section11622953115117"></a>**
@@ -3548,15 +3548,15 @@ host\_mem\_usage\_\*.csv文件内容格式示例如下：
 
 Host侧磁盘I/O利用率数据timeline信息在msprof\_\*.json文件的Disk Usage层级展示，summary信息在host\_disk\_usage\_\*.csv文件汇总。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001798578961_section91616487538"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001798578961_section91616487538"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **msprof\_\*.json文件的Disk Usage层级数据说明<a name="zh-cn_topic_0000001798578961_section11622953115117"></a>**
@@ -3596,15 +3596,15 @@ host\_disk\_usage\_\*.csv文件内容格式示例如下：
 
 Host侧网络I/O利用率数据timeline信息在msprof\_\*.json文件的Network Usage层级展示，summary信息在host\_network\_usage\_\*.csv文件汇总。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001798698005_section91616487538"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001798698005_section91616487538"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **msprof\_\*.json文件的Network Usage层级数据说明<a name="zh-cn_topic_0000001798698005_section11622953115117"></a>**
@@ -3643,15 +3643,15 @@ host\_network\_usage\_\*.csv文件内容格式示例如下：
 
 Host侧syscall和pthreadcall数据timeline信息在msprof\_\*.json文件的OS Runtime API层级展示，summary信息在os\_runtime\_statistic\_\*.csv文件汇总。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001751778218_section91616487538"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001751778218_section91616487538"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 **msprof\_\*.json文件的OS Runtime API层级数据说明<a name="zh-cn_topic_0000001751778218_section11622953115117"></a>**
 
@@ -3695,15 +3695,15 @@ os\_runtime\_statistic\_\*.csv文件内容格式示例如下：
 
 Host侧系统CPU利用率数据无timeline信息，summary信息在cpu\_usage\_\*.csv文件汇总。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001751619314_section91616487538"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001751619314_section91616487538"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **cpu\_usage\_\*.csv文件说明<a name="zh-cn_topic_0000001751619314_section11791341554"></a>**
@@ -3732,15 +3732,15 @@ cpu\_usage\_\*.csv文件内容格式示例如下：
 
 Host侧进程CPU利用率数据无timeline信息，summary信息在process\_cpu\_usage\_\*.csv文件汇总。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001798578965_section91616487538"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001798578965_section91616487538"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **process\_cpu\_usage\_\*.csv文件说明<a name="zh-cn_topic_0000001798578965_section11791341554"></a>**
@@ -3765,15 +3765,15 @@ process\_cpu\_usage\_\*.csv文件内容格式示例如下：
 
 Host侧系统内存利用率数据无timeline信息，summary信息在sys\_mem\_\*.csv文件汇总。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001798698009_section91616487538"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001798698009_section91616487538"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **sys\_mem\_\*.csv文件说明<a name="zh-cn_topic_0000001798698009_section11791341554"></a>**
@@ -3804,15 +3804,15 @@ sys\_mem\_\*.csv文件内容格式示例如下：
 
 Host侧进程内存利用率数据无timeline信息，summary信息在process\_mem\_\*.csv文件汇总。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001800355893_section91616487538"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001800355893_section91616487538"></a>**
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **process\_mem\_\*.csv文件说明<a name="zh-cn_topic_0000001800355893_section11791341554"></a>**

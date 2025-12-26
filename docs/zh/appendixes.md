@@ -6,11 +6,11 @@
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **功能说明<a name="zh-cn_topic_0000001276273570_section4362143220451"></a>**
@@ -21,8 +21,7 @@
 
 |脚本名|功能| 路径                                                                                                                                                             |
 |--|--|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|get_msprof_info.py|获取设备信息。| ${INSTALL\_DIR}/tools/profiler/profiler_tool/analysis/interface，${INSTAL\_DIR}请替换为CANN软件安装后文件存储路径。若安装的Toolkit软件包，以root安装举例，则安装后文件存储路径为：/usr/local/Ascend/cann。 |
-
+|get_msprof_info.py|获取设备信息。| `${INSTALL_DIR}/tools/profiler/profiler_tool/analysis/interface`，${INSTAL\_DIR}请替换为CANN软件安装后文件存储路径。若安装的Toolkit软件包，以root安装举例，则安装后文件存储路径为：/usr/local/Ascend/cann。 |
 
 **命令格式<a name="zh-cn_topic_0000001276273570_section25968322563"></a>**
 
@@ -128,11 +127,11 @@ python3 get_msprof_info.py -dir <dir> [-help]
 
 |产品|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **功能说明<a name="zh-cn_topic_0000001265229666_section1598625522114"></a>**
@@ -153,7 +152,7 @@ python3 get_msprof_info.py -dir <dir> [-help]
 
 msprof\_slice.json配置文件保存目录为：
 
-$\{INSTALL\_DIR\}/tools/profiler/profiler\_tool/analysis/msconfig，$\{INSTALL\_DIR\}请替换为CANN软件安装后文件存储路径。若安装的Toolkit软件包，以root安装举例，则安装后文件存储路径为：/usr/local/Ascend/cann。
+`${INSTALL_DIR}/tools/profiler/profiler_tool/analysis/msconfig`，$\{INSTALL\_DIR\}请替换为CANN软件安装后文件存储路径。若安装的Toolkit软件包，以root安装举例，则安装后文件存储路径为：/usr/local/Ascend/cann。
 
 **参数说明<a name="zh-cn_topic_0000001265229666_section112651016202315"></a>**
 
@@ -186,21 +185,21 @@ msprof.py脚本需要执行如下步骤才能完成性能数据的最终导出�
 
 >![](public_sys-resources/icon-note.gif) **说明：** 
 >-   以下产品不支持在设备上直接解析、查询和导出，需要将采集到的PROF\_XXX目录拷贝到安装了Toolkit包的环境下进行操作：
->    -   Ascend 310B的Ascend RC场景
+>    -   Atlas 200I/500 A2 推理产品的Ascend RC场景
 >    -   msprof.py工具使用安装时创建的用户运行。
 
 
 ### 解析性能数据
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001265229758_section17436144114294"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001265229758_section17436144114294"></a>**
 
 |AI处理器类型|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **功能说明<a name="zh-cn_topic_0000001265229758_section14143165719292"></a>**
@@ -234,7 +233,7 @@ python3 msprof.py import -dir <dir>
 1.  登录安装了Toolkit包的环境。
 2.  切换至msprof.py脚本所在目录。
 
-    $\{INSTALL\_DIR\}/tools/profiler/profiler\_tool/analysis/msprof，$\{INSTALL\_DIR\}请替换为CANN软件安装后文件存储路径。若安装的Toolkit软件包，以root安装举例，则安装后文件存储路径为：/usr/local/Ascend/cann。
+    `${INSTALL_DIR}/tools/profiler/profiler_tool/analysis/msprof`，$\{INSTALL\_DIR\}请替换为CANN软件安装后文件存储路径。若安装的Toolkit软件包，以root安装举例，则安装后文件存储路径为：/usr/local/Ascend/cann。
 
 3.  解析性能数据。
 
@@ -251,15 +250,15 @@ python3 msprof.py import -dir <dir>
 
 ### 查询性能数据文件信息
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001312709849_section17436144114294"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001312709849_section17436144114294"></a>**
 
 |AI处理器类型|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **功能说明<a name="zh-cn_topic_0000001312709849_section2149245124116"></a>**
@@ -295,7 +294,7 @@ python3 msprof.py query -dir <dir>
 1.  登录安装了Toolkit包的环境。
 2.  切换至msprof.py脚本所在目录。
 
-    $\{INSTALL\_DIR\}/tools/profiler/profiler\_tool/analysis/msprof，$\{INSTALL\_DIR\}请替换为CANN软件安装后文件存储路径。若安装的Toolkit软件包，以root安装举例，则安装后文件存储路径为：/usr/local/Ascend/cann。
+    `${INSTALL_DIR}/tools/profiler/profiler_tool/analysis/msprof`，$\{INSTALL\_DIR\}请替换为CANN软件安装后文件存储路径。若安装的Toolkit软件包，以root安装举例，则安装后文件存储路径为：/usr/local/Ascend/cann。
 
 3.  查询性能数据信息，命令行格式如下。
 
@@ -326,15 +325,15 @@ msprof工具的查询功能获取到的信息如[表2](#zh-cn_topic_000000131270
 
 ### 导出性能数据
 
-**AI处理器支持情况<a name="zh-cn_topic_0000001265069834_section17436144114294"></a>**
+**产品支持情况<a name="zh-cn_topic_0000001265069834_section17436144114294"></a>**
 
 |AI处理器类型|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 **功能说明<a name="zh-cn_topic_0000001265069834_section4946111125919"></a>**
@@ -373,8 +372,8 @@ msprof工具的查询功能获取到的信息如[表2](#zh-cn_topic_000000131270
 |--|--|--|
 |-dir或--collection-dir|必选|收集到的性能数据目录。须指定为PROF_XXX目录或PROF*_*XXX目录的父目录，例如：/home/HwHiAiUser/profiler_data/PROF_XXX。|
 |-reports|可选|传入用户自定义的reports_sample_config.json配置文件，会根据配置文件中指定的范围导出相应的性能数据文件。参数实现与msprof --reports一致，详细介绍请参见[使用示例（--reports参数）](msprof_parsing_instruct.md#zh-cn_topic_0000001265229686_section1128153151819)。|
-|--iteration-id|可选|迭代ID。需配置为正整数。默认值为1。与--model-id必须同时配置。<br>&#8226; 对于Ascend 910B，支持--model-id 4294967295，表示指定以Step为粒度统计的迭代ID（每执行完成一个Step，Iteration ID加1）。仅支持解析MindSpore（版本号大于等于2.3）框架的性能数据。<br/>&#8226; 对于Ascend 910C，支持--model-id 4294967295，表示指定以Step为粒度统计的迭代ID（每执行完成一个Step，Iteration ID加1）。仅支持解析MindSpore（版本号大于等于2.3）框架的性能数据。<br/>&#8226; --model-id配置为其他值时，指定以Graph为粒度统计的迭代ID（每个Graph执行一次，Iteration ID加1，当一个脚本被编译为多个Graph时，该ID与脚本层面的Step ID不一致）。|
-|--model-id|可选|模型ID。需配置为正整数。与--iteration-id必须同时配置，--iteration-id未配置且不配置--model-id时，默认导出所有模型ID对应的数据。<br/>&#8226; 对于Ascend 910B，支持--model-id 4294967295，为Step模式，即--iteration-id配置的值以Step为粒度解析。仅支持解析MindSpore（版本号大于等于2.3）框架的性能数据。<br/>&#8226; 对于Ascend 910C，支持--model-id 4294967295，为Step模式，即--iteration-id配置的值以Step为粒度解析。仅支持解析MindSpore（版本号大于等于2.3）框架的性能数据。<br/>&#8226; --model-id配置为其他值时，为Graph模式，即--iteration-id配置的值以Graph为粒度解析。|
+|--iteration-id|可选|迭代ID。需配置为正整数。默认值为1。与--model-id必须同时配置。<br>&#8226; 对于Atlas A2 训练系列产品/Atlas A2 推理系列产品，支持--model-id 4294967295，表示指定以Step为粒度统计的迭代ID（每执行完成一个Step，Iteration ID加1）。仅支持解析MindSpore（版本号大于等于2.3）框架的性能数据。<br/>&#8226; 对于Atlas A3 训练系列产品/Atlas A3 推理系列产品，支持--model-id 4294967295，表示指定以Step为粒度统计的迭代ID（每执行完成一个Step，Iteration ID加1）。仅支持解析MindSpore（版本号大于等于2.3）框架的性能数据。<br/>&#8226; --model-id配置为其他值时，指定以Graph为粒度统计的迭代ID（每个Graph执行一次，Iteration ID加1，当一个脚本被编译为多个Graph时，该ID与脚本层面的Step ID不一致）。|
+|--model-id|可选|模型ID。需配置为正整数。与--iteration-id必须同时配置，--iteration-id未配置且不配置--model-id时，默认导出所有模型ID对应的数据。<br/>&#8226; 对于Atlas A2 训练系列产品/Atlas A2 推理系列产品，支持--model-id 4294967295，为Step模式，即--iteration-id配置的值以Step为粒度解析。仅支持解析MindSpore（版本号大于等于2.3）框架的性能数据。<br/>&#8226; 对于Atlas A3 训练系列产品/Atlas A3 推理系列产品，支持--model-id 4294967295，为Step模式，即--iteration-id配置的值以Step为粒度解析。仅支持解析MindSpore（版本号大于等于2.3）框架的性能数据。<br/>&#8226; --model-id配置为其他值时，为Graph模式，即--iteration-id配置的值以Graph为粒度解析。|
 |--iteration-count|可选|导出连续迭代的个数，取值范围为1~5的整数，根据--iteration-id配置的值为起始Step，导出连续数量的Step，比如配置--iteration-count为3，--iteration-id为1，则导出Step为1、2、3。|
 |--format|可选|summary数据文件的导出格式，支持csv和json两种格式，默认值为csv。仅配置summary参数时支持。<br/>本文中summary文件介绍均以csv文件为例。|
 |--clear|可选|数据精简模式，开启后将在导出性能数据后删除PROF_XXX/device_{id}下的sqlite目录，以节省存储空间。配置该参数时表示开启数据精简模式，未配置表示关闭，默认关闭。|
@@ -386,7 +385,7 @@ msprof工具的查询功能获取到的信息如[表2](#zh-cn_topic_000000131270
 1.  登录安装了Toolkit包的环境。
 2.  切换至msprof.py脚本所在目录。
 
-    $\{INSTALL\_DIR\}/tools/profiler/profiler\_tool/analysis/msprof，$\{INSTALL\_DIR\}请替换为CANN软件安装后文件存储路径。若安装的Toolkit软件包，以root安装举例，则安装后文件存储路径为：/usr/local/Ascend/cann。
+    `${INSTALL_DIR}/tools/profiler/profiler_tool/analysis/msprof`，$\{INSTALL\_DIR\}请替换为CANN软件安装后文件存储路径。若安装的Toolkit软件包，以root安装举例，则安装后文件存储路径为：/usr/local/Ascend/cann。
 
 3.  导出性能数据。可以导出timeline、summary和db三类文件，命令行格式如下：
 
@@ -480,18 +479,18 @@ msprof工具的查询功能获取到的信息如[表2](#zh-cn_topic_000000131270
 >![](public_sys-resources/icon-note.gif) **说明：** 
 >该功能为msprof工具解析后输出调优建议的功能，已不再演进，分析性能数据并输出调优建议更多的功能请参见《[msprof-analyze](https://gitcode.com/Ascend/mstt/tree/master/profiler/msprof_analyze/)》。
 
-**AI处理器支持情况<a name="zh-cn_topic_0000002441319698_section5889102116569"></a>**
+**产品支持情况<a name="zh-cn_topic_0000002441319698_section5889102116569"></a>**
 
 >![](public_sys-resources/icon-note.gif) **说明：** 
 >AI处理器与昇腾产品的对应关系，请参见《[昇腾产品形态说明](https://www.hiascend.com/document/detail/zh/AscendFAQ/ProduTech/productform/hardwaredesc_0001.html)》
 
 |AI处理器类型|是否支持|
 |--|:-:|
-|Ascend 910C|√|
-|Ascend 910B|√|
-|Ascend 310B|√|
-|Ascend 310P|√|
-|Ascend 910|√|
+|Atlas A3 训练系列产品/Atlas A3 推理系列产品|√|
+|Atlas A2 训练系列产品/Atlas A2 推理系列产品|√|
+|Atlas 200I/500 A2 推理产品|√|
+|Atlas 推理系列产品|√|
+|Atlas 训练系列产品|√|
 
 
 集群或多卡通信场景下，在执行完性能数据export导出命令后，会在屏幕打印相关性能调优建议，具体如下：
@@ -541,5 +540,4 @@ msprof工具的查询功能获取到的信息如[表2](#zh-cn_topic_000000131270
 
     **图 2**  基于通信矩阵分析<a name="zh-cn_topic_0000002441319698_fig1087154512584"></a>  
     ![](figures/基于通信矩阵分析.png "基于通信矩阵分析")
-
 
