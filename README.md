@@ -1,8 +1,8 @@
-# 📖MindStudio Profiler
+# MindStudio Profiler
 
-## 📖简介
+## 简介
 
-MindStudio Profiler（简称msProf）是性能调试命令行工具。msProf提供了AI任务运行性能数据、昇腾AI处理器系统数据等性能数据的采集和解析功能，这些功能侧重不同的训练或推理场景，可以定位模型训练或推理中的性能问题。
+MindStudio Profiler（msProf，模型调优工具）提供了AI任务运行性能数据、昇腾AI处理器系统数据等性能数据的采集和解析功能，这些功能侧重不同的训练或推理场景，可以定位模型训练或推理中的性能问题。
 
 ## 🗂️目录结构
 
@@ -24,11 +24,11 @@ MindStudio Profiler（简称msProf）是性能调试命令行工具。msProf提�
 └── README.md                 // 整体仓说明文档
 
 ```
-## 🏷️版本说明
+## 版本说明
 
 msProf的版本说明包含msProf的软件版本配套关系和软件包下载以及每个版本的特性变更说明，详情请参见《[版本说明](docs/zh/release_notes.md)》。
 
-## ⚙️环境部署
+## 环境部署
 
 ### 环境和依赖
 
@@ -38,16 +38,16 @@ msProf的版本说明包含msProf的软件版本配套关系和软件包下载�
 
 以上环境依赖请根据实际环境选择适配的版本。
 
-###  🛠️工具安装
+###  工具安装
 
 安装msProf工具，详情请参见《[msProf工具安装指南](docs/zh/msprof_install_guide.md)》。
 
-## 🚀 快速入门
+## 快速入门
 
-离线推理场景推荐使用msProf命令采集，请参见[离线推理场景性能分析快速入门](https://www.hiascend.com/document/detail/zh/canncommercial/83RC1/devaids/Profiling/atlasprofiling_16_0005.html)。如果当前环境未安装Ascend-cann-toolkit包，则无法使用msProf命令。
+离线推理场景推荐使用msProf命令采集，请参见[离线推理场景性能分析快速入门](https://www.hiascend.com/document/detail/zh/canncommercial/83RC1/devaids/Profiling/atlasprofiling_16_0005.html)。如果当前环境未安装Toolkit开发套件包和ops算子包，则无法使用msProf命令。
 
 
-## 🧰 功能介绍
+## 功能介绍
 
 1. msProf性能数据采集
 
@@ -58,11 +58,11 @@ msProf的版本说明包含msProf的软件版本配套关系和软件包下载�
    通过msProf命令对AI任务运行性能数据、昇腾AI处理器系统数据进行解析。
 
 
-## 🔒 安全声明
+## 安全声明
 
-描述msProf产品的安全加固信息、公网地址信息及通信矩阵等内容。详情请参见[msProf工具安全声明](./docs/zh/security_statement.md)。
+描述msProf产品的安全加固信息、公网地址信息及通信矩阵等内容。详情请参见[msProf安全声明](./docs/zh/security_statement.md)。
 
-## ❗免责声明
+## 免责声明
 
 ### 致msProf使用者
 
@@ -79,9 +79,9 @@ msProf的版本说明包含msProf的软件版本配套关系和软件包下载�
 
 ## License
 
-msProf产品的使用许可证，具体请参见[License](License)文件。
+msProf产品的使用许可证，具体请参见[LICENSE](LICENSE)文件。
 
-msProf工具docs目录下的文档适用CC-BY 4.0许可证，具体请参见[License](./docs/LICENSE)。
+msProf工具docs目录下的文档适用CC-BY 4.0许可证，具体请参见[LICENSE](./docs/LICENSE)。
 
 ## 贡献声明
 
@@ -93,18 +93,18 @@ msProf工具docs目录下的文档适用CC-BY 4.0许可证，具体请参见[Lic
    1. Fork本项目的仓库。
    2. Clone到本地。
    3. 创建开发分支。
-   4. 本地自测，提交前请通过所有的已经单元测试，以及为您要解决的问题新增单元测试。
+   4. 本地测试：提交前请通过所有的单元测试，包括新增的测试用例。
    5. 提交代码。
    6. 新建Pull Request。
-   7. 代码检视，您需要根据评审意见修改代码，并再次推送更新。此过程可能会有多轮。
+   7. 代码检视：您需要根据评审意见修改代码，并重新提交更新。此流程可能涉及多轮迭代。
    8. 当您的PR获得足够数量的检视者批准后，Committer会进行最终审核。
    9. 审核和测试通过后，CI会将您的PR合并入到项目的主干分支。
 
-## 💬建议与交流
+## 建议与交流
 
-欢迎大家为社区做贡献。如果有任何疑问或建议，请提交issues，我们会尽快回复。感谢您的支持。
+欢迎大家为社区做贡献。如果有任何疑问或建议，请提交[Issues](https://gitcode.com/Ascend/msprof/issues)，我们会尽快回复。感谢您的支持。
 
-## ❤️致谢
+## 致谢
 
 msProf由华为公司的下列部门联合贡献：
 
