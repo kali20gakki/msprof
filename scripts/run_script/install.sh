@@ -10,7 +10,7 @@ function install_whl_package() {
     local _package=$2
     local _pythonlocalpath=$3
 
-    print "INFO" "Start to begin install ${_package}."
+    print "INFO" "Start to install ${_package}."
     if [ ! -f "${_package}" ]; then
         print "ERROR" "Install whl The ${_package} does not exist."
         return 1
@@ -53,7 +53,7 @@ function implement_install() {
     msprof_analyse_whl=${install_path}/${ANALYSIS_PATH}/${MSPROF_ANALYSIS_WHL}
     copy_file ${MSPROF_ANALYSIS_WHL} $msprof_analyse_whl
     if [ -f "${MSPROF_ANALYSIS_WHL}" ]; then
-        install_whl_package $pylocal ${MSPROF_ANALYSIS_WHL} ${install_path}/${ANALYSIS_PATH}
+        install_whl_package $pylocal ${msprof_analyse_whl} ${install_path}/${ANALYSIS_PATH}
     fi
     if [ $? -ne 0 ]; then
         print "ERROR" "Install msprof analysis whl failed."
