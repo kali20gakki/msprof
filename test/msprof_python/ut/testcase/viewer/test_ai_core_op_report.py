@@ -337,5 +337,18 @@ class TestReportOPCounter(unittest.TestCase):
         self.assertEqual(res, expect)
 
 
+    def test_get_op_summary_data(self):
+        headers = [AiCoreOpReport.TASK_START_TIME, AiCoreOpReport.TASK_DURATION, AiCoreOpReport.TASK_WAIT_TIME]
+        tasks = [['-1', '0', 1], ['0', '2', 1], ['2', '3', 1], ['3', '4', 1]]
+        InfoConfReader()._start_info = {'collectionTimeBegin': '1'}
+        InfoConfReader()._end_info = {'collectionTimeEnd': '10'}
+        InfoConfReader()._info_json = {'platform_version': '5'}
+        with mock.patch(NAMESPACE + '.AiCoreOpReport.get_op_summary_header', return_value=[]), \
+                mock.patch(NAMESPACE + '.AiCoreOpReport.get_ai_core_op_summary_data_with_headers', return_value=([], headers)), \
+                mock.patch(NAMESPACE + '.AiCoreOpReport.get_hccl_op_data', return_value=[]), \
+                mock.patch(NAMESPACE + '.AiCoreOpReport._format_summary_data', return_value=tasks):
+            res = AiCoreOpReport.get_op_summary_data('', '', {})
+            self.assertEqual(3, res[2])
+            self.assertEqual(['0', '2', 0], res[1][0])
 if __name__ == '__main__':
     unittest.main()

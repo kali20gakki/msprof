@@ -17,7 +17,6 @@
 import json
 import logging
 import os
-
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
@@ -26,6 +25,7 @@ from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msvp_common import is_number
 from msmodel.interface.base_model import BaseModel
+from typing import Callable
 
 
 class Utils:
@@ -253,3 +253,19 @@ class Utils:
             return 0
         rank = (len(data_list) - 1) * percent
         return data_list[key(rank)]
+
+    @classmethod
+    def filter_data_by_start_time_condition(cls: any, data_list: list, start_time: str, data_time_fetcher: Callable) -> list:
+        """
+        filter data by start time
+        param data_time_fetcher: return (task_start_time, task_end_time)
+        """
+        filtered_data = [0] * len(data_list)
+        _index = 0
+        for item in data_list:
+            task_start, task_end = data_time_fetcher(item)
+            if task_start > start_time or task_start < start_time < task_end:
+                filtered_data[_index] = item
+                _index += 1
+        filtered_data = filtered_data[:_index]
+        return filtered_data

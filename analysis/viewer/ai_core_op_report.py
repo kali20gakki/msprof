@@ -17,7 +17,6 @@
 import logging
 import os
 from collections import deque
-
 from common_func.constant import Constant
 from common_func.data_manager import DataManager
 from common_func.db_manager import DBManager
@@ -25,7 +24,7 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
-from common_func.msvp_common import add_aicore_units
+from common_func.msvp_common import add_aicore_units, float_calculate
 from common_func.msvp_common import format_high_precision_for_csv
 from common_func.msvp_common import read_cpu_cfg
 from common_func.msvp_constant import MsvpConstant
@@ -214,9 +213,14 @@ class AiCoreOpReport:
         task_data = cls._format_summary_data(*format_pmu_data_by_headers(headers, data))
         start_ts, _ = InfoConfReader().get_collect_time()
         task_start_index = headers.index(cls.TASK_START_TIME)
+        task_duration_index = headers.index(cls.TASK_DURATION)
         logging.info("There are %d records before op_summary data filtering, timestamp is %s.",
                      len(task_data), start_ts)
-        filtered_data = [item for item in task_data if item[task_start_index] > start_ts]
+        filtered_data = Utils.filter_data_by_start_time_condition(task_data, start_ts,
+            lambda d: (d[task_start_index], float_calculate([d[task_start_index], d[task_duration_index]])))
+        ## reset first wait time zero
+        if 0 < len(filtered_data) != len(task_data):
+            filtered_data[0][headers.index(cls.TASK_WAIT_TIME)] = 0
         logging.info("There are %d records after op_summary data filtering.", len(filtered_data))
         add_aicore_units(headers)
         return headers, filtered_data, len(filtered_data)

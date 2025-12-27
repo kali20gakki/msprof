@@ -22,8 +22,9 @@ from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
-from common_func.msvp_common import format_high_precision_for_csv
+from common_func.msvp_common import format_high_precision_for_csv, float_calculate
 from common_func.ms_constant.number_constant import NumberConstant
+from common_func.utils import Utils
 from profiling_bean.db_dto.ge_task_dto import GeTaskDto
 from viewer.memory_copy.memory_copy_viewer import MemoryCopyViewer
 from viewer.task_time_viewer import TaskTimeViewer
@@ -57,8 +58,10 @@ class TaskOpViewer:
             return headers, [], 0
         start_ts, _ = InfoConfReader().get_collect_time()
         task_start_index = 5
+        task_duration_index = 4
         logging.info("There are %d records before task_time data filtering, timestamp is %s", len(data), start_ts)
-        filtered_data = [item for item in data if item[task_start_index] > start_ts]
+        filtered_data = Utils.filter_data_by_start_time_condition(data, start_ts,
+            lambda d: (d[task_start_index], float_calculate([d[task_start_index], d[task_duration_index]])))
         logging.info("There are %d records after task_time data filtering.", len(filtered_data))
         data = TaskOpViewer._add_memcpy_data(message.get("result_dir"), filtered_data)
         return headers, data, len(data)

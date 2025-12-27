@@ -40,8 +40,8 @@ class TestTaskOpViewer(unittest.TestCase):
 
     def test_get_task_op_summary_should_match_2aicore_and_1memcpy(self):
         task_data_summary = [
-            ('trans_TransData_0', 'AI_CORE', 148, 3, '"7.62"', '155149754006240', '155149754013860'),
-            ('trans_TransData_2', 'AI_CORE', 148, 6, '"2.01"', '155151161417390', '155151161419400'),
+            ('trans_TransData_0', 'AI_CORE', 148, 3, '7.62', '155149754006240', '155149754013860'),
+            ('trans_TransData_2', 'AI_CORE', 148, 6, '2.01', '155151161417390', '155151161419400'),
         ]
 
         expect_headers = [
@@ -49,8 +49,8 @@ class TestTaskOpViewer(unittest.TestCase):
             "task_time(us)", "task_start(us)", "task_stop(us)",
         ]
         expect_data = [
-            ('trans_TransData_0', 'AI_CORE', 148, 3, '"7.62"', '155149754006240', '155149754013860'),
-            ('trans_TransData_2', 'AI_CORE', 148, 6, '"2.01"', '155151161417390', '155151161419400'),
+            ('trans_TransData_0', 'AI_CORE', 148, 3, '7.62', '155149754006240', '155149754013860'),
+            ('trans_TransData_2', 'AI_CORE', 148, 6, '2.01', '155151161417390', '155151161419400'),
             ("MemcopyAsync", "other", 11, 12, "100", "2200", "2300"),
         ]
         InfoConfReader()._start_info = {"collectionTimeBegin": '155149754000000'}
