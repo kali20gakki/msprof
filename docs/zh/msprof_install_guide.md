@@ -39,15 +39,15 @@
        bash scripts/download_thirdparty.sh
        # 编译采集包
        bash build/build.sh --mode=collector --version=[<version>]
-     ```
-     
-     编译命令支持通过--mode参数，分别编译包含msProf采集和解析功能的软件包或仅包含msProf采集功能以及仅包含msProf解析功能的软件包，更多编译参数详细介绍请参见[编译run包参数说明](#编译run包参数说明)。
-     
-     编译完成后，会在msprof/output目录下生成msProf工具的run包，run包名称格式为`Ascend-mindstudio-msprof_<version>_linux-<arch>.run`。
+      ```
    
-     上述编译命令中的version参数即为软包名称中的version，表示该run包的版本号，默认为“none”。
+   编译命令支持通过--mode参数，分别编译包含msProf采集和解析功能的软件包或仅包含msProf采集功能以及仅包含msProf解析功能的软件包，更多编译参数详细介绍请参见[编译run包参数说明](#编译run包参数说明)。
    
-     run包中的arch表示系统架构，根据实际运行系统自动适配。
+   编译完成后，会在msprof/output目录下生成msProf工具的run包，run包名称格式为`Ascend-mindstudio-msprof_<version>_linux-<arch>.run`。
+   
+   上述编译命令中的version参数即为软件包名称中的version，表示该run包的版本号，默认为“none”。
+   
+   run包中的arch表示系统架构，根据实际运行系统自动适配。
    
 #### 编译解析run包
 
@@ -69,13 +69,13 @@
        # 编译解析包
        bash build/build.sh --mode=analysis --version=[<version>]
       ```
-     编译命令支持通过--mode参数，分别编译包含msProf采集和解析功能的软件包或仅包含msProf采集功能以及仅包含msProf解析功能的软件包，更多编译参数详细介绍请参见[编译run包参数说明](#编译run包参数说明)。
-     
-     编译完成后，会在msprof/output目录下生成msProf工具的run包，run包名称格式为`Ascend-mindstudio-msprof_<version>_linux-<arch>.run`。
+   编译命令支持通过--mode参数，分别编译包含msProf采集和解析功能的软件包或仅包含msProf采集功能以及仅包含msProf解析功能的软件包，更多编译参数详细介绍请参见[编译run包参数说明](#编译run包参数说明)。
    
-     上述编译命令中的version参数即为软包名称中的version，表示该run包的版本号，默认为“none”。
+   编译完成后，会在msprof/output目录下生成msProf工具的run包，run包名称格式为`Ascend-mindstudio-msprof_<version>_linux-<arch>.run`。
    
-     run包中的arch表示系统架构，根据实际运行系统自动适配。
+   上述编译命令中的version参数即为软件包名称中的version，表示该run包的版本号，默认为“none”。
+   
+   run包中的arch表示系统架构，根据实际运行系统自动适配。
 
 ### 安装步骤
 
