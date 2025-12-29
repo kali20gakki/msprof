@@ -86,6 +86,11 @@ function check_path() {
         print "ERROR" "The path ${path_str} is invalid, only [a-z,A-Z,0-9,-,_] is support!"
         exit 1
     fi
+    # check the existence of the path
+    if [ ! -e "${path_str}" ]; then
+        print "ERROR" "The path ${path_str} does not exist, please check."
+        exit 1
+    fi
 }
 
 function check_cann_path() {
