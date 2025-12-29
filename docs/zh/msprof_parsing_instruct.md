@@ -21,7 +21,7 @@ msprof命令行工具是通过msprof.py封装的，支持性能数据的通用�
 
     Ascend EP场景下msprof工具路径为：`${INSTALL_DIR}/tools/profiler/bin`，$\{INSTALL\_DIR\}请替换为CANN软件安装后文件存储路径。若安装的Toolkit软件包，以root安装举例，则安装后文件存储路径为：/usr/local/Ascend/cann。
 
-    Ascend RC场景下msprof工具路径为：/var
+    Ascend RC场景下msprof工具路径为：/var。
 
 2.  设置Python相关环境变量。
 
