@@ -321,18 +321,16 @@ void CANNTraceDBDumper::AddTaskInfoForOnlyTaskTrack(const std::shared_ptr<HostTa
 
     std::string taskType;
     std::string opType;
-    std::string opName;
     std::string kernelName = HashData::GetInstance().Get(task->kernelName);
+    std::string opName = kernelName;
     // opFlag在level0 或者无补充信息时填NA
     auto opFlag = (isLevel0 || !info.isValid) ? NA : (info.opFlag ? "YES" : "NO");
     if (info.isValid) {
         taskType = isLevel0 ? NA : info.taskType;
         opType = isLevel0 ? NA : info.opType;
-        opName = info.opName;
     } else {
         taskType = isLevel0 ? NA : TransTaskTypeFromRtsToGe(task->taskType);
         opType = isLevel0 ? NA : kernelName;
-        opName = kernelName;
     }
     if (isLevel0) {
         data.emplace_back(info.modelId, opName, task->streamId, task->taskId, 0, 0, NA,

@@ -650,14 +650,13 @@ class TaskGear(CANNGear):
         if rts_trk.kernel_name == Constant.NA and not op_info.is_valid:
             return
 
+        op_name = rts_trk.kernel_name
         if op_info.is_valid:
             task_type = Constant.NA if is_level0 else op_info.task_type
             op_type = Constant.NA if is_level0 else op_info.op_type
-            op_name = op_info.op_name
         else:
             task_type = Constant.NA if is_level0 else self.RTS_TASK_TYPE_MAP.get(rts_trk.task_type, rts_trk.task_type)
             op_type = Constant.NA if is_level0 else rts_trk.kernel_name
-            op_name = rts_trk.kernel_name
 
         request_id = -1
         context_id = 0 if (task_type in [GeTaskType.MIX_AIC.name, GeTaskType.MIX_AIV.name] and
