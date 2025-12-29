@@ -21,7 +21,7 @@ msprof命令行工具是通过msprof.py封装的，支持性能数据的通用�
 
     Ascend EP场景下msprof工具路径为：`${INSTALL_DIR}/tools/profiler/bin`，$\{INSTALL\_DIR\}请替换为CANN软件安装后文件存储路径。若安装的Toolkit软件包，以root安装举例，则安装后文件存储路径为：/usr/local/Ascend/cann。
 
-    Ascend RC场景下msprof工具路径为：/var
+    Ascend RC场景下msprof工具路径为：/var。
 
 2.  设置Python相关环境变量。
 
@@ -35,9 +35,9 @@ msprof命令行工具是通过msprof.py封装的，支持性能数据的通用�
 
 >![](public_sys-resources/icon-note.gif) **说明：** 
 >上述环境变量只在当前窗口生效，用户可以将上述命令写入\~/.bashrc文件，使其永久生效，操作如下：
->1.  以安装用户在任意目录下执行**vi \~/.bashrc**，在该文件最后添加上述内容。
->2.  执行**:wq!**命令保存文件并退出。
->3.  执行**source \~/.bashrc**使环境变量生效。
+>1.  以安装用户在任意目录下执行`vi \~/.bashrc`，在该文件最后添加上述内容。
+>2.  执行`:wq!`命令保存文件并退出。
+>3.  执行`source \~/.bashrc`使环境变量生效。
 
 **约束**
 
