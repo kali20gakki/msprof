@@ -27,7 +27,7 @@
 \*表示\{timestamp\}时间戳。
 
 -   mindstudio\_profiler\_output目录保存Host和各个Device的性能数据汇总（性能数据分析推荐查看该目录下文件），目录下的结果文件命名格式为：“模块名\_\{timestamp\}.\{json/csv\}”。
--   device\__\{id\}_目录主要保存各个Device运行昇腾AI应用的性能原始数据和昇腾AI处理器系统原始数据。
+-   device_{id}目录主要保存各个Device运行昇腾AI应用的性能原始数据和昇腾AI处理器系统原始数据。
 -   host目录主要保存上层应用接口（msproftx）的昇腾AI应用运行性能原始数据和Host系统原始数据。
 
 >![](public_sys-resources/icon-note.gif) **说明：** 
@@ -68,8 +68,8 @@ msprof\_\*.db为汇总整体性能数据的文件，mindstudio\_profiler\_output
 
 **summary文件说明<a name="zh-cn_topic_0000001798537961_section19411141014571"></a>**
 
--   生成的summary数据文件使用Excel打开时，可能会出现字段值为科学计数的情况，例如“1.00159E+12“。此时可选中该单元格，然后“右键\>设置单元格格式“，在弹出的对话框中“数字“标签下选择“数值“，单击“确定“就能正常显示。
--   生成的summary数据文件中某些字段值为“N/A“时，表示此时该值不存在。
+-   生成的summary数据文件使用Excel打开时，可能会出现字段值为科学计数的情况，例如“1.00159E+12”。此时可选中该单元格，然后“右键\>设置单元格格式”，在弹出的对话框中“数字”标签下选择“数值”，单击“确定”就能正常显示。
+-   生成的summary数据文件中某些字段值为“N/A”时，表示此时该值不存在。
 
 
 ## msprof导出db格式数据说明<a name="ZH-CN_TOPIC_0000002509503205"></a>
@@ -1127,7 +1127,7 @@ rankId和deviceId的映射关系数据。
 
 timeline数据总表文件为msprof\_\*.json。
 
-msprof\_\*.json在“chrome://tracing“中展示如下。
+msprof\_\*.json在“chrome://tracing”中展示如下。
 
 **图 1**  timeline汇总展示<a name="zh-cn_topic_0000001751419248_fig10608132131617"></a>  
 ![](figures/timeline汇总展示.png "timeline汇总展示")
@@ -1146,7 +1146,7 @@ msprof\_\*.json在“chrome://tracing“中展示如下。
 
 **查看算子下发方向<a name="zh-cn_topic_0000001751419248_section174114535213"></a>**
 
-在tracing中查看.json文件时，开启“Flow events“下的选项后，应用层算子到NPU算子之间通过连线方式展示下发到执行的对应关系。如[图2](#zh-cn_topic_0000001751419248_fig490591821019)所示。
+在tracing中查看.json文件时，开启“Flow events”下的选项后，应用层算子到NPU算子之间通过连线方式展示下发到执行的对应关系。如[图2](#zh-cn_topic_0000001751419248_fig490591821019)所示。
 
 主要包括的对应关系有：
 
@@ -1798,7 +1798,7 @@ Task Duration字段为算子耗时信息，可以按照Task Duration排序，找
 >-   Atlas A3 训练系列产品/Atlas A3 推理系列产品：MatMul算子的输入a、b矩阵满足：内轴大于1000，MAC理论计算耗时大于50us，内轴大小非516B对齐时，MatMul会转化为MIX算子，此时op\_summary.csv中的MatMul算子数量减少且Task Type由原来的AI\_Core转变为MIX\_AIC。
 >-   对于部分算子，执行时间过长，导致metric相关数据失准，不再具有参考意义，此类数据统一置为N/A，不做相关呈现。
 >-   由于Task Type为communication类型的算子通常包含一系列通信任务，每个通信任务均有独立的Task ID和Stream ID等标识，此处不作展示，因此该类算子的Task ID和Stream ID为N/A。
->-   算子的输入维度Input Shapes取值为空，即表示为“; ; ; ;“格式时，表示当前输入的为标量，其中“;”为每个维度的分隔符。算子的输出维度同理。
+>-   算子的输入维度Input Shapes取值为空，即表示为“; ; ; ;”格式时，表示当前输入的为标量，其中“;”为每个维度的分隔符。算子的输出维度同理。
 >-   工具会检测算子溢出情况，若发现算子溢出，则提示如下告警，此时该算子的计算结果不可信。
 >    **图 2**  算子溢出告警<a name="zh-cn_topic_0000001686107246_fig144168454163"></a>  
 >    ![](figures/算子溢出告警.png "算子溢出告警")
