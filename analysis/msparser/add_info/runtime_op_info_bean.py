@@ -27,8 +27,9 @@ class RuntimeOpInfoBean(AddInfoBean):
         self._block_dim = data[11]
         self._node_id = data[12]
         self._op_type = data[13]
-        self._op_flag = data[14]
-        self._tensor_num = data[15]
+        # reserve * 2
+        self._op_flag = data[16]
+        self._tensor_num = data[17]
 
     @property
     def model_id(self: any) -> int:
@@ -120,7 +121,7 @@ class RuntimeOpInfo256Bean(RuntimeOpInfoBean, GeTensorBaseBean):
     Runtime Op Info Bean (length 256)
     """
     TENSOR_LEN = 11
-    TENSOR_PER_LEN = 16
+    TENSOR_PER_LEN = 18
 
     def __init__(self: any, *args) -> None:
         RuntimeOpInfoBean.__init__(self, *args)

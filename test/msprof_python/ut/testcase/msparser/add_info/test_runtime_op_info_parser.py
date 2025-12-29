@@ -53,10 +53,10 @@ class TestRuntimeOpInfoParser(unittest.TestCase):
             check.save()
 
     def test_parse_for_256_data(self):
-        info = (23130, 10000, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 2,
+        info = (23130, 10000, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 0, 0, 14, 2,
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # input
                 1, 88, 2, 3, 4, 5, 0, 0, 0, 0, 0, # output
-                *(0,) * 24)
+                *(0,) * 20)
         struct_data = struct.pack(StructFmt.BYTE_ORDER_CHAR + StructFmt.RUNTIME_OP_INFO_256_FMT, *info)
         with mock.patch(NAMESPACE + '.RuntimeOpInfoParser.parse_bean_data',
                         return_value=[RuntimeOpInfo256Bean.decode(struct_data)]):
@@ -78,7 +78,7 @@ class TestRuntimeOpInfoParser(unittest.TestCase):
 
     def test_read_data_with_variable_length_data_when_data_is_valid_then_success(self):
         tensor_num = 7
-        info = (23130, 10000, 2, 3, 356, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, tensor_num,
+        info = (23130, 10000, 2, 3, 372, 5, 6, 7, 8, 9, 10, 11, 12, 13, 0, 0, 14, tensor_num,
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # input
                 1, 88, 2, 3, 4, 5, 0, 0, 0, 0, 0,  # output
                 0, 1, 2, 3, 4, 5, 6, 7, 0, 0, 0,  # input
@@ -105,7 +105,7 @@ class TestRuntimeOpInfoParser(unittest.TestCase):
 
     def test_read_data_with_variable_length_data_when_tensor_num_is_invalid_then_failed(self):
         tensor_num = 7
-        info = (23130, 10000, 2, 3, 356, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 5,
+        info = (23130, 10000, 2, 3, 372, 5, 6, 7, 8, 9, 10, 11, 12, 13, 0, 0, 14, 5,
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # input
                 1, 88, 2, 3, 4, 5, 0, 0, 0, 0, 0,  # output
                 0, 1, 2, 3, 4, 5, 6, 7, 0, 0, 0,  # input
