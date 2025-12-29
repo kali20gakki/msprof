@@ -23,9 +23,6 @@ MindStudio Profiler（msProf，模型调优工具）提供了AI任务运行性�
 └── README.md                 // 整体仓说明文档
 
 ```
-## 版本说明
-
-msProf的版本说明包含msProf的软件版本配套关系和软件包下载以及每个版本的特性变更说明，详情请参见《[版本说明](docs/zh/release_notes.md)》。
 
 ## 环境部署
 
