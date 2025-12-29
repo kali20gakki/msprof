@@ -102,7 +102,7 @@
     安装完成后，若显示如下信息，则说明软件安装成功。
 
     ```text
-    MindStudio-Profiler package install success.
+    mindStudio-msprof package install success.
     ```
 
 ## 附录
