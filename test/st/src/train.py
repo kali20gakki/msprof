@@ -13,30 +13,38 @@
 # MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
 # See the Mulan PSL v2 for more details.
 # -------------------------------------------------------------------------
+import argparse
 import torch
-import torch_npu
+import torch_npu  # for NPU support
 
-torch.npu.set_device("npu:0")
-
-
-def run_matmul():
-    aic_t1 = torch.rand((128, 128), requires_grad=False).npu()
-    aic_t2 = torch.rand((128, 128), requires_grad=False).npu()
-    for i in range(5):
-        torch.matmul(aic_t1, aic_t2)
+from src.model import ResNet50
 
 
-def run():
-    print(f"start")
-    for _ in range(1):
-        run_matmul()
-    print(f"end")
+def resnet50_train():
+    trainer = ResNet50(num_classes=10)
+    fake_images = torch.randn(80, 3, 224, 224)
+    fake_labels = torch.randint(0, 10, (80,))
+    dataset = torch.utils.data.TensorDataset(fake_images, fake_labels)
+    loader = torch.utils.data.DataLoader(dataset, batch_size=8, shuffle=True)
+    trainer.train(loader, epochs=2, lr=1e-3, freeze_backbone=True)
 
 
-def main():
-    for i in range(3):
-        run()
+# Map function names to actual functions
+TRAIN_FUNCS = {
+    "resnet50": resnet50_train,
+}
 
 
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Train different models.")
+    parser.add_argument(
+        "--model",
+        type=str,
+        default="resnet50",
+        choices=TRAIN_FUNCS.keys(),
+        help="Model to train (default: resnet50)"
+    )
+    args = parser.parse_args()
+
+    print(f"[INFO] Starting training for model: {args.model}")
+    TRAIN_FUNCS[args.model]()

@@ -35,7 +35,7 @@ python3 get_msprof_info.py -dir <dir> [-help]
 
 |参数|可选/必选|说明|
 |--|--|--|
-|-dir或--collection-dir|必选|收集到的Profiling数据目录。非集群场景须指定为PROF_XXX目录下的host或device*_{id}*目录；集群场景须指定为PROF*_*XXX目录的父目录。|
+|-dir或--collection-dir|必选|收集到的Profiling数据目录。非集群场景须指定为PROF\_XXX目录下的host或device\_{id}目录；集群场景须指定为PROF\_XXX目录的父目录。|
 |-h或--help|可选|显示帮助信息，仅在获取使用方式时使用。|
 
 **使用示例<a name="zh-cn_topic_0000001276273570_section20415205113454"></a>**
@@ -60,7 +60,7 @@ python3 get_msprof_info.py -dir <dir> [-help]
 
 |参数|**可选/必选**| 说明                                                                                  |
 |--|--|-------------------------------------------------------------------------------------|
-|-dir或--collection-dir|必选| 收集到的Profiling数据目录。非集群场景须指定为PROF_XXX目录下的host或device_{id}目录；集群场景须指定为PROF*_*XXX目录的父目录。 |
+|-dir或--collection-dir|必选| 收集到的Profiling数据目录。非集群场景须指定为PROF\_XXX目录下的host或device\_{id}目录；集群场景须指定为PROF\_XXX目录的父目录。 |
 |-h或--help|可选| 显示帮助信息，仅在获取使用方式时使用。                                                                 |
 
 **输出说明<a name="zh-cn_topic_0000001276273570_section1320820550911"></a>**
@@ -223,8 +223,8 @@ python3 msprof.py import -dir <dir>
 |参数|**可选/必选**|说明|
 |--|--|--|
 |import|必选|通过import方式解析性能数据。使用import方式解析性能数据时，即使原始性能数据目录中已经生成.db文件，该方式会重新生成.db文件。|
-|--cluster|集群场景时必选|解析集群场景的性能数据并进行汇总。仅配置import参数时支持。<br>**-dir**参数需指定PROF_XXX目录的父目录，指定后的解析结果在PROF_XXX目录同级目录下生成sqlite目录。|
-|-dir或--collection-dir|必选|收集到的性能数据目录。须指定为PROF*_*XXX目录或PROF*_*XXX目录的父目录，例如：*/home/profiler_data/PROF_XXX*。|
+|--cluster|集群场景时必选|解析集群场景的性能数据并进行汇总。仅配置import参数时支持。<br>**-dir**参数需指定PROF\_XXX目录的父目录，指定后的解析结果在PROF_XXX目录同级目录下生成sqlite目录。|
+|-dir或--collection-dir|必选|收集到的性能数据目录。须指定为PROF\_XXX目录或PROF\_XXX目录的父目录，例如：*/home/profiler_data/PROF_XXX*。|
 |-h或--help|可选|显示帮助信息，仅在获取使用方式时使用。|
 
 
@@ -281,7 +281,7 @@ python3 msprof.py query -dir <dir>
 
 |参数|**可选/必选**|说明|
 |--|--|--|
-|-dir或--collection-dir|必选|收集到的性能数据目录。须指定为PROF_XXX目录或PROF*_*XXX目录的父目录，例如：/home/profiler_data/PROF_XXX|
+|-dir或--collection-dir|必选|收集到的性能数据目录。须指定为PROF\_XXX目录或PROF\_XXX目录的父目录，例如：/home/profiler_data/PROF_XXX|
 |--data-type|可选|数据类型。用于MindStudio对接，用户无需配置。取值为：<br/>&#8226; 0：集群场景，可查询当前数据是否为集群场景采集的数据。<br/>&#8226; 1：迭代轨迹数据，每轮迭代的详细数据，包括FP/BP计算时间、迭代更新拖尾和迭代间隙。<br/>&#8226; 2：计算量，AI Core上的浮点运算数。<br/>&#8226; 3：数据准备，训练数据发送至Device以及Device侧读取训练数据。<br/>&#8226; 4：并行度调优建议。<br/>&#8226; 5：并行度数据，主要展示纯通信耗时和计算耗时。<br/>&#8226; 6：通信慢卡慢链路数据及优化建议。<br/>&#8226; 7：通信矩阵数据及优化建议。<br/>&#8226; 8：Host侧系统及进程的CPU、内存的性能指标。<br/>&#8226; 9：通信耗时使能关键路径分析。<br/>&#8226; 10：通信矩阵使能关键路径分析。|
 |--id|可选|集群场景时指定集群节点的Rank ID，非集群场景指定设备ID。用于MindStudio对接，用户无需配置。|
 |--model-id|可选|模型ID。<br/>用于MindStudio对接，用户无需配置。|
@@ -370,7 +370,7 @@ msprof工具的查询功能获取到的信息如[表2](#zh-cn_topic_000000131270
 
 |参数|**可选/必选**|说明|
 |--|--|--|
-|-dir或--collection-dir|必选|收集到的性能数据目录。须指定为PROF_XXX目录或PROF*_*XXX目录的父目录，例如：/home/HwHiAiUser/profiler_data/PROF_XXX。|
+|-dir或--collection-dir|必选|收集到的性能数据目录。须指定为PROF\_XXX目录或PROF\_XXX目录的父目录，例如：/home/HwHiAiUser/profiler_data/PROF_XXX。|
 |-reports|可选|传入用户自定义的reports_sample_config.json配置文件，会根据配置文件中指定的范围导出相应的性能数据文件。参数实现与msprof --reports一致，详细介绍请参见[使用示例（--reports参数）](msprof_parsing_instruct.md#zh-cn_topic_0000001265229686_section1128153151819)。|
 |--iteration-id|可选|迭代ID。需配置为正整数。默认值为1。与--model-id必须同时配置。<br>&#8226; 对于Atlas A2 训练系列产品/Atlas A2 推理系列产品，支持--model-id 4294967295，表示指定以Step为粒度统计的迭代ID（每执行完成一个Step，Iteration ID加1）。仅支持解析MindSpore（版本号大于等于2.3）框架的性能数据。<br/>&#8226; 对于Atlas A3 训练系列产品/Atlas A3 推理系列产品，支持--model-id 4294967295，表示指定以Step为粒度统计的迭代ID（每执行完成一个Step，Iteration ID加1）。仅支持解析MindSpore（版本号大于等于2.3）框架的性能数据。<br/>&#8226; --model-id配置为其他值时，指定以Graph为粒度统计的迭代ID（每个Graph执行一次，Iteration ID加1，当一个脚本被编译为多个Graph时，该ID与脚本层面的Step ID不一致）。|
 |--model-id|可选|模型ID。需配置为正整数。与--iteration-id必须同时配置，--iteration-id未配置且不配置--model-id时，默认导出所有模型ID对应的数据。<br/>&#8226; 对于Atlas A2 训练系列产品/Atlas A2 推理系列产品，支持--model-id 4294967295，为Step模式，即--iteration-id配置的值以Step为粒度解析。仅支持解析MindSpore（版本号大于等于2.3）框架的性能数据。<br/>&#8226; 对于Atlas A3 训练系列产品/Atlas A3 推理系列产品，支持--model-id 4294967295，为Step模式，即--iteration-id配置的值以Step为粒度解析。仅支持解析MindSpore（版本号大于等于2.3）框架的性能数据。<br/>&#8226; --model-id配置为其他值时，为Graph模式，即--iteration-id配置的值以Graph为粒度解析。|

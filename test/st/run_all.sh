@@ -7,13 +7,12 @@ WHITE='\e[0;37m'
 NC='\e[0m'
 
 RUN_ALL_PATH="$(readlink -f "$0")"
-PYTHON_PATH=${RUN_ALL_PATH}/../
-export PYTHONPATH=$PYTHONPATH:${PYTHON_PATH}
-result_file=${RUN_ALL_PATH}/run_all_result.txt
-output_path=${RUN_ALL_PATH}
+PARENT_RUN_ALL_PATH="$(dirname "$RUN_ALL_PATH")"
+export PYTHONPATH=$PYTHONPATH:${PARENT_RUN_ALL_PATH}
+result_file=${PARENT_RUN_ALL_PATH}/run_all_result.txt
+output_path=${PARENT_RUN_ALL_PATH}
 
 rm -rf $output_path
-
 
 test_list=`ls |grep ".sh" | grep -E "test_ascend_msprof"`
 num_of_cases=$(echo "$test_list" | wc -l)

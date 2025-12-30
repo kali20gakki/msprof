@@ -27,7 +27,7 @@ logging.basicConfig(level=logging.INFO,
                     format='\n%(asctime)s %(filename)s [line:%(lineno)d] [%(levelname)s] %(message)s')
 
 
-def test_ascend_msprof_task_time_l1(prof_path):
+def test_ascend_msprof_aic_mode_sample_based_read_memory(prof_path):
     # 1. Verify the prof data result of the text type
     _check_text_files(prof_path)
     # 2. Verify the prof data result of the db type
