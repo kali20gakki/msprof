@@ -64,6 +64,11 @@ function log_init() {
 
 function check_path() {
     local path_str=${1}
+    # check the existence of the path
+    if [ ! -e "${path_str}" ]; then
+        print "ERROR" "The path ${path_str} does not exist, please check."
+        exit 1
+    fi
     # check the length of path
     if [ ${#path_str} -gt ${PATH_LENGTH} ]; then
         print "ERROR" "parameter error $path_str, the length exceeds ${PATH_LENGTH}."
