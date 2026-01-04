@@ -64,7 +64,7 @@ function create_collector_temp_dir() {
     cp ${runtime_dir}/runtime/include/external/acl/acl_prof.h ${temp_dir}
     cp ${runtime_dir}/runtime/include/external/ge/ge_prof.h ${temp_dir}
     # 2. oam_tools
-    cp ${oam_tools_dir}/oam_tools/msprof/bin/msprof ${temp_dir}
+    cp ${oam_tools_dir}/oam_tools/profiler/bin/msprof ${temp_dir}
 }
 
 function create_analysis_temp_dir() {
@@ -78,8 +78,8 @@ function create_analysis_temp_dir() {
 # create temp dir for product
 function create_temp_dir() {
     local temp_dir=${1}
-    local runtime_dir=${TOP_DIR}/build/collector/runtime-dev/build_out/runtime_decompress/
-    local oam_tools_dir=${TOP_DIR}/build/collector/oam-tools-dev/build_out/oam_tools_decompress/
+    local runtime_dir=${TOP_DIR}/build/collector/runtime/build_out/runtime_decompress
+    local oam_tools_dir=${TOP_DIR}/build/collector/oam-tools/build_out/oam_tools_decompress
 
     case "$BUILD_MODE" in
         "all")

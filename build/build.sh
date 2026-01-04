@@ -50,8 +50,8 @@ fi
 
 function build_runtime() {
     cd ${TOP_DIR}/build/collector
-    git clone https://gitcode.com/cann/runtime-dev.git
-    cd runtime-dev
+    git clone https://gitcode.com/cann/runtime.git
+    cd runtime
     echo "build runtime start."
     bash build.sh
     cd build_out/
@@ -64,8 +64,8 @@ function build_runtime() {
 
 function build_oam_tools() {
     cd ${TOP_DIR}/build/collector
-    git clone https://gitcode.com/cann/oam-tools-dev.git
-    cd oam-tools-dev
+    git clone https://gitcode.com/cann/oam-tools.git
+    cd oam-tools
     sed -i '25s#set(ASCEND_CANN_PACKAGE_PATH .*)#set(ASCEND_CANN_PACKAGE_PATH '${TOP_DIR}'/build/collector/runtime_install/cann/)#' CMakeLists.txt
     echo "build oam-tools start."
     bash build.sh
