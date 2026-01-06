@@ -38,7 +38,7 @@
        # 下载三方依赖包
        bash scripts/download_thirdparty.sh
        # 编译采集包
-       bash build/build.sh --mode=collector --version=[<version>]
+       bash build/build.sh --mode=collector --version=<version>
       ```
    
    编译命令支持通过--mode参数，分别编译包含msProf采集和解析功能的软件包或仅包含msProf采集功能以及仅包含msProf解析功能的软件包，更多编译参数详细介绍请参见[编译run包参数说明](#编译run包参数说明)。
@@ -50,8 +50,6 @@
    run包中的arch表示系统架构，根据实际运行系统自动适配。
    
 #### 编译解析run包
-
-解析run包包含msProf的采集功能，采集的是原始性能数据（不可直接查看，需通过msProf解析工具解析出交付件查看）。
 
 1. 下载源码。
     ```shell
@@ -67,7 +65,7 @@
        # 下载三方依赖包
        bash scripts/download_thirdparty.sh
        # 编译解析包
-       bash build/build.sh --mode=analysis --version=[<version>]
+       bash build/build.sh --mode=analysis --version=<version>
       ```
    编译命令支持通过--mode参数，分别编译包含msProf采集和解析功能的软件包或仅包含msProf采集功能以及仅包含msProf解析功能的软件包，更多编译参数详细介绍请参见[编译run包参数说明](#编译run包参数说明)。
    

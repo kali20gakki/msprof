@@ -1504,7 +1504,7 @@ api\_statistic\_\*.csv文件内容格式示例如下：
 **图 2**  api\_statistic\_\*.csv<a name="zh-cn_topic_0000001656264690_fig881322061712"></a>  
 ![](figures/api_statistic_-csv.png "api_statistic_-csv")
 
-上图根据Time列进行降序排列，找出耗时最长的TopN算子；也可以根据最大、最小、平均耗时、方差等信息判断该算子运行是否稳定或者是否存在某次调用耗时较长的情况。
+上图根据Time列进行降序排列，找出耗时最长的TopN算子；也可以根据最大、最小、平均耗时、方差等信息判断该算子运行是否稳定或者是否存在某次调用耗时较长的情况。例如方差数值越小，则代表算子运行越稳定；最大最小值越接近平均值且不存在个别数据差异较大的情况，则代表算子运行越稳定。
 
 **表 2**  字段说明
 
@@ -1524,7 +1524,7 @@ api\_statistic\_\*.csv文件内容格式示例如下：
 
 ## step\_trace（迭代轨迹信息）<a name="ZH-CN_TOPIC_0000002477463224"></a>
 
-迭代轨迹数据timeline信息在step\_trace\_\*.json文件展示，summary信息在step\_trace\_\*.csv文件汇总，用于判断耗时长的迭代。
+迭代轨迹数据timeline信息在step\_trace\_\*.json文件展示，summary信息在step\_trace\_\*.csv文件汇总，用于判断并找出耗时较长的迭代。
 
 单算子场景（如PyTorch场景）下无此性能数据文件。
 
