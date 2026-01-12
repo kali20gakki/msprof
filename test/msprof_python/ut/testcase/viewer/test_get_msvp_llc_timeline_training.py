@@ -279,7 +279,6 @@ class TestLLCTimelineTrain(unittest.TestCase):
         db_manager = DBManager()
         test_sql = db_manager.create_table("hbm.db")
         db_manager.destroy(test_sql)
-        test_sql = db_manager.create_table("hbm.db")
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=test_sql), \
              mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \
              mock.patch(NAMESPACE + '._reformat_hbm_data', side_effect=OSError):
@@ -288,7 +287,6 @@ class TestLLCTimelineTrain(unittest.TestCase):
 
         test_sql = db_manager.create_table("hbm.db")
         db_manager.destroy(test_sql)
-        test_sql = db_manager.create_table("hbm.db")
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(None, None)), \
              mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True):
             res = get_hbm_timeline(param)
@@ -296,7 +294,6 @@ class TestLLCTimelineTrain(unittest.TestCase):
 
         test_sql = db_manager.create_table("hbm.db")
         db_manager.destroy(test_sql)
-        test_sql = db_manager.create_table("hbm.db")
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=test_sql), \
              mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \
              mock.patch(NAMESPACE + '._reformat_hbm_data', return_value=[]):
@@ -306,12 +303,10 @@ class TestLLCTimelineTrain(unittest.TestCase):
 
         test_sql = db_manager.create_table("hbm.db")
         db_manager.destroy(test_sql)
-        test_sql = db_manager.create_table("hbm.db")
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=test_sql), \
              mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=False):
             res = get_hbm_timeline(param)
         self.assertEqual(len(res), 0)
-        db_manager.destroy(test_sql)
 
     def test_get_hbm_timeline_3(self):
         param['end_time'] = 0

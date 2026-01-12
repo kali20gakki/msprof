@@ -50,13 +50,10 @@ class TestBlockLogModel(TestDirCRBaseModel):
             [2, 24, 2, task_type_ai_core, 1, 128, 3000, 4000, 1000],
             [2, 25, 3, task_type_ai_core, 1, 128, 5000, 6000, 1000],
         ]
-        model = BlockLogModel(self.PROF_DEVICE_DIR, DBNameConstant.DB_SOC_LOG, [DBNameConstant.TABLE_BLOCK_LOG])
-        model.init()
-        model.flush(log_data)
-        model.finalize()
+        with BlockLogModel(self.PROF_DEVICE_DIR, DBNameConstant.DB_SOC_LOG, [DBNameConstant.TABLE_BLOCK_LOG]) as model:
+            model.flush(log_data)
 
         with BlockLogViewModel(self.PROF_DEVICE_DIR, DBNameConstant.DB_SOC_LOG,
                                 [DBNameConstant.TABLE_BLOCK_LOG]) as view_model:
-            view_model.init()
             device_tasks = view_model.get_block_log_data()
             self.assertEqual(len(device_tasks), 3)

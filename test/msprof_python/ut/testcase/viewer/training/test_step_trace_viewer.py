@@ -27,7 +27,7 @@ from constant.constant import ITER_RANGE
 from constant.info_json_construct import DeviceInfo
 from constant.info_json_construct import InfoJson
 from constant.info_json_construct import InfoJsonReaderManager
-from sqlite.db_manager import DBManager
+from sqlite.db_manager import DBManager, DBOpen
 from viewer.training.step_trace_viewer import StepTraceViewer
 
 NAMESPACE = 'viewer.training.step_trace_viewer'
@@ -39,35 +39,21 @@ DB_TRACE = DBNameConstant.DB_TRACE
 TABLE_TRAINING_TRACE = DBNameConstant.TABLE_TRAINING_TRACE
 TABLE_ALL_REDUCE = DBNameConstant.TABLE_ALL_REDUCE
 
+DATA1 = (('127.0.0.1', 4, 1, 65, 144, 1013979616375, 65, 145, 1013981208724,
+          71, 189, 1013981571636, 64, 5, 2955261, 1592349, 362912, 0, 0),)
 
-def create_trace_db():
-    db_manager = DBManager()
-    if os.path.exists(os.path.join(db_manager.db_path, DB_TRACE)):
-        os.remove(os.path.join(db_manager.db_path, DB_TRACE))
+DATA2 = (('127.0.0.1', 4, 1013981571636, 1013980654091, 70, 4, 1013981072280, 70, 103, 0),
+         ('127.0.0.1', 4, 1013981571636, 1013981251417, 72, 6, 1013981476623, 72, 105, 0),)
 
-    data1 = (('127.0.0.1', 4, 1, 65, 144, 1013979616375, 65, 145, 1013981208724,
-              71, 189, 1013981571636, 64, 5, 1955261, 1592349, 362912, 0, 0),)
+TRAINING_TRACE_SQL = "create table if not exists {0} (host_id int, device_id int, iteration_id int, " \
+                     "job_stream int, job_task int, FP_start int, FP_stream int, FP_task int, " \
+                     "BP_end int, BP_stream int, BP_task int, iteration_end int, iter_stream int," \
+                     "iter_task int, iteration_time int, fp_bp_time int, grad_refresh_bound int, " \
+                     "data_aug_bound int default 0, model_id int default 0)".format(TABLE_TRAINING_TRACE)
 
-    data2 = (('127.0.0.1', 4, 1013981571636, 1013980654091, 70, 4, 1013981072280, 70, 103, 0),
-             ('127.0.0.1', 4, 1013981571636, 1013981251417, 72, 6, 1013981476623, 72, 105, 0),)
-
-    sql = "create table if not exists {0} (host_id int, device_id int, iteration_id int, " \
-          "job_stream int, job_task int, FP_start int, FP_stream int, FP_task int, " \
-          "BP_end int, BP_stream int, BP_task int, iteration_end int, iter_stream int," \
-          "iter_task int, iteration_time int, fp_bp_time int, grad_refresh_bound int, " \
-          "data_aug_bound int default 0, model_id int default 0)".format(TABLE_TRAINING_TRACE)
-    insert_sql = "insert into {0} values ({value})".format(TABLE_TRAINING_TRACE, value="?," * (len(data1[0]) - 1) + "?")
-    conn, cur = db_manager.create_table(DB_TRACE, sql, insert_sql, data1)
-    conn.close()
-
-    sql = "create table if not exists {0}(host_id int, device_id int," \
-          "iteration_end int, start int, start_stream int, start_task int," \
-          "end int, end_stream int, end_task int, model_id int default 0)".format(
-        TABLE_ALL_REDUCE)
-    insert_sql = "insert into {0} values ({value})".format(TABLE_ALL_REDUCE, value="?," * (len(data2[0]) - 1) + "?")
-    conn, cur = db_manager.create_table(DB_TRACE, sql, insert_sql, data2)
-
-    return db_manager, conn, cur
+ALL_REDUCE_SQL = "create table if not exists {0}(host_id int, device_id int," \
+                 "iteration_end int, start int, start_stream int, start_task int," \
+                 "end int, end_stream int, end_task int, model_id int default 0)".format(TABLE_ALL_REDUCE)
 
 
 class TestStepTraceViewer(unittest.TestCase):
@@ -75,33 +61,27 @@ class TestStepTraceViewer(unittest.TestCase):
     def test_add_reduce_headers_should_return_headers_with_length_is_1(self):
         test_message = {'job_id': 'job_default', 'device_id': '4'}
         headers = ["Model ID"]
-        db_manager = DBManager()
-        if os.path.exists(os.path.join(db_manager.db_path, DB_TRACE)):
-            os.remove(os.path.join(db_manager.db_path, DB_TRACE))
         sql = "create table if not exists {0}(host_id int, device_id int," \
               "iteration_end int, start int, start_stream int, start_task int," \
               "end int, end_stream int, end_task int, model_id int default 0)".format(
             TABLE_ALL_REDUCE)
-        conn, cur = db_manager.create_table(DB_TRACE, sql)
-
-        StepTraceViewer.add_reduce_headers(conn, headers, test_message)
-        conn.close()
-
-        if os.path.exists(db_manager.db_name):
-            os.remove(db_manager.db_name)
-        self.assertEqual(len(headers), 1)
+        db_name = "test_add_reduce_headers_should_return_headers_with_length_is_1_" + DB_TRACE
+        with DBOpen(db_name) as db_open:
+            db_open.create_table(sql)
+            StepTraceViewer.add_reduce_headers(db_open.db_conn, headers, test_message)
+            self.assertEqual(len(headers), 1)
 
     def test_add_reduce_headers_should_return_headers_with_length_is_5(self):
         test_message = {'job_id': 'job_default', 'device_id': '4'}
         headers = ["Model ID"]
-        db_manager, conn, curs = create_trace_db()
-
-        StepTraceViewer.add_reduce_headers(conn, headers, test_message)
-        conn.close()
-
-        if os.path.exists(db_manager.db_name):
-            os.remove(db_manager.db_name)
-        self.assertEqual(len(headers), 5)
+        db_name = "test_add_reduce_headers_should_return_headers_with_length_is_5_" + DB_TRACE
+        with DBOpen(db_name) as db_open:
+            db_open.create_table(TRAINING_TRACE_SQL)
+            db_open.create_table(ALL_REDUCE_SQL)
+            db_open.insert_data(TABLE_TRAINING_TRACE, DATA1)
+            db_open.insert_data(TABLE_ALL_REDUCE, DATA2)
+            StepTraceViewer.add_reduce_headers(db_open.db_conn, headers, test_message)
+            self.assertEqual(len(headers), 5)
 
     def test_add_reduce_headers_should_return_headers_with_length_is_11(self):
         data = (
@@ -111,17 +91,15 @@ class TestStepTraceViewer(unittest.TestCase):
         )
         test_message = {'job_id': 'job_default', 'device_id': '4'}
         headers = ["Model ID"]
-        db_manager, conn, curs = create_trace_db()
-        insert_sql = "insert into {0} values ({value})".format(
-            TABLE_ALL_REDUCE, value="?," * (len(data[0]) - 1) + "?")
-        db_manager._insert_data(insert_sql, data)
-
-        StepTraceViewer.add_reduce_headers(conn, headers, test_message)
-        conn.close()
-
-        if os.path.exists(db_manager.db_name):
-            os.remove(db_manager.db_name)
-        self.assertEqual(len(headers), 11)
+        db_name = "test_add_reduce_headers_should_return_headers_with_length_is_11_" + DB_TRACE
+        with DBOpen(db_name) as db_open:
+            db_open.create_table(TRAINING_TRACE_SQL)
+            db_open.create_table(ALL_REDUCE_SQL)
+            db_open.insert_data(TABLE_TRAINING_TRACE, DATA1)
+            db_open.insert_data(TABLE_ALL_REDUCE, DATA2)
+            db_open.insert_data(TABLE_ALL_REDUCE, data)
+            StepTraceViewer.add_reduce_headers(db_open.db_conn, headers, test_message)
+            self.assertEqual(len(headers), 11)
 
     def test_get_step_trace_summary(self):
         message1 = {'job_id': 'job_default', 'device_id': '4'}
@@ -133,42 +111,44 @@ class TestStepTraceViewer(unittest.TestCase):
         self.assertEqual(res, ([], [], 0))
 
         message1 = {'job_id': 'job_default', 'device_id': '4', 'project_path': ''}
-        db_manager, conn, curs = create_trace_db()
-        conn.close()
-
-        with mock.patch(NAMESPACE + '.PathManager.get_sql_dir', return_value=db_manager.db_path):
+        db_name = "test_get_step_trace_summary_" + DB_TRACE
+        with DBOpen(db_name) as db_open, \
+                mock.patch(NAMESPACE + '.PathManager.get_sql_dir', return_value=db_open.db_path):
+            db_open.create_table(TRAINING_TRACE_SQL)
+            db_open.create_table(ALL_REDUCE_SQL)
+            db_open.insert_data(TABLE_TRAINING_TRACE, DATA1)
+            db_open.insert_data(TABLE_ALL_REDUCE, DATA2)
             res = StepTraceViewer.get_step_trace_summary(message1)
-
-        if os.path.exists(db_manager.db_name):
-            os.remove(db_manager.db_name)
-        self.assertEqual(res[2], 0)
+            self.assertEqual(res[2], 0)
 
     def test_step_trace_timeline(self):
         message1 = {'job_id': 'job_default', 'device_id': '4', 'project_path': ''}
-        db_manager, conn, curs = create_trace_db()
-        conn.close()
         InfoJsonReaderManager(info_json=InfoJson(devices='0', DeviceInfo=[
             DeviceInfo(hwts_frequency='100').device_info])).process()
-        with mock.patch(NAMESPACE + '.PathManager.get_sql_dir', return_value=db_manager.db_path):
+        db_name = "test_step_trace_timeline_" + DB_TRACE
+        with DBOpen(db_name) as db_open, \
+                mock.patch(NAMESPACE + '.PathManager.get_sql_dir', return_value=db_open.db_path):
+            db_open.create_table(TRAINING_TRACE_SQL)
+            db_open.create_table(ALL_REDUCE_SQL)
+            db_open.insert_data(TABLE_TRAINING_TRACE, DATA1)
+            db_open.insert_data(TABLE_ALL_REDUCE, DATA2)
             res = StepTraceViewer.get_step_trace_timeline(message1)
-
-        if os.path.exists(db_manager.db_name):
-            os.remove(db_manager.db_name)
-        self.assertEqual(len(res), 0)
+            self.assertEqual(len(res), 0)
 
     def test_get_one_iter_timeline_data(self):
-        db_manager, conn, curs = create_trace_db()
-        conn.close()
         InfoJsonReaderManager(info_json=InfoJson(devices='0', DeviceInfo=[
             DeviceInfo(hwts_frequency='100').device_info])).process()
         ProfilingScene().init("")
-        with mock.patch(NAMESPACE + '.PathManager.get_sql_dir', return_value=db_manager.db_path), \
+        db_name = "test_get_one_iter_timeline_data_" + DB_TRACE
+        with DBOpen(db_name) as db_open, \
+                mock.patch(NAMESPACE + '.PathManager.get_sql_dir', return_value=db_open.db_path), \
                 mock.patch('common_func.utils.Utils.get_scene', return_value=Constant.STEP_INFO):
+            db_open.create_table(TRAINING_TRACE_SQL)
+            db_open.create_table(ALL_REDUCE_SQL)
+            db_open.insert_data(TABLE_TRAINING_TRACE, DATA1)
+            db_open.insert_data(TABLE_ALL_REDUCE, DATA2)
             res = StepTraceViewer.get_one_iter_timeline_data("", ITER_RANGE)
-
-        db_manager.conn.close()
-
-        self.assertEqual(len(res), 0)
+            self.assertEqual(len(res), 0)
 
     def test_reformat_step_trace_data(self):
         data_list = [

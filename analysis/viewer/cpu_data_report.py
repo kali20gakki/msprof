@@ -111,13 +111,10 @@ def get_cpu_hot_function(project_path: str, db_name: str, table_name: str, heade
     try:
         if not (conn and curs) or not DBManager.judge_table_exist(curs, table_name):
             return MsvpConstant.MSVP_EMPTY_DATA
+        total_cycles = curs.execute("SELECT SUM(r11) FROM {};".format(table_name)).fetchone()[0]
     except sqlite3.Error:
         return MsvpConstant.MSVP_EMPTY_DATA
     else:
-        try:
-            total_cycles = curs.execute("SELECT SUM(r11) FROM {};".format(table_name)).fetchone()[0]
-        except sqlite3.Error:
-            return MsvpConstant.MSVP_EMPTY_DATA
         if not total_cycles:
             return MsvpConstant.MSVP_EMPTY_DATA
         cpu_hot_func_sql = "SELECT func,module,SUM(r11) AS cycles,CAST(1.0*SUM(r11)*100/? AS decimal(8,{})) " \

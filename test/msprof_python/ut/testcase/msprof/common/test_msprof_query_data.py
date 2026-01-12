@@ -110,6 +110,7 @@ class TestMsprofQueryData(unittest.TestCase):
         self.assertEqual(result, [[1, 1, "N/A"]])
         _db_manager.clear_table("step_trace_data")
         result = msprof_query_data._update_top_iteration_info([(1, 1), ], {1}, res[1])
+        _db_manager.destroy(res)
         self.assertEqual(result, [])
 
     def test_assembly_job_info_1(self):

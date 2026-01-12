@@ -98,6 +98,12 @@ class TestAiCoreSampleModel(unittest.TestCase):
             check = AiCoreSampleModel('test', 'aicore.db', ['EventCount'], 'ai_core_metrics')
             result = check.insert_metric_summary_table(freq, metric_key)
             self.assertEqual(result, None)
+        with mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config', return_value={}),\
+                mock.patch(NAMESPACE + '.AiCoreSampleModel._get_metrics', side_effect=OSError), \
+                mock.patch(NAMESPACE + '.logging.error'), \
+                mock.patch(NAMESPACE + '.error'):
+            check = AiCoreSampleModel('test', 'aicore.db', ['EventCount'], 'ai_core_metrics')
+            check.insert_metric_summary_table(freq, 'ArithmeticUtilization')
         with mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config', return_value={}), \
                 mock.patch(NAMESPACE + '.logging.info'), \
                 mock.patch(NAMESPACE + '.AiCoreSampleModel.sql_insert_metric_summary_table',
@@ -108,12 +114,6 @@ class TestAiCoreSampleModel(unittest.TestCase):
             check.insert_metric_summary_table(freq, 'ArithmeticUtilization')
         res[0].commit()
         db_manager.destroy(res)
-        with mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config', return_value={}),\
-                mock.patch(NAMESPACE + '.AiCoreSampleModel._get_metrics', side_effect=OSError), \
-                mock.patch(NAMESPACE + '.logging.error'), \
-                mock.patch(NAMESPACE + '.error'):
-            check = AiCoreSampleModel('test', 'aicore.db', ['EventCount'], 'ai_core_metrics')
-            check.insert_metric_summary_table(freq, 'ArithmeticUtilization')
 
     def test_insert_metric_value(self):
         metrics_config = OrderedDict([('total_cycles', 'task_cyc'),

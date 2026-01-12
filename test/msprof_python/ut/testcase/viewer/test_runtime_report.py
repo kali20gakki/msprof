@@ -23,7 +23,7 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.memcpy_constant import MemoryCopyConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msvp_constant import MsvpConstant
-from sqlite.db_manager import DBManager
+from sqlite.db_manager import DBManager, DBOpen
 from viewer.runtime_report import _get_output_event_counter
 from viewer.runtime_report import add_memcpy_data
 from viewer.runtime_report import add_op_total
@@ -50,36 +50,29 @@ class TestRuntimeReport(unittest.TestCase):
     def test_get_task_scheduler_data_1(self):
         db_manager = DBManager()
         test_sql = db_manager.create_table("runtime.db")
-        configs = {"headers": "Time(%),Time(us),Count,Avg(us),Min(us),Max(us),"
-                              "Waiting(us),Running(us),Pending(us),Type,API,Task ID,Op Name,Stream ID"}
+        tmp_config = {"headers": "Time(%),Time(us),Count,Avg(us),Min(us),Max(us),"
+                                 "Waiting(us),Running(us),Pending(us),Type,API,Task ID,Op Name,Stream ID"}
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=(None, None)), \
                 mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=False):
-            res = get_task_scheduler_data('', "ReportTask", configs, params)
+            res = get_task_scheduler_data('', "ReportTask", tmp_config, params)
         self.assertEqual(res, ("Time(%),Time(us),Count,Avg(us),Min(us),Max(us),"
-                               "Waiting(us),Running(us),Pending(us),Type,API,Task ID,Op Name,Stream ID",
-                               [],
-                               0))
+                               "Waiting(us),Running(us),Pending(us),Type,API,Task ID,Op Name,Stream ID", [], 0))
+        db_manager.destroy(test_sql)
 
     def test_get_task_scheduler_data_2(self):
         create_sql = "CREATE TABLE IF NOT EXISTS ReportTask" \
                      " (timeratio REAL,time REAL,count INTEGER,avg REAL,min REAL,max REAL,waiting REAL,running REAL," \
                      "pending REAL,type TEXT,api TEXT,task_id INTEGER,stream_id INTEGER,device_id)"
         data = ((0.1, 1, 2, 1, 1, 5, 3, 1, 0.5, "aicore", "a", 0, 0, 0),)
-        db_manager = DBManager()
-        insert_sql = db_manager.insert_sql("ReportTask", data)
-
-        configs = {"headers": "Time(%),Time(us),Count,Avg(us),Min(us),Max(us),"
-                              "Waiting(us),Running(us),Pending(us),Type,API,Task ID,Op Name,Stream ID"}
-
-        test_sql = db_manager.create_table("runtime.db", create_sql, insert_sql, data)
-        with mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=test_sql), \
-                mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \
+        tmp_config = {"headers": "Time(%),Time(us),Count,Avg(us),Min(us),Max(us),"
+                                 "Waiting(us),Running(us),Pending(us),Type,API,Task ID,Op Name,Stream ID"}
+        db_name = "test_get_task_scheduler_data_2_runtime.db"
+        with DBOpen(db_name) as db_open, \
                 mock.patch(NAMESPACE + '.add_memcpy_data', return_value=data):
-            res = get_task_scheduler_data('', "ReportTask", configs, params)
-        test_sql = db_manager.connect_db("runtime.db")
-        (test_sql[1]).execute("drop Table ReportTask")
-        db_manager.destroy(test_sql)
-        self.assertEqual(res[2], 1)
+            db_open.create_table(create_sql)
+            db_open.insert_data("ReportTask", data)
+            res = get_task_scheduler_data(db_open.db_path, "ReportTask", tmp_config, params)
+            self.assertEqual(res[2], 1)
 
     def test_add_memcpy_data(self):
         data = [(50, 10000, 1, 10000, 10000,
@@ -129,20 +122,17 @@ class TestRuntimeReport(unittest.TestCase):
                      "icache_miss_rate, device_id, task_id, stream_id, index_id, model_id)"
         data = ((0.0426514705882353, 58006, 0.019154, 0.449091473295866, 0, 0, 0.000387, 0.00906802744543668, 0, 0,
                  0.010296, 0.241388821846016, 0.019614, 0.459866220735786, 0.0535714285714286, 0, 3, 5, 1, 1),)
-        db_manager = DBManager()
-        insert_sql = db_manager.insert_sql(DBNameConstant.TABLE_METRIC_SUMMARY, data)
-
-        test_sql = db_manager.create_table(DBNameConstant.DB_RUNTIME, create_sql, insert_sql, data)
-        with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=test_sql), \
+        db_name = "test_get_task_based_core_data_2_" + DBNameConstant.DB_RUNTIME
+        with DBOpen(db_name) as db_open, \
                 mock.patch("common_func.config_mgr.ConfigMgr.pre_check_sample", return_value=configs), \
-                mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \
                 mock.patch(NAMESPACE + '.add_op_total', return_value=[]), \
-                mock.patch(NAMESPACE + '.cal_metrics', return_value=[1, 2]):
-            res = get_task_based_core_data('', DBNameConstant.DB_RUNTIME, params)
-        test_sql = db_manager.connect_db(DBNameConstant.DB_RUNTIME)
-        (test_sql[1]).execute("drop Table {}".format(DBNameConstant.TABLE_METRIC_SUMMARY))
-        db_manager.destroy(test_sql)
-        self.assertEqual(res[0], 1)
+                mock.patch(NAMESPACE + '.cal_metrics', return_value=[1, 2]), \
+                mock.patch('common_func.path_manager.PathManager.get_db_path', return_value=db_open.db_path):
+            db_open.create_table(create_sql)
+            db_open.insert_data(DBNameConstant.TABLE_METRIC_SUMMARY, data)
+            project_path = os.path.dirname(os.path.dirname(db_open.db_path))
+            res = get_task_based_core_data(project_path, DBNameConstant.DB_RUNTIME, params)
+            self.assertEqual(res[0], 1)
 
     def test_get_task_based_core_data_3(self):
         params["data_type"] = StrConstant.AI_VECTOR_CORE_PMU_EVENTS
@@ -152,19 +142,18 @@ class TestRuntimeReport(unittest.TestCase):
                      "icache_miss_rate, device_id, task_id, stream_id, index_id, model_id)"
         data = ((0.0426514705882353, 58001, 0.019154, 0.449091473295866, 0, 0, 0.000387, 0.00906802744543668, 0, 0,
                  0.010296, 0.241388821846016, 0.019614, 0.459866220735786, 0.0535714285714286, 0, 3, 5, 1, 1),)
-        db_manager = DBManager()
-        insert_sql = db_manager.insert_sql(DBNameConstant.TABLE_AIV_METRIC_SUMMARY, data)
+        db_name = "test_get_task_based_core_data_3_" + DBNameConstant.DB_RUNTIME
+        with DBOpen(db_name) as db_open, \
+                mock.patch("common_func.config_mgr.ConfigMgr.pre_check_sample", return_value=configs), \
+                mock.patch(NAMESPACE + '._get_output_event_counter', return_value=[1, 2]), \
+                mock.patch('common_func.path_manager.PathManager.get_db_path', return_value=db_open.db_path):
+            db_open.create_table(create_sql)
+            db_open.insert_data(DBNameConstant.TABLE_AIV_METRIC_SUMMARY, data)
+            project_path = os.path.dirname(os.path.dirname(db_open.db_path))
+            res = get_task_based_core_data(project_path, DBNameConstant.DB_RUNTIME, params)
+            self.assertEqual(res[0], 1)
 
-        test_sql = db_manager.create_table(DBNameConstant.DB_RUNTIME, create_sql, insert_sql, data)
-        with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=test_sql), \
-                mock.patch(NAMESPACE + '._get_output_event_counter', return_value=[1, 2]):
-            res = get_task_based_core_data('', DBNameConstant.DB_RUNTIME, params)
-        test_sql = db_manager.connect_db(DBNameConstant.DB_RUNTIME)
-        (test_sql[1]).execute("drop Table {}".format(DBNameConstant.TABLE_AIV_METRIC_SUMMARY))
-        db_manager.destroy(test_sql)
-        self.assertEqual(res[0], 1)
-
-    def test_get_output_tasktype(self):
+    def test_get_output_task_type(self):
         db_manager = DBManager()
         test_sql = db_manager.create_table(DBNameConstant.DB_RUNTIME)
 
@@ -200,20 +189,20 @@ class TestRuntimeReport(unittest.TestCase):
 
     def test_get_opname_2(self):
         create_ge_sql = "CREATE TABLE IF NOT EXISTS " + DBNameConstant.TABLE_GE_TASK + \
-                        " (device_id, model_name, model_id, op_name, stream_id, task_id, block_dim, op_state, " \
-                        "task_type, op_type, iter_id, input_count, input_formats, input_data_types, input_shapes, " \
-                        "output_count, output_formats, output_data_types, output_shapes)"
-        data = ((0, "resnet50", 1, "trans_TransData_0", 5, 3, 1, "static", "AI_CORE", "TransData", 0, 1, "NCHW",
+                        " (device_id, model_name, model_id, op_name, stream_id, task_id, batch_id, block_dim, " \
+                        "op_state, task_type, op_type, iter_id, input_count, input_formats, input_data_types, " \
+                        "input_shapes, output_count, output_formats, output_data_types, output_shapes)"
+        data = ((0, "resnet50", 1, "trans_TransData_0", 5, 3, 0, 1, "static", "AI_CORE", "TransData", 0, 1, "NCHW",
                  "DT_FLOAT16", "1,3,224,224", 1, "NC1HWC0", "DT_FLOAT16", "1,1,224,224,16"),)
-        db_manager = DBManager()
-        insert_ge_sql = db_manager.insert_sql(DBNameConstant.TABLE_GE_TASK, data)
-        res = db_manager.create_table(DBNameConstant.DB_GE_INFO, create_ge_sql, insert_ge_sql, data)
-
-        res_dir = os.path.realpath(os.path.join(db_manager.db_path, ".."))
-        res_ge = get_opname([3, 5, -1], res_dir, res[1])
-        (res[1]).execute("drop Table {}".format(DBNameConstant.TABLE_GE_TASK))
-        db_manager.destroy(res)
-        # self.assertEqual(res_ge, 'trans_TransData_0')
+        db_name = "test_get_opname_2_" + DBNameConstant.DB_GE_INFO
+        with DBOpen(db_name) as db_open, \
+                mock.patch('common_func.path_manager.PathManager.get_db_path', return_value=db_open.db_path):
+            db_open.create_table(create_ge_sql)
+            db_open.insert_data(DBNameConstant.TABLE_GE_TASK, data)
+            res_dir = os.path.realpath(os.path.join(db_open.db_path, ".."))
+            # [-1, 3, 5, 0]: unknown, task_id, stream_id, batch_id
+            res_ge = get_opname([-1, 3, 5, 0], res_dir, db_open.db_curs)
+            self.assertEqual(res_ge, 'trans_TransData_0')
 
     def test_get_opname_3(self):
         with mock.patch('os.path.exists', return_value=False):
@@ -239,8 +228,6 @@ class TestRuntimeReport(unittest.TestCase):
         with mock.patch(NAMESPACE + ".get_opname", return_value=[1]):
             res = add_op_total([[3, 4, -1]], res_dir)
             res_ge = add_op_total([[3, 4, -1]], res_dir)
-        # test_ge_sql = db_manager_ge.connect_db(DB_GE_INFO)
-        # test_sql = db_manager.connect_db(DB_RTS_TRACK)
         db_manager_ge.destroy(test_ge_sql)
         db_manager.destroy(test_sql)
         self.assertEqual(len(res), 1)

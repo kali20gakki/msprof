@@ -23,6 +23,7 @@ from collections import namedtuple
 from unittest import mock
 from unittest.mock import Mock
 
+from common_func.common import is_linux
 from common_func.constant import Constant
 from common_func.file_manager import FileManager, is_root_user, check_parent_dir_invalid
 from common_func.file_manager import check_db_path_valid
@@ -201,6 +202,9 @@ class TestFileManager(unittest.TestCase):
     def test_check_path_valid_should_return_error_when_is_not_root_and_not_current_user(self):
         path = '/path/host/host'
         is_file = False
+        # win平台无校验必要
+        if not is_linux():
+            return
         with mock.patch('os.path.exists', return_value=True), \
              mock.patch('os.path.isdir', return_value=True), \
              mock.patch('os.path.islink', return_value=False), \
@@ -322,14 +326,18 @@ class TestFileManager(unittest.TestCase):
         self.assertFalse(is_link(path))
 
     def test_is_root_user_should_return_true_when_is_root(self):
-        with mock.patch('os.getuid', return_value=0), \
-             mock.patch(NAMESPACE + '.is_linux', return_value=True):
+        if is_linux():
+            with mock.patch('os.getuid', return_value=0):
+                self.assertFalse(is_root_user())
+        else:
             self.assertTrue(is_root_user())
 
     def test_is_root_user_should_return_false_when_is_not_root(self):
-        with mock.patch('os.getuid', return_value=1), \
-            mock.patch(NAMESPACE + '.is_linux', return_value=True):
-            self.assertFalse(is_root_user())
+        if is_linux():
+            with mock.patch('os.getuid', return_value=1):
+                self.assertFalse(is_root_user())
+        else:
+            self.assertTrue(is_root_user())
 
     def test_check_parent_dir_invalid_should_return_true_when_check_path_valid_failed(self):
         try:

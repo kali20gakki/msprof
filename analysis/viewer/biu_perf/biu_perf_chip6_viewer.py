@@ -65,7 +65,7 @@ class BiuPerfChip6Viewer(BaseViewer, ABC):
                                                         column_trace_data))
         return result
 
-    def get_timeline_data(self: any) -> str:
+    def get_timeline_data(self: any) -> list:
         """
         get model list timeline data
         @return:timeline trace data

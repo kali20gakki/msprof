@@ -762,8 +762,8 @@ class TestExportCommand(unittest.TestCase):
             test._start_view(path_table)
 
     def test__start_view_export_summary_with_so(self) -> None:
-        path_table = {"collection_path": "test", "host": "test/host", "device": ["test/device_0"]}
-        args_dic = {"collection_path": "test", "iteration_id": None, "model_id": None, "iteration_count": None}
+        path_table = {"collection_path": "./", "host": "./host", "device": ["./device_0"]}
+        args_dic = {"collection_path": "./", "iteration_id": None, "model_id": None, "iteration_count": None}
         args = Namespace(**args_dic)
         with mock.patch(NAMESPACE + '.ExportCommand._handle_export'), \
                 mock.patch('framework.load_info_manager.LoadInfoManager.load_info'), \

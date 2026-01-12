@@ -59,16 +59,15 @@ class TestVoltageViewer(TestDirCRBaseModel):
             [950, 4]
         ]
 
-        aic_voltage_viewer_model = AicVoltageViewerModel(self.params)
-        aic_voltage_viewer_model.init()
-        aic_voltage_viewer_model.create_table()
-        aic_voltage_viewer_model.insert_data_to_db(DBNameConstant.TABLE_AIC_VOLTAGE, data)
-        result = aic_voltage_viewer_model.get_data()
+        with AicVoltageViewerModel(self.params) as aic_voltage_viewer_model:
+            aic_voltage_viewer_model.create_table()
+            aic_voltage_viewer_model.insert_data_to_db(DBNameConstant.TABLE_AIC_VOLTAGE, data)
+            result = aic_voltage_viewer_model.get_data()
 
-        self.assertEqual(len(result), 3)
-        self.assertEqual(result[0], (900, 2))
-        self.assertEqual(result[1], (850, 3))
-        self.assertEqual(result[2], (950, 4))
+            self.assertEqual(len(result), 3)
+            self.assertEqual(result[0], (900, 2))
+            self.assertEqual(result[1], (850, 3))
+            self.assertEqual(result[2], (950, 4))
 
     def test_bus_voltage_data_viewer_model_get_data_return_ok(self):
         data = [
@@ -77,16 +76,15 @@ class TestVoltageViewer(TestDirCRBaseModel):
             [950, 4]
         ]
 
-        bus_voltage_viewer_model = BusVoltageViewerModel(self.params)
-        bus_voltage_viewer_model.init()
-        bus_voltage_viewer_model.create_table()
-        bus_voltage_viewer_model.insert_data_to_db(DBNameConstant.TABLE_BUS_VOLTAGE, data)
-        result = bus_voltage_viewer_model.get_data()
+        with BusVoltageViewerModel(self.params) as bus_voltage_viewer_model:
+            bus_voltage_viewer_model.create_table()
+            bus_voltage_viewer_model.insert_data_to_db(DBNameConstant.TABLE_BUS_VOLTAGE, data)
+            result = bus_voltage_viewer_model.get_data()
 
-        self.assertEqual(len(result), 3)
-        self.assertEqual(result[0], (900, 2))
-        self.assertEqual(result[1], (850, 3))
-        self.assertEqual(result[2], (950, 4))
+            self.assertEqual(len(result), 3)
+            self.assertEqual(result[0], (900, 2))
+            self.assertEqual(result[1], (850, 3))
+            self.assertEqual(result[2], (950, 4))
 
     def test_voltage_viewer_get_all_data_return_ok(self):
         """

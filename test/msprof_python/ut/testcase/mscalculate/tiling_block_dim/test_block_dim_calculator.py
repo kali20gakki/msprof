@@ -15,6 +15,7 @@
 # MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
 # See the Mulan PSL v2 for more details.
 # -------------------------------------------------------------------------
+import gc
 import os
 import unittest
 
@@ -28,7 +29,7 @@ from sqlite.db_manager import DBOpen
 NAMESPACE = 'mscalculate.tiling_block_dim.block_dim_calculator'
 
 
-class TestKfcCalculator(unittest.TestCase):
+class TestBlockDimCalculator(unittest.TestCase):
     DIR_PATH = os.path.join(os.path.dirname(__file__), 'DT_BlockDimCalculator')
     DEVICE_SQLITE_DIR = os.path.join(DIR_PATH, 'PROF', 'device_0', 'sqlite')
     HOST_SQLITE_DIR = os.path.join(DIR_PATH, 'PROF', 'host', 'sqlite')
@@ -51,6 +52,7 @@ class TestKfcCalculator(unittest.TestCase):
         db_open._connect_db()
         db_open.create_table(create_sql)
         db_open.insert_data(DBNameConstant.TABLE_GE_TASK, data)
+        db_open._destroy_db_connect()
 
     def construct_ts_track_db(self):
         create_block_dim_sql = "CREATE TABLE IF NOT EXISTS " + DBNameConstant.TABLE_BLOCK_DIM + \
@@ -69,13 +71,22 @@ class TestKfcCalculator(unittest.TestCase):
         db_open.create_table(create_block_dim_sql)
         db_open.insert_data(DBNameConstant.TABLE_BLOCK_DIM, block_dim_data)
         db_open.insert_data(DBNameConstant.TABLE_DEVICE_TASK_FLIP, flip_num_data)
+        db_open._destroy_db_connect()
 
     def setUp(self) -> None:
+        if os.path.exists(self.DEVICE_SQLITE_DIR):
+            clear_dt_project(self.DEVICE_SQLITE_DIR)
         os.makedirs(self.DEVICE_SQLITE_DIR)
+
+        if os.path.exists(self.HOST_SQLITE_DIR):
+            clear_dt_project(self.HOST_SQLITE_DIR)
         os.makedirs(self.HOST_SQLITE_DIR)
 
     def tearDown(self) -> None:
-        clear_dt_project(self.DIR_PATH)
+        # 清理BlockDimCalculator中model链接，避免后续数据清理失败
+        gc.collect()
+        if os.path.exists(self.DIR_PATH):
+            clear_dt_project(self.DIR_PATH)
 
     def test_ms_run_should_return_when_contain_block_dim_data(self: any) -> None:
         self.construct_ts_track_db()

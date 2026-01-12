@@ -94,16 +94,20 @@ class TestDataLoader(unittest.TestCase):
         insert_sql = "insert into {0} values ({value})".format("GELoad", value="?," * (len(data[0]) - 1) + "?")
         db_manager = DBManager()
         res = db_manager.create_table("ge_model_info.db", create_sql, insert_sql, data)
+        db_manager.destroy(res)
         with mock.patch(NAMESPACE + '.OpSummaryTuningDataHandle.is_network', return_value=False):
             result = OpSummaryTuningDataHandle.select_memory_workspace(project, device_id)
         self.assertEqual(result, [])
+
         db_manager = DBManager()
         res = db_manager.create_table("ge_model_info.db", create_sql, insert_sql, data)
+        db_manager.destroy(res)
         with mock.patch(NAMESPACE + '.OpSummaryTuningDataHandle.is_network', return_value=True), \
                 mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(res[0], res[1])), \
                 mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True):
             result = OpSummaryTuningDataHandle.select_memory_workspace(project, device_id)
         self.assertEqual(result, [])
+
         db_manager = DBManager()
         res = db_manager.create_table("ge_model_info.db", create_sql, insert_sql, data)
         with mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
