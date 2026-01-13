@@ -17,6 +17,7 @@
 #ifndef ANALYSIS_UTILS_TIME_UTILS_H
 #define ANALYSIS_UTILS_TIME_UTILS_H
 
+#include <cstdint>
 #include <string>
 #include "analysis/csrc/infrastructure/utils/hp_float.h"
 

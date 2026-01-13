@@ -17,6 +17,8 @@
 #ifndef ANALYSIS_ASSOCIATION_CREDENTIAL_ID_POOL_H
 #define ANALYSIS_ASSOCIATION_CREDENTIAL_ID_POOL_H
 
+#include <cstdint>
+#include <string>
 #include <unordered_map>
 #include <mutex>
 

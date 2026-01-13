@@ -17,6 +17,7 @@
 #ifndef ANALYSIS_UTILS_HP_FLOAT_H
 #define ANALYSIS_UTILS_HP_FLOAT_H
 
+#include <cstdint>
 #include <string>
 #include <vector>
 namespace Analysis {
