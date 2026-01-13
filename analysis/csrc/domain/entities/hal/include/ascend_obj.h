@@ -20,6 +20,7 @@
 #include <cstdint>
 #include <memory>
 #include <utility>
+#include <string>
 
 #include "analysis/csrc/infrastructure/utils/prof_common.h"
 

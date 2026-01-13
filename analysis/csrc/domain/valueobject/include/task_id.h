@@ -19,6 +19,7 @@
 
 #include <cstdint>
 #include <tuple>
+#include <functional>
 
 constexpr uint32_t INVALID_BATCH_ID = 0;
 constexpr uint32_t INVALID_CONTEXT_ID = UINT32_MAX;
