@@ -110,7 +110,7 @@ private:
     }
 
     template<typename T>
-    bool SortByTimeAndLevel(std::vector<std::shared_ptr<T>> &traces)
+    void SortByTimeAndLevel(std::vector<std::shared_ptr<T>> &traces)
     {
         auto comp =
             [](std::shared_ptr<T> &api1, std::shared_ptr<T> &api2) {
@@ -143,7 +143,7 @@ void EventGrouper::GroupEvents<TaskTrackParser, MsprofCompactInfo, &CANNWarehous
     EventType eventType);
 
 template<>
-bool EventGrouper::SortByTimeAndLevel<MsprofApi>(std::vector<std::shared_ptr<MsprofApi>> &traces);
+void EventGrouper::SortByTimeAndLevel<MsprofApi>(std::vector<std::shared_ptr<MsprofApi>> &traces);
 
 } // namespace Cann
 } // namespace Host

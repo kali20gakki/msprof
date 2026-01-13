@@ -73,6 +73,8 @@ target_compile_options(msprof_analysis PRIVATE
     -fvisibility-inlines-hidden
     -Wfloat-equal
     -Wextra
+    -Werror=uninitialized
+    -Werror=return-type
     -D_GLIBCXX_USE_CXX11_ABI=0
     -D_FORTIFY_SOURCE=2
     -DASCEND_CI_LIMITED_PY37 # 保持编译和运行python版本兼容性

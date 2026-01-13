@@ -271,7 +271,7 @@ void EventGrouper::GroupEvents<TaskTrackParser, MsprofCompactInfo, &CANNWarehous
 }
 
 template<>
-bool EventGrouper::SortByTimeAndLevel<MsprofApi>(std::vector<std::shared_ptr<MsprofApi>> &traces)
+void EventGrouper::SortByTimeAndLevel<MsprofApi>(std::vector<std::shared_ptr<MsprofApi>> &traces)
 {
     auto comp =
         [](std::shared_ptr<MsprofApi> &api1, std::shared_ptr<MsprofApi> &api2) {
