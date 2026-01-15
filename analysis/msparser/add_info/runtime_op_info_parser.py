@@ -117,7 +117,6 @@ class RuntimeOpInfoParser(DataParser, MsMultiProcess):
             self._var_size = self._var_size + 1
             body = RuntimeOpInfoBean.decode(_all_data[offset: middle])
 
-
             data_len = body.tensor_num * StructFmt.RUNTIME_OP_INFO_TENSOR_SIZE
             if (data_len + StructFmt.RUNTIME_OP_INFO_WITHOUT_HEAD_SIZE) != body.data_len:
                 logging.error("data_len error: data_len is %d, tensor num is %d", body.data_len, body.tensor_num)
