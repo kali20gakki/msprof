@@ -2,7 +2,7 @@
 
 ## 简介
 
-MindStudio Profiler（msProf，模型调优工具）提供了AI任务运行性能数据、昇腾AI处理器系统数据等性能数据的采集和解析功能，这些功能侧重不同的训练或推理场景，可以定位模型训练或推理中的性能问题。
+MindStudio Profiler（模型调优工具，msProf）提供了AI任务运行性能数据、昇腾AI处理器系统数据等性能数据的采集和解析功能，这些功能侧重不同的训练或推理场景，可以定位模型训练或推理中的性能问题。
 
 ## 目录结构
 
@@ -43,7 +43,7 @@ MindStudio Profiler（msProf，模型调优工具）提供了AI任务运行性�
 
 ## 功能介绍
 
-1. msProf性能数据采集
+1. [msProf性能数据采集](https://www.hiascend.com/document/detail/zh/CANNCommunityEdition/850alpha002/devaids/Profiling/atlasprofiling_16_0010.html)
 
    通过msProf命令对AI任务运行性能数据、昇腾AI处理器系统数据进行采集。
 
@@ -78,7 +78,7 @@ msProf产品的使用许可证，具体请参见[LICENSE](LICENSE)文件。
 msProf工具docs目录下的文档适用CC-BY 4.0许可证，具体请参见[LICENSE](./docs/LICENSE)。
 
 ## 贡献指导
-请参考 [贡献指导](./CONTRIBUTING.md)
+请参考[贡献指导](./CONTRIBUTING.md)。
 
 ## 建议与交流
 
