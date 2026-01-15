@@ -457,6 +457,17 @@ class InfoConfReader:
             Decimal(NumberConstant.NS_TO_US)
         return int(res)
 
+    def trans_from_start_info_raw_time_into_host_cnt(self: any) -> int:
+        """
+        transfer raw time(ns) from start info json to host cnt
+        return: host cnt
+        """
+        start_info_raw_time, _ = self.get_collect_raw_time()
+        res = ((Decimal(int(start_info_raw_time)) - Decimal(self._host_mon * NumberConstant.NANO_SECOND)) * \
+                Decimal(self.get_host_freq() / NumberConstant.NANO_SECOND)) + \
+                Decimal(self._host_cnt * NumberConstant.NANO_SECOND)
+        return int(res)
+
     def get_local_time_offset(self: any, is_host: bool = False) -> float:
         """
         get the offset between local time and monotonic raw
