@@ -38,6 +38,9 @@ MindStudio Profiler（msProf，模型调优工具）提供了AI任务运行性�
 安装msProf工具，详情请参见《[msProf工具安装指南](docs/zh/msprof_install_guide.md)》。
 
 
+## 快速开始
+
+
 ## 功能介绍
 
 1. msProf性能数据采集
@@ -74,26 +77,20 @@ msProf产品的使用许可证，具体请参见[LICENSE](LICENSE)文件。
 
 msProf工具docs目录下的文档适用CC-BY 4.0许可证，具体请参见[LICENSE](./docs/LICENSE)。
 
-## 贡献声明
-
-1. 提交错误报告：如果您在msProf中发现了一个存在安全问题的漏洞，请在msProf仓库中的Issues中搜索，以防该漏洞已被提交，如果找不到漏洞可以创建一个新的Issues。如果发现了一个安全问题请不要将其公开，请参阅安全问题处理方式。提交错误报告时应该包含完整信息。
-2. 安全问题处理：本项目中对安全问题处理的形式，请通过邮箱通知项目核心人员确认编辑。
-3. 解决现有问题：通过查看仓库的Issues列表可以发现需要处理的问题信息, 可以尝试解决其中的某个问题。
-4. 如何提出新功能：请使用Issues的Feature标签进行标记，我们会定期处理和确认开发。
-5. 开始贡献：
-   1. Fork本项目的仓库。
-   2. Clone到本地。
-   3. 创建开发分支。
-   4. 本地测试：提交前请通过所有的单元测试，包括新增的测试用例。
-   5. 提交代码。
-   6. 新建Pull Request。
-   7. 代码检视：您需要根据评审意见修改代码，并重新提交更新。此流程可能涉及多轮迭代。
-   8. 当您的PR获得足够数量的检视者批准后，Committer会进行最终审核。
-   9. 审核和测试通过后，CI会将您的PR合并入到项目的主干分支。
+## 贡献指导
+请参考 [贡献指导](./CONTRIBUTING.md)
 
 ## 建议与交流
 
 欢迎大家为社区做贡献。如果有任何疑问或建议，请提交[Issues](https://gitcode.com/Ascend/msprof/issues)，我们会尽快回复。感谢您的支持。
+
+## 联系我们
+
+<div>
+  <a href="https://raw.gitcode.com/kali20gakki1/Imageshack/raw/main/CDC0BEE2-8F11-477D-BD55-77A15417D7D1_4_5005_c.jpeg">
+    <img src="https://img.shields.io/badge/WeChat-07C160?style=for-the-badge&logo=wechat&logoColor=white"></a>
+</div>
+
 
 ## 致谢
 
