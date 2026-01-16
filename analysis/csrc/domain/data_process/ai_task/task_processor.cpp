@@ -72,7 +72,10 @@ bool TaskProcessor::ProcessSingleDevice(const std::string &devicePath, std::vect
         ERROR("AscendTask format data failed. DBPath is %", dbPath);
         return false;
     }
-    FilterDataByStartTime(formatData, record.startTimeNs, PROCESSOR_NAME_TASK);
+    FilterDataByStartTime<AscendTaskData>(formatData, record.startTimeNs, PROCESSOR_NAME_TASK,
+        [](const AscendTaskData& data, uint64_t startTimeNs) {
+            return static_cast<double>(data.timestamp) + data.duration < static_cast<double>(startTimeNs);
+        });
     allProcessedData.insert(allProcessedData.end(), formatData.begin(), formatData.end());
     return true;
 }

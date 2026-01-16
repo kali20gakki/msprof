@@ -17,6 +17,7 @@
 #ifndef ANALYSIS_DOMAIN_DATA_PROCESSOR_H
 #define ANALYSIS_DOMAIN_DATA_PROCESSOR_H
 
+#include <functional>
 #include <set>
 #include "analysis/csrc/infrastructure/db/include/db_info.h"
 #include "analysis/csrc/infrastructure/data_inventory/include/data_inventory.h"
@@ -46,7 +47,8 @@ protected:
     static uint16_t GetEnumTypeValue(const std::string &key, const std::string &tableName,
                                      const std::unordered_map<std::string, uint16_t> &enumTable);
     template<typename Tp>
-    void FilterDataByStartTime(std::vector<Tp>& data, uint64_t startTimeNs, const std::string& processorName);
+    void FilterDataByStartTime(std::vector<Tp>& data, uint64_t startTimeNs, const std::string& processorName,
+        std::function<bool(const Tp&, uint64_t)> condition = nullptr);
 
     template<typename Tp>
     bool SaveToDataInventory(std::vector<Tp>&& data, DataInventory& dataInventory, const std::string& processorName);
@@ -60,12 +62,14 @@ private:
 
 template<typename Tp>
 void DataProcessor::FilterDataByStartTime(std::vector<Tp>& datas, uint64_t startTimeNs,
-                                          const std::string& processorName)
+                                          const std::string& processorName,
+                                          std::function<bool(const Tp&, uint64_t)> condition)
 {
     INFO("There are % records before % data filtering, filterTime is %.", datas.size(), processorName, startTimeNs);
-    datas.erase(std::remove_if(datas.begin(), datas.end(),
-                               [startTimeNs](const Tp& data) {return data.timestamp < startTimeNs; }),
-                datas.end());
+    datas.erase(std::remove_if(datas.begin(), datas.end(), [startTimeNs, condition](const Tp& data) {
+        return condition == nullptr ? data.timestamp < startTimeNs : condition(data, startTimeNs);
+    }),
+        datas.end());
     INFO("There are % records after % data filtering.", datas.size(), processorName);
 }
 
