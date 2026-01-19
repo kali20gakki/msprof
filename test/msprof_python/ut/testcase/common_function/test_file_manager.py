@@ -328,7 +328,7 @@ class TestFileManager(unittest.TestCase):
     def test_is_root_user_should_return_true_when_is_root(self):
         if is_linux():
             with mock.patch('os.getuid', return_value=0):
-                self.assertFalse(is_root_user())
+                self.assertTrue(is_root_user())
         else:
             self.assertTrue(is_root_user())
 

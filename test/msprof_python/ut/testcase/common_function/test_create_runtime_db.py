@@ -212,7 +212,9 @@ class TestParsingRuntimeData(unittest.TestCase):
                              26050, 0, 526, 0, 14002, 26675, 224, 12, 58006, 101612566070, 2, 0, 0, 0, 0)
         data_4 = struct.pack("=BBHLHHHHQ8QQQH3H", 1, 4, 112, 200, 0, 5, 3, 0, 18446744073709551615,
                              26050, 0, 526, 0, 14002, 26675, 224, 12, 58006, 101612566070, 2, 0, 0, 0)
+        target_is_root = 'common_func.file_manager.is_root_user'
         with mock.patch('os.path.join', return_value='test\\data'), \
+                mock.patch(target_is_root, return_value=True), \
                 mock.patch(NAMESPACE + '.ParsingRuntimeData.insert_data'), \
                 mock.patch(NAMESPACE + '.logging.info'):
             with mock.patch('builtins.open', mock.mock_open(read_data=data_1)), \
