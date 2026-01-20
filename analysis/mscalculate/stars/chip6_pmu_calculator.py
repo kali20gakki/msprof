@@ -87,6 +87,7 @@ class Chip6PmuCalculator(PmuCalculator, MsMultiProcess):
         self._data_name = []
         self.pmu_data = []
         self.block_pmu_data = []  # for chip v6
+        self._logged_func_types: set = set()
 
     @staticmethod
     def _get_total_cycle_and_pmu_data(data: any, use_actual_data: bool) -> tuple:
@@ -340,7 +341,10 @@ class Chip6PmuCalculator(PmuCalculator, MsMultiProcess):
             self._data_list_dict.setdefault(StrConstant.BLOCK_PMU_TYPE, []).append(PmuBeanV6.decode(bin_data))
         else:
             self._wrong_func_type_count += 1
-            logging.error('Func type error, data may have been lost. Func type: %s', func_type)
+            # 同类型报错只触发一次
+            if func_type not in self._logged_func_types:
+                logging.error('Func type error, data may have been lost. Func type: %s', func_type)
+                self._logged_func_types.add(func_type)
 
     def _set_stream_id_by_host(self):
         device_id = InfoConfReader().get_device_id()

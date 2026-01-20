@@ -116,6 +116,8 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
         self.aic_table_name_list = []
         self.aiv_table_name_list = []
         self.data_name = []
+        self._logged_func_types: set = set()
+
 
     @staticmethod
     def _get_total_cycle_and_pmu_data(data: any, is_true: bool) -> tuple:
@@ -550,7 +552,11 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
             self._data_list.setdefault(StrConstant.BLOCK_PMU_TYPE, []).append(FftsBlockPmuBean.decode(bin_data))
         else:
             self._wrong_func_type_count += 1
-            logging.error('Func type error, data may have been lost. Func type: %s', func_type)
+
+            # 用set确保每种异常类型打印一次
+            if func_type not in self._logged_func_types:
+                logging.error('Func type error, data may have been lost. Func type: %s', func_type)
+                self._logged_func_types.add(func_type)
 
     def _need_to_analyse(self: any) -> bool:
         db_path = PathManager.get_db_path(self._result_dir, DBNameConstant.DB_METRICS_SUMMARY)
