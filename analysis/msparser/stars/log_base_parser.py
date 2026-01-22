@@ -127,8 +127,11 @@ class LogBaseParser(IStarsParser):
             return
         device_id = InfoConfReader().get_device_id()
         host_task_dict = HostTaskCollector(self._result_dir).get_host_task_stream_table(int(device_id))
+         failed_count = 0
         for data in self._data_list:
             if data.task_id not in host_task_dict:
-                logging.warning(f"Task ID {data.task_id} not found in host task")
+                failed_count += 1
                 continue
             data.stream_id = host_task_dict.get(data.task_id)
+        if failed_count > 0:
+            logging.warning(f"{failed_count} task items not found in host task")

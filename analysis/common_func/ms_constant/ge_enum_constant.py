@@ -204,7 +204,8 @@ class GeTaskType(Enum):
     DSA_SQE = 7
     DVPP = 8
     HCCL = 9
-    INVALID = 10
+    FUSION = 10
+    INVALID = 11
 
     @classmethod
     def member_map(cls: any) -> dict:

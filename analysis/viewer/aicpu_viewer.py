@@ -211,7 +211,6 @@ class ParseAiCpuData:
             if task.start_time <= aicpu.sys_end * NumberConstant.NS_TO_US <= task.end_time:
                 ai_cpu_data[aicpu_index] = aicpu.replace(batch_id=task.batch_id)
                 aicpu_index += 1
-                task_index += 1
             elif aicpu.sys_end * NumberConstant.NS_TO_US < task.start_time:
                 aicpu_index += 1
             elif aicpu.sys_end * NumberConstant.NS_TO_US > task.end_time:

@@ -350,12 +350,15 @@ class Chip6PmuCalculator(PmuCalculator, MsMultiProcess):
         device_id = InfoConfReader().get_device_id()
         host_collector = HostTaskCollector(self._project_path)
         host_task_dict = host_collector.get_host_task_stream_table(int(device_id))
+        failed_count = 0
         for data_list in self._data_list_dict.values():
             for data in data_list:
                 if data.task_id not in host_task_dict:
-                    logging.warning(f"Task ID {data.task_id} not found in host task")
+                    failed_count += 1
                     continue
                 data.stream_id = host_task_dict.get(data.task_id)
+        if failed_count > 0:
+            logging.warning(f"{failed_count} task items not found in host task")
 
     def _need_to_analyse(self: any) -> bool:
         db_path = PathManager.get_db_path(self._project_path, DBNameConstant.DB_METRICS_SUMMARY)
