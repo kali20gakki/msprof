@@ -15,6 +15,7 @@
 # -------------------------------------------------------------------------
 
 import logging
+from typing import List
 
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_multi_process import MsMultiProcess
@@ -29,11 +30,13 @@ from common_func.hccl_info_common import LinkType
 from common_func.hccl_info_common import TransPortType
 from common_func.hccl_info_common import RdmaType
 from common_func.hccl_info_common import DeviceHcclSource
+from common_func.platform.chip_manager import ChipManager
 from msmodel.ai_cpu.ai_cpu_model import AiCpuModel
 from msmodel.step_trace.ts_track_model import TsTrackModel
 from msmodel.ai_cpu.data_preparation_model import DataPreparationModel
 from msmodel.add_info.kfc_info_model import KfcInfoModel
 from msparser.add_info.aicpu_add_info_bean import AicpuAddInfoBean
+from msparser.add_info.aicpu_add_info_bean import KfcHcclInfoBean
 from msparser.data_struct_size_constant import StructFmt
 from msparser.interface.data_parser import DataParser
 from profiling_bean.prof_enum.data_tag import DataTag
@@ -52,6 +55,8 @@ class AicpuAddInfoParser(DataParser, MsMultiProcess):
         self._file_list = file_list
         self.project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
         self.hash_data = {}
+        self.is_chip_v6 = ChipManager().is_chip_v6()
+        self.unique_id_map = dict()
         self._aicpu_data = {
             AicpuAddInfoBean.AICPU_NODE: [],
             AicpuAddInfoBean.AICPU_DP: [],
@@ -64,177 +69,199 @@ class AicpuAddInfoParser(DataParser, MsMultiProcess):
             AicpuAddInfoBean.AICPU_FLIP_TASK: [],
             AicpuAddInfoBean.AICPU_MASTER_STREAM_HCCL_TASK: [],
         }
-        self._get_data_func = {
-            AicpuAddInfoBean.AICPU_NODE: self.get_aicpu_node_data,
-            AicpuAddInfoBean.AICPU_DP: self.get_aicpu_dp_data,
-            AicpuAddInfoBean.AICPU_MODEL: self.get_aicpu_model_data,
-            AicpuAddInfoBean.AICPU_MI: self.get_aicpu_mi_data,
-            AicpuAddInfoBean.KFC_COMM_TURN: self.get_kfc_comm_turn_data,
-            AicpuAddInfoBean.KFC_COMPUTE_TURN: self.get_kfc_compute_turn_data,
-            AicpuAddInfoBean.KFC_HCCL_INFO: self.get_kfc_hccl_info_data,
-            AicpuAddInfoBean.HCCL_OP_INFO: self.get_hccl_op_info_data,
-            AicpuAddInfoBean.AICPU_FLIP_TASK: self.get_aicpu_flip_task_data,
-            AicpuAddInfoBean.AICPU_MASTER_STREAM_HCCL_TASK: self.get_aicpu_master_stream_hccl_tank_data,
-        }
-        self._aicpu_table = {
-            AicpuAddInfoBean.KFC_COMM_TURN: DBNameConstant.TABLE_KFC_COMM_TURN,
-            AicpuAddInfoBean.KFC_COMPUTE_TURN: DBNameConstant.TABLE_KFC_COMPUTE_TURN,
-            AicpuAddInfoBean.KFC_HCCL_INFO: DBNameConstant.TABLE_KFC_INFO,
-            AicpuAddInfoBean.HCCL_OP_INFO: DBNameConstant.TABLE_DEVICE_HCCL_OP_INFO,
-            AicpuAddInfoBean.AICPU_FLIP_TASK: DBNameConstant.TABLE_AICPU_TASK_FLIP,
-            AicpuAddInfoBean.AICPU_MASTER_STREAM_HCCL_TASK: DBNameConstant.TABLE_AICPU_MASTER_STREAM_HCCL_TASK,
+        self._get_data_save_func = {
+            AicpuAddInfoBean.AICPU_NODE: self.save_aicpu_node_data,
+            AicpuAddInfoBean.AICPU_DP: self.save_aicpu_dp_data,
+            AicpuAddInfoBean.AICPU_MODEL: self.save_aicpu_model_data,
+            AicpuAddInfoBean.AICPU_MI: self.save_aicpu_mi_data,
+            AicpuAddInfoBean.KFC_COMM_TURN: self.save_kfc_comm_turn_data,
+            AicpuAddInfoBean.KFC_COMPUTE_TURN: self.save_kfc_compute_turn_data,
+            AicpuAddInfoBean.KFC_HCCL_INFO: self.save_kfc_hccl_info_data,
+            AicpuAddInfoBean.HCCL_OP_INFO: self.save_hccl_op_info_data,
+            AicpuAddInfoBean.AICPU_FLIP_TASK: self.save_aicpu_flip_task_data,
+            AicpuAddInfoBean.AICPU_MASTER_STREAM_HCCL_TASK: self.save_aicpu_master_stream_hccl_task_data,
         }
 
-    @staticmethod
-    def get_aicpu_node_data(aicpu_info: AicpuAddInfoBean) -> list:
-        return [
-            aicpu_info.data.stream_id,
-            aicpu_info.data.task_id,
-            aicpu_info.data.ai_cpu_task_start_time,
-            aicpu_info.data.ai_cpu_task_end_time,
-            AicpuAddInfoParser.NONE_NODE_NAME,
-            aicpu_info.data.compute_time,
-            aicpu_info.data.memory_copy_time,
-            aicpu_info.data.ai_cpu_task_time,
-            aicpu_info.data.dispatch_time,
-            aicpu_info.data.total_time
+    def save_aicpu_node_data(self: any, aicpu_info_list: List[AicpuAddInfoBean]):
+        result = [
+            [
+                aicpu_info.data.stream_id,
+                aicpu_info.data.task_id,
+                aicpu_info.data.ai_cpu_task_start_time,
+                aicpu_info.data.ai_cpu_task_end_time,
+                AicpuAddInfoParser.NONE_NODE_NAME,
+                aicpu_info.data.compute_time,
+                aicpu_info.data.memory_copy_time,
+                aicpu_info.data.ai_cpu_task_time,
+                aicpu_info.data.dispatch_time,
+                aicpu_info.data.total_time
+            ]
+            for aicpu_info in aicpu_info_list
         ]
+        with AiCpuModel(self.project_path, [DBNameConstant.TABLE_AI_CPU]) as model:
+            model.flush(result, DBNameConstant.TABLE_AI_CPU)
 
-    @staticmethod
-    def get_aicpu_dp_data(aicpu_info: AicpuAddInfoBean) -> list:
-        return [
-            InfoConfReader().trans_into_local_time(float(aicpu_info.timestamp)),
-            aicpu_info.data.action,
-            aicpu_info.data.source,
-            aicpu_info.data.buffer_size,
+    def save_aicpu_dp_data(self: any, aicpu_info_list: List[AicpuAddInfoBean]):
+        result = [
+            [
+                InfoConfReader().trans_into_local_time(float(aicpu_info.timestamp)),
+                aicpu_info.data.action,
+                aicpu_info.data.source,
+                aicpu_info.data.buffer_size,
+            ]
+            for aicpu_info in aicpu_info_list
         ]
+        with AiCpuModel(self.project_path, [DBNameConstant.TABLE_AI_CPU_DP]) as model:
+            model.flush(result, DBNameConstant.TABLE_AI_CPU_DP)
 
-    @staticmethod
-    def get_aicpu_model_data(aicpu_info: AicpuAddInfoBean) -> list:
-        return [
-            aicpu_info.data.index_id,
-            aicpu_info.data.model_id,
-            aicpu_info.timestamp,
-            aicpu_info.data.tag_id,
-            aicpu_info.data.event_id,
+    def save_aicpu_model_data(self: any, aicpu_info_list: List[AicpuAddInfoBean]):
+        result = [
+            [
+                aicpu_info.data.index_id,
+                aicpu_info.data.model_id,
+                aicpu_info.timestamp,
+                aicpu_info.data.tag_id,
+                aicpu_info.data.event_id,
+            ]
+            for aicpu_info in aicpu_info_list
         ]
+        with TsTrackModel(self.project_path,
+                          DBNameConstant.DB_STEP_TRACE, [DBNameConstant.TABLE_MODEL_WITH_Q]) as model:
+            model.create_table(DBNameConstant.TABLE_MODEL_WITH_Q)
+            model.flush(DBNameConstant.TABLE_MODEL_WITH_Q, result)
 
-    @staticmethod
-    def get_aicpu_mi_data(aicpu_info: AicpuAddInfoBean) -> list:
-        return [
-            aicpu_info.data.node_name,
-            aicpu_info.data.queue_size,
-            aicpu_info.data.start_time,
-            aicpu_info.data.end_time,
-            aicpu_info.data.duration,
+    def save_aicpu_mi_data(self: any, aicpu_info_list: List[AicpuAddInfoBean]):
+        result = [
+            [
+                aicpu_info.data.node_name,
+                aicpu_info.data.queue_size,
+                aicpu_info.data.start_time,
+                aicpu_info.data.end_time,
+                aicpu_info.data.duration,
+            ]
+            for aicpu_info in aicpu_info_list
         ]
+        with DataPreparationModel(self.project_path, [DBNameConstant.TABLE_DATA_QUEUE]) as model:
+            model.flush(result)
 
-    @staticmethod
-    def get_kfc_comm_turn_data(aicpu_info: AicpuAddInfoBean) -> list:
-        return [
-            aicpu_info.data.device_id,
-            aicpu_info.data.stream_id,
-            aicpu_info.data.task_id,
-            aicpu_info.data.comm_turn,
-            aicpu_info.data.current_turn,
-            aicpu_info.data.server_start_time,
-            aicpu_info.data.wait_msg_start_time,
-            aicpu_info.data.kfc_alg_exe_start_time,
-            aicpu_info.data.send_task_start_time,
-            aicpu_info.data.send_sqe_finish_time,
-            aicpu_info.data.rtsq_exe_end_time,
-            aicpu_info.data.server_end_time,
+    def save_kfc_comm_turn_data(self: any, aicpu_info_list: List[AicpuAddInfoBean]):
+        result = [
+            [
+                aicpu_info.data.device_id,
+                aicpu_info.data.stream_id,
+                aicpu_info.data.task_id,
+                aicpu_info.data.comm_turn,
+                aicpu_info.data.current_turn,
+                aicpu_info.data.server_start_time,
+                aicpu_info.data.wait_msg_start_time,
+                aicpu_info.data.kfc_alg_exe_start_time,
+                aicpu_info.data.send_task_start_time,
+                aicpu_info.data.send_sqe_finish_time,
+                aicpu_info.data.rtsq_exe_end_time,
+                aicpu_info.data.server_end_time,
+            ]
+            for aicpu_info in aicpu_info_list
         ]
+        with KfcInfoModel(self.project_path, [DBNameConstant.TABLE_KFC_COMM_TURN]) as model:
+            model.flush(result, DBNameConstant.TABLE_KFC_COMM_TURN)
 
-    @staticmethod
-    def get_kfc_compute_turn_data(aicpu_info: AicpuAddInfoBean) -> list:
-        return [
-            aicpu_info.data.device_id,
-            aicpu_info.data.stream_id,
-            aicpu_info.data.task_id,
-            aicpu_info.data.compute_turn,
-            aicpu_info.data.current_turn,
-            aicpu_info.data.wait_compute_start_time,
-            aicpu_info.data.compute_start_time,
-            aicpu_info.data.compute_exe_end_time,
+    def save_kfc_compute_turn_data(self: any, aicpu_info_list: List[AicpuAddInfoBean]):
+        result = [
+            [
+                aicpu_info.data.device_id,
+                aicpu_info.data.stream_id,
+                aicpu_info.data.task_id,
+                aicpu_info.data.compute_turn,
+                aicpu_info.data.current_turn,
+                aicpu_info.data.wait_compute_start_time,
+                aicpu_info.data.compute_start_time,
+                aicpu_info.data.compute_exe_end_time,
+            ]
+            for aicpu_info in aicpu_info_list
         ]
+        with KfcInfoModel(self.project_path, [DBNameConstant.TABLE_KFC_COMPUTE_TURN]) as model:
+            model.flush(result, DBNameConstant.TABLE_KFC_COMPUTE_TURN)
 
-    @staticmethod
-    def get_aicpu_flip_task_data(aicpu_info: AicpuAddInfoBean) -> list:
-        return [
-            aicpu_info.data.stream_id,
-            InfoConfReader().time_from_syscnt(aicpu_info.timestamp),
-            aicpu_info.data.task_id,
-            aicpu_info.data.flip_num,
+    def save_aicpu_flip_task_data(self: any, aicpu_info_list: List[AicpuAddInfoBean]):
+        result = [
+            [
+                aicpu_info.data.stream_id,
+                InfoConfReader().time_from_syscnt(aicpu_info.timestamp),
+                aicpu_info.data.task_id,
+                aicpu_info.data.flip_num,
+            ]
+            for aicpu_info in aicpu_info_list
         ]
+        with KfcInfoModel(self.project_path, [DBNameConstant.TABLE_AICPU_TASK_FLIP]) as model:
+            model.flush(result, DBNameConstant.TABLE_AICPU_TASK_FLIP)
 
-    @staticmethod
-    def get_aicpu_master_stream_hccl_tank_data(aicpu_info: AicpuAddInfoBean) -> list:
-        return [
-            InfoConfReader().time_from_syscnt(aicpu_info.timestamp),
-            aicpu_info.data.aicpu_stream_id,
-            aicpu_info.data.aicpu_task_id,
-            aicpu_info.data.stream_id,
-            aicpu_info.data.task_id,
-            aicpu_info.data.type,
+    def save_aicpu_master_stream_hccl_task_data(self: any, aicpu_info_list: List[AicpuAddInfoBean]):
+        result = [
+            [
+                InfoConfReader().time_from_syscnt(aicpu_info.timestamp),
+                aicpu_info.data.aicpu_stream_id,
+                aicpu_info.data.aicpu_task_id,
+                self.unique_id_map.get(aicpu_info.data.task_id, aicpu_info.data.stream_id),
+                aicpu_info.data.task_id,
+                aicpu_info.data.type,
+            ]
+            for aicpu_info in aicpu_info_list
         ]
+        with KfcInfoModel(self.project_path, [DBNameConstant.TABLE_AICPU_MASTER_STREAM_HCCL_TASK]) as model:
+            model.flush(result, DBNameConstant.TABLE_AICPU_MASTER_STREAM_HCCL_TASK)
 
-    def get_hccl_op_info_data(self: any, aicpu_info: AicpuAddInfoBean) -> list:
-        source = DeviceHcclSource.INVALID
-        if aicpu_info.struct_type == str(AicpuAddInfoBean.HCCL_OP_INFO):
-            source = DeviceHcclSource.HCCL
-        return [
-            InfoConfReader().time_from_syscnt(aicpu_info.timestamp),
-            aicpu_info.data.relay,
-            aicpu_info.data.retry,
-            trans_enum_name(DataType, aicpu_info.data.data_type),
-            self.hash_data.get(aicpu_info.data.alg_type, aicpu_info.data.alg_type),
-            aicpu_info.data.count,
-            aicpu_info.data.group_name,
-            aicpu_info.data.stream_id,
-            aicpu_info.data.task_id,
-            aicpu_info.data.rank_size,
-            source.value,
+    def save_hccl_op_info_data(self: any, aicpu_info_list: List[AicpuAddInfoBean]):
+        result = [
+            [
+                InfoConfReader().time_from_syscnt(aicpu_info.timestamp),
+                aicpu_info.data.relay,
+                aicpu_info.data.retry,
+                trans_enum_name(DataType, aicpu_info.data.data_type),
+                self.hash_data.get(aicpu_info.data.alg_type, aicpu_info.data.alg_type),
+                aicpu_info.data.count,
+                aicpu_info.data.group_name,
+                aicpu_info.data.stream_id,
+                aicpu_info.data.task_id,
+                aicpu_info.data.rank_size,
+                DeviceHcclSource.HCCL.value,
+            ]
+            for aicpu_info in aicpu_info_list
         ]
+        with KfcInfoModel(self.project_path, [DBNameConstant.TABLE_DEVICE_HCCL_OP_INFO]) as model:
+            model.flush(result, DBNameConstant.TABLE_DEVICE_HCCL_OP_INFO)
 
-    def get_kfc_hccl_info_data(self: any, aicpu_info: AicpuAddInfoBean) -> list:
-        result = []
-        for kfc_hccl_info in [aicpu_info.data.first_hccl_info, aicpu_info.data.second_hccl_info]:
-            if kfc_hccl_info.group_name == "0":
-                continue
-            role = trans_enum_name(RoleType, kfc_hccl_info.role)
-            op_type = trans_enum_name(OpType, kfc_hccl_info.op_type)
-            data_type = trans_enum_name(DataType, kfc_hccl_info.data_type)
-            link_type = trans_enum_name(LinkType, kfc_hccl_info.link_type)
-            transport_type = trans_enum_name(TransPortType, kfc_hccl_info.transport_type)
-            rdma_type = trans_enum_name(RdmaType, kfc_hccl_info.rdma_type)
-            result.append([
-                InfoConfReader().time_from_syscnt(kfc_hccl_info.timestamp),
-                self.hash_data.get(kfc_hccl_info.item_id, kfc_hccl_info.item_id),
-                kfc_hccl_info.ccl_tag,
-                kfc_hccl_info.group_name,
-                kfc_hccl_info.local_rank,
-                kfc_hccl_info.remote_rank,
-                kfc_hccl_info.rank_size,
-                kfc_hccl_info.work_flow_mode,
-                kfc_hccl_info.plane_id,
+    def save_kfc_hccl_info_data(self: any, aicpu_info_list: List[KfcHcclInfoBean]):
+        result = [
+            [
+                InfoConfReader().time_from_syscnt(aicpu_info.timestamp),
+                self.hash_data.get(aicpu_info.item_id, aicpu_info.item_id),
+                aicpu_info.ccl_tag,
+                aicpu_info.group_name,
+                aicpu_info.local_rank,
+                aicpu_info.remote_rank,
+                aicpu_info.rank_size,
+                aicpu_info.work_flow_mode,
+                aicpu_info.plane_id,
                 self.INVALID_CONTEXT_ID,
-                kfc_hccl_info.notify_id,
-                kfc_hccl_info.stage,
-                role,
-                kfc_hccl_info.duration_estimated,
-                kfc_hccl_info.src_addr,
-                kfc_hccl_info.dst_addr,
-                kfc_hccl_info.data_size,
-                op_type,
-                data_type,
-                link_type,
-                transport_type,
-                rdma_type,
-                kfc_hccl_info.stream_id,
-                kfc_hccl_info.task_id,
-            ])
-        return result
+                aicpu_info.notify_id,
+                aicpu_info.stage,
+                trans_enum_name(RoleType, aicpu_info.role),
+                aicpu_info.duration_estimated,
+                aicpu_info.src_addr,
+                aicpu_info.dst_addr,
+                aicpu_info.data_size,
+                trans_enum_name(OpType, aicpu_info.op_type),
+                trans_enum_name(DataType, aicpu_info.data_type),
+                trans_enum_name(LinkType, aicpu_info.link_type),
+                trans_enum_name(TransPortType, aicpu_info.transport_type),
+                trans_enum_name(RdmaType, aicpu_info.rdma_type),
+                aicpu_info.stream_id,
+                aicpu_info.task_id,
+            ]
+            for aicpu_info in aicpu_info_list
+        ]
+        with KfcInfoModel(self.project_path, [DBNameConstant.TABLE_KFC_INFO]) as model:
+            model.flush(result, DBNameConstant.TABLE_KFC_INFO)
 
     def parse(self: any) -> None:
         """
@@ -255,30 +282,14 @@ class AicpuAddInfoParser(DataParser, MsMultiProcess):
         save data to db
         :return:
         """
-        aicpu_node_data = self._aicpu_data.get(AicpuAddInfoBean.AICPU_NODE, [])
-        aicpu_dp_data = self._aicpu_data.get(AicpuAddInfoBean.AICPU_DP, [])
-        aicpu_model_data = self._aicpu_data.get(AicpuAddInfoBean.AICPU_MODEL, [])
-        aicpu_mi_data = self._aicpu_data.get(AicpuAddInfoBean.AICPU_MI, [])
-        if aicpu_node_data:
-            with AiCpuModel(self.project_path, [DBNameConstant.TABLE_AI_CPU]) as model:
-                model.flush(aicpu_node_data, DBNameConstant.TABLE_AI_CPU)
-        if aicpu_dp_data:
-            with AiCpuModel(self.project_path, [DBNameConstant.TABLE_AI_CPU_DP]) as model:
-                model.flush(aicpu_dp_data, DBNameConstant.TABLE_AI_CPU_DP)
-        if aicpu_model_data:
-            with TsTrackModel(self.project_path,
-                              DBNameConstant.DB_STEP_TRACE, [DBNameConstant.TABLE_MODEL_WITH_Q]) as model:
-                model.create_table(DBNameConstant.TABLE_MODEL_WITH_Q)
-                model.flush(DBNameConstant.TABLE_MODEL_WITH_Q, aicpu_model_data)
-        if aicpu_mi_data:
-            with DataPreparationModel(self.project_path, [DBNameConstant.TABLE_DATA_QUEUE]) as model:
-                model.flush(aicpu_mi_data)
-        for aicpu_type, aicpu_table in self._aicpu_table.items():
-            aicpu_data = self._aicpu_data.get(aicpu_type, [])
+        for struct_type, aicpu_data in self._aicpu_data.items():
+            func = self._get_data_save_func.get(struct_type)
+            if not func:
+                logging.error("The aicpu type %d is invalid.", struct_type)
+                continue
             if not aicpu_data:
                 continue
-            with KfcInfoModel(self.project_path, [aicpu_table]) as model:
-                model.flush(aicpu_data, aicpu_table)
+            func(aicpu_data)
 
     def ms_run(self: any) -> None:
         """
@@ -294,14 +305,19 @@ class AicpuAddInfoParser(DataParser, MsMultiProcess):
     def set_aicpu_data(self: any, aicpu_data: list) -> None:
         for aicpu_info in aicpu_data:
             struct_type = int(aicpu_info.struct_type)
-            get_data_func = self._get_data_func.get(struct_type)
-            if not get_data_func:
-                logging.error("The aicpu type %d is invalid.", aicpu_info.struct_type)
-                continue
             if struct_type == AicpuAddInfoBean.AICPU_NODE and \
                     (aicpu_info.data.ai_cpu_task_start_time == 0 or aicpu_info.data.ai_cpu_task_end_time == 0):
                 continue
             if struct_type == AicpuAddInfoBean.KFC_HCCL_INFO:
-                self._aicpu_data.get(struct_type).extend(get_data_func(aicpu_info))
+                self._aicpu_data.get(struct_type).extend(self._pre_process_kfc_info(aicpu_info))
             else:
-                self._aicpu_data.get(struct_type).append(get_data_func(aicpu_info))
+                self._aicpu_data.get(struct_type).append(aicpu_info)
+
+    def _pre_process_kfc_info(self: any, aicpu_info: AicpuAddInfoBean) -> list:
+        result_list = []
+        for kfc_hccl_info in [aicpu_info.data.first_hccl_info, aicpu_info.data.second_hccl_info]:
+            if kfc_hccl_info.group_name == "0":
+                continue
+            result_list.append(kfc_hccl_info)
+            # reserved for chip v6, set taskId(sqeId)-streamId in self.unique_id_map as key-value
+        return result_list
