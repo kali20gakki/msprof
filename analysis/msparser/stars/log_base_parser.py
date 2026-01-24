@@ -127,7 +127,7 @@ class LogBaseParser(IStarsParser):
             return
         device_id = InfoConfReader().get_device_id()
         host_task_dict = HostTaskCollector(self._result_dir).get_host_task_stream_table(int(device_id))
-         failed_count = 0
+        failed_count = 0
         for data in self._data_list:
             if data.task_id not in host_task_dict:
                 failed_count += 1
