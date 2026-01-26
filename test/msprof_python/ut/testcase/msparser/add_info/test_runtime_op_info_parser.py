@@ -62,7 +62,7 @@ class TestRuntimeOpInfoParser(unittest.TestCase):
                         return_value=[RuntimeOpInfo256Bean.decode(struct_data)]):
             check = RuntimeOpInfoParser(self.file_list, CONFIG)
             check._parse_for_256_data(['aging.additional.capture_op_info.slice_0'])
-            self.assertEqual(check._runtime_op_info_data, [['node', '2', 3, 5, 7, 6, 8, 9, '12', 'INVALID',
+            self.assertEqual(check._runtime_op_info_data, [['node', '2', 3, 5, 7, 6, 8, 9, '12', 'FUSION',
                                                             '13', 11, 0, 14, 1, 2, 'NCHW', 'FLOAT', 'N/A', '88',
                                                             'INT8', '"3,4,5"']])
             self.assertEqual(check._256_size, 1)
@@ -96,7 +96,7 @@ class TestRuntimeOpInfoParser(unittest.TestCase):
             check = RuntimeOpInfoParser(self.file_list, CONFIG)
             check._read_data("unaging", 'unaging.variable.capture_op_info.slice_0')
             self.assertEqual(check._runtime_op_info_data,
-                             [['node', '2', 3, 5, 7, 6, 8, 9, '12', 'INVALID', '13', 11, 0, 14, 0, 7,
+                             [['node', '2', 3, 5, 7, 6, 8, 9, '12', 'FUSION', '13', 11, 0, 14, 0, 7,
                               'NCHW;NHWC;FRACTAL_DECONV_TRANSPOSE;FRACTAL_DECONV', 'FLOAT;INT8;DOUBLE;UINT16',
                               '";3,4,5,6,7;12,13;6,5,4,3,2,1"', '88;NCDHW;HASHTABLE_LOOKUP_LOOKUPS',
                               'INT8;UINT64;UNDEFINED', '"3,4,5;3,8,5,17;3,15,5,16"']])

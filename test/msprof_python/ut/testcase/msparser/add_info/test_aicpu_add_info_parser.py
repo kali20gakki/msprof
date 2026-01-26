@@ -89,7 +89,7 @@ class TestAicpuAddInfoParser(unittest.TestCase):
             check.save()
         data = check._aicpu_data.get(AicpuAddInfoBean.AICPU_NODE, [])
         self.assertEqual(1, len(data))
-        self.assertEqual(0.123, data[0][8])
+        self.assertEqual(0.123, data[0].data.dispatch_time)
         InfoConfReader()._info_json = {}
 
     def test_parse_should_return_aicpu_node_data_when_type_0_and_start_time_0(self):
@@ -121,7 +121,7 @@ class TestAicpuAddInfoParser(unittest.TestCase):
             check.save()
         data = check._aicpu_data.get(AicpuAddInfoBean.AICPU_DP, [])
         self.assertEqual(1, len(data))
-        self.assertEqual("Last dequeue", data[0][1])
+        self.assertEqual("Last dequeue", data[0].data.action)
 
     def test_parse_should_return_aicpu_model_data_when_type_2(self):
         aicpu_data = [23130, 6000, 2, 1, 128, 2000,
@@ -134,7 +134,7 @@ class TestAicpuAddInfoParser(unittest.TestCase):
             check.save()
         data = check._aicpu_data.get(AicpuAddInfoBean.AICPU_MODEL, [])
         self.assertEqual(1, len(data))
-        self.assertEqual(2, data[0][3])
+        self.assertEqual(2, data[0].data.tag_id)
 
     def test_parse_should_return_aicpu_mi_data_when_type_3(self):
         aicpu_data = [23130, 6000, 3, 1, 128, 2000,
@@ -147,7 +147,7 @@ class TestAicpuAddInfoParser(unittest.TestCase):
             check.save()
         data = check._aicpu_data.get(AicpuAddInfoBean.AICPU_MI, [])
         self.assertEqual(1, len(data))
-        self.assertEqual(2000, data[0][3])
+        self.assertEqual(2000, data[0].data.end_time)
 
     def test_parse_should_return_comm_turn_data_when_type_4(self):
         aicpu_data = [23130, 6000, 4, 1, 128, 20000,
@@ -160,7 +160,7 @@ class TestAicpuAddInfoParser(unittest.TestCase):
             check.save()
         data = check._aicpu_data.get(AicpuAddInfoBean.KFC_COMM_TURN, [])
         self.assertEqual(1, len(data))
-        self.assertEqual(1000, data[0][5])
+        self.assertEqual(1000, data[0].data.server_start_time)
 
     def test_parse_should_return_compute_turn_data_when_type_5(self):
         aicpu_data = [23130, 6000, 5, 1, 128, 20000,
@@ -173,7 +173,7 @@ class TestAicpuAddInfoParser(unittest.TestCase):
             check.save()
         data = check._aicpu_data.get(AicpuAddInfoBean.KFC_COMPUTE_TURN, [])
         self.assertEqual(1, len(data))
-        self.assertEqual(1000, data[0][5])
+        self.assertEqual(1000, data[0].data.wait_compute_start_time)
 
     def test_parse_should_return_kfc_hccl_info_data_when_type_13(self):
         InfoConfReader()._info_json = {"DeviceInfo": [{'hwts_frequency': 100}]}
@@ -190,8 +190,8 @@ class TestAicpuAddInfoParser(unittest.TestCase):
             check.save()
         data = check._aicpu_data.get(AicpuAddInfoBean.KFC_HCCL_INFO, [])
         self.assertEqual(1, len(data))  # 拆分成了2条数据,但是第二条因为groupname是"0",被过滤
-        self.assertEqual("MUL", data[0][17])
-        self.assertEqual("RDMA_SEND_PAYLOAD", data[0][21])
+        self.assertEqual("1", data[0].op_type)  # op type
+        self.assertEqual("1", data[0].rdma_type)  # rdma type
         InfoConfReader()._info_json = {}
 
     def test_parse_should_return_device_hccl_op_info_data_when_type_10(self):
@@ -206,7 +206,7 @@ class TestAicpuAddInfoParser(unittest.TestCase):
             check.save()
         data = check._aicpu_data.get(AicpuAddInfoBean.HCCL_OP_INFO, [])
         self.assertEqual(1, len(data))
-        self.assertEqual("INT8", data[0][3])
+        self.assertEqual("0", data[0].data.data_type)  # data type
         InfoConfReader()._info_json = {}
 
 
