@@ -45,7 +45,7 @@ class ConfigDataParsers:
         get parsers by chip model
         :param config_name: DataParsersConfig, DataCalculatorConfig
         :param chip_model: 0,1,2
-        :param task_flag: whether pmu is task-based
+        :param task_flag: whether pmu is task-based and not custom pmu scene
         :return: data parsers
         """
         parsers_dict = {}

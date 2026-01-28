@@ -91,6 +91,9 @@ def dump_device_data(device_path: str) -> None:
     if ConfigMgr.is_ai_core_sample_based(device_path):
         logging.warning("Device Data in sample-based will not be parsed by msprof_analysis.so!")
         return
+    if ConfigMgr.is_custom_pmu_scene(device_path):
+        logging.warning("Device Data in custom pmu scene will not be parsed by msprof_analysis.so!")
+        return
     all_export_flag = ProfilingScene().is_all_export() and InfoConfReader().is_all_export_version()
     if ProfilingScene().is_cpp_parse_enable() and all_export_flag:
         run_in_subprocess(_dump_device_data, device_path)

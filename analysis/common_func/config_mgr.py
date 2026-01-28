@@ -130,3 +130,12 @@ class ConfigMgr:
                 return {}
         return sample_config
 
+    @staticmethod
+    def is_custom_pmu_scene(result_dir: str) -> bool:
+        """
+        check scene is custom pmu
+        """
+        sample_config = ConfigMgr.read_sample_config(result_dir)
+        metrics = sample_config.get("ai_core_metrics")
+        return metrics.startswith("Custom") if metrics else False
+

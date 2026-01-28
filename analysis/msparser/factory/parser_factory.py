@@ -36,7 +36,8 @@ class ParserFactory(IProfFactory):
         """
         generate parser
         """
-        task_flag = ConfigMgr.is_ai_core_task_based(self._project_path)
+        task_flag = (ConfigMgr.is_ai_core_task_based(self._project_path) and not
+                     ConfigMgr.is_custom_pmu_scene(self._project_path))
         return ConfigDataParsers.get_parsers(ConfigManager.DATA_PARSERS, chip_model, task_flag)
 
     def run(self: any) -> None:

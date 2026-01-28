@@ -60,11 +60,7 @@ class AicPmuUtils:
         :return:
         """
         events_list = aic_pmu_events.split(",")
-        aicore_events_map = read_cpu_cfg("ai_core", "custom")
-        if set(events_list).issubset(set(aicore_events_map.keys())):
-            return list(map(lambda x: x.replace('0x', 'r'), events_list))
-        raise ProfException(ProfException.PROF_INVALID_CONFIG_ERROR,
-                            "invalid pmu event id settings, event id: {}".format(aic_pmu_events))
+        return list(map(lambda x: x.replace('0x', 'r'), events_list))
 
     @classmethod
     def remove_unused_column(cls: any, ai_core_profiling_events: list) -> list:
