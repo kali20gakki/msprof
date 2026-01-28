@@ -76,8 +76,9 @@ function build_oam_tools() {
 }
 
 function build_analysis() {
-    cmake -S ${TOP_DIR}/cmake/superbuild/ -B ${TOP_DIR}/build -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=${TOP_DIR}/prefix -DSECUREC_LIB_DIR=${TOP_DIR}/prefix/securec_shared
-    cd ${TOP_DIR}/build; make -j$(nproc)
+    rm -rf ${TOP_DIR}/build/analysis
+    cmake -S ${TOP_DIR}/cmake/superbuild/ -B ${TOP_DIR}/build/analysis -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=${TOP_DIR}/prefix -DSECUREC_LIB_DIR=${TOP_DIR}/prefix/securec_shared
+    cd ${TOP_DIR}/build/analysis; make -j$(nproc)
 }
 
 function build_collector() {

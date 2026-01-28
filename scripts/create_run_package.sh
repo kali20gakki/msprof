@@ -47,7 +47,7 @@ function parse_script_args() {
 
 # build python whl
 function build_python_whl() {
-  cd ${TOP_DIR}/build/build
+  cd ${TOP_DIR}/build/analysis/build
   python3  ${TOP_DIR}/build/setup.py bdist_wheel --python-tag=py3 --py-limited-api=cp37
   cd - > /dev/null
 }
@@ -70,7 +70,7 @@ function create_collector_temp_dir() {
 function create_analysis_temp_dir() {
     local temp_dir=${1}
 
-    cp ${TOP_DIR}/build/dist/msprof-0.0.1-py3-none-any.whl ${temp_dir}
+    cp ${TOP_DIR}/build/analysis/dist/msprof-0.0.1-py3-none-any.whl ${temp_dir}
     cp -r ${TOP_DIR}/analysis ${temp_dir}
     rm -rf ${temp_dir}/analysis/csrc
 }
