@@ -64,7 +64,7 @@ class GeModel(ParserModel):
 class GeInfoViewModel(ViewModel):
     TASK_INFO_TYPE = CustomizedNamedtupleFactory.enhance_namedtuple(
         namedtuple("TaskInfo",
-                   ["model_id", "op_name", "stream_id", "task_id", "block_dim", "mix_block_dim",
+                   ["model_id", "op_name", "stream_id", "task_id", "block_num", "mix_block_num",
                     "op_stat", "task_type", "op_type", "index_id", "thread_id", "timestamp", "batch_id",
                     "tensor_num", "input_formats", "input_data_types", "input_shapes",
                     "output_formats", "output_data_types", "output_shapes", "device_id", "context_id",

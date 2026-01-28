@@ -90,31 +90,31 @@ static std::map<TaskId, std::vector<DeviceTask>> GenerateDeviceTask()
     std::map<TaskId, std::vector<DeviceTask>> deviceTask;
     auto& res1 = deviceTask[{1, 1, 1, 1}];
     res1.emplace_back();
-    res1.back().mixBlockDim = 3;  // 3为从核数
-    res1.back().blockDim = 8;  // 8为主核数
+    res1.back().mixBlockNum = 3;  // 3为从核数
+    res1.back().blockNum = 8;  // 8为主核数
     res1.back().taskStart = 100; // 第一个task开始时间为100
     res1.back().taskEnd = 130;  // 第一个task结束时间为130
     res1.emplace_back();
-    res1.back().mixBlockDim = 3;  // 3为从核数
-    res1.back().blockDim = 8;  // 8为主核数
+    res1.back().mixBlockNum = 3;  // 3为从核数
+    res1.back().blockNum = 8;  // 8为主核数
     res1.back().taskStart = 150; // 第2个task开始时间为150
     res1.back().taskEnd = 170;  // 第2个task结束时间为170
     auto& res2 = deviceTask[{1, 2, 1, 1}];
     res2.emplace_back();
-    res2.back().mixBlockDim = 3;  // 3为从核数
-    res2.back().blockDim = 8;  // 8为主核数
+    res2.back().mixBlockNum = 3;  // 3为从核数
+    res2.back().blockNum = 8;  // 8为主核数
     res2.back().taskStart = 200; // 第3个task开始时间为200
     res2.back().taskEnd = 230;  // 第3个task结束时间为230
     auto& res3 = deviceTask[{1, 3, 1, 1}];
     res3.emplace_back();
-    res3.back().mixBlockDim = 3;  // 3为从核数
-    res3.back().blockDim = 8;  // 8为主核数
+    res3.back().mixBlockNum = 3;  // 3为从核数
+    res3.back().blockNum = 8;  // 8为主核数
     res3.back().taskStart = 250; // 第4个task开始时间为250
     res3.back().taskEnd = 270; // 第4个task结束时间为270
     auto& res4 = deviceTask[{1, 1, 2, 1}];
     res4.emplace_back();
-    res4.back().mixBlockDim = 3;  // 3为从核数
-    res4.back().blockDim = 8;  // 8为主核数
+    res4.back().mixBlockNum = 3;  // 3为从核数
+    res4.back().blockNum = 8;  // 8为主核数
     res4.back().taskStart = 300; // 第5个task开始时间为300
     res4.back().taskEnd = 330; // 第5个task结束时间为330
     return deviceTask;
@@ -139,7 +139,7 @@ static void SetDeviceContext(DeviceContext& context)
 /**
  * 用例设计如下：
  *   一、DeviceTask：
- *   streamId-taskId-contextId-batchId        block_dim     mix_block_dim
+ *   streamId-taskId-contextId-batchId        block_num     mix_block_num
  *                1-1-1-1                         8              3
  *                1-1-1-1                         8              3
  *                1-1-1-2                         8              3
@@ -380,13 +380,13 @@ static std::map<TaskId, std::vector<DeviceTask>> GenerateDeviceTaskForQueue()
     std::map<TaskId, std::vector<DeviceTask>> deviceTask;
     auto& res1 = deviceTask[{1, 1, 1, 1}];
     res1.emplace_back();
-    res1.back().mixBlockDim = 3;  // 3为从核数
-    res1.back().blockDim = 8;  // 8为主核数
+    res1.back().mixBlockNum = 3;  // 3为从核数
+    res1.back().blockNum = 8;  // 8为主核数
     res1.back().taskStart = 480; // 第一个task开始时间为480
     res1.back().taskEnd = 600;  // 第一个task结束时间为600
     res1.emplace_back();
-    res1.back().mixBlockDim = 3;  // 3为从核数
-    res1.back().blockDim = 8;  // 8为主核数
+    res1.back().mixBlockNum = 3;  // 3为从核数
+    res1.back().blockNum = 8;  // 8为主核数
     res1.back().taskStart = 800; // 第2个task开始时间为800
     res1.back().taskEnd = 900;  // 第2个task结束时间为900
     return deviceTask;

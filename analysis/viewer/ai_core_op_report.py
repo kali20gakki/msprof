@@ -61,14 +61,14 @@ class AiCoreOpReport:
         "aic_vec_bankgroup_cflt_ratio", "aic_vec_bank_cflt_ratio", "aic_vec_resc_cflt_ratio",
         "aic_vector_fops", "aiv_cube_fops", "aiv_fixpipe_ratio", "aiv_fixpipe_time",
     }
-    ADDITION_HEADER = ["Context ID", "Mix Block Dim", "aiv_time", "aiv_total_time"]
+    ADDITION_HEADER = ["Context ID", "Mix Block Num", "aiv_time", "aiv_total_time"]
     TENSOR_HEADERS = [
         "Input Shapes", "Input Data Types", "Input Formats", "Output Shapes", "Output Data Types", "Output Formats"
     ]
     SPECIAL_AI_CORE_HEAD = ("_extra",)
 
     OPERATOR_UNUSED_HEADERS = ["Model Name", "Infer ID"]
-    HEADERS_WITH_NO_GE_DATA = ["Block Dim", "Mix Block Dim", "HF32 Eligible"]
+    HEADERS_WITH_NO_GE_DATA = ["Block Num", "Mix Block Num", "HF32 Eligible"]
     HARDWARE_OP_LIST = ['AI_CPU', 'DSA', 'DVPP']
     TASK_START_TIME = 'Task Start Time(us)'
     TASK_DURATION = 'Task Duration(us)'
@@ -474,7 +474,7 @@ class AiCoreOpReport:
               "when {1}.op_state is '0' then 'static' end), " \
               "{1}.task_type," \
               "{0}.start_time, {0}.duration_time," \
-              "{0}.wait_time, {1}.block_dim, {1}.mix_block_dim, {1}.op_flag," \
+              "{0}.wait_time, {1}.block_num, {1}.mix_block_num, {1}.op_flag," \
               "(case when {1}.input_shapes is NULL then 'N/A' else {1}.input_shapes end), " \
               "(case when {1}.input_data_types is NULL then 'N/A' else {1}.input_data_types end), " \
               "(case when {1}.input_formats is NULL then 'N/A' else {1}.input_formats end), " \

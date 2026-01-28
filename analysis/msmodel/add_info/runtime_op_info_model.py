@@ -40,7 +40,7 @@ class RuntimeOpInfoViewModel(ViewModel):
         if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_RUNTIME_OP_INFO):
             return {}
         sql = ("SELECT TRUE AS is_valid, device_id, model_id, stream_id, task_id, "
-               "op_name, task_type, op_type, block_dim, mix_block_dim, op_flag, is_dynamic, tensor_num, "
+               "op_name, task_type, op_type, block_num, mix_block_num, op_flag, is_dynamic, tensor_num, "
                "input_formats, input_data_types, input_shapes, output_formats, output_data_types, output_shapes "
                "FROM {}").format(DBNameConstant.TABLE_RUNTIME_OP_INFO)
         op_info_data = DBManager.fetch_all_data(self.cur, sql, dto_class=RuntimeOpInfoDto)

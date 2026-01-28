@@ -39,8 +39,8 @@ struct TaskInfoData {
     uint32_t modelId = UINT32_MAX;
     uint32_t streamId = UINT32_MAX;
     uint32_t taskId = UINT32_MAX;
-    uint32_t blockDim = UINT32_MAX;
-    uint32_t mixBlockDim = UINT32_MAX;
+    uint32_t blockNum = UINT32_MAX;
+    uint32_t mixBlockNum = UINT32_MAX;
     uint32_t batchId = UINT32_MAX;
     uint32_t contextId = UINT32_MAX;
     std::string opState;

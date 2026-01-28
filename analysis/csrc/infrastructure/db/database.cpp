@@ -50,8 +50,8 @@ namespace {
         {"op_name", SQL_TEXT_TYPE},
         {"stream_id", SQL_INTEGER_TYPE},
         {"task_id", SQL_INTEGER_TYPE},
-        {"block_dim", SQL_INTEGER_TYPE},
-        {"mix_block_dim", SQL_INTEGER_TYPE},
+        {"block_num", SQL_INTEGER_TYPE},
+        {"mix_block_num", SQL_INTEGER_TYPE},
         {"op_state", SQL_TEXT_TYPE},
         {"task_type", SQL_TEXT_TYPE},
         {"op_type", SQL_TEXT_TYPE},
@@ -177,8 +177,8 @@ namespace {
         {"op_name", SQL_TEXT_TYPE},
         {"task_type", SQL_TEXT_TYPE},
         {"op_type", SQL_TEXT_TYPE},
-        {"block_dim", SQL_INTEGER_TYPE},
-        {"mix_block_dim", SQL_INTEGER_TYPE},
+        {"block_num", SQL_INTEGER_TYPE},
+        {"mix_block_num", SQL_INTEGER_TYPE},
         {"op_flag", SQL_INTEGER_TYPE},
         {"is_dynamic", SQL_INTEGER_TYPE},
         {"tensor_num", SQL_INTEGER_TYPE},
@@ -737,11 +737,11 @@ namespace {
         {"timestamp", SQL_NUMERIC_TYPE}
     };
 
-    const TableColumns TsBlockDim = {
+    const TableColumns TsBlockNum = {
         {"timestamp", SQL_REAL_TYPE},
         {"stream_id", SQL_INTEGER_TYPE},
         {"task_id", SQL_INTEGER_TYPE},
-        {"block_dim", SQL_INTEGER_TYPE}
+        {"block_num", SQL_INTEGER_TYPE}
     };
 
     const TableColumns QosBwData = {
@@ -1018,7 +1018,7 @@ StepTraceDB::StepTraceDB()
     tableColNames_["StepTime"] = StepTime;
     tableColNames_["TaskType"] = TaskType;
     tableColNames_["TsMemcpy"] = TsMemcpy;
-    tableColNames_["TsBlockDim"] = TsBlockDim;
+    tableColNames_["TsBlockNum"] = TsBlockNum;
 }
 
 KfcInfo::KfcInfo()

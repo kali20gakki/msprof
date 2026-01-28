@@ -58,7 +58,7 @@ class MsProfExportDataConfig(MetaConfig):
             ('handler', '_get_op_summary_data'),
             ('headers',
              'Model Name,Model ID,Task ID,Stream ID,Infer ID,Op Name,OP Type,OP State,Task Type,'
-             'Task Start Time(us),Task Duration(us),Task Wait Time(us),Block Dim,Mix Block Dim,HF32 Eligible'),
+             'Task Start Time(us),Task Duration(us),Task Wait Time(us),Block Num,Mix Block Num,HF32 Eligible'),
         ],
         'l2_cache': [
             ('handler', '_get_l2_cache_data'),

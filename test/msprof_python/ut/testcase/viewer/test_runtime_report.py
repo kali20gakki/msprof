@@ -189,7 +189,7 @@ class TestRuntimeReport(unittest.TestCase):
 
     def test_get_opname_2(self):
         create_ge_sql = "CREATE TABLE IF NOT EXISTS " + DBNameConstant.TABLE_GE_TASK + \
-                        " (device_id, model_name, model_id, op_name, stream_id, task_id, batch_id, block_dim, " \
+                        " (device_id, model_name, model_id, op_name, stream_id, task_id, batch_id, block_num, " \
                         "op_state, task_type, op_type, iter_id, input_count, input_formats, input_data_types, " \
                         "input_shapes, output_count, output_formats, output_data_types, output_shapes)"
         data = ((0, "resnet50", 1, "trans_TransData_0", 5, 3, 0, 1, "static", "AI_CORE", "TransData", 0, 1, "NCHW",

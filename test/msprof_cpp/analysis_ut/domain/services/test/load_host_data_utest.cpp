@@ -217,7 +217,7 @@ TEST_F(LoadHostDataUtest, InjectDataReturnSuccess)
     auto ptr = std::make_shared<std::map<TaskId, std::vector<DeviceTask>>>();
     dataInventory_.Inject(ptr);
     CreateHostData();
-    std::vector<uint32_t> expectBlockDim{32, 32};
+    std::vector<uint32_t> expectBlockNum{32, 32};
     auto deviceTask = GenerateDeviceTask();
     auto deviceTaskS = dataInventory_.GetPtr<std::map<TaskId, std::vector<Domain::DeviceTask>>>();
     deviceTaskS->swap(deviceTask);
@@ -225,8 +225,8 @@ TEST_F(LoadHostDataUtest, InjectDataReturnSuccess)
     deviceContext.deviceContextInfo.deviceFilePath = HOST_PATH;
     LoadHostData loadHostData;
     ASSERT_EQ(ANALYSIS_OK, loadHostData.Run(dataInventory_, deviceContext));
-    ASSERT_EQ(deviceTaskS->at({1, 1, 1, 1})[0].blockDim, expectBlockDim[0]);
-    ASSERT_EQ(deviceTaskS->at({1, 1, 2, 1})[0].blockDim, expectBlockDim[1]);
+    ASSERT_EQ(deviceTaskS->at({1, 1, 1, 1})[0].blockNum, expectBlockNum[0]);
+    ASSERT_EQ(deviceTaskS->at({1, 1, 2, 1})[0].blockNum, expectBlockNum[1]);
 }
 
 TEST_F(LoadHostDataUtest, ReturnOKWhenWithOutDeviceTask)

@@ -39,8 +39,8 @@ const std::string TASK_TYPE = "Task Type";
 const std::string TASK_START_TIME = "Task Start Time(us)";
 const std::string TASK_DURATION = "Task Duration(us)";
 const std::string TASK_WAIT_TIME = "Task Wait Time(us)";
-const std::string BLOCK_DIM = "Block Dim";
-const std::string MIX_BLOCK_DIM = "Mix Block Dim";
+const std::string BLOCK_NUM = "Block Num";
+const std::string MIX_BLOCK_NUM = "Mix Block Num";
 const std::string HF32_ELIGIBLE = "HF32 Eligible";
 const std::string INPUT_SHAPES = "Input Shapes";
 const std::string INPUT_DATA_TYPES = "Input Data Types";
@@ -65,7 +65,7 @@ const std::vector<std::string> BASE_HEADER{
     TASK_START_TIME, TASK_DURATION, TASK_WAIT_TIME
 };
 const std::vector<std::string> ADDITIONAL_TENSOR_HEADER{
-    BLOCK_DIM, MIX_BLOCK_DIM, HF32_ELIGIBLE, INPUT_SHAPES, INPUT_DATA_TYPES, INPUT_FORMATS,
+    BLOCK_NUM, MIX_BLOCK_NUM, HF32_ELIGIBLE, INPUT_SHAPES, INPUT_DATA_TYPES, INPUT_FORMATS,
     OUTPUT_SHAPES, OUTPUT_DATA_TYPES, OUTPUT_FORMATS, CONTEXT_ID
 };
 
@@ -127,7 +127,7 @@ std::vector<std::string> OpSummaryAssembler::GenerateOneTaskRow(const TaskInfoDa
             std::to_string(task.streamId), computeTask.opName, computeTask.opType, computeTask.opState,
             computeTask.taskType, DivideByPowersOfTenWithPrecision(task.timestamp),
             DivideByPowersOfTenWithPrecision(task.end - task.timestamp), "0",
-            std::to_string(computeTask.blockDim), std::to_string(computeTask.mixBlockDim), computeTask.opFlag,
+            std::to_string(computeTask.blockNum), std::to_string(computeTask.mixBlockNum), computeTask.opFlag,
             computeTask.inputShapes, computeTask.inputDataTypes, computeTask.inputFormats, computeTask.outputShapes,
             computeTask.outputDataTypes, computeTask.outputFormats, ctxId};
 }
@@ -190,7 +190,7 @@ std::set<int> OpSummaryAssembler::GetMaskCols()
 {
     std::set<int> maskCols;
     const auto platVersion = Context::GetInstance().GetPlatformVersion(DEFAULT_DEVICE_ID, profPath_);
-    std::vector<std::string> STARS_HEADER{CONTEXT_ID, MIX_BLOCK_DIM, AIV_TIME, AIV_TOTAL_TIME};
+    std::vector<std::string> STARS_HEADER{CONTEXT_ID, MIX_BLOCK_NUM, AIV_TIME, AIV_TOTAL_TIME};
     if (!Context::GetInstance().IsStarsChip(platVersion)) {
         for (auto &name : STARS_HEADER) {
             auto idx = GetIndexForVec(headers_, name);

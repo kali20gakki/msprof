@@ -635,7 +635,7 @@ class TaskGear(CANNGear):
             task_type = Constant.TASK_TYPE_AI_CPU
         for cxt_id in cxt_ids:
             self.task_info.append([model_id, op_name, add_dto.stream_id, add_dto.task_id,
-                                   node_basic_info_dto.block_dim, node_basic_info_dto.mix_block_dim,
+                                   node_basic_info_dto.block_num, node_basic_info_dto.mix_block_num,
                                    node_basic_info_dto.is_dynamic, task_type, node_basic_info_dto.op_type,
                                    request_id, add_dto.thread_id, add_dto.timestamp, add_dto.batch_id,
                                    tensor_info_dto.tensor_num, tensor_info_dto.input_formats,
@@ -672,7 +672,7 @@ class TaskGear(CANNGear):
                                    rts_trk.device_id, context_id, op_flag, Constant.NA])
         else:
             self.task_info.append([op_info.model_id, op_name, rts_trk.stream_id, rts_trk.task_id,
-                                   op_info.block_dim, op_info.mix_block_dim, op_info.is_dynamic, task_type,
+                                   op_info.block_num, op_info.mix_block_num, op_info.is_dynamic, task_type,
                                    op_type, request_id, rts_trk.thread_id, rts_trk.timestamp,
                                    rts_trk.batch_id, op_info.tensor_num, op_info.input_formats,
                                    op_info.input_data_types, op_info.input_shapes,

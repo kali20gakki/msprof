@@ -62,7 +62,7 @@ std::vector<TaskInfoData> ComputeTaskInfoProcessor::LoadData(
         ERROR("Create % connection failed.", dbPath);
         return res;
     }
-    std::string sql{"SELECT hashid, model_id, op_name, stream_id, task_id, block_dim, mix_block_dim, task_type, "
+    std::string sql{"SELECT hashid, model_id, op_name, stream_id, task_id, block_num, mix_block_num, task_type, "
                     "op_type, op_flag, batch_id, IFNULL(input_formats, 'NULL'), IFNULL(input_data_types, 'NULL'), "
                     "IFNULL(input_shapes, 'NULL'), IFNULL(output_formats, 'NULL'), IFNULL(output_data_types, 'NULL'), "
                     "IFNULL(output_shapes, 'NULL'), device_id, context_id, (case when op_state is 'N/A' then 'N/A' "
@@ -83,7 +83,7 @@ std::vector<TaskInfoData> ComputeTaskInfoProcessor::LoadData(
     ShapeInfo info;
     std::string hashId;
     for (auto& node : oriData) {
-        std::tie(hashId, data.modelId, data.opName, data.streamId, data.taskId, data.blockDim, data.mixBlockDim,
+        std::tie(hashId, data.modelId, data.opName, data.streamId, data.taskId, data.blockNum, data.mixBlockNum,
                  data.taskType, data.opType, data.opFlag, data.batchId, info.inputFormats, info.inputDataTypes,
                  info.inputShapes, info.outputFormats, info.outputDataTypes, info.outputShapes,
                  data.deviceId, data.contextId, data.opState) = node;

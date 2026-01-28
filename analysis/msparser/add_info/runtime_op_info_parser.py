@@ -97,7 +97,7 @@ class RuntimeOpInfoParser(DataParser, MsMultiProcess):
             body.level, struct_type, body.thread_id, body.timestamp,
             body.device_id, body.model_id, body.stream_id, body.task_id,
             op_name, body.task_type, op_type,
-            body.block_dim, body.mix_block_dim, body.op_flag, op_state, body.tensor_num,
+            body.block_num, body.mix_block_num, body.op_flag, op_state, body.tensor_num,
             tensor.input_format if tensor.input_format else Constant.NA,
             tensor.input_data_type if tensor.input_data_type else Constant.NA,
             "\"" + tensor.input_shape + "\"" if tensor.input_shape else Constant.NA,

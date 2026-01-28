@@ -109,7 +109,7 @@ class TestAicCalculator(unittest.TestCase):
                 mock.patch(NAMESPACE + '.AicCalculator.calculate_pmu_list'):
             check = AicCalculator(self.file_list, CONFIG)
             check._core_num_dict = {'aic': 30, 'aiv': 0}
-            check._block_dims = {'2-2': [22, 22]}
+            check._block_num = {'2-2': [22, 22]}
             check._freq = 1500
             check._parse(aic_reader)
 

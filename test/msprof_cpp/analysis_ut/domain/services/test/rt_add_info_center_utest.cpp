@@ -107,8 +107,8 @@ void CheckRuntimeOpInfo(RuntimeOpInfo info, RuntimeOpInfo expect)
 {
     EXPECT_EQ(info.deviceId, expect.deviceId);
     EXPECT_EQ(info.taskId, expect.taskId);
-    EXPECT_EQ(info.blockDim, expect.blockDim);
-    EXPECT_EQ(info.mixBlockDim, expect.mixBlockDim);
+    EXPECT_EQ(info.blockNum, expect.blockNum);
+    EXPECT_EQ(info.mixBlockNum, expect.mixBlockNum);
     EXPECT_EQ(info.opFlag, expect.opFlag);
     EXPECT_EQ(info.tensorNum, expect.tensorNum);
     EXPECT_EQ(info.modelId, expect.modelId);

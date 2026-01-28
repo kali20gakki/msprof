@@ -80,7 +80,7 @@ class StructDecoder:
         "MemoryApplicationBean": StructFmt.MEMORY_APPLICATION_FMT,
         "MemoryOpBean": StructFmt.MEMORY_OP_FMT,
         "TaskFlipBean": StructFmt.DEVICE_TASK_FLIP,
-        "BlockDimBean": StructFmt.TS_BLOCK_DIM_FMT,
+        "BlockNumBean": StructFmt.TS_BLOCK_NUM_FMT,
         "NpuModuleMemDataBean": StructFmt.NPU_MODULE_MEM_FMT,
         "HcclOpInfoBean": StructFmt.HCCL_OP_INFO_FMT,
         "StaticOpMemBean": StructFmt.STATIC_OP_MEM_FMT,

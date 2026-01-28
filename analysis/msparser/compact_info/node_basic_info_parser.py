@@ -46,8 +46,8 @@ class NodeBasicInfoParser(DataParser, MsMultiProcess):
         if not bean_data:
             return []
         return [bean_data.level, bean_data.struct_type, bean_data.thread_id, bean_data.timestamp,
-                bean_data.node_id, bean_data.task_type, bean_data.op_type, bean_data.block_dim,
-                bean_data.mix_block_dim, bean_data.op_flag]
+                bean_data.node_id, bean_data.task_type, bean_data.op_type, bean_data.block_num,
+                bean_data.mix_block_num, bean_data.op_flag]
 
     def parse(self: any) -> None:
         """

@@ -462,8 +462,8 @@ task数据，呈现所有硬件执行的算子信息。
 |--|--|--|
 |name|INTEGER|算子名，STRING_IDS(name)|
 |globalTaskId|INTEGER|索引，全局算子任务ID，用于关联TASK表|
-|blockDim|INTEGER|算子运行切分数量，对应算子运行时核数|
-|mixBlockDim|INTEGER|mix算子从加速器的BlockDim值|
+|blockNum|INTEGER|算子运行切分数量，对应算子运行时核数|
+|mixBlockNum|INTEGER|mix算子从加速器的BlockNum值|
 |taskType|INTEGER|Host执行该算子的加速器类型，STRING_IDS(taskType)|
 |opType|INTEGER|算子类型，STRING_IDS(opType)|
 |inputFormats|INTEGER|算子输入数据格式，STRING_IDS(inputFormats)|
@@ -1822,9 +1822,9 @@ op\_summary\_\*.csv文件根据msprof采集参数取值不同，文件呈现结�
 |Task Start Time(us)|Task开始时间，单位us。|
 |Task Duration(us)|Task耗时，包含调度到加速器的时间、加速器上的执行时间以及结束响应时间，单位us。|
 |Task Wait Time(us)|上一个Task的结束时间与当前Task的开始时间间隔，单位us。|
-|Block Dim|Task运行切分数量，对应Task运行时核数。task_time为l0时，不采集该字段，显示为0。|
+|Block Num|Task运行切分数量，对应Task运行时核数。task_time为l0时，不采集该字段，显示为0。|
 |HF32 Eligible|标识是否使用HF32精度标记，YES表示使用，NO表示未使用，该字段仅在--task-time=l1情况下上报，--task-time=l0时显示为N/A。|
-|Mix Block Dim|部分算子同时在AI Core和Vector Core上执行，主加速器的Block Dim在Block Dim字段描述，从加速器的Block Dim在本字段描述。task_time为l0时，不采集该字段，显示为N/A。|
+|Mix Block Num|部分算子同时在AI Core和Vector Core上执行，主加速器的Block Num在Block Num字段描述，从加速器的Block Num在本字段描述。task_time为l0时，不采集该字段，显示为N/A。|
 |Input Shapes|算子的输入维度。task_time为l0时，不采集该字段，显示为N/A。|
 |Input Data Types|算子输入数据类型。task_time为l0时，不采集该字段，显示为N/A。|
 |Input Formats|算子输入数据格式。task_time为l0时，不采集该字段，显示为N/A。|

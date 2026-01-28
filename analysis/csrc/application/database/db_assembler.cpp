@@ -741,7 +741,7 @@ bool SaveComputeTaskInfo(DataInventory& dataInventory, DBInfo& msprofDB, const s
         taskInfoData.hashId = IdPool::GetInstance().GetUint64Id(item.hashId);
         taskInfoData.opState = IdPool::GetInstance().GetUint64Id(item.opState);
         taskInfoData.hf32Eligible = IdPool::GetInstance().GetUint64Id(item.opFlag);
-        res.emplace_back(taskInfoData.opName, taskInfoData.globalTaskId, item.blockDim, item.mixBlockDim,
+        res.emplace_back(taskInfoData.opName, taskInfoData.globalTaskId, item.blockNum, item.mixBlockNum,
                          taskInfoData.taskType, taskInfoData.opType, taskInfoData.inputFormats,
                          taskInfoData.inputDataTypes, taskInfoData.inputShapes, taskInfoData.outputFormats,
                          taskInfoData.outputDataTypes, taskInfoData.outputShapes, taskInfoData.hashId,

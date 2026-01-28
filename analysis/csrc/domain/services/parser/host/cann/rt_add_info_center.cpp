@@ -56,7 +56,7 @@ void RTAddInfoCenter::LoadDB(const std::string &path)
     }
 
     std::string sql{"SELECT device_id, model_id, stream_id, task_id, op_name, task_type, op_type, "
-                    "block_dim, mix_block_dim, op_flag, is_dynamic, tensor_num, input_formats, "
+                    "block_num, mix_block_num, op_flag, is_dynamic, tensor_num, input_formats, "
                     "input_data_types, input_shapes, output_formats, output_data_types, output_shapes "
                     "FROM RuntimeOpInfo"};
     using dataFormat = std::vector<std::tuple<uint16_t, uint64_t, uint32_t, uint16_t, std::string, std::string,
@@ -70,12 +70,12 @@ void RTAddInfoCenter::LoadDB(const std::string &path)
     }
 
     for (auto row : result) {
-        uint16_t deviceId, taskId, blockDim, mixBlockDim, opFlag, tensorNum;
+        uint16_t deviceId, taskId, blockNum, mixBlockNum, opFlag, tensorNum;
         uint32_t streamId;
         uint64_t modelId, opNameU64, opTypeU64;
         std::string opName, taskType, opType, isDynamic, inputFormats, inputDataTypes, inputShapes,
                     outputFormats, outputDataTypes, outputShapes;
-        std::tie(deviceId, modelId, streamId, taskId, opName, taskType, opType, blockDim, mixBlockDim, opFlag,
+        std::tie(deviceId, modelId, streamId, taskId, opName, taskType, opType, blockNum, mixBlockNum, opFlag,
                  isDynamic, tensorNum, inputFormats, inputDataTypes, inputShapes,
                  outputFormats, outputDataTypes, outputShapes) = row;
         std::string key = Utils::Join("_", deviceId, streamId, taskId);
@@ -85,7 +85,7 @@ void RTAddInfoCenter::LoadDB(const std::string &path)
         }
         opName = HashData::GetInstance().Get(opNameU64);
         opType = HashData::GetInstance().Get(opTypeU64);
-        RuntimeOpInfo info{deviceId, taskId, blockDim, mixBlockDim, opFlag, tensorNum, streamId, modelId, taskType,
+        RuntimeOpInfo info{deviceId, taskId, blockNum, mixBlockNum, opFlag, tensorNum, streamId, modelId, taskType,
                            opType, opName, isDynamic, inputFormats, inputDataTypes, inputShapes,
                            outputFormats, outputDataTypes, outputShapes};
         runtimeOpInfoData_[key] = info;

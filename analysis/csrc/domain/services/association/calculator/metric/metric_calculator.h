@@ -38,7 +38,7 @@ const uint64_t FREQ_TO_Hz = 1000000;
 const uint8_t AIV_CORE_TYPE = 1;
 const uint8_t AIC_CORE_TYPE = 0;
 struct CalculationElements {
-    uint32_t blockDim{0};
+    uint32_t blockNum{0};
     uint32_t coreNum{0};
     uint64_t taskCyc{0};
     uint64_t bwFreq{0};  // 这个频率为从info.json中读出来的aic_frequency
@@ -67,7 +67,7 @@ public:
     static double CalculatorTimeByMultiplication(CalculationElements &allParams, size_t index);
     static double CalculatorCubeFops(CalculationElements &allParams, size_t index);
     static double CalculatorVectorFops(CalculationElements &allParams, size_t index);
-    static double CalculatorTotalTime(uint64_t totalCycle, uint64_t blockDim, uint64_t coreNum, uint64_t freq);
+    static double CalculatorTotalTime(uint64_t totalCycle, uint64_t blockNum, uint64_t coreNum, uint64_t freq);
     static double CalculateMetricWithoutCycByAdd(CalculationElements &allParams, size_t index);
     static double CalculateMetricWithoutCycBySub(CalculationElements &allParams, size_t index);
 public:
@@ -82,7 +82,7 @@ public:
     std::vector<double> CalculatePmu(HalPmuData pmuData, std::map<T, Calculator> calTable, CalculationElements& params)
     {
         auto pmuTable = GetValueMappingOffset(params, pmuData);
-        params.totalTime = Calculator::CalculatorTotalTime(pmuData.pmu.totalCycle, params.blockDim, params.coreNum,
+        params.totalTime = Calculator::CalculatorTotalTime(pmuData.pmu.totalCycle, params.blockNum, params.coreNum,
                                                            params.timeFreq);
         std::vector<double> res;
         if (calTable.size() != params.floatBit->size()) {

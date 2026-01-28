@@ -29,8 +29,8 @@ using TaskTypeDataFormat = std::tuple<uint64_t, uint16_t, uint16_t, uint64_t, ui
 using StepTraceDataFormat = std::tuple<uint64_t, uint64_t, uint64_t, uint16_t, uint16_t, uint16_t>;
 // timestamp stream_id task_id task_state
 using TaskMemcpyDataFormat = std::tuple<uint64_t, uint16_t, uint16_t, uint64_t>;
-// timestamp stream_id task_id block_dim
-using BlockDimDataFormat = std::tuple<uint64_t, uint16_t, uint16_t, uint32_t>;
+// timestamp stream_id task_id block_num
+using BlockNumDataFormat = std::tuple<uint64_t, uint16_t, uint16_t, uint32_t>;
 
 bool SaveTaskTypeData(const std::vector<HalTrackData>& dataS, const DeviceContext& deviceContext)
 {
@@ -82,20 +82,20 @@ bool SaveTsMemcpyData(const std::vector<HalTrackData>& dataS, const DeviceContex
     return SaveData(tsMemecpyTasks, tsTrackDB, dbPath);
 }
 
-bool SaveBlockDimData(const std::vector<HalTrackData>& dataS, const DeviceContext& deviceContext)
+bool SaveBlockNumData(const std::vector<HalTrackData>& dataS, const DeviceContext& deviceContext)
 {
-    DBInfo tsTrackDB("step_trace.db", "TsBlockDim");
+    DBInfo tsTrackDB("step_trace.db", "TsBlockNum");
     MAKE_SHARED0_RETURN_VALUE(tsTrackDB.database, StepTraceDB, ANALYSIS_ERROR);
     std::string dbPath = Utils::File::PathJoin({deviceContext.GetDeviceFilePath(), SQLITE, tsTrackDB.dbName});
     INFO("Start to process %.", dbPath);
     MAKE_SHARED_RETURN_VALUE(tsTrackDB.dbRunner, DBRunner, ANALYSIS_ERROR, dbPath);
-    std::vector<BlockDimDataFormat> blockDimTaskS;
+    std::vector<BlockNumDataFormat> blockNumTaskS;
     for (const auto& data : dataS) {
-        HalBlockDim blockDim = data.blockDim;
-        blockDimTaskS.emplace_back(data.hd.timestamp, data.hd.taskId.streamId,
-                                   data.hd.taskId.taskId, blockDim.blockDim);
+        HalBlockNum blockNum = data.blockNum;
+        blockNumTaskS.emplace_back(data.hd.timestamp, data.hd.taskId.streamId,
+                                   data.hd.taskId.taskId, blockNum.blockNum);
     }
-    return SaveData(blockDimTaskS, tsTrackDB, dbPath);
+    return SaveData(blockNumTaskS, tsTrackDB, dbPath);
 }
 
 static const std::unordered_map<int, std::function<bool(const std::vector<HalTrackData>&, const DeviceContext&)>>
@@ -103,7 +103,7 @@ type2SaveFunc {
     {HalTrackType::STEP_TRACE, SaveStepTraceData},
     {HalTrackType::TS_TASK_TYPE, SaveTaskTypeData},
     {HalTrackType::TS_MEMCPY, SaveTsMemcpyData},
-    {HalTrackType::BLOCK_DIM, SaveBlockDimData}
+    {HalTrackType::BLOCK_NUM, SaveBlockNumData}
 };
 
 bool SaveTrackData(const std::unordered_map<HalTrackType, std::vector<HalTrackData>>& type2Data,

@@ -21,7 +21,7 @@ from viewer.chip_model_function.chip_model_decorators import format_pmu_data_by_
 
 header = [
     'Model Name', 'Model ID', 'Task ID', 'Stream ID', 'Infer ID', 'Op Name', 'OP Type', 'OP State', 'Task Type',
-    'Task Start Time(us)', 'Task Duration(us)', 'Task Wait Time(us)', 'Block Dim', 'Mix Block Dim',
+    'Task Start Time(us)', 'Task Duration(us)', 'Task Wait Time(us)', 'Block Num', 'Mix Block Num',
     'HF32 Eligible', 'Input Shapes', 'Input Data Types', 'Input Formats', 'Output Shapes', 'Output Data Types',
     'Output Formats', 'Context ID', 'total_time', 'total_cycles', 'ub_read_bw', 'ub_write_bw', 'l1_read_bw',
     'l1_write_bw', 'main_mem_read_bw', 'main_mem_write_bw'

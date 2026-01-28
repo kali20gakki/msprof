@@ -22,12 +22,12 @@
 namespace Analysis {
 namespace Domain {
 using namespace Analysis::Infra;
-double Calculator::CalculatorTotalTime(uint64_t totalCycle, uint64_t blockDim, uint64_t coreNum, uint64_t freq)
+double Calculator::CalculatorTotalTime(uint64_t totalCycle, uint64_t blockNum, uint64_t coreNum, uint64_t freq)
 {
-    if (!blockDim || !coreNum || !freq) {
+    if (!blockNum || !coreNum || !freq) {
         return 0.0;
     }
-    auto res = static_cast<double>(totalCycle) * FREQ_TO_Hz / freq / blockDim * ((blockDim + coreNum - 1) / coreNum);
+    auto res = static_cast<double>(totalCycle) * FREQ_TO_Hz / freq / blockNum * ((blockNum + coreNum - 1) / coreNum);
     return res;
 }
 
@@ -158,12 +158,12 @@ std::unordered_map<uint32_t, uint64_t> MetricCalculator::GetValueMappingOffset(C
     return res;
 }
 
-void SetBlockDim(DeviceTask& task, CalculationElements& allParams, HalPmuData& pmu)
+void SetBlockNum(DeviceTask& task, CalculationElements& allParams, HalPmuData& pmu)
 {
     if (pmu.type == PMU) {
-        allParams.blockDim = task.blockDim;
+        allParams.blockNum = task.blockNum;
     } else {
-        allParams.blockDim = task.mixBlockDim;
+        allParams.blockNum = task.mixBlockNum;
     }
 }
 
@@ -225,7 +225,7 @@ std::vector<double> MetricCalculator::CalculatePmuMetric(DataInventory& dataInve
         }
         params.coreNum = pmu.type == PMU ? deviceInfo.aivNum : deviceInfo.aiCoreNum;
     }
-    SetBlockDim(task, params, pmu);
+    SetBlockNum(task, params, pmu);
     return SetAllParamsAndCalculator(params, context, pmu);
 }
 }

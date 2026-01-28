@@ -147,8 +147,8 @@ struct RuntimeOpInfo {
     bool isValid = false;
     uint16_t deviceId = 0;
     uint16_t taskId = 0;
-    uint16_t blockDim = 0;
-    uint16_t mixBlockDim = 0;
+    uint16_t blockNum = 0;
+    uint16_t mixBlockNum = 0;
     uint16_t opFlag = 0;
     uint16_t tensorNum = 0;
     uint32_t streamId = 0;
@@ -165,12 +165,12 @@ struct RuntimeOpInfo {
     std::string outputShapes{"N/A"};
 
     RuntimeOpInfo() = default;
-    RuntimeOpInfo(uint16_t deviceId, uint16_t taskId, uint16_t blockDim, uint16_t mixBlockDim, uint16_t opFlag,
+    RuntimeOpInfo(uint16_t deviceId, uint16_t taskId, uint16_t blockNum, uint16_t mixBlockNum, uint16_t opFlag,
                   uint16_t tensorNum, uint32_t streamId, uint64_t modelId, std::string taskType,
                   std::string opType, std::string opName, std::string isDynamic, std::string inputFormats,
                   std::string inputDataTypes, std::string inputShapes, std::string outputFormats,
                   std::string outputDataTypes, std::string outputShapes)
-        : deviceId(deviceId), taskId(taskId), blockDim(blockDim), mixBlockDim(mixBlockDim), opFlag(opFlag),
+        : deviceId(deviceId), taskId(taskId), blockNum(blockNum), mixBlockNum(mixBlockNum), opFlag(opFlag),
           tensorNum(tensorNum), streamId(streamId), modelId(modelId), taskType(std::move(taskType)),
           opType(std::move(opType)), opName(std::move(opName)), isDynamic(std::move(isDynamic)),
           inputFormats(std::move(inputFormats)), inputDataTypes(std::move(inputDataTypes)),

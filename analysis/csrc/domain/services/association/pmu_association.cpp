@@ -124,7 +124,7 @@ size_t PmuAssociation::MergeBlockPmuToDeviceTask(std::vector<HalPmuData*>& pmuDa
               pmuData[0]->hd.taskId.taskId, pmuData[0]->hd.taskId.streamId, pmuData[0]->hd.taskId.contextId);
         return pmuData.size();
     }
-    uint32_t mixCount = deviceTask.mixBlockDim;
+    uint32_t mixCount = deviceTask.mixBlockNum;
     uint8_t core_type = AIC_CORE_TYPE;
     if (deviceTask.acceleratorType == MIX_AIC) {
         core_type = AIV_CORE_TYPE;

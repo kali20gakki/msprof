@@ -14,7 +14,7 @@
  * See the Mulan PSL v2 for more details.
  * -------------------------------------------------------------------------*/
 
-#include "analysis/csrc/domain/services/parser/parser_item/task_block_dim_parser_item.h"
+#include "analysis/csrc/domain/services/parser/parser_item/task_block_num_parser_item.h"
 #include "analysis/csrc/infrastructure/dfx/log.h"
 #include "analysis/csrc/domain/entities/hal/include/hal_track.h"
 #include "analysis/csrc/infrastructure/utils/utils.h"
@@ -25,17 +25,17 @@ namespace Analysis {
 namespace Domain {
 using namespace Utils;
 
-int BlockDimParseItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *halUniData, uint16_t expandStatus)
+int BlockNumParseItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *halUniData, uint16_t expandStatus)
 {
-    if (binaryDataSize != sizeof(BlockDim)) {
-        ERROR("BlockDimParseItem failure, struct is BlockDim");
+    if (binaryDataSize != sizeof(BlockNum)) {
+        ERROR("BlockNumParseItem failure, struct is BlockNum");
         return PARSER_ERROR_SIZE_MISMATCH;
     }
 
-    auto *bin = ReinterpretConvert<BlockDim *>(binaryData);
+    auto *bin = ReinterpretConvert<BlockNum *>(binaryData);
     auto *uni = ReinterpretConvert<HalTrackData *>(halUniData);
     if (bin == nullptr || uni == nullptr) {
-        ERROR("Struct of block dim reinterpret convert failed.");
+        ERROR("Struct of block num reinterpret convert failed.");
         return DEFAULT_CNT;
     }
 
@@ -45,13 +45,13 @@ int BlockDimParseItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *hal
     uni->hd.taskId.contextId = INVALID_CONTEXT_ID;
     uni->hd.timestamp = bin->timestamp;
 
-    uni->type = BLOCK_DIM;
+    uni->type = BLOCK_NUM;
 
-    uni->blockDim.timestamp = bin->timestamp;
-    uni->blockDim.blockDim = bin->blockDim;
+    uni->blockNum.timestamp = bin->timestamp;
+    uni->blockNum.blockNum = bin->blockNum;
     return DEFAULT_CNT;
 }
 
-REGISTER_PARSER_ITEM(TRACK_PARSER, PARSER_ITEM_BLOCK_DIM, BlockDimParseItem);
+REGISTER_PARSER_ITEM(TRACK_PARSER, PARSER_ITEM_BLOCK_NUM, BlockNumParseItem);
 }
 }

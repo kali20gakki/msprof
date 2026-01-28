@@ -31,9 +31,9 @@ class NodeBasicInfoBean(CompactInfoBean):
         self._node_id = data[6]
         self._task_type = data[7]
         self._op_type = data[8]
-        self._block_dim = data[9]
+        self._block_num = data[9]
         self._op_flag = data[10]
-        self._mix_block_dim = self.mix_block_dim
+        self._mix_block_num = self.mix_block_num
 
     @property
     def task_type(self: any) -> str:
@@ -68,17 +68,17 @@ class NodeBasicInfoBean(CompactInfoBean):
         return self._op_flag
 
     @property
-    def block_dim(self: any) -> int:
+    def block_num(self: any) -> int:
         """
-        for block dims
+        for block num
         get lower 16bit data of 32bit
         """
-        return self._block_dim & 65535
+        return self._block_num & 65535
 
     @property
-    def mix_block_dim(self: any) -> int:
+    def mix_block_num(self: any) -> int:
         """
-        for mix block dims
-        get the product of block dim and higher 16bit
+        for mix block num
+        get the product of block num and higher 16bit
         """
-        return (self._block_dim & 65535) * (self._block_dim >> 16)
+        return (self._block_num & 65535) * (self._block_num >> 16)

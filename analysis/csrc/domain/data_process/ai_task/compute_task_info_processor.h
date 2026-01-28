@@ -21,7 +21,7 @@
 
 namespace Analysis {
 namespace Domain {
-// hashid, model_id, op_name, stream_id, task_id, block_dim, mix_block_dim, task_type, op_type,
+// hashid, model_id, op_name, stream_id, task_id, block_num, mix_block_num, task_type, op_type,
 // op_flag, batch_id, input_formats, input_data_types, input_shapes, output_formats,
 // output_data_types, output_shapes, device_id, context_id, op_state
 using TaskInfoFormat = std::tuple<std::string, uint32_t, std::string, uint32_t, uint32_t, uint32_t, uint32_t,

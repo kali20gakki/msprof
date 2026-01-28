@@ -39,7 +39,7 @@ class PmuCalculator(ICalculator):
     _project_path = None
     _sample_json = None
     _iter_range = None
-    _block_dims = None
+    _block_num = None
     _freq = None
     _core_num_dict = None
     sample_config = None
@@ -59,23 +59,23 @@ class PmuCalculator(ICalculator):
     def init_params(self):
         self._project_path = self.sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
         self._iter_range = self.sample_config.get(StrConstant.PARAM_ITER_ID)
-        self._block_dims = {'block_dim': {}, 'mix_block_dim': {}, 'block_dim_group': {}}
+        self._block_num = {'block_num': {}, 'mix_block_num': {}, 'block_num_group': {}}
         self._core_num_dict = {'aic': 0, 'aiv': 0}
         self._freq = 0
-        self.get_block_dim_from_ge()
+        self.get_block_num_from_ge()
         self.get_config_params()
 
-    def get_block_dim_from_ge(self: any) -> None:
+    def get_block_num_from_ge(self: any) -> None:
         """
         get ge data from ge info in the format of [task_id, stream_id, blockid]
-        :return: {"task_id-stream_id":blockdim}
+        :return: {"task_id-stream_id":blockNum}
         """
         db_path = PathManager.get_db_path(self._project_path, DBNameConstant.DB_GE_INFO)
         if not DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_GE_TASK):
             return
         ge_conn, ge_curs = DBManager.check_connect_db_path(db_path)
         if ge_conn and ge_curs:
-            ge_data = self.__get_block_dim_data(ge_curs)
+            ge_data = self.__get_block_num_data(ge_curs)
             if not ge_data:
                 DBManager.destroy_db_connect(ge_conn, ge_curs)
                 return
@@ -94,11 +94,11 @@ class PmuCalculator(ICalculator):
 
     def _get_current_block(self: any, block_type: str, ai_core_data: any) -> int:
         """
-        get the current block dim when stream id and task id occurs again
+        get the current block num when stream id and task id occurs again
         :param ai_core_data: ai core pmu data
-        :return: block dim
+        :return: block num
         """
-        block = self._block_dims.get(block_type, {}).get(
+        block = self._block_num.get(block_type, {}).get(
             self.STREAM_TASK_KEY_FMT.format(ai_core_data.task_id, ai_core_data.stream_id))
         if not block:
             return 0
@@ -110,21 +110,21 @@ class PmuCalculator(ICalculator):
                                       Constant.TASK_TYPE_MIX_AIC, Constant.TASK_TYPE_MIX_AIV):
                 continue
             _key = self.STREAM_TASK_KEY_FMT.format(data.task_id, data.stream_id)
-            self._block_dims.get('block_dim', {}).setdefault(_key, []).append(int(data.block_dim))
+            self._block_num.get('block_num', {}).setdefault(_key, []).append(int(data.block_num))
             if data.task_type in (Constant.TASK_TYPE_MIX_AIV, Constant.TASK_TYPE_MIX_AIC):
-                self._block_dims.get('mix_block_dim', {}).setdefault(_key, []).append(int(data.mix_block_dim))
+                self._block_num.get('mix_block_num', {}).setdefault(_key, []).append(int(data.mix_block_num))
 
-    def __get_block_dim_data(self: any, ge_curs: any) -> list:
+    def __get_block_num_data(self: any, ge_curs: any) -> list:
         device_id = InfoConfReader().get_device_id()
         host_start_cnt = InfoConfReader().trans_from_start_info_raw_time_into_host_cnt()
         if ProfilingScene().is_all_export() or ProfilingScene().is_step_export():
-            sql = "select task_id, stream_id, context_id, task_type, block_dim, mix_block_dim from {0} " \
+            sql = "select task_id, stream_id, context_id, task_type, block_num, mix_block_num from {0} " \
                   "where device_id={1} and timestamp >= {2} " \
                   "order by timestamp".format(DBNameConstant.TABLE_GE_TASK, device_id, host_start_cnt)
             return DBManager.fetch_all_data(ge_curs, sql, dto_class=GeTaskDto)
         ge_data = []
         iter_list = MsprofIteration(self._project_path).get_index_id_list_with_index_and_model(self._iter_range)
-        sql = "select task_id, stream_id, context_id, task_type, block_dim, mix_block_dim from {0} " \
+        sql = "select task_id, stream_id, context_id, task_type, block_num, mix_block_num from {0} " \
               "where model_id=? and (index_id=0 or index_id=?) and device_id={1} and timestamp >= {2} " \
               " order by timestamp".format(DBNameConstant.TABLE_GE_TASK, device_id, host_start_cnt)
         for iter_id, model_id in iter_list:

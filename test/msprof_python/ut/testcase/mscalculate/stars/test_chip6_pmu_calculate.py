@@ -87,7 +87,7 @@ class TestChip6PmuCalculator(TestCase):
             InfoConfReader()._info_json = {'DeviceInfo': [{'aic_frequency': 1500, 'hwts_frequency': 1000}],
                                            "devices": "0"}
             check._core_num_dict = {'aic': 30, 'aiv': 0}
-            check._block_dims = {'2-2': [22, 22]}
+            check._block_num = {'2-2': [22, 22]}
             check._freq = 1500
             check.parse()
             check.calculate()
@@ -127,7 +127,7 @@ class TestChip6PmuCalculator(TestCase):
             }
             mixCalcute = Chip6PmuCalculator(self.file_list, CONFIG)
             mixCalcute._core_num_dict = {'aic': 30, 'aiv': 0}
-            mixCalcute._block_dims = {'2-2': [22, 22]}
+            mixCalcute._block_num = {'2-2': [22, 22]}
             mixCalcute._freq = 1500
             mixCalcute.parse()
             mixCalcute.calculate()

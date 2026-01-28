@@ -80,7 +80,7 @@ struct MsprofNodeBasicInfo {
     uint64_t opName;
     uint32_t taskType;
     uint64_t opType;
-    uint32_t blockDim;
+    uint32_t blockNum;
     uint32_t opFlag;
     uint8_t opState;
 };

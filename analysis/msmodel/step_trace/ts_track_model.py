@@ -30,7 +30,7 @@ from profiling_bean.db_dto.step_trace_dto import IterationRange
 from profiling_bean.db_dto.step_trace_dto import StepTraceDto
 from profiling_bean.db_dto.step_trace_dto import StepTraceOriginDto
 from profiling_bean.db_dto.step_trace_ge_dto import StepTraceGeDto
-from profiling_bean.db_dto.tiling_block_dim_dto import TilingBlockDimDto
+from profiling_bean.db_dto.tiling_block_num_dto import TilingBlockNumDto
 from profiling_bean.db_dto.time_section_dto import TimeSectionDto
 from msparser.step_trace.ts_binary_data_reader.task_flip_bean import TaskFlip
 
@@ -206,6 +206,6 @@ class TsTrackViewModel(ViewModel):
               "from {} order by end_time".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
         return DBManager.fetch_all_data(self.cur, sql, dto_class=TimeSectionDto)
 
-    def get_tiling_block_dim_data(self):
-        sql = "select stream_id, task_id, timestamp, block_dim from {}".format(DBNameConstant.TABLE_BLOCK_DIM)
-        return DBManager.fetch_all_data(self.cur, sql, dto_class=TilingBlockDimDto)
+    def get_tiling_block_num_data(self):
+        sql = "select stream_id, task_id, timestamp, block_num from {}".format(DBNameConstant.TABLE_BLOCK_NUM)
+        return DBManager.fetch_all_data(self.cur, sql, dto_class=TilingBlockNumDto)

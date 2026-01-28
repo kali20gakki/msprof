@@ -109,7 +109,7 @@ class TestTaskOpViewer(unittest.TestCase):
             DBNameConstant.DB_ASCEND_TASK, create_ascend_sql, insert_ascend_sql, ascend_data)
 
         create_ge_sql = "CREATE TABLE {0}(model_id INTEGER,op_name TEXT," \
-                        "stream_id INTEGER,task_id INTEGER,block_dim INTEGER,op_state TEXT,task_type TEXT," \
+                        "stream_id INTEGER,task_id INTEGER,block_num INTEGER,op_state TEXT,task_type TEXT," \
                         "op_type TEXT,index_id INTEGER,thread_id INTEGER" \
                         ",timestamp INTEGER, batch_id INTEGER, context_id INTEGER)".format(
                             DBNameConstant.TABLE_GE_TASK)

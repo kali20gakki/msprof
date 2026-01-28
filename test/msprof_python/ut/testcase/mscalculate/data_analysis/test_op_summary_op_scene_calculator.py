@@ -64,7 +64,7 @@ class TestOpSummaryOpSceneCalculator(unittest.TestCase):
         check = OpSummaryOpSceneCalculator(file_list, CONFIG)
         InfoConfReader()._info_json = {'devices': '0'}
         result = check._get_ge_sql()
-        sql = "SELECT model_id, task_id, stream_id, op_name, op_type, op_state, block_dim, mix_block_dim, task_type, " \
+        sql = "SELECT model_id, task_id, stream_id, op_name, op_type, op_state, block_num, mix_block_num, task_type, " \
               "tensor_num, input_formats, input_data_types, input_shapes, output_formats, output_data_types," \
               "output_shapes, index_id, timestamp, batch_id, context_id, op_flag from TaskInfo where device_id = 0"
         self.assertEqual(sql, result)
@@ -192,7 +192,7 @@ class TestOpSummaryOpSceneCalculator(unittest.TestCase):
     def test_create_summary_table(self):
         create_sql = "create table if not exists ge_task_data (device_id INTEGER," \
                      "model_name TEXT,model_id INTEGER,op_name TEXT,stream_id INTEGER," \
-                     "task_id INTEGER,block_dim INTEGER,op_state TEXT,task_type TEXT," \
+                     "task_id INTEGER,block_num INTEGER,op_state TEXT,task_type TEXT," \
                      "op_type TEXT,iter_id INTEGER,input_count INTEGER,input_formats TEXT," \
                      "input_data_types TEXT,input_shapes TEXT,output_count INTEGER," \
                      "output_formats TEXT,output_data_types TEXT,output_shapes TEXT)"

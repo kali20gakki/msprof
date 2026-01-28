@@ -33,7 +33,7 @@ class TestOpSummaryModel(TestDirCRBaseModel):
     def test_get_operator_data_by_task_type_should_return_different_data_when_is_empty(self):
         create_ge_summary_sql = "create table IF NOT EXISTS {0} " \
                                 "(model_id INTEGER, task_id INTEGER, stream_id INTEGER," \
-                                "op_name TEXT, op_type TEXT, block_dim INTEGER, mix_block_dim INTEGER," \
+                                "op_name TEXT, op_type TEXT, block_num INTEGER, mix_block_num INTEGER," \
                                 "task_type TEXT, timestamp INTEGER,  batch_id INTEGER," \
                                 "context_id INTEGER)".format(DBNameConstant.TABLE_SUMMARY_GE)
         create_task_time_sql = "create table IF NOT EXISTS {0} " \
@@ -74,7 +74,7 @@ class TestOpSummaryModel(TestDirCRBaseModel):
     def test_get_operator_data_by_task_type_should_return_different_data_when_is_empty_and_all_export(self):
         create_ge_summary_sql = "create table IF NOT EXISTS {0} " \
                                 "(model_id INTEGER, task_id INTEGER, stream_id INTEGER," \
-                                "op_name TEXT, op_type TEXT, block_dim INTEGER, mix_block_dim INTEGER," \
+                                "op_name TEXT, op_type TEXT, block_num INTEGER, mix_block_num INTEGER," \
                                 "task_type TEXT, timestamp INTEGER,  batch_id INTEGER, index_id INTEGER, " \
                                 "context_id INTEGER)".format(DBNameConstant.TABLE_SUMMARY_GE)
         create_task_time_sql = "create table IF NOT EXISTS {0} " \
@@ -112,7 +112,7 @@ class TestOpSummaryModel(TestDirCRBaseModel):
     def test_get_operator_data_by_task_type_should_return_different_data_when_is_empty_and_not_all_export(self):
         create_ge_summary_sql = "create table IF NOT EXISTS {0} " \
                                 "(model_id INTEGER, task_id INTEGER, stream_id INTEGER," \
-                                "op_name TEXT, op_type TEXT, block_dim INTEGER, mix_block_dim INTEGER," \
+                                "op_name TEXT, op_type TEXT, block_num INTEGER, mix_block_num INTEGER," \
                                 "task_type TEXT, timestamp INTEGER,  batch_id INTEGER, index_id INTEGER, " \
                                 "context_id INTEGER)".format(DBNameConstant.TABLE_SUMMARY_GE)
         create_task_time_sql = "create table IF NOT EXISTS {0} " \

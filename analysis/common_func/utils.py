@@ -174,11 +174,11 @@ class Utils:
         return True
 
     @staticmethod
-    def cal_total_time(total_cycle: int, freq: int, block_dim: int, core_num: int) -> float:
-        if not all([block_dim, core_num, freq]):
+    def cal_total_time(total_cycle: int, freq: int, block_num: int, core_num: int) -> float:
+        if not all([block_num, core_num, freq]):
             return 0
-        total_time = total_cycle * 1000 * NumberConstant.NS_TO_US / freq / block_dim * \
-                     ((block_dim + core_num - 1) // core_num)
+        total_time = total_cycle * 1000 * NumberConstant.NS_TO_US / freq / block_num * \
+                     ((block_num + core_num - 1) // core_num)
         return round(total_time, NumberConstant.ROUND_TWO_DECIMAL)
 
     @staticmethod

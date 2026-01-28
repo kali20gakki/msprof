@@ -52,25 +52,25 @@ class ProfConditionConfig(MetaConfig):
             "cmp": "!="
         },
         {
-            "id": "condition_block_dim_1",
+            "id": "condition_block_num_1",
             "type": "formula",
-            "left": ["block_dim", "core_num"],
+            "left": ["block_num", "core_num"],
             "right": 1,
             "formula": "{0}/{1}",
             "cmp": "<"
         },
         {
-            "id": "condition_block_dim_2",
+            "id": "condition_block_num_2",
             "type": "formula",
-            "left": ["block_dim"],
+            "left": ["block_num"],
             "right": 0,
             "formula": "{0}&({0}-1)",
             "cmp": "!="
         },
         {
-            "id": "condition_block_dim_3",
+            "id": "condition_block_num_3",
             "type": "formula",
-            "left": ["block_dim", "core_num"],
+            "left": ["block_num", "core_num"],
             "right": 0,
             "formula": "{0}%{1}",
             "cmp": "!="

@@ -23,7 +23,7 @@
 #include "analysis/csrc/domain/services/parser/parser_item/step_trace_parser_item.h"
 #include "analysis/csrc/domain/services/parser/parser_item/task_memcpy_parser_item.h"
 #include "analysis/csrc/domain/services/parser/parser_item/task_type_parser_item.h"
-#include "analysis/csrc/domain/services/parser/parser_item/task_block_dim_parser_item.h"
+#include "analysis/csrc/domain/services/parser/parser_item/task_block_num_parser_item.h"
 #include "test/msprof_cpp/analysis_ut/domain/services/test/fake_generator.h"
 
 using namespace testing;
@@ -97,14 +97,14 @@ protected:
         return taskMemcpy;
     }
 
-    BlockDim CreateTsBlockDim(int funcType, int taskId, int streamId, int timestamp)
+    BlockNum CreateTsBlockNum(int funcType, int taskId, int streamId, int timestamp)
     {
-        BlockDim blockDim{};
-        blockDim.funcType = funcType;
-        blockDim.taskId = taskId;
-        blockDim.streamId = streamId;
-        blockDim.timestamp = timestamp;
-        return blockDim;
+        BlockNum blockNum{};
+        blockNum.funcType = funcType;
+        blockNum.streamId = streamId;
+        blockNum.taskId = taskId;
+        blockNum.timestamp = timestamp;
+        return blockNum;
     }
 
 protected:
@@ -249,14 +249,14 @@ TEST_F(TsTrackParserUtest, ShouldNormalRunWhenGetOneFileSizeFail)
     ASSERT_EQ(Analysis::ANALYSIS_OK, tsTrackParser.Run(dataInventory_, context));
 }
 
-TEST_F(TsTrackParserUtest, ShouldReturnBlockDimDataWhenParser)
+TEST_F(TsTrackParserUtest, ShouldReturnBlockNumDataWhenParser)
 {
     std::vector<int> expectTimestamp{10, 20};
     TsTrackParser tsTrackParser;
     DeviceContext context;
     context.deviceContextInfo.deviceFilePath = TS_TRACK_PATH;
-    std::vector<BlockDim> blockDimData{CreateTsBlockDim(0x0F, 1, 1, 10), CreateTsBlockDim(0x0F, 1, 2, 20)};
-    WriteBin(blockDimData, File::PathJoin({TS_TRACK_PATH, "data"}), "ts_track.data.0.slice_0");
+    std::vector<BlockNum> blockNumData{CreateTsBlockNum(0x0F, 1, 1, 10), CreateTsBlockNum(0x0F, 1, 2, 20)};
+    WriteBin(blockNumData, File::PathJoin({TS_TRACK_PATH, "data"}), "ts_track.data.0.slice_0");
     ASSERT_EQ(Analysis::ANALYSIS_OK, tsTrackParser.Run(dataInventory_, context));
     auto data = dataInventory_.GetPtr<std::vector<HalTrackData>>();
     ASSERT_EQ(2ul, data->size());

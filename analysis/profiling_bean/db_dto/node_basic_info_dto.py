@@ -20,11 +20,11 @@ from profiling_bean.db_dto.dto_meta_class import InstanceCheckMeta
 
 @dataclass
 class NodeBasicInfoDto(metaclass=InstanceCheckMeta):
-    block_dim: int = None
+    block_num: int = None
     data_len: int = None
     is_dynamic: int = None
     level: str = None
-    mix_block_dim: int = None
+    mix_block_num: int = None
     op_flag: str = None
     op_name: str = None
     op_type: str = None

@@ -27,17 +27,17 @@ NAMESPACE = 'mscalculate.aic.pmu_calculator'
 
 
 class TestPmuCalculator(unittest.TestCase):
-    GeDataBean = collections.namedtuple('ge_data', ['task_type', 'task_id', 'stream_id', 'block_dim', 'mix_block_dim'])
+    GeDataBean = collections.namedtuple('ge_data', ['task_type', 'task_id', 'stream_id', 'block_num', 'mix_block_num'])
 
     def test_init_param(self):
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
-                mock.patch(NAMESPACE + '.PmuCalculator.get_block_dim_from_ge'), \
+                mock.patch(NAMESPACE + '.PmuCalculator.get_block_num_from_ge'), \
                 mock.patch(NAMESPACE + '.PmuCalculator.get_config_params'):
             check = PmuCalculator()
             check.sample_config = {'result_dir': 'test', 'device_id': '0', 'iter_id': 1, 'job_id': 'job_default'}
             check.init_params()
 
-    def test_get_block_dim_from_ge(self):
+    def test_get_block_num_from_ge(self):
         ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
                 mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True), \
@@ -48,9 +48,9 @@ class TestPmuCalculator(unittest.TestCase):
             InfoConfReader()._info_json = {'devices': '0'}
             key = PmuCalculator()
             key._core_num_dict = {'aic': 30, 'aiv': 0}
-            key._block_dims = {'block_dim': {'0-0': [20]}}
+            key._block_num = {'block_num': {'0-0': [20]}}
             key._freq = 1500
-            key.get_block_dim_from_ge()
+            key.get_block_num_from_ge()
         ProfilingScene().init('test')
         ProfilingScene().set_mode(ExportMode.GRAPH_EXPORT)
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
@@ -65,17 +65,17 @@ class TestPmuCalculator(unittest.TestCase):
                 mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=(1, 1)):
             InfoConfReader()._info_json = {'devices': '0'}
             key = PmuCalculator()
-            key._block_dims = {'block_dim': {'0-0': [20]}, 'mix_block_dim': {'0-0': [20]}}
+            key._block_num = {'block_num': {'0-0': [20]}, 'mix_block_num': {'0-0': [20]}}
             key._core_num_dict = {'aic': 30, 'aiv': 0}
             key._freq = 1500
-            key.get_block_dim_from_ge()
+            key.get_block_num_from_ge()
 
     def test_get_current_block(self):
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
                 mock.patch('os.path.join', return_value='test\\test.text'):
             key = PmuCalculator()
-            key._block_dims = {'block_dim': {'0-0': [20]}}
-            result = key._get_current_block('block_dim', self.GeDataBean('', 0, 0, 20, 40))
+            key._block_num = {'block_num': {'0-0': [20]}}
+            result = key._get_current_block('block_num', self.GeDataBean('', 0, 0, 20, 40))
             self.assertEqual(result, 20)
 
     def test_get_config_params(self):
@@ -83,9 +83,9 @@ class TestPmuCalculator(unittest.TestCase):
                 mock.patch('os.listdir', return_value=['info.json.0']):
             key = PmuCalculator()
             InfoConfReader()._info_json = {'DeviceInfo': [{'ai_core_num': 8, 'aiv_num': 8, 'aic_frequency': 1500}]}
-            key._block_dims = {'block_dim': {'0-0': [20]}}
+            key._block_num = {'block_num': {'0-0': [20]}}
             key._core_num_dict = {'aic': 30, 'aiv': 0}
-            key._block_dims = {'block_dim': {'2-2': [22, 22]}}
+            key._block_num = {'block_num': {'2-2': [22, 22]}}
             key._freq = 1500
             key.get_config_params()
 

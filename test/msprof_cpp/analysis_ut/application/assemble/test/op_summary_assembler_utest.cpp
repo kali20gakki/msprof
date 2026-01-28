@@ -202,7 +202,7 @@ TEST_F(OpSummaryAssemblerUTest, ShouldReturnTrueWhenTaskAndHcclExistWithNoStars)
     EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
     EXPECT_EQ(6ul, res.size());
     std::string expectHeader{"Device_id,Model ID,Task ID,Stream ID,Op Name,OP Type,OP State,Task Type,"
-                             "Task Start Time(us),Task Duration(us),Task Wait Time(us),Block Dim,HF32 Eligible,"
+                             "Task Start Time(us),Task Duration(us),Task Wait Time(us),Block Num,HF32 Eligible,"
                              "Input Shapes,Input Data Types,Input Formats,Output Shapes,Output Data Types,"
                              "Output Formats"};
     EXPECT_EQ(expectHeader, res[0]);
@@ -264,7 +264,7 @@ TEST_F(OpSummaryAssemblerUTest, ShouldReturnTrueWhenTaskAndHcclAndPmuExistWithSt
     EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
     EXPECT_EQ(6ul, res.size());
     std::string expectHeader{"Device_id,Model ID,Task ID,Stream ID,Op Name,OP Type,OP State,Task Type,"
-                             "Task Start Time(us),Task Duration(us),Task Wait Time(us),Block Dim,Mix Block Dim,"
+                             "Task Start Time(us),Task Duration(us),Task Wait Time(us),Block Num,Mix Block Num,"
                              "HF32 Eligible,Input Shapes,Input Data Types,Input Formats,Output Shapes,"
                              "Output Data Types,Output Formats,Context ID,aicore_time(us),aic_total_cycles,"
                              "aic_mac_time(us),aic_mac_ratio,aic_scalar_time(us),aic_scalar_ratio,aic_mte1_time(us),"

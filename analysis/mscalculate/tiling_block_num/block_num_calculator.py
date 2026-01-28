@@ -27,20 +27,20 @@ from msmodel.ge.ge_info_model import GeInfoViewModel
 from msmodel.step_trace.ts_track_model import TsTrackViewModel
 
 
-class BlockDimCalculator(ICalculator, MsMultiProcess):
-    BITS_FOR_BLOCK_DIM = 16
-    INVALID_BLOCK_DIM_VALUE = 65535
+class BlockNumCalculator(ICalculator, MsMultiProcess):
+    BITS_FOR_BLOCK_NUM = 16
+    INVALID_BLOCK_NUM_VALUE = 65535
 
     def __init__(self: any, file_list: dict, sample_config: dict):
         super().__init__(sample_config)
         self._file_list = file_list
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
         self._ge_model = GeInfoViewModel(self._project_path, [DBNameConstant.TABLE_GE_TASK])
-        self._ts_model = TsTrackViewModel(self._project_path, [DBNameConstant.TABLE_BLOCK_DIM])
+        self._ts_model = TsTrackViewModel(self._project_path, [DBNameConstant.TABLE_BLOCK_NUM])
         self._data = []
 
     @staticmethod
-    def _process_block_dim_data(data):
+    def _process_block_num_data(data):
         return {(datum.stream_id, datum.task_id, datum.batch_id): datum for datum in data}
 
     def calculate(self: any) -> None:
@@ -55,19 +55,19 @@ class BlockDimCalculator(ICalculator, MsMultiProcess):
         with self._ts_model as _ts_model:
             if not _ts_model.check_table():
                 return
-            tiling_block_dim_data = _ts_model.get_tiling_block_dim_data()
-        if not tiling_block_dim_data:
+            tiling_block_num_data = _ts_model.get_tiling_block_num_data()
+        if not tiling_block_num_data:
             return
 
-        tiling_block_dim_data = FlipCalculator.set_device_batch_id(tiling_block_dim_data, self._project_path)
-        processed_block_dim_data = self._process_block_dim_data(tiling_block_dim_data)
+        tiling_block_num_data = FlipCalculator.set_device_batch_id(tiling_block_num_data, self._project_path)
+        processed_block_num_data = self._process_block_num_data(tiling_block_num_data)
         for ge_data in ge_task_data:
             search_key = (ge_data.stream_id, ge_data.task_id, ge_data.batch_id)
-            if search_key in processed_block_dim_data:
-                tiling_block_dim = processed_block_dim_data.get(search_key).block_dim
-                self._data.append(ge_data.replace(block_dim=tiling_block_dim & self.INVALID_BLOCK_DIM_VALUE,
-                                                  mix_block_dim=(tiling_block_dim & self.INVALID_BLOCK_DIM_VALUE) * (
-                                                          tiling_block_dim >> self.BITS_FOR_BLOCK_DIM)))
+            if search_key in processed_block_num_data:
+                tiling_block_num = processed_block_num_data.get(search_key).block_num
+                self._data.append(ge_data.replace(block_num=tiling_block_num & self.INVALID_BLOCK_NUM_VALUE,
+                                                  mix_block_num=(tiling_block_num & self.INVALID_BLOCK_NUM_VALUE) * (
+                                                          tiling_block_num >> self.BITS_FOR_BLOCK_NUM)))
             else:
                 self._data.append(ge_data)
 

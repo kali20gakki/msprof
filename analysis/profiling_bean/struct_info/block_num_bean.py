@@ -17,17 +17,17 @@ from profiling_bean.stars.stars_common import StarsCommon
 from profiling_bean.struct_info.struct_decoder import StructDecoder
 
 
-class BlockDimBean(StructDecoder):
+class BlockNumBean(StructDecoder):
     """
-    block dim for tiling-down
+    block num for tiling-down
     """
 
     def __init__(self: any, *args: any) -> None:
-        block_dim = args[0]
-        self._timestamp = block_dim[4]
-        self._stream_id = StarsCommon.set_stream_id(block_dim[5], block_dim[6])
-        self._task_id = StarsCommon.set_task_id(block_dim[5], block_dim[6])
-        self._block_dim = block_dim[7]
+        block_num = args[0]
+        self._timestamp = block_num[4]
+        self._stream_id = StarsCommon.set_stream_id(block_num[5], block_num[6])
+        self._task_id = StarsCommon.set_task_id(block_num[5], block_num[6])
+        self._block_num = block_num[7]
 
     @property
     def stream_id(self: any) -> int:
@@ -54,9 +54,9 @@ class BlockDimBean(StructDecoder):
         return self._task_id
 
     @property
-    def block_dim(self: any) -> int:
+    def block_num(self: any) -> int:
         """
-        get block_dim
-        :return: block_dim
+        get block_num
+        :return: block_num
         """
-        return self._block_dim
+        return self._block_num

@@ -102,8 +102,8 @@ class AicCalculator(PmuCalculator, MsMultiProcess):
 
     def calculate_total_time(self: any, data: AicPmuBean, data_type: str = 'aic'):
         core_num = self._core_num_dict.get(data_type)
-        block_dim = self._get_current_block('block_dim', data)
-        total_time = Utils.cal_total_time(data.total_cycle, int(self._freq), block_dim, core_num)
+        block_num = self._get_current_block('block_num', data)
+        total_time = Utils.cal_total_time(data.total_cycle, int(self._freq), block_num, core_num)
         return total_time
 
     def save(self: any) -> None:

@@ -34,7 +34,7 @@ from viewer.ai_core_op_report import ReportOPCounter
 NAMESPACE = 'viewer.ai_core_op_report'
 config = {'handler': '_get_op_summary_data_with_headers',
           'headers': ['Model Name', 'Model ID', 'Task ID', 'Stream ID', 'Infer ID', 'Op Name', 'OP Type', 'OP State',
-                      'Task Type', 'Task Start Time(us)', 'Task Duration(us)', 'Task Wait Time(us)', 'Block Dim'],
+                      'Task Type', 'Task Start Time(us)', 'Task Duration(us)', 'Task Wait Time(us)', 'Block Num'],
           'db': 'ai_core_op_summary.db', 'unused_cols': []}
 
 
@@ -140,7 +140,7 @@ class TestAiCoreOpReport(unittest.TestCase):
     def test_get_op_summary_data(self):
         create_ge_sql = "CREATE TABLE IF NOT EXISTS ge_summary(model_name text,model_id INTEGER,task_id INTEGER," \
                         "stream_id INTEGER, op_name text,op_type text,op_state text," \
-                        "block_dim INTEGER,input_shapes text," \
+                        "block_num INTEGER,input_shapes text," \
                         "input_data_types text,input_formats text,output_shapes text,output_data_types text," \
                         "output_formats text,device_id INTEGER,task_type text,index_id INTEGER)"
         union_sql = "select * from ge_summary where ge_summary.index_id=? and ge_summary.task_type!=?"

@@ -72,8 +72,8 @@ uint32_t ReadHostGEInfo(DataInventory& dataInventory, const DeviceContext& devic
     if (!CheckPathAndTableExists(hostDbDirectory, hostGeInfoDBRunner, TASK_INFO_TABLE)) {
         return ANALYSIS_OK;
     }
-    std::string sql{"SELECT stream_id, batch_id, task_id, context_id, block_dim, "
-                    "mix_block_dim FROM TaskInfo where device_id = " + std::to_string(deviceInfo.deviceId)};
+    std::string sql{"SELECT stream_id, batch_id, task_id, context_id, block_num, "
+                    "mix_block_num FROM TaskInfo where device_id = " + std::to_string(deviceInfo.deviceId)};
     OriDataFormat result;
     bool rc =  hostGeInfoDBRunner.QueryData(sql, result);
     if (!rc) {
@@ -86,15 +86,15 @@ uint32_t ReadHostGEInfo(DataInventory& dataInventory, const DeviceContext& devic
         return ANALYSIS_ERROR;
     }
     for (auto row : result) {
-        uint32_t stream_id, batch_id, task_id, context_id, blockDim, mixBlockDim;
-        std::tie(stream_id, batch_id, task_id, context_id, blockDim, mixBlockDim) = row;
+        uint32_t stream_id, batch_id, task_id, context_id, blockNum, mixBlockNum;
+        std::tie(stream_id, batch_id, task_id, context_id, blockNum, mixBlockNum) = row;
         TaskId id = {(uint16_t)stream_id, (uint16_t)batch_id, (uint16_t)task_id, context_id};
         auto item = deviceTaskMap->find(id);
         if (item != deviceTaskMap->end()) {
             std::vector<DeviceTask> &deviceTasks = item->second;
             for (auto& deviceTask : deviceTasks) {
-                deviceTask.blockDim = (uint16_t)blockDim;
-                deviceTask.mixBlockDim = (uint16_t)mixBlockDim;
+                deviceTask.blockNum = (uint16_t)blockNum;
+                deviceTask.mixBlockNum = (uint16_t)mixBlockNum;
             }
         } else {
             noExistCNt++;

@@ -62,11 +62,11 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
     只有MIX类型的算子才会同时有AIC和AIV的数据，MIX算子在AIC和AIV上都会跑，先跑的叫主核，后跑的叫从核
     1.开启block模式
     主核会上报context pmu数据和block pmu数据，从核只会上报block pmu数据；
-    主核上报的context pmu数量为1，上报的block pmu数量等于block_dim；从核上报的block pmu数据数量等于mix_block_dim
+    主核上报的context pmu数量为1，上报的block pmu数量等于block_num；从核上报的block pmu数据数量等于mix_block_num
     计算从核的pmu数据时，需要过滤block pmu数据中由主核上报的block pmu数据，防止重复计算
     2.不开启block模式
     主核只会上报context pmu数据，从核只会上报block pmu数据；
-    主核上报的context pmu数量为1；从核上报的block pmu数据数量等于mix_block_dim
+    主核上报的context pmu数量为1；从核上报的block pmu数据数量等于mix_block_num
     假设主核是AIC，那么aic的一系列pmu数据由context pmu计算得到，aiv的一系列pmu数据由从核上报的block pmu计算得到；
     二、
     原有代码存在的问题：
@@ -130,7 +130,7 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
     def _get_group_number(number: int, group_size_list: list) -> int:
         """
         得到block pmu数据分组的编号
-        主要针对静态图场景，以及走路径五（aclnn）场景下，Task Type为MIX_AIV类型算子的mix_block_dim为0的情况
+        主要针对静态图场景，以及走路径五（aclnn）场景下，Task Type为MIX_AIV类型算子的mix_block_num为0的情况
         Input:
         number: 同一个key下，该条block pmu数据为第几条被上报的数据
         group_size_list: 包含每组数据大小的列表
@@ -236,16 +236,16 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
         pmu_data_type = None
         for index, data in enumerate(enumerate_data_list):
             task_type = 0 if data.is_aic_data() else 1
-            block_dim = self._get_current_block('block_dim', data)
-            mix_block_dim = self._get_current_block('mix_block_dim', data)
+            block_num = self._get_current_block('block_num', data)
+            mix_block_num = self._get_current_block('mix_block_num', data)
             aic_pmu_value, aiv_pmu_value, aic_total_cycle, aiv_total_cycle = \
-                self.add_block_mix_pmu_to_context_pmu(data, task_type, mix_block_dim)
-            block_dim_dict = {}
+                self.add_block_mix_pmu_to_context_pmu(data, task_type, mix_block_num)
+            block_num_dict = {}
             # False代表主核（False），True代表从核（True）
-            block_dim_dict.setdefault(False, block_dim)
-            block_dim_dict.setdefault(True, mix_block_dim)
-            aic_total_time = self.calculate_total_time(data, aic_total_cycle, block_dim_dict)
-            aiv_total_time = self.calculate_total_time(data, aiv_total_cycle, block_dim_dict, data_type='aiv')
+            block_num_dict.setdefault(False, block_num)
+            block_num_dict.setdefault(True, mix_block_num)
+            aic_total_time = self.calculate_total_time(data, aic_total_cycle, block_num_dict)
+            aiv_total_time = self.calculate_total_time(data, aiv_total_cycle, block_num_dict, data_type='aiv')
             aic_pmu_value = self.aic_calculator.add_pipe_time(
                 aic_pmu_value, aic_total_time, self._sample_json.get('ai_core_metrics'))
             aic_pmu_value = {k: aic_pmu_value[k] for k in self.aic_table_name_list if k in aic_pmu_value}
@@ -296,10 +296,10 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
                 pmu_events = AicPmuUtils.get_custom_pmu_events(self._sample_json.get('ai_core_profiling_events'))
             else:
                 pmu_events = AicPmuUtils.get_pmu_events(self._sample_json.get('ai_core_profiling_events'))
-            block_dim_dict = {}
-            block_dim_dict.setdefault(False, self._get_current_block('block_dim', data))
-            block_dim_dict.setdefault(True, self._get_current_block('mix_block_dim', data))
-            total_time = self.calculate_total_time(data, data.total_cycle, block_dim_dict)
+            block_num_dict = {}
+            block_num_dict.setdefault(False, self._get_current_block('block_num', data))
+            block_num_dict.setdefault(True, self._get_current_block('mix_block_num', data))
+            total_time = self.calculate_total_time(data, data.total_cycle, block_num_dict)
             _, pmu_list = self.aic_calculator.compute_ai_core_data(
                 Utils.generator_to_list(pmu_events), pmu_list, data.total_cycle, data.pmu_list)
             pmu_list = self.aic_calculator.add_pipe_time(pmu_list, total_time,
@@ -323,16 +323,16 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
             pmu_data_list[index] = pmu_data
 
     def calculate_total_time(self: any, data: any, total_cycle: int,
-                             block_dim_dict: dict, data_type: str = 'aic') -> float:
+                             block_num_dict: dict, data_type: str = 'aic') -> float:
         core_num = self._core_num_dict.get(data_type)
-        block_dim = block_dim_dict.get(self._is_not_mix_main_core(data, data_type))
+        block_num = block_num_dict.get(self._is_not_mix_main_core(data, data_type))
         freq = self._freq
         if self.freq_data and len(data.time_list) >= 2:
             freq = self._get_current_freq(data.time_list[1])
-        total_time = Utils.cal_total_time(total_cycle, int(freq), block_dim, core_num)
+        total_time = Utils.cal_total_time(total_cycle, int(freq), block_num, core_num)
         return total_time
 
-    def add_block_mix_pmu_to_context_pmu(self, data: any, task_type: int, mix_block_dim: int) -> tuple:
+    def add_block_mix_pmu_to_context_pmu(self, data: any, task_type: int, mix_block_num: int) -> tuple:
         """
         add block mix pmu to context pmu
         将block pmu数据添加到context pmu中
@@ -354,8 +354,8 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
         mix_pmu_info = self.mix_pmu_dict.get(data_key, {})
         aic_total_cycle = data.total_cycle if not task_type else 0
         aiv_total_cycle = data.total_cycle if task_type else 0
-        # 从核的total_cycle和pmu数据由block pmu提供，如果某条context pmu数据的mix_block_dim为0则直接跳过
-        if mix_pmu_info and mix_block_dim != 0:
+        # 从核的total_cycle和pmu数据由block pmu提供，如果某条context pmu数据的mix_block_num为0则直接跳过
+        if mix_pmu_info and mix_block_num != 0:
             pmu_info = mix_pmu_info.pop(0)
             mix_pmu_value, mix_total_cycle = pmu_info.get('pmu'), pmu_info.get('total_cycle')
             if pmu_info.get('mix_type') == Constant.TASK_TYPE_MIX_AIV:
@@ -382,13 +382,13 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
 
     def get_group_size_list(self: any, key: str) -> list:
         """
-        通过self._block_dims中的block_dim_group来获取一个包含每组大小的列表
-        1.不开启block模式，每组的大小为mix_block_dim
-        2.开启block模式，每组的大小为（block_dim + mix_block_dim）
+        通过self._block_num中的block_num_group来获取一个包含每组大小的列表
+        1.不开启block模式，每组的大小为mix_block_num
+        2.开启block模式，每组的大小为（block_num + mix_block_num）
         先判断采集到这份数据时，是否开启了block模式，然后再获取每组的group size
         """
         group_size_list = []
-        for item in self._block_dims.get('block_dim_group', {}).get(key, []):
+        for item in self._block_num.get('block_num_group', {}).get(key, []):
             if self.is_block():
                 group_size_list.append((item[0] + item[1]))
             else:
@@ -407,7 +407,7 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
         """
         通过block pmu数据计算total cycle和pmu等数据
         在静态图模式下，假设某一个MIX算子跑了N轮，其key为1-1-1，那么mix_pmu_dict['1-1-1']中就会有N条数据
-        demo: 不开启block模式, mix_block_dim = 2, 一共跑了2轮
+        demo: 不开启block模式, mix_block_num = 2, 一共跑了2轮
         input: {'1-1-1': [('MIX_AIC', (1, (1, 2, 3, 4, 1, 2, 3, 4)), 1),
                           ('MIX_AIC', (1, (4, 3, 2, 1, 4, 3, 2, 1)), 1),
                           ('MIX_AIC', (1, (2, 3, 4, 5, 2, 3, 4, 5)), 1),
@@ -449,7 +449,7 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
     def group_block_with_iter(self, value, group_size_list) -> dict:
         """
         将拥有相同key（stream_id-task_id-subtask_id）的原始block pmu数据进行分组，主要针对静态图模式
-        假设在静态图模式下，一个MIX算子跑了N个迭代，其block_dim 为10, mix_block_dim为20
+        假设在静态图模式下，一个MIX算子跑了N个迭代，其block_num 为10, mix_block_num为20
         1.不开启block模式，则该算子总共上报20N条block pmu数据，每20条block pmu数据为1组
         2.开启block模式，则该算子总共上报（10+20）*N条block pmu数据，每（10+20）条block pmu数据为1组
         demo single_value:
@@ -572,9 +572,9 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
 
     def _get_current_block(self: any, block_type: str, ai_core_data: any) -> any:
         """
-        get the current block dim when stream id and task id occurs again
+        get the current block num when stream id and task id occurs again
         :param ai_core_data: ai core pmu data
-        :return: block dim
+        :return: block num
         """
         block_key = self.STREAM_TASK_CONTEXT_KEY_FMT.format(ai_core_data.stream_id,
                                                             ai_core_data.task_id, ai_core_data.subtask_id)
@@ -582,7 +582,7 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
             block_key = self.STREAM_TASK_CONTEXT_KEY_FMT.format(ai_core_data.stream_id,
                                                                 ai_core_data.task_id,
                                                                 NumberConstant.DEFAULT_GE_CONTEXT_ID)
-        block = self._block_dims.get(block_type, {}).get(block_key)
+        block = self._block_num.get(block_type, {}).get(block_key)
         if not block:
             return 0
         return block.pop(0) if len(block) > 1 else block[0]
@@ -593,11 +593,11 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
                                       Constant.TASK_TYPE_MIX_AIC, Constant.TASK_TYPE_MIX_AIV]:
                 continue
             _key = self.STREAM_TASK_CONTEXT_KEY_FMT.format(data.stream_id, data.task_id, data.context_id)
-            self._block_dims['block_dim'].setdefault(_key, []).append(int(data.block_dim))
+            self._block_num['block_num'].setdefault(_key, []).append(int(data.block_num))
             if data.task_type in [Constant.TASK_TYPE_MIX_AIV, Constant.TASK_TYPE_MIX_AIC]:
-                self._block_dims['block_dim_group'].setdefault(_key, []).append(
-                    [int(data.block_dim), int(data.mix_block_dim)])
-                self._block_dims['mix_block_dim'].setdefault(_key, []).append(int(data.mix_block_dim))
+                self._block_num['block_num_group'].setdefault(_key, []).append(
+                    [int(data.block_num), int(data.mix_block_num)])
+                self._block_num['mix_block_num'].setdefault(_key, []).append(int(data.mix_block_num))
 
     def __update_model_instance(self):
         self._model = AicPmuModel(self._project_path)

@@ -275,8 +275,8 @@ void CANNTraceDBDumper::AddTensorShapeInfo(const std::shared_ptr<ConcatTensorInf
     auto desc = task->op->opDesc;
     auto attr = desc->nodeAttr;
     auto hashId = attr ? std::to_string(attr->data.nodeAttrInfo.hashId) : NA;
-    uint32_t blockDim = nodeBasicInfo.blockDim & 0xffff;
-    auto mixBlockDim = blockDim * (nodeBasicInfo.blockDim >> 16);
+    uint32_t blockNum = nodeBasicInfo.blockNum & 0xffff;
+    auto mixBlockNum = blockNum * (nodeBasicInfo.blockNum >> 16);
     auto opFlag = nodeBasicInfo.opFlag ? "YES" : "NO";
     auto opState = std::to_string(nodeBasicInfo.opState);
     auto inputFormatStr = inputFormat.empty() ? NA : Utils::Join(inputFormat, ";");
@@ -286,7 +286,7 @@ void CANNTraceDBDumper::AddTensorShapeInfo(const std::shared_ptr<ConcatTensorInf
     auto outputDataTypeStr = outputDataType.empty() ? NA : Utils::Join(outputDataType, ";");
     auto outputShapeStr = outputShape.empty() ? NA : Utils::AddQuotation(Utils::Join(outputShape, ";"));
     data.emplace_back(task->modelId, HashData::GetInstance().Get(nodeBasicInfo.opName), task->streamId,
-                      task->taskId, blockDim, mixBlockDim, opState,
+                      task->taskId, blockNum, mixBlockNum, opState,
                       NumberMapping::Get(MappingType::GE_TASK_TYPE, nodeBasicInfo.taskType),
                       HashData::GetInstance().Get(nodeBasicInfo.opType), task->requestId, task->thread_id,
                       task->timeStamp, task->batchId, tensorNum, inputFormatStr, inputDataTypeStr, inputShapeStr,
@@ -339,7 +339,7 @@ void CANNTraceDBDumper::AddTaskInfoForOnlyTaskTrack(const std::shared_ptr<HostTa
                           taskType, opType, task->requestId, task->thread_id, task->timeStamp, task->batchId,
                           0, NA, NA, NA, NA, NA, NA, task->deviceId, task->contextId, opFlag, NA);
     } else {
-        data.emplace_back(info.modelId, opName, task->streamId, task->taskId, info.blockDim, info.mixBlockDim,
+        data.emplace_back(info.modelId, opName, task->streamId, task->taskId, info.blockNum, info.mixBlockNum,
                           info.isDynamic, taskType, opType, task->requestId, task->thread_id, task->timeStamp,
                           task->batchId, info.tensorNum, info.inputFormats, info.inputDataTypes, info.inputShapes,
                           info.outputFormats, info.outputDataTypes, info.outputShapes,
@@ -372,14 +372,14 @@ void CANNTraceDBDumper::AddTaskInfo(const std::shared_ptr<HostTask> &task, TaskI
     auto attr = desc->nodeAttr;
     auto nodeBasicInfo = node->data.nodeBasicInfo;
     auto hashId = attr ? std::to_string(attr->data.nodeAttrInfo.hashId) : NA;
-    auto blockDim = nodeBasicInfo.blockDim & 0xffff;
-    auto mixBlockDim = blockDim * (nodeBasicInfo.blockDim >> 16);
+    auto blockNum = nodeBasicInfo.blockNum & 0xffff;
+    auto mixBlockNum = blockNum * (nodeBasicInfo.blockNum >> 16);
     auto tensorDesc = desc->tensorDesc;
     auto opFlag = nodeBasicInfo.opFlag ? "YES" : "NO";
     auto opState = std::to_string(nodeBasicInfo.opState);
     if (!tensorDesc) {
         data.emplace_back(task->modelId, HashData::GetInstance().Get(nodeBasicInfo.opName), task->streamId,
-                          task->taskId, blockDim, mixBlockDim, opState,
+                          task->taskId, blockNum, mixBlockNum, opState,
                           NumberMapping::Get(MappingType::GE_TASK_TYPE, nodeBasicInfo.taskType),
                           HashData::GetInstance().Get(nodeBasicInfo.opType),
                           task->requestId, task->thread_id, task->timeStamp, task->batchId,

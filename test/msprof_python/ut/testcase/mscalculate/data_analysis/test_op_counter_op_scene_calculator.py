@@ -112,7 +112,7 @@ class TestOpCounterOpSceneCalculator(unittest.TestCase):
         curs = res[1]
         create_ge_sql = "create table if not exists ge_task_data (device_id INTEGER," \
                         "model_name TEXT,model_id INTEGER,op_name TEXT,stream_id INTEGER," \
-                        "task_id INTEGER,block_dim INTEGER,op_state TEXT,task_type TEXT," \
+                        "task_id INTEGER,block_num INTEGER,op_state TEXT,task_type TEXT," \
                         "op_type TEXT,iter_id INTEGER,input_count INTEGER,input_formats TEXT," \
                         "input_data_types TEXT,input_shapes TEXT,output_count INTEGER," \
                         "output_formats TEXT,output_data_types TEXT,output_shapes TEXT)"

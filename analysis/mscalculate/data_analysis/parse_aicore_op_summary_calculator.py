@@ -232,7 +232,7 @@ class ParseAiCoreOpSummaryCalculator(MsMultiProcess):
         iter_list = MsprofIteration(self.project_path).get_index_id_list_with_index_and_model(self.iter_range)
         device_id = InfoConfReader().get_device_id()
         ge_sql = f"SELECT model_id, batch_id, task_id, stream_id, " \
-                 f"op_name, op_type, op_state, block_dim, mix_block_dim, task_type, tensor_num, input_formats," \
+                 f"op_name, op_type, op_state, block_num, mix_block_num, task_type, tensor_num, input_formats," \
                  f" input_data_types, input_shapes, output_formats, output_data_types," \
                  f" output_shapes, timestamp, index_id, context_id, op_flag " \
                  f"from {DBNameConstant.TABLE_GE_TASK} where index_id=? and model_id=? and device_id=?"

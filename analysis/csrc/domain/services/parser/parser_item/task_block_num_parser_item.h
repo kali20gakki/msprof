@@ -14,17 +14,17 @@
  * See the Mulan PSL v2 for more details.
  * -------------------------------------------------------------------------*/
 
-#ifndef MSPROF_ANALYSIS_DOMAIN_SERVICES_PARSER_PARSER_ITEM_BLOCK_DIM_PARSER_ITEM_H
-#define MSPROF_ANALYSIS_DOMAIN_SERVICES_PARSER_PARSER_ITEM_BLOCK_DIM_PARSER_ITEM_H
+#ifndef MSPROF_ANALYSIS_DOMAIN_SERVICES_PARSER_PARSER_ITEM_BLOCK_NUM_PARSER_ITEM_H
+#define MSPROF_ANALYSIS_DOMAIN_SERVICES_PARSER_PARSER_ITEM_BLOCK_NUM_PARSER_ITEM_H
 
 #include <cstdint>
 
 namespace Analysis {
 namespace Domain {
-#define PARSER_ITEM_BLOCK_DIM 0x0f
+#define PARSER_ITEM_BLOCK_NUM 0x0f
 
 #pragma pack(1)
-struct BlockDim {
+struct BlockNum {
     uint8_t resv1;
     uint8_t funcType;
     uint16_t resv2;
@@ -33,12 +33,12 @@ struct BlockDim {
     uint16_t streamId : 11;
     uint16_t resv4 : 5;
     uint16_t taskId;
-    uint32_t blockDim;
+    uint32_t blockNum;
     uint8_t resv6[16];
 };
 #pragma pack()
 
-int BlockDimParseItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *halUniData, uint16_t expandStatus);
+int BlockNumParseItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *halUniData, uint16_t expandStatus);
 }
 }
-#endif // MSPROF_ANALYSIS_DOMAIN_SERVICES_PARSER_PARSER_ITEM_BLOCK_DIM_PARSER_ITEM_H
+#endif // MSPROF_ANALYSIS_DOMAIN_SERVICES_PARSER_PARSER_ITEM_BLOCK_NUM_PARSER_ITEM_H

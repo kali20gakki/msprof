@@ -64,8 +64,8 @@ namespace {
     const TableColumns COMPUTE_TASK_INFO = {
         {"name", SQL_INTEGER_TYPE},
         {"globalTaskId", SQL_INTEGER_TYPE, true},
-        {"blockDim", SQL_INTEGER_TYPE},
-        {"mixBlockDim", SQL_INTEGER_TYPE},
+        {"blockNum", SQL_INTEGER_TYPE},
+        {"mixBlockNum", SQL_INTEGER_TYPE},
         {"taskType", SQL_INTEGER_TYPE},
         {"opType", SQL_INTEGER_TYPE},
         {"inputFormats", SQL_INTEGER_TYPE},

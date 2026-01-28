@@ -25,7 +25,7 @@ class NanoPmuDto:
     stream_id: int = None
     task_id: int = None
     total_cycle: int = None
-    block_dim: int = None
+    block_num: int = None
     pmu0: float = None
     pmu1: float = None
     pmu2: float = None
