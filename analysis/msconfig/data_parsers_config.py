@@ -370,7 +370,7 @@ class DataParsersConfig(MetaConfig):
         ],
         'RuntimeOpInfoParser': [
             ('path', 'msparser.add_info.runtime_op_info_parser'),
-            ('chip_model', '5'),
+            ('chip_model', '5,15,16'),
             ('level', '2'),
             ('position', 'H')
         ],
