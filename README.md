@@ -52,7 +52,7 @@ MindStudio Profiler（模型调优工具，msProf）提供了AI任务运行性�
    通过msProf命令对AI任务运行性能数据、昇腾AI处理器系统数据进行解析。
 
 ## 贡献指导
-介绍如何向msProf反馈问题、需求以及为msProf贡献的代码开发流程，具体请参见[为MindStudio Probe贡献](CONTRIBUTING.md)。
+介绍如何向msProf反馈问题、需求以及为msProf贡献的代码开发流程，具体请参见[为MindStudio Profiler贡献](CONTRIBUTING.md)。
 
 ## 联系我们
 
@@ -60,6 +60,7 @@ MindStudio Profiler（模型调优工具，msProf）提供了AI任务运行性�
   <a href="https://raw.gitcode.com/kali20gakki1/Imageshack/raw/main/CDC0BEE2-8F11-477D-BD55-77A15417D7D1_4_5005_c.jpeg">
     <img src="https://img.shields.io/badge/WeChat-07C160?style=for-the-badge&logo=wechat&logoColor=white"></a>
 </div>
+
 ## 安全声明
 
 描述msProf产品的安全加固信息、公网地址信息及通信矩阵等内容。详情请参见[msProf安全声明](./docs/zh/security_statement.md)。
