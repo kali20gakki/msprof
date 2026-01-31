@@ -36,6 +36,7 @@ function install_whl_package() {
 function implement_install() {
 	# 1. install collector
 	# msprof bin
+	create_msprof_soft_link
 	copy_file ${MSPROF} ${install_path}/${MSPROF_PATH}/${MSPROF}
 	# libmsprofiler.so
 	copy_file ${LIB_MS_PROFILER} ${install_path}/${arch_name}/lib64/${LIB_MS_PROFILER}
@@ -59,6 +60,19 @@ function implement_install() {
         print "ERROR" "Install msprof analysis whl failed."
         return 1
     fi
+}
+
+function create_msprof_soft_link() {
+  local source="${install_path}/${MSPROF_PATH}/${MSPROF}"
+  local target="${install_path}/${arch_name}/${SOFT_LINK_MSPROF_PATH}"
+
+  [[ -e "${target}" ]] && return 0
+
+  # If the target file does not exist, create a soft link.
+  ln -s "${source}" "${target}" || {
+        echo "ERROR: Failed to create symlink: ${target} -> ${source}" >&2
+        return 1
+    }
 }
 
 function copy_file() {
