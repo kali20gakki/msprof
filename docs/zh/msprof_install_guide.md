@@ -4,7 +4,7 @@
 本文档主要介绍msProf工具的安装方式。
 
 ## 安装前准备
-已完成安装配套版本的CANN Toolkit开发套件包和ops算子包并配置CANN环境变量，具体请参见《CANN软件安装指南》。
+完成安装配套版本的CANN Toolkit开发套件包和ops算子包并配置CANN环境变量，具体请参见《[CANN软件安装指南](https://www.hiascend.com/document/detail/zh/canncommercial/850/softwareinst/instg/instg_0000.html?Mode=PmIns&InstallType=netconda&OS=openEuler)》。
 
 ## 安装run包
 
@@ -18,11 +18,26 @@
 
 1. 安装依赖。
 
-    下载并安装cmake、autoconf、gperf等编译依赖，命令如下：
+   msProf的采集源码在[runtime](https://gitcode.com/cann/runtime)仓和[oam-tools](https://gitcode.com/cann/oam-tools)仓中，因此msProf编采集包会先编译runtime和oam-tools两个仓的代码，而runtime仓在编译时需要指定一定版本的依赖，如gcc版本大于等于7.3.0，小于等于13、cmake版本大于等于3.16.0等。
 
-    ```shell
-    apt install -y cmake python3 python3-pip ccache autoconf gperf libtool libssl-dev
-    ```
+   编译runtime仓用到的依赖如下，请注意版本要求：
+
+   - python >= 3.9.0
+   - pip3
+   - gcc >= 7.3.0, <= 13
+   - cmake >= 3.16.0
+   - ccache
+   - autoconf
+   - gperf
+   - libtool
+
+   runtime仓编译前置依赖详细介绍请参见[runtime仓编译依赖](https://gitcode.com/cann/runtime/blob/master/README.md#%E5%89%8D%E6%8F%90%E6%9D%A1%E4%BB%B6)
+
+   下载并安装cmake、autoconf、gperf等编译依赖，命令如下：
+
+     ```shell
+     apt install -y cmake python3 python3-pip ccache autoconf gperf libtool libssl-dev
+     ```
    
 2. 下载源码。
     ```shell
@@ -44,7 +59,7 @@
    编译命令支持通过--mode参数，分别编译包含msProf采集和解析功能的软件包或仅包含msProf采集功能以及仅包含msProf解析功能的软件包，更多编译参数详细介绍请参见[编译run包参数说明](#编译run包参数说明)。
    
    编译完成后，会在msprof/output目录下生成msProf工具的run包，run包名称格式为`Ascend-mindstudio-msprof_<version>_linux-<arch>.run`。
-   
+    
    上述编译命令中的version参数即为软件包名称中的version，表示该run包的版本号，默认为“none”。
    
    run包中的arch表示系统架构，根据实际运行系统自动适配。
@@ -122,7 +137,7 @@ msProf工具run包的安装命令可配置如下参数。
 | 参数     | 可选/必选 | 说明                                                                                                                                                            |
 | --------| -------  |---------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | --install | 必选 | 安装软件包。可配置--install-path参数指定软件的安装路径；不配置--install-path参数时，则直接安装到默认路径下。                                                                                          |
-| --install-path | 可选 | 安装路径。路径须指定到cann目录，如果用户未指定安装路径，则软件会安装到默认路径下，默认安装路径如下：<br>&#8226 ; root用户：“/usr/local/Ascend/cann”。<br>&#8226; 非root用户：“\${HOME}/Ascend/cann”，${HOME}为当前用户的家目录。 |
+| --install-path | 可选 | 安装路径。路径须指定到cann目录，如果用户未指定安装路径，则软件会安装到默认路径下，默认安装路径如下：<br>- root用户：`/usr/local/Ascend/cann`<br>- 非root用户：`${HOME}/Ascend/cann`，${HOME}为当前用户的家目录。 |
 | --install-for-all | 可选 | 安装时，允许其他用户具有安装用户组的权限。当安装携带该参数时，支持其他用户使用msProf运行业务，但该参数存在安全风险，请谨慎使用。                                                                                           |
 
 安装run包还可指定其他参数，具体可通过./xxx.run --help命令查看。
