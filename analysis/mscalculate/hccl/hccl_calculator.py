@@ -54,6 +54,8 @@ class HcclCalculator(ICalculator, MsMultiProcess):
         self._hccl_task_data = []
         self._hccl_op_data = []
         self._hccl_op_report_data = []
+        start_ts, _ = InfoConfReader().get_collect_time()
+        self.hot_start_time_raw_timestamp = InfoConfReader().trans_from_local_time_into_dev_raw_time(start_ts)
 
     @staticmethod
     def update_bandwidth(communication_data: List[HcclTask]):
@@ -138,21 +140,6 @@ class HcclCalculator(ICalculator, MsMultiProcess):
         return [transit_time, saved_size]
 
     @staticmethod
-    def update_op_name_by_group_name(communication_data: List[HcclTask]):
-        group_dict = defaultdict(lambda: {"first_timestamp": 0, "count": 0})
-        for num, data in enumerate(communication_data):
-            if data.group_name in group_dict:
-                if data.first_timestamp > group_dict[data.group_name]["first_timestamp"]:
-                    group_dict[data.group_name]["first_timestamp"] = data.first_timestamp
-                    group_dict[data.group_name]["count"] += 1
-            else:
-                group_dict[data.group_name]["first_timestamp"] = data.first_timestamp
-                group_dict[data.group_name]["count"] = 0
-            index = group_dict[data.group_name]["count"]
-            communication_data[num] = data.replace(
-                op_name=f"{data.op_name}_{data.group_name[-3:]}_{str(index)}_{str(data.iter_id)}")
-
-    @staticmethod
     def _calculate_bandwidth_gb_s(duration, size):
         if abs(duration) < 1e-15:
             bandwidth = 0
@@ -172,19 +159,30 @@ class HcclCalculator(ICalculator, MsMultiProcess):
             total_time += ops.get("total_time", 0)
         return total_time
 
-    @staticmethod
-    def _get_hccl_op_report_data(communication_data: List[HcclTask]) -> any:
+    def update_op_name_by_group_name(self: any, communication_data: List[HcclTask]):
+        group_dict = defaultdict(lambda: {"first_timestamp": 0, "count": -1})
+        for num, data in enumerate(communication_data):
+            # if data start in warmup, index will be set -1
+            # else index++ when group name in group_dict or group name set first
+            if (data.timestamp > self.hot_start_time_raw_timestamp and
+                    data.first_timestamp > group_dict[data.group_name]["first_timestamp"]):
+                group_dict[data.group_name]["first_timestamp"] = data.first_timestamp
+                group_dict[data.group_name]["count"] += 1
+
+            index = group_dict[data.group_name]["count"]
+            communication_data[num] = data.replace(
+                op_name=f"{data.op_name}_{data.group_name[-3:]}_{str(index)}_{str(data.iter_id)}")
+
+    def _get_hccl_op_report_data(self: any, communication_data: List[HcclTask]) -> any:
         """
         Calculate the hccl op report data by communication data
         return：{"op_type":{'count': 0,'duration': 0, min': 0,'avg': 0,max': 0}}
         """
         if not communication_data:
             return {}
-        start_ts, _ = InfoConfReader().get_collect_time()
-        start_time_raw_timestamp = InfoConfReader().trans_from_local_time_into_dev_raw_time(start_ts)
         grouped_data = defaultdict(lambda: {"min_timestamp": float("inf"), "max_timestamp": -float("inf")})
         for data in communication_data:
-            if data.is_master == 0 or data.timestamp < start_time_raw_timestamp:
+            if data.is_master == 0 or data.timestamp < self.hot_start_time_raw_timestamp:
                 continue
             key = (data.op_name, data.first_timestamp, data.op_type)
             grouped_data[key]["min_timestamp"] = min(grouped_data[key]["min_timestamp"], data.timestamp)
@@ -297,7 +295,7 @@ class HcclCalculator(ICalculator, MsMultiProcess):
                                          data.hccl_name, data.group_name, data.first_timestamp, data.plane_id,
                                          data.timestamp, data.duration, data.is_dynamic,
                                          data.task_type, data.op_type, data.connection_id,
-                                         data.is_master, data.stream_id, data.task_id, 
+                                         data.is_master, data.stream_id, data.task_id,
                                          data.duration_estimated, data.local_rank, data.remote_rank,
                                          data.transport_type, data.size,
                                          data.data_type, data.link_type, data.bandwidth, data.context_id,

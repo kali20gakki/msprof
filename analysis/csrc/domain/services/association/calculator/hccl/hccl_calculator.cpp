@@ -30,8 +30,8 @@ namespace Analysis {
 namespace Domain {
 namespace {
 struct GroupData {
-    uint64_t firstTimestamp = UINT64_MAX;
-    uint64_t count = 0;
+    uint64_t firstTimestamp = 0;
+    int64_t count = -1;
 };
 
 struct OpTypeInfo {
@@ -63,9 +63,13 @@ uint32_t HcclCalculator::ProcessEntry(DataInventory& dataInventory, const Contex
         return std::tie(task1.hostTimestamp, task1.timestamp) < std::tie(task2.hostTimestamp, task2.timestamp);
     });
 
-    UpdateHcclOpNameByGroupName();
+    const auto& deviceContext = dynamic_cast<const DeviceContext&>(context);
+    DeviceStartInfo startInfo;
+    deviceContext.Getter(startInfo);
+
+    UpdateHcclOpNameByGroupName(startInfo.clockMonotonicRaw);
     UpdateHcclBandwidth();
-    if (!GetHcclStatisticsData(context)) {
+    if (!GetHcclStatisticsData(startInfo.clockMonotonicRaw)) {
         ERROR("Failed to Get hccl statistics data.");
         return ANALYSIS_ERROR;
     }
@@ -273,21 +277,17 @@ HcclOp HcclCalculator::GetCompleteHcclOpData(const HcclOp &op)
     return hcclOp;
 }
 
-void HcclCalculator::UpdateHcclOpNameByGroupName()
+void HcclCalculator::UpdateHcclOpNameByGroupName(uint64_t clockMonotonicRaw)
 {
     INFO("Start UpdateHcclOpNameByGroupName.");
     std::unordered_map<std::string, GroupData> hcclGroup;
+    //  if data start in warmup, index will be set -1
+    //  else index++ when group name in group_dict or group name set first
     for (auto& data : taskData_) {
-        if (hcclGroup.find(data.groupName) != hcclGroup.end()) {
-            auto& group_entry = hcclGroup[data.groupName];
-            if (data.firstTimestamp > group_entry.firstTimestamp) {
-                group_entry.firstTimestamp = data.firstTimestamp;
-                group_entry.count++;
-            }
-        } else {
-            GroupData groupData;
-            groupData.firstTimestamp = data.firstTimestamp;
-            hcclGroup[data.groupName] = groupData;
+        auto& groupEntry = hcclGroup[data.groupName];
+        if (data.timestamp > clockMonotonicRaw && data.firstTimestamp > groupEntry.firstTimestamp) {
+            groupEntry.firstTimestamp = data.firstTimestamp;
+            groupEntry.count++;
         }
         int subPoint = 0;
         if (static_cast<int>(data.groupName.size()) > POS_COMPARE_BASE) {
@@ -295,7 +295,7 @@ void HcclCalculator::UpdateHcclOpNameByGroupName()
         }
         auto subGroupName = data.groupName.substr(subPoint);
         data.opName = Utils::Join("_", data.opName, subGroupName,
-                                  std::to_string(hcclGroup[data.groupName].count), std::to_string(data.iterationId));
+                                  std::to_string(groupEntry.count), std::to_string(data.iterationId));
     }
 }
 
@@ -362,7 +362,7 @@ uint16_t HcclCalculator::GetJumpNum(const DeviceHcclTask &task)
 double HcclCalculator::CalculateBandwidth(double size, double duration)
 {
     // B -> GB: 以 1 / 10^9替代； ns -> s: 以 1 / 10^9替代。两者约分，带宽单位为 GB/s
-    return (duration <= 0) ? 0 : static_cast<double>(size) / duration;
+    return (Utils::IsDoubleEqual(duration, 0.0) || (duration <= 0)) ? 0 : static_cast<double>(size) / duration;
 }
 
 uint16_t HcclCalculator::FindConsecutivePayloadTask(std::vector<DeviceHcclTask*> tasks, size_t idx)
@@ -375,19 +375,16 @@ uint16_t HcclCalculator::FindConsecutivePayloadTask(std::vector<DeviceHcclTask*>
     return count;
 }
 
-bool HcclCalculator::GetHcclStatisticsData(const Context& context)
+bool HcclCalculator::GetHcclStatisticsData(uint64_t clockMonotonicRaw)
 {
     INFO("Start GetHcclStatisticsData.");
     if (!isValidData_) {
         WARN("No op type in hccl data.");
         return true;
     }
-    const auto& deviceContext = dynamic_cast<const DeviceContext&>(context);
-    DeviceStartInfo startInfo;
-    deviceContext.Getter(startInfo);
     std::unordered_map<std::string, OpTypeInfo> groupedData;
     for (const auto& task : taskData_) {
-        if (task.isMaster == 0 || task.timestamp < startInfo.clockMonotonicRaw) {
+        if (task.isMaster == 0 || task.timestamp < clockMonotonicRaw) {
             continue;
         }
         auto key = Utils::Join("-", task.opName, std::to_string(task.firstTimestamp), task.opType);

@@ -88,13 +88,13 @@ private:
                          const std::vector<DeviceHcclTask>& deviceHcclTasks);
     DeviceHcclTask GetCompleteHcclTaskData(const HcclOp &op, const DeviceHcclTask &hcclTask, uint16_t count);
     HcclOp GetCompleteHcclOpData(const HcclOp &op);
-    void UpdateHcclOpNameByGroupName();
+    void UpdateHcclOpNameByGroupName(uint64_t clockMonotonicRaw);
     void UpdateHcclBandwidth();
     void CalculateTaskBandwidth(std::vector<DeviceHcclTask*> hcclTasks);
     uint16_t GetJumpNum(const DeviceHcclTask &task);
     double CalculateBandwidth(double size, double duration);
     uint16_t FindConsecutivePayloadTask(std::vector<DeviceHcclTask*> tasks, size_t idx);
-    bool GetHcclStatisticsData(const Context& context);
+    bool GetHcclStatisticsData(uint64_t clockMonotonicRaw);
     bool InjectData(DataInventory &inventory);
 private:
     std::vector<HcclOp> opData_;
