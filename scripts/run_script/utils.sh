@@ -15,7 +15,7 @@ user_libmsprofiler_right=440
 
 PATH_LENGTH=4096
 
-MSPROF_RUN_NAME="mindstudio-msprof"
+MSPROF_RUN_NAME="mindstudio-profiler"
 # product constant
 LIB_MS_PROFILER="libmsprofiler.so"
 LIB_PROF_API="libprofapi.so"

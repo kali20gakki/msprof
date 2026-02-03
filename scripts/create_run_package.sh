@@ -27,7 +27,7 @@ MAIN_SCRIPT=main.sh
 INSTALL_SCRIPT=install.sh
 UTILS_SCRIPT=utils.sh
 
-MSPROF_RUN_NAME="mindstudio-msprof"
+MSPROF_RUN_NAME="mindstudio-profiler"
 VERSION="none"
 BUILD_MODE="analysis"
 
@@ -144,12 +144,11 @@ function get_version() {
 }
 
 function get_package_name() {
-    local product="Ascend"
     local name=${MSPROF_RUN_NAME}
 
     local version=$(echo $(get_version) | cut -d '.' -f 1,2,3)
     local os_arch=$(arch)
-    echo "${product}-${name}_${version}_linux-${os_arch}.run"
+    echo "${name}_${version}_${os_arch}.run"
 }
 
 function create_run_package() {
