@@ -22,7 +22,7 @@ class DataParsersConfig(MetaConfig):
         'CaptureStreamInfoParser': [
             ('path', 'msparser.compact_info.capture_stream_info_parser'),
             ('chip_model', '5'),
-            ('level', '4'),
+            ('level', '2'),
             ('position', 'H')
         ],
         'GeLogicStreamParser': [

@@ -401,8 +401,9 @@ class TaskGear(CANNGear):
     def get_model_id(self, rts_trk: TaskTrackDto, model_dto: ApiDataDto):
         if model_dto.item_id != "":
             return model_dto.item_id
-        return RTAddInfoCenter().get_op_info_by_id(rts_trk.device_id, rts_trk.stream_id, rts_trk.task_id).model_id
-
+        model_id, _ = RTAddInfoCenter().get_op_info_by_id(rts_trk.device_id, rts_trk.stream_id, rts_trk.task_id,
+                                                          rts_trk.batch_id, rts_trk.timestamp)
+        return model_id
 
     def add_host_task(self, call_stack: dict, task_track_dto: TaskTrackDto):
         model_event: Event = call_stack.get(Constant.MODEL_LEVEL)
@@ -646,7 +647,8 @@ class TaskGear(CANNGear):
                                    Constant.NA if not node_attr_info.hashid else node_attr_info.hashid])
 
     def add_kernel_task_only_task_track(self, rts_trk: TaskTrackDto, is_level0: bool):
-        op_info = RTAddInfoCenter().get_op_info_by_id(rts_trk.device_id, rts_trk.stream_id, rts_trk.task_id)
+        _, op_info = RTAddInfoCenter().get_op_info_by_id(rts_trk.device_id, rts_trk.stream_id, rts_trk.task_id,
+                                                         rts_trk.batch_id, rts_trk.timestamp)
         if rts_trk.kernel_name == Constant.NA and not op_info.is_valid:
             return
 
@@ -661,7 +663,7 @@ class TaskGear(CANNGear):
 
         request_id = -1
         context_id = 0 if (task_type in [GeTaskType.MIX_AIC.name, GeTaskType.MIX_AIV.name] and
-                           not ChipManager().is_chip_v6()) else self.INVALID_CONTEXT_ID        # op_flag在level0 或者无补充信息时填NA
+                           not ChipManager().is_chip_v6()) else self.INVALID_CONTEXT_ID  # op_flag在level0 或者无补充信息时填NA
         op_flag = Constant.NA if (is_level0 or not op_info.is_valid) else ("YES" if op_info.op_flag else "NO")
 
         if is_level0:
@@ -678,7 +680,6 @@ class TaskGear(CANNGear):
                                    op_info.input_data_types, op_info.input_shapes,
                                    op_info.output_formats, op_info.output_data_types, op_info.output_shapes,
                                    rts_trk.device_id, context_id, op_flag, Constant.NA])
-
 
     def run(self, event: Event, call_stack: dict):
         # pure runtime api

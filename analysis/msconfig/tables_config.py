@@ -87,7 +87,10 @@ class TablesConfig(MetaConfig):
             ('device_id', 'INTEGER,null'),
             ('model_id', 'INTEGER,null'),
             ('original_stream_id', 'INTEGER,null'),
-            ('model_stream_id', 'INTEGER,null')
+            ('stream_id', 'INTEGER,null'),
+            ('batch_id', 'INTEGER,null'),
+            ('capture_status', 'INTEGER,null'),
+            ('timestamp', 'NUMERIC,null')
         ],
         'OriginalDataMap': [
             ('common', 'TEXT,null'),

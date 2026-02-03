@@ -110,27 +110,37 @@ class CaptureStreamInfoParser(DataParser, MsMultiProcess):
                                                          models_stream_id, comm_info_data.comm_stream_ids])
 
     def _format_stream_data(self, capture_stream_data: List[CaptureStreamInfoBean]):
-        start_model_set = set()
-        end_model_set = set()
-        stream_info_set = set()
+        sorted_capture_stream_data = sorted(capture_stream_data, key=lambda x: x.timestamp)
+        start_model_set, end_model_set, stream_info_set = set(), set(), set()
         repeated_num = 0
-        for bean_data in capture_stream_data:
-            key = (bean_data.device_id, bean_data.model_id, bean_data.original_stream_id, bean_data.model_stream_id)
-            if key in stream_info_set:
+        batch_id_map = {}
+        for bean_data in sorted_capture_stream_data:
+            device_stream_key = (bean_data.device_id, bean_data.model_stream_id)
+            # 获取当前batch_id
+            if device_stream_key not in batch_id_map:
+                batch_id = 0
+                batch_id_map[device_stream_key] = batch_id
+            else:
+                # 已经出现过，递增batch_id
+                batch_id = batch_id_map[device_stream_key]
+            key_without_batch = (bean_data.device_id, bean_data.model_id, bean_data.original_stream_id,
+                                 bean_data.model_stream_id, bean_data.capture_status, bean_data.timestamp)
+            if key_without_batch in stream_info_set:
                 repeated_num += 1
                 continue
-
             # 0 start; 1 end: 记录无需落盘,start 和end对不上属于正常情况（prof stop时 capture流还未被销毁）
             if bean_data.capture_status == 0 and bean_data.model_id not in start_model_set:
                 start_model_set.add(bean_data.model_id)
             if bean_data.capture_status == 1 and bean_data.model_id not in end_model_set:
-                start_model_set.add(bean_data.model_id)
+                end_model_set.add(bean_data.model_id)
                 continue
-            stream_info_set.add(key)
+            batch_id_map[device_stream_key] = batch_id + 1
+            stream_info_set.add(key_without_batch)
+            self._capture_stream_data.append((bean_data.device_id, bean_data.model_id,
+                                              bean_data.original_stream_id, bean_data.model_stream_id, batch_id,
+                                              bean_data.capture_status, bean_data.timestamp))
 
         if start_model_set != end_model_set:
             logging.warning(f"start model ids are {start_model_set}, end model ids are {end_model_set}.")
         if repeated_num:
             logging.warning(f"There are {repeated_num} duplicate records in total.")
-
-        self._capture_stream_data = [list(t) for t in stream_info_set]

@@ -1,0 +1,36 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# -------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This file is part of the MindStudio project.
+#
+# MindStudio is licensed under Mulan PSL v2.
+# You can use this software according to the terms and conditions of the Mulan PSL v2.
+# You may obtain a copy of Mulan PSL v2 at:
+#
+#    http://license.coscl.org.cn/MulanPSL2
+#
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+# EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+# MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+# See the Mulan PSL v2 for more details.
+# -------------------------------------------------------------------------
+
+import unittest
+
+from profiling_bean.db_dto.capture_stream_info_dto import CaptureStreamInfoDto
+
+
+class TestCaptureStreamInfoDto(unittest.TestCase):
+    def test_should_init_capture_stream_info_dto_when_parameters_are_valid(self):
+        check = CaptureStreamInfoDto()
+        check.device_id = 0
+        check.model_id = 55
+        check.original_stream_id = 66
+        check.stream_id = 10
+        check.batch_id = 5
+        check.capture_status = 0
+        check.timestamp = 17565646545
+        self.assertEqual([0, 55, 66, 10, 5, 0, 17565646545],
+                         [check.device_id, check.model_id, check.original_stream_id, check.stream_id,
+                          check.batch_id, check.capture_status, check.timestamp])

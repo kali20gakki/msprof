@@ -15,10 +15,9 @@
 # -------------------------------------------------------------------------
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
-from common_func.info_conf_reader import InfoConfReader
-from common_func.ms_constant.str_constant import StrConstant
 from msmodel.interface.parser_model import ParserModel
 from msmodel.interface.view_model import ViewModel
+from profiling_bean.db_dto.capture_stream_info_dto import CaptureStreamInfoDto
 
 
 class CaptureStreamInfoModel(ParserModel):
@@ -36,3 +35,17 @@ class CaptureStreamInfoModel(ParserModel):
         if not self.table_list:
             return
         self.insert_data_to_db(table_name, data_list)
+
+
+class CaptureStreamInfoViewModel(ViewModel):
+    def __init__(self: any, path: str) -> None:
+        super().__init__(path, DBNameConstant.DB_STREAM_INFO, [])
+
+    def get_capture_stream_info_data(self):
+        if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_CAPTURE_STREAM_INFO):
+            return {}
+
+        sql = ("SELECT device_id, model_id, original_stream_id, stream_id, batch_id, capture_status, "
+               "timestamp FROM {}").format(DBNameConstant.TABLE_CAPTURE_STREAM_INFO)
+        capture_stream_info_data = DBManager.fetch_all_data(self.cur, sql, dto_class=CaptureStreamInfoDto)
+        return capture_stream_info_data
