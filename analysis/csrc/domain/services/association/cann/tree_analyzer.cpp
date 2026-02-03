@@ -58,9 +58,11 @@ const std::set<std::string> KERNEL_COMPUTE_WHITE_LIST = {KERNEL_AI_CORE_TASK_TYP
                                                          KERNEL_AI_CPU_TASK_TYPE,
                                                          KERNEL_MIX_AIC_TASK_TYPE, KERNEL_MIX_AIV_TASK_TYPE};
 
-uint64_t GetModelId(const std::shared_ptr<MsprofApi> &api, uint16_t deviceId, uint32_t streamId, uint16_t taskId)
+uint64_t GetModelId(const std::shared_ptr<MsprofApi> &api, uint16_t deviceId, uint32_t streamId, uint16_t batchId,
+                    uint64_t timestamp)
 {
-    return api != nullptr ? api->itemId : RTAddInfoCenter::GetInstance().Get(deviceId, streamId, taskId).modelId;
+    return api != nullptr ? api->itemId : RTAddInfoCenter::GetInstance().GetModelId(deviceId, streamId, batchId,
+           timestamp);
 }
 
 }
@@ -327,7 +329,7 @@ std::shared_ptr<HostTask> TreeAnalyzer::GenHostTask(const std::shared_ptr<Msprof
     task->timeStamp = track->timeStamp;
     task->thread_id = track->threadId;
     task->kernelName = track->data.runtimeTrack.kernelName;
-    task->modelId = GetModelId(modelApi, task->deviceId, task->streamId, task->taskId);
+    task->modelId = GetModelId(modelApi, task->deviceId, task->streamId, task->batchId, task->timeStamp);
     return task;
 }
 

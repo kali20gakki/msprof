@@ -179,6 +179,24 @@ struct RuntimeOpInfo {
     {}
 };
 
+// 存储CaptureStreamInfo表
+struct CaptureStreamInfo {
+    uint64_t modelId = UINT32_MAX;
+    uint64_t timeStamp = 0;
+    uint32_t streamId = 0;
+    uint16_t originalStreamId = 0;
+    uint16_t deviceId = 0;
+    uint16_t batchId = 0;
+    uint16_t captureStatus = 0;
+
+    CaptureStreamInfo() = default;
+    CaptureStreamInfo(uint64_t modelId, uint64_t timeStamp, uint32_t streamId, uint16_t originalStreamId,
+                      uint16_t deviceId, uint16_t batchId, uint16_t captureStatus)
+        : modelId(modelId), timeStamp(timeStamp), streamId(streamId), originalStreamId(originalStreamId),
+          deviceId(deviceId), batchId(batchId), captureStatus(captureStatus)
+    {}
+};
+
 } // namespace Domain
 } // namespace Analysis
 #endif // ANALYSIS_ENTITIES_ASCEND_OBJ_H

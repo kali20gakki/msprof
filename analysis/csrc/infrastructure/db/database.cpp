@@ -89,6 +89,16 @@ namespace {
         {"expand_status", SQL_NUMERIC_TYPE},
     };
 
+    const TableColumns CaptureStreamInfo = {
+        {"device_id", SQL_INTEGER_TYPE},
+        {"model_id", SQL_INTEGER_TYPE},
+        {"original_stream_id", SQL_INTEGER_TYPE},
+        {"stream_id", SQL_INTEGER_TYPE},
+        {"batch_id", SQL_INTEGER_TYPE},
+        {"capture_status", SQL_INTEGER_TYPE},
+        {"timestamp", SQL_NUMERIC_TYPE},
+    };
+
     const TableColumns TypeHashInfo = {
         {"hash_key", SQL_TEXT_TYPE},
         {"hash_value", SQL_TEXT_TYPE},
@@ -838,6 +848,12 @@ StreamExpandSpecDB::StreamExpandSpecDB()
 {
     dbName_ = "stream_expand_spec.db";
     tableColNames_["StreamExpandSpec"] = StreamExpandSpec;
+}
+
+StreamInfoDB::StreamInfoDB()
+{
+    dbName_ = "stream_info.db";
+    tableColNames_["CaptureStreamInfo"] = CaptureStreamInfo;
 }
 
 HashDB::HashDB()

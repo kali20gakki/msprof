@@ -66,6 +66,11 @@ public:
     StreamExpandSpecDB();
 };
 
+class StreamInfoDB : public Database {
+public:
+    StreamInfoDB();
+};
+
 class HashDB : public Database {
 public:
     HashDB();

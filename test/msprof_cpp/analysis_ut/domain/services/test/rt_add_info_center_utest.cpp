@@ -34,6 +34,9 @@ using dataFormat = std::vector<std::tuple<std::string, std::string, uint32_t, ui
                                           uint16_t, std::string, std::string, std::string, uint16_t, uint16_t,
                                           uint16_t, std::string, uint16_t, std::string, std::string, std::string,
                                           std::string, std::string, std::string>>;
+using captureStreamDataFormat = std::vector<std::tuple<uint16_t, uint64_t, uint16_t, uint32_t, uint16_t,
+                                            uint16_t, uint64_t>>;
+
 const dataFormat DATA{
     {"node", "123", 123, 111, 5, 800, 30, 10, "12345", "AI_CORE", "123456", 20, 0, 0, "dynamic", 3,
      "NCL;NCL", "FLOAT;FLOAT", "\"63,63,511;63,63,511\"", "ND", "FLOAT", "\"261121\""},
@@ -41,10 +44,17 @@ const dataFormat DATA{
      "NCL;ND", "BOOL;INT64", "\"63,63,511;1\"", "ND", "BOOL", "\"63,63\""},
     {"node", "123", 123, 111, 5, 800, 30, 12, "abcde", "AI_VECTOR_CORE", "abcde", 20, 0, 0, "static", 3,
         "NCL;ND", "BOOL;INT64", "\"63,63,511;1\"", "ND", "BOOL", "\"63,63\""}};
+const captureStreamDataFormat CAPTURE_STREAM_DATA{
+    {0, 49, 3, 95, 0, 0, 27063567062060},
+    {0, 49, 44, 11, 0, 0, 27063567062060},
+    {0, 49, 43, 12, 0, 0, 27063567062060}
+};
+
 const std::string PROF_PATH = "./PROF_XXX";
 const std::string HOST_PATH = File::PathJoin({PROF_PATH, "host"});
 const std::string SQLITE_PATH = File::PathJoin({HOST_PATH, "sqlite"});
 const std::string RTS_TRACK_DB_PATH = File::PathJoin({PROF_PATH, "host", "sqlite", "rts_track.db"});
+const std::string CAPTURE_STREAM_INFO_DB_PATH = File::PathJoin({PROF_PATH, "host", "sqlite", "stream_info.db"});
 const std::string DATA_PATH = File::PathJoin({HOST_PATH, "data"});
 const std::string HASH_FILE = File::PathJoin({DATA_PATH, "unaging.additional.hash_dic.slice_0"});
 
@@ -80,11 +90,16 @@ protected:
         RtsTrackDB rtsTrackDB;
         std::string opInfo = "RuntimeOpInfo";
         CreateDB(rtsTrackDB, opInfo, RTS_TRACK_DB_PATH, DATA);
+        StreamInfoDB streamInfoDB;
+        std::string captureStreamInfo = "CaptureStreamInfo";
+        CreateDB(streamInfoDB, captureStreamInfo, CAPTURE_STREAM_INFO_DB_PATH,
+                 CAPTURE_STREAM_DATA);
     }
 
     void TearDown() override
     {
         EXPECT_TRUE(File::DeleteFile(RTS_TRACK_DB_PATH));
+        EXPECT_TRUE(File::DeleteFile(CAPTURE_STREAM_INFO_DB_PATH));
     }
 
     template<typename T>
@@ -139,4 +154,12 @@ TEST_F(RTAddInfoCenterUTest, LoadThenTestGetWhenLoadSuccess)
     CheckRuntimeOpInfo(info1, expect1);
     CheckRuntimeOpInfo(info2, expect2);
     CheckRuntimeOpInfo(info3, RuntimeOpInfo());
+    uint64_t modelId1 = RTAddInfoCenter::GetInstance().GetModelId(0, 95, 0, 27063567062061);
+    uint64_t modelId2 = RTAddInfoCenter::GetInstance().GetModelId(0, 11, 0, 27063567062061);
+    uint64_t modelId3 = RTAddInfoCenter::GetInstance().GetModelId(0, 12, 0, 27063567062061);
+    uint64_t modelId4 = RTAddInfoCenter::GetInstance().GetModelId(0, 12, 0, 27063567062059);
+    EXPECT_EQ(modelId1, 49);
+    EXPECT_EQ(modelId2, 49);
+    EXPECT_EQ(modelId3, 49);
+    EXPECT_EQ(modelId4, 4294967295u);
 }

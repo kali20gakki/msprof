@@ -33,6 +33,8 @@ using namespace Analysis::Infra;
 void Cann::RTAddInfoCenter::Load(const std::string &path)
 {
     LoadDB(path);
+    LoadCaptureInfoDB(path);
+    BuildCaptureInfoTimeRange();
 }
 
 RuntimeOpInfo RTAddInfoCenter::Get(uint16_t deviceId, uint32_t streamId, uint16_t taskId)
@@ -43,6 +45,77 @@ RuntimeOpInfo RTAddInfoCenter::Get(uint16_t deviceId, uint32_t streamId, uint16_
         return it->second;
     }
     return RuntimeOpInfo();
+}
+
+uint64_t RTAddInfoCenter::GetModelId(uint16_t deviceId, uint32_t streamId, uint16_t batchId, uint64_t timestamp)
+{
+    constexpr uint32_t kDefaultModelId = DEFAULT_MODEL_ID;
+
+    CaptureKey key{deviceId, streamId, batchId};
+    auto it = captureInfoTimeRangeDict_.find(key);
+    if (it == captureInfoTimeRangeDict_.end())
+        return kDefaultModelId;
+
+    const auto& timeRange = it->second;
+    uint64_t start = std::get<0>(timeRange);
+    uint64_t end   = std::get<1>(timeRange);
+    uint32_t model = std::get<2>(timeRange);
+
+    return (timestamp >= start && timestamp <= end) ? model : kDefaultModelId;
+}
+
+void RTAddInfoCenter::BuildCaptureInfoTimeRange()
+{
+    const uint64_t kInf = std::numeric_limits<uint64_t>::max();
+
+    for (const auto& info : captureStreamInfoData_) {
+        CaptureKey key{info.deviceId, info.streamId, info.batchId};
+
+        auto it = captureInfoTimeRangeDict_.find(key);
+        if (it == captureInfoTimeRangeDict_.end()) {
+            it = captureInfoTimeRangeDict_.emplace(key, TimeRangeInfo{0, kInf, info.modelId}).first;
+        }
+        auto& timeRange = it->second;
+
+        if (info.captureStatus == CAPTURE_STATUS_START) {
+            std::get<0>(timeRange) = info.timeStamp;   // startTime
+            std::get<2>(timeRange) = info.modelId;     // modelId
+        } else if (info.captureStatus == CAPTURE_STATUS_END) {
+            std::get<1>(timeRange) = info.timeStamp;   // endTime
+            std::get<2>(timeRange) = info.modelId;
+        }
+    }
+}
+
+void RTAddInfoCenter::LoadCaptureInfoDB(const std::string &path)
+{
+    StreamInfoDB streamInfoDB;
+    std::string hostDbDirectory = Utils::File::PathJoin({path, streamInfoDB.GetDBName()});
+    DBRunner dbRunner(hostDbDirectory);
+    if (!File::Exist(hostDbDirectory) || !dbRunner.CheckTableExists("CaptureStreamInfo")) {
+        return;
+    }
+    std::string sql{"SELECT model_id, timestamp, stream_id, original_stream_id, device_id, batch_id, capture_status "
+                    "FROM CaptureStreamInfo"};
+    using DataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint32_t, uint16_t, uint16_t, uint16_t, uint16_t>>;
+    DataFormat result;
+    if (!dbRunner.QueryData(sql, result)) {
+        ERROR("Query capture stream info data failed, db path is %.", hostDbDirectory);
+        return;
+    }
+
+    for (const auto& row : result) {
+        uint16_t deviceId;
+        uint16_t originalStreamId;
+        uint16_t batchId;
+        uint16_t captureStatus;
+        uint32_t streamId;
+        uint64_t modelId;
+        uint64_t timeStamp;
+        std::tie(modelId, timeStamp, streamId, originalStreamId, deviceId, batchId, captureStatus) = row;
+        CaptureStreamInfo info{modelId, timeStamp, streamId, originalStreamId, deviceId, batchId, captureStatus};
+        captureStreamInfoData_.push_back(info);
+    }
 }
 
 

@@ -22,6 +22,9 @@
 #include <cstdint>
 #include <string>
 #include <unordered_map>
+#include <limits>
+#include <map>
+#include <tuple>
 
 #include "analysis/csrc/infrastructure/utils/singleton.h"
 #include "analysis/csrc/domain/entities/hal/include/ascend_obj.h"
@@ -30,19 +33,35 @@ namespace Analysis {
 namespace Domain {
 namespace Host {
 namespace Cann {
+
+using CaptureKey = std::tuple<uint16_t, uint32_t, uint16_t>;
+
+using TimeRangeInfo = std::tuple<uint64_t, uint64_t, uint64_t>;
+
+static constexpr uint64_t DEFAULT_MODEL_ID = UINT32_MAX;
+
+static constexpr uint16_t CAPTURE_STATUS_START = 0;
+
+static constexpr uint16_t CAPTURE_STATUS_END = 1;
+
 // 该类是runtime 算子补充信息数据单例类，当前仅读取db，不做解析
 class RTAddInfoCenter : public Utils::Singleton<RTAddInfoCenter> {
 public:
     void Load(const std::string &path);
     RuntimeOpInfo Get(uint16_t deviceId, uint32_t streamId, uint16_t taskId);
+    uint64_t GetModelId(uint16_t deviceId, uint32_t streamId, uint16_t batchId, uint64_t timestamp);
 
 private:
     void LoadDB(const std::string &path);
+    void LoadCaptureInfoDB(const std::string &path);
+    void BuildCaptureInfoTimeRange();
     std::unordered_map<std::string, RuntimeOpInfo> runtimeOpInfoData_;
-};  // class RTAddInfoCenter
-}  // namespace Cann
-}  // namespace Host
-}  // namespace Domain
-}  // namespace Analysis
+    std::vector<CaptureStreamInfo> captureStreamInfoData_;
+    std::map<CaptureKey, TimeRangeInfo> captureInfoTimeRangeDict_;
+ };  // class RTAddInfoCenter
+ }  // namespace Cann
+ }  // namespace Host
+ }  // namespace Domain
+ }  // namespace Analysis
 
 #endif // ANALYSIS_PARSER_HOST_CANN_RT_ADD_INFO_CENTER_H
