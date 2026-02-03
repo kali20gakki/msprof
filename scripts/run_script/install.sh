@@ -34,10 +34,16 @@ function install_whl_package() {
 }
 
 function implement_install() {
+  create_directory ${install_path}/${MSPROF_PATH} ${right}
+  create_directory ${install_path}/${arch_name}/${SOFT_LINK_MSPROF_PATH} ${right}
+  create_directory ${install_path}/${arch_name}/lib64 ${right}
+  create_directory ${install_path}/${arch_name}/include/acl ${right}
+  create_directory ${install_path}/${arch_name}/include/ge ${right}
+  create_directory ${install_path}/${ANALYSIS_PATH} ${right}
 	# 1. install collector
 	# msprof bin
-	create_msprof_soft_link
 	copy_file ${MSPROF} ${install_path}/${MSPROF_PATH}/${MSPROF}
+	create_msprof_soft_link
 	# libmsprofiler.so
 	copy_file ${LIB_MS_PROFILER} ${install_path}/${arch_name}/lib64/${LIB_MS_PROFILER}
 	# libprofapi.so
@@ -62,10 +68,20 @@ function implement_install() {
     fi
 }
 
+function create_directory() {
+  local _dir=${1}
+ 	local _right=${2}
+ 	if [ ! -d "${_dir}" ]; then
+ 	    mkdir -p ${_dir}
+ 	    chmod ${_right} ${_dir}
+ 	fi
+}
+
 function create_msprof_soft_link() {
   local source="${install_path}/${MSPROF_PATH}/${MSPROF}"
-  local target="${install_path}/${arch_name}/${SOFT_LINK_MSPROF_PATH}"
+  local target="${install_path}/${arch_name}/${SOFT_LINK_MSPROF_PATH}/${MSPROF}"
 
+  [[ -e "${source}" ]] || return 0
   [[ -e "${target}" ]] && return 0
 
   # If the target file does not exist, create a soft link.
@@ -94,11 +110,11 @@ function copy_file() {
 		cp -r ${filename} ${target_file}
 		chmod -R ${parent_right} ${target_file}
 		chmod ${parent_right} ${parent_dir}
-		
-		print "INFO" "$filename is replaced."
-		return
-	fi
-	print "WARNING" "target $filename is non-existent."
+	else
+ 	  cp -r ${filename} ${target_file}
+ 	  chmod -R ${parent_right} ${target_file}
+ 	fi
+	print "INFO" "$filename is replaced."
 }
 
 function chmod_ini_file() {

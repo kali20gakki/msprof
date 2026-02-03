@@ -117,29 +117,17 @@ function copy_script() {
 }
 
 function get_version() {
-    # 如果 VERSION 不是 "none"，直接返回 VERSION
-    if [ "${VERSION}" != "none" ]; then
-        echo "${VERSION}"
-        return
-    fi
-
-    # 定义配置文件路径
     local path="${TOP_DIR}/../manifest/dependency/config.ini"
-
-    # 检查配置文件是否存在
-    if [ ! -f "${path}" ]; then
-        echo "none"
-        return
-    fi
-
-    # 从配置文件中读取 version
-    local version=$(grep -m 1 "^version=" "${path}" | cut -d"=" -f2)
-
-    # 检查读取到的 version 是否为空
-    if [ -z "${version}" ]; then
-        echo "none"
-    else
+    if [[ "$VERSION" != "none" ]]; then
+        echo "${VERSION}"
+    elif [ -f "${path}" ]; then
+        local version=$(grep "^version=" "${path}" | cut -d"=" -f2)
         echo "${version}"
+    elif [ -f "${TOP_DIR}/version.txt" ]; then
+        local version=$(grep "^version=" "${TOP_DIR}/version.txt" | cut -d"=" -f2)
+        echo "${version}"
+    else
+        echo "${VERSION}"
     fi
 }
 

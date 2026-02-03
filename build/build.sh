@@ -66,7 +66,7 @@ function build_oam_tools() {
     cd ${TOP_DIR}/build/collector
     git clone https://gitcode.com/cann/oam-tools.git
     cd oam-tools
-    sed -i '25s#set(ASCEND_CANN_PACKAGE_PATH .*)#set(ASCEND_CANN_PACKAGE_PATH '${TOP_DIR}'/build/collector/runtime_install/cann/)#' CMakeLists.txt
+    sed -i '45s#set(ASCEND_CANN_PACKAGE_PATH .*)#set(ASCEND_CANN_PACKAGE_PATH '${TOP_DIR}'/build/collector/runtime_install/cann/)#' CMakeLists.txt
     echo "build oam-tools start."
     bash build.sh
     cd build_out/

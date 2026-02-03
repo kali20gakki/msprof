@@ -29,7 +29,7 @@ MSPROF="msprof"
 
 ANALYSIS_PATH="tools/profiler/profiler_tool"
 MSPROF_PATH="tools/profiler/bin"
-SOFT_LINK_MSPROF_PATH="bin/msprof"
+SOFT_LINK_MSPROF_PATH="bin/"
 
 # msprof analysis whl
 MSPROF_ANALYSIS_WHL="msprof-0.0.1-py3-none-any.whl"
