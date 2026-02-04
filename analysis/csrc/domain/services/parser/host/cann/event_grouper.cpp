@@ -26,6 +26,7 @@ namespace Host {
 namespace Cann {
 namespace {
 const std::string RECORD_EVENT = "aclrtRecordEvent";
+const std::string WAIT_EVENT = "aclrtStreamWaitEvent";
 }
 
 CANNWarehouses &EventGrouper::GetGroupEvents()
@@ -139,6 +140,15 @@ void EventGrouper::InitLastKernelTimes(const std::set<uint32_t> &threadIds)
     }
 }
 
+bool EventGrouper::IsBuildTreeWithAcl(const std::shared_ptr<MsprofApi> &trace)
+{
+    if (trace->level == MSPROF_REPORT_ACL_LEVEL) {
+        auto id = TypeData::GetInstance().Get(trace->level, trace->type);
+        return id != RECORD_EVENT && id != WAIT_EVENT;
+    }
+    return false;
+}
+
 bool EventGrouper::isKernelApiEvent(const std::shared_ptr<MsprofApi> &trace)
 {
     if (trace->level == MSPROF_REPORT_ACL_LEVEL || trace->level == MSPROF_REPORT_MODEL_LEVEL ||
@@ -157,8 +167,7 @@ bool EventGrouper::isKernelApiEvent(const std::shared_ptr<MsprofApi> &trace)
             lastKernelTimes_[trace->threadId][trace->level] = {trace->beginTime, trace->endTime};
             return true;
         }
-        if (trace->level == MSPROF_REPORT_ACL_LEVEL &&
-            TypeData::GetInstance().Get(trace->level, trace->type) != RECORD_EVENT) {
+        if (IsBuildTreeWithAcl(trace)) {
             return false;
         }
         WARN("Redundant api, level: %, time: [%, %], last valid api time: [%, %], threadId = %",

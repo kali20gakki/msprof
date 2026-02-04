@@ -121,13 +121,14 @@ void GenerateApiTrace(std::vector<ApiData> &apiData, std::vector<std::shared_ptr
         res.push_back(event);
     }
 }
+
 void GenerateConnectionTrace(std::vector<ApiData> &apiData, uint32_t pid, std::vector<std::shared_ptr<TraceEvent>> &res,
                              std::unordered_set<uint64_t> memcpyAsyncConnectionIds)
 {
     std::string connId;
     std::string name;
     for (auto &data : apiData) {
-        if (MSPROF_REPORT_NODE_LEVEL == data.level || RECORD_EVENT == data.id ||
+        if (MSPROF_REPORT_NODE_LEVEL == data.level || RECORD_EVENT == data.id || WAIT_EVENT == data.id ||
             memcpyAsyncConnectionIds.find(data.connectionId) != memcpyAsyncConnectionIds.end()) {
             connId = ConnectionIdPool::GetConnectionId(data.connectionId, ConnectionCategory::GENERAL);
             name = HOST_TO_DEVICE + connId;

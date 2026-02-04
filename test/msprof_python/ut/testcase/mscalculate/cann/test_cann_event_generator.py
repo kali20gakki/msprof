@@ -109,11 +109,6 @@ class TestClusterLinkCalculate(unittest.TestCase):
         self.assertFalse(check.is_kernel_api(api1))
         self.assertFalse(check.is_kernel_api(api2))
 
-    def test_is_kernel_api_when_api_level_invalid_then_return_False(self):
-        api = self.create_api_dto(self.api_col('acl', 0, 10, 100, 'm', 0))
-        check = CANNEventGenerator("test")
-        self.assertFalse(check.is_kernel_api(api))
-
     def test_is_kernel_api_when_api_struct_type_invalid_then_return_True(self):
         api = self.create_api_dto(self.api_col('model', 0, 10, 100, 'm', 0))
         check = CANNEventGenerator("test")

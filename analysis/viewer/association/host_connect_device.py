@@ -41,6 +41,8 @@ class HostToDevice:
         self._result_dir = result_dir
         # 没有api数据时没必要增加连线
         self.exist_api = False
+        self._acl_event_apis = {}
+        self._memcpy_async_ids = defaultdict(list)
 
     @staticmethod
     def is_node_launch(api_trace: Dict[str, Any]) -> bool:
@@ -92,7 +94,7 @@ class HostToDevice:
     @staticmethod
     def add_task_connection_data(traces: List[Dict[str, Any]], cann_pid: int,
                                  node_tasks: Dict[Tuple[int, int, int, int], Tuple[int, int]],
-                                 device_id: int) -> None:
+                                 device_id: int, acl_event_apis: Dict[str, Any]) -> None:
         if not isinstance(traces, list):
             return
         tmp_list = []
@@ -102,9 +104,19 @@ class HostToDevice:
             task_id = trace_args.get("Task Id")
             batch_id = trace_args.get("Batch Id")
             context_id: int = trace_args.get("Subtask Id", Constant.DEFAULT_INVALID_VALUE)
-            if (device_id, stream_id, task_id, batch_id) not in node_tasks:
+            connection_id = trace_args.get("connection_id", Constant.DEFAULT_INVALID_VALUE)
+            task_data = node_tasks.get((device_id, stream_id, task_id, batch_id), None)
+            if task_data is not None:
+                host_task_tid, host_task_ts = task_data
+                host_task_ts = InfoConfReader().trans_into_local_time(
+                    InfoConfReader().time_from_host_syscnt(host_task_ts, NumberConstant.MICRO_SECOND),
+                    use_us=True, is_host=True)
+            elif connection_id in acl_event_apis:
+                api_trace = acl_event_apis[connection_id]
+                host_task_tid = api_trace.get(TraceViewHeaderConstant.TRACE_HEADER_TID)
+                host_task_ts = api_trace.get(TraceViewHeaderConstant.TRACE_HEADER_TS)
+            else:
                 continue
-            host_task_tid, host_task_ts = node_tasks[(device_id, stream_id, task_id, batch_id)]
             pid = trace.get(TraceViewHeaderConstant.TRACE_HEADER_PID)
             tid = trace.get(TraceViewHeaderConstant.TRACE_HEADER_TID)
 
@@ -112,10 +124,6 @@ class HostToDevice:
             # |---6bit--|---16bit--|---16bit---|---16bit---|---32bit---|
             #  device_id  stream_id   task_id     batch_id   context_id
             connection_id = (device_id << 80) + (stream_id << 64) + (task_id << 48) + (batch_id << 32) + context_id
-            host_task_ts = InfoConfReader().trans_into_local_time(
-                InfoConfReader().time_from_host_syscnt(host_task_ts, NumberConstant.MICRO_SECOND),
-                use_us=True, is_host=True)
-
             connect_start = {
                 TraceViewHeaderConstant.TRACE_HEADER_NAME: f'HostToDevice{connection_id}',
                 TraceViewHeaderConstant.TRACE_HEADER_PH: 's',
@@ -196,6 +204,66 @@ class HostToDevice:
             tmp_list.append(connect_dict)
         traces.extend(tmp_list)
 
+    @staticmethod
+    def add_memcpy_async_start_points(api_traces: List[Dict[str, Any]],
+                          memcpy_async_ids: Dict[int, List[int]]) -> None:
+        if not isinstance(api_traces, list):
+            return
+        tmp_list = []
+        for api_trace in api_traces:
+            if api_trace.get("args", {}).get("connection_id") in memcpy_async_ids:
+                start_time = api_trace.get('ts', '0')
+                connection_id = api_trace.get("args", {}).get("connection_id", Constant.DEFAULT_INVALID_VALUE)
+                context_ids = memcpy_async_ids.get(connection_id, [Constant.DEFAULT_INVALID_VALUE])
+                tmp_list.extend([
+                    {
+                        TraceViewHeaderConstant.TRACE_HEADER_NAME: f'HostToDevice{(connection_id << 32) + ctx_id}',
+                        TraceViewHeaderConstant.TRACE_HEADER_PH: 's',
+                        TraceViewHeaderConstant.TRACE_HEADER_CAT: StrConstant.HOST_TO_DEVICE,
+                        TraceViewHeaderConstant.TRACE_HEADER_ID: str((connection_id << 32) + ctx_id),
+                        TraceViewHeaderConstant.TRACE_HEADER_PID: api_trace.get(TraceViewHeaderConstant.TRACE_HEADER_PID),
+                        TraceViewHeaderConstant.TRACE_HEADER_TID: api_trace.get(TraceViewHeaderConstant.TRACE_HEADER_TID),
+                        TraceViewHeaderConstant.TRACE_HEADER_TS: start_time
+                    }
+                    for ctx_id in context_ids
+                ])
+        api_traces.extend(tmp_list)
+
+    @staticmethod
+    def add_memcpy_async_end_points(traces: List[Dict[str, Any]], memcpy_async_ids: Dict[int, List[int]]) -> None:
+        if not isinstance(traces, list):
+            return
+        tmp_list = []
+        for trace in traces:
+            if trace.get("name") == 'MEMCPY_ASYNC' and trace.get("args", {}).get("connection_id") in memcpy_async_ids:
+                trace_args = trace.get('args', {})
+                connection_id = trace_args.get('connection_id', Constant.DEFAULT_INVALID_VALUE)
+                if connection_id == Constant.DEFAULT_INVALID_VALUE:
+                    continue
+                context_id: int = trace_args.get("Subtask Id", Constant.DEFAULT_INVALID_VALUE)
+                pid = trace.get(TraceViewHeaderConstant.TRACE_HEADER_PID)
+                tid = trace.get(TraceViewHeaderConstant.TRACE_HEADER_TID)
+                connection_id = (connection_id << 32) + context_id
+                connect_dict = {
+                    TraceViewHeaderConstant.TRACE_HEADER_NAME: f'HostToDevice{connection_id}',
+                    TraceViewHeaderConstant.TRACE_HEADER_PH: 'f',
+                    TraceViewHeaderConstant.TRACE_HEADER_ID: str(connection_id),
+                    TraceViewHeaderConstant.TRACE_HEADER_TS: trace.get(TraceViewHeaderConstant.TRACE_HEADER_TS),
+                    TraceViewHeaderConstant.TRACE_HEADER_CAT: StrConstant.HOST_TO_DEVICE,
+                    TraceViewHeaderConstant.TRACE_HEADER_PID: pid,
+                    TraceViewHeaderConstant.TRACE_HEADER_TID: tid,
+                    TraceViewHeaderConstant.TRACE_HEADER_BP: 'e',
+                }
+                tmp_list.append(connect_dict)
+        traces.extend(tmp_list)
+    
+    def get_acl_event_trace(self, api_traces: List[Dict[str, Any]]) -> None:
+        for api_trace in api_traces:
+            if api_trace.get("name") == StrConstant.ACL_RECORD_EVENT or \
+                    api_trace.get("name") == StrConstant.ACL_WAIT_EVENT:
+                connection_id = api_trace.get("args", {}).get("connection_id")
+                self._acl_event_apis[connection_id] = api_trace
+
     def add_hccl_start_points(self, api_traces: List[Dict[str, Any]],
                               conn_to_ctxes: Dict[int, List[int]], hccl_conn_ids: Set[int]) -> None:
         """
@@ -238,12 +306,15 @@ class HostToDevice:
             if not self.exist_api:
                 return
             cann_pid = self.get_cann_pid()
-            self.add_task_connection_data(traces, cann_pid, node_tasks, device_id)
+            self.add_task_connection_data(traces, cann_pid, node_tasks, device_id, self._acl_event_apis)
+            self.add_memcpy_async_end_points(traces, self._memcpy_async_ids)
         elif data_type == self.API_TYPE:
             self.exist_api = True
             hccl_conn_ids = self.get_hccl_op_connection_ids()
             conn_to_ctxes = self.get_connection_id_to_context_ids_mapping(node_tasks, device_id)
+            self.get_acl_event_trace(traces)
             self.add_hccl_start_points(traces, conn_to_ctxes, hccl_conn_ids)
+            self.add_memcpy_async_start_points(traces, self._memcpy_async_ids)
         elif data_type == self.MODULE_HCCL:
             self.add_hccl_end_points(traces)
 
@@ -272,10 +343,12 @@ class HostToDevice:
         ascend_task_model = ViewModel(self._result_dir, DBNameConstant.DB_ASCEND_TASK,
                                       [DBNameConstant.TABLE_ASCEND_TASK])
         ascend_task_model.init()
-        sql = 'select stream_id, task_id, batch_id, context_id, connection_id from AscendTask'
+        sql = 'select stream_id, task_id, batch_id, context_id, connection_id, host_task_type from AscendTask'
         ascend_tasks = ascend_task_model.get_sql_data(sql)
         result = defaultdict(list)
-        for stream_id, task_id, batch_id, context_id, connection_id in ascend_tasks:
+        for stream_id, task_id, batch_id, context_id, connection_id, host_task_type in ascend_tasks:
+            if host_task_type == 'MEMCPY_ASYNC':
+                self._memcpy_async_ids[connection_id].append(context_id)
             if (device_id, stream_id, task_id, batch_id) not in node_tasks:
                 continue
             result[connection_id].append(context_id)

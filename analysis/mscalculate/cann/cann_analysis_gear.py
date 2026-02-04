@@ -410,6 +410,8 @@ class TaskGear(CANNGear):
         model_dto: ApiDataDto = self.db.get_api(model_event)
         node_event: Event = call_stack.get(Constant.NODE_LEVEL)
         node_dto: ApiDataDto = self.db.get_api(node_event)
+        acl_event: Event = call_stack.get(Constant.ACL_LEVEL)
+        acl_dto: ApiDataDto = self.db.get_api(acl_event)
 
         model_id = self.get_model_id(task_track_dto, model_dto)
         request_id = model_dto.request_id if model_dto.request_id is not None else -1
@@ -423,6 +425,8 @@ class TaskGear(CANNGear):
         connection_id = Constant.DEFAULT_INVALID_VALUE
         if node_dto.connection_id is not None:
             connection_id = node_dto.connection_id
+        elif acl_dto.connection_id is not None:
+            connection_id = acl_dto.connection_id
 
         self.host_tasks.append(
             [model_id, request_id, task_track_dto.stream_id, task_track_dto.task_id,

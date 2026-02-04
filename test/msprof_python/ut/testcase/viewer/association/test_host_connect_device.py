@@ -144,6 +144,69 @@ class TestHostToDevice(unittest.TestCase):
             connection.exist_api = True
             connection.add_connect_line(task_time_data, "task_time")
             self.assertEqual(task_time_data, expected_data)
+    
+    def test_add_connect_line_should_add_one_line_when_data_is_acl_event(self):
+        InfoConfReader()._local_time_offset = 10.0
+        InfoConfReader()._host_local_time_offset = 10.0
+        acl_event_data = [
+            {
+                TraceViewHeaderConstant.TRACE_HEADER_NAME: "EVENT_RECORD",
+                TraceViewHeaderConstant.TRACE_HEADER_PID: 3,
+                TraceViewHeaderConstant.TRACE_HEADER_TID: 11,
+                TraceViewHeaderConstant.TRACE_HEADER_TS: 134524588800,
+                TraceViewHeaderConstant.TRACE_HEADER_DURATION: 0.74,
+                TraceViewHeaderConstant.TRACE_HEADER_PH: "X",
+                TraceViewHeaderConstant.TRACE_HEADER_ARGS: {
+                    "Task Type": "EVENT_RECORD", "Physic Stream Id": 11, "Task Id": 4043,
+                    "Batch Id": 0, "Subtask Id": 4294967295, "connection_id": 19,
+                }
+            },
+        ]
+        connection_id = (0 << 80) + (11 << 64) + (4043 << 48) + (0 << 32) + 4294967295
+        expected_data = acl_event_data + [
+            {
+                TraceViewHeaderConstant.TRACE_HEADER_NAME: f"HostToDevice{connection_id}",
+                TraceViewHeaderConstant.TRACE_HEADER_PH: "s",
+                TraceViewHeaderConstant.TRACE_HEADER_CAT: "HostToDevice",
+                TraceViewHeaderConstant.TRACE_HEADER_ID: str(connection_id),
+                TraceViewHeaderConstant.TRACE_HEADER_PID: 3,
+                TraceViewHeaderConstant.TRACE_HEADER_TID: 11,
+                TraceViewHeaderConstant.TRACE_HEADER_TS: "134524588600"
+            },
+            {
+                TraceViewHeaderConstant.TRACE_HEADER_NAME: f"HostToDevice{connection_id}",
+                TraceViewHeaderConstant.TRACE_HEADER_PH: "f",
+                TraceViewHeaderConstant.TRACE_HEADER_ID: str(connection_id),
+                TraceViewHeaderConstant.TRACE_HEADER_TS: 134524588800,
+                TraceViewHeaderConstant.TRACE_HEADER_CAT: "HostToDevice",
+                TraceViewHeaderConstant.TRACE_HEADER_PID: 3,
+                TraceViewHeaderConstant.TRACE_HEADER_TID: 11,
+                TraceViewHeaderConstant.TRACE_HEADER_BP: "e"
+            },
+        ]
+        data = {
+            TraceViewHeaderConstant.TRACE_HEADER_NAME: "AscendCL@aclrtRecordEvent",
+                TraceViewHeaderConstant.TRACE_HEADER_PID: 3,
+                TraceViewHeaderConstant.TRACE_HEADER_TID: 11,
+                TraceViewHeaderConstant.TRACE_HEADER_TS: '134524588600',
+                TraceViewHeaderConstant.TRACE_HEADER_DURATION: 0.74,
+                TraceViewHeaderConstant.TRACE_HEADER_PH: "X",
+                TraceViewHeaderConstant.TRACE_HEADER_ARGS: {
+                    "Thread Id": "11", "Mode": 'ACL_RTS', "level": 'acl',
+                    "id": 'aclrtRecordEvent', "item_id": 0, "connection_id": 19,
+                }
+        }
+        with mock.patch(NAMESPACE + ".HostToDevice.get_cann_pid", return_value=3):
+            InfoConfReader()._info_json = {"devices": 0}
+            InfoConfReader()._host_freq = 123456
+            connection = HostToDevice("")
+            connection._acl_event_apis[19] = data
+            connection.add_connect_line(acl_event_data, "task_time")
+            self.assertEqual(acl_event_data, acl_event_data)
+ 
+            connection.exist_api = True
+            connection.add_connect_line(acl_event_data, "task_time")
+            self.assertEqual(acl_event_data, expected_data)
 
     def test_add_connect_line_hccl(self):
         hccl_data = [

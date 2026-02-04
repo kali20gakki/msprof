@@ -35,6 +35,7 @@ const std::string META_DATA_PROCESS_LABEL = "process_labels";
 const std::string META_DATA_THREAD_NAME = "thread_name";
 const std::string META_DATA_THREAD_INDEX = "thread_sort_index";
 const std::string HOST_TO_DEVICE = "HostToDevice";
+const std::string WAIT_EVENT = "aclrtStreamWaitEvent";
 const std::string MS_TX = "MsTx";
 const std::string FLOW_START = "s";
 const std::string FLOW_END = "f";

@@ -104,8 +104,6 @@ class CANNEventGenerator:
             return False
         if api_data_dto.start <= 0 or api_data_dto.start == api_data_dto.end:
             return False
-        if api_data_dto.level == ApiViewer.ACL_LEVEL:
-            return False
         return True
 
     def record_additional_info(self, infos):

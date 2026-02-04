@@ -103,7 +103,7 @@ private:
     std::map<TaskId, std::string> taskType_;
     std::set<std::pair<uint32_t, int>> pidTidSet_;
     std::set<TaskId> ffts_;
-    std::set<uint64_t> recordEvent_;
+    std::set<uint64_t> aclEvent_;
     std::vector<AscendTaskData> memcpyAsyncDeviceTasks_;
 };
 }

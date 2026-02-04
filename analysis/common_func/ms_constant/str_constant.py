@@ -121,6 +121,8 @@ class StrConstant:
     ASYNC_NPU = "async_npu"
 
     HOST_TO_DEVICE = "HostToDevice"
+    ACL_RECORD_EVENT = "AscendCL@aclrtRecordEvent"
+    ACL_WAIT_EVENT = "AscendCL@aclrtStreamWaitEvent"
 
     MSTX = "MsTx"
 

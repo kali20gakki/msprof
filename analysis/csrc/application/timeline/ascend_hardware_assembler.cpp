@@ -101,8 +101,8 @@ void AscendHardwareAssembler::InitData(DataInventory &dataInventory, std::vector
     auto apiData = dataInventory.GetPtr<std::vector<ApiData>>();
     if (apiData != nullptr) {
         for (const auto &node : *apiData) {
-            if (RECORD_EVENT == node.id) {
-                recordEvent_.emplace(node.connectionId);
+            if (RECORD_EVENT == node.id || WAIT_EVENT == node.id) {
+                aclEvent_.emplace(node.connectionId);
             }
         }
     }
@@ -257,7 +257,7 @@ void AscendHardwareAssembler::GenerateTaskConnectionTrace(const AscendTaskData &
     std::string connId;
     std::string name;
     int tid;
-    if (opName_.find(id) != opName_.end() || recordEvent_.find(data.connectionId) != recordEvent_.end()) {
+    if (opName_.find(id) != opName_.end() || aclEvent_.find(data.connectionId) != aclEvent_.end()) {
         connId = ConnectionIdPool::GetConnectionId(data.connectionId, ConnectionCategory::GENERAL);
         name = HOST_TO_DEVICE + connId;
         tid = static_cast<int>(GetPhysicStreamId(data.streamId));

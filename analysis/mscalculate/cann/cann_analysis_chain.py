@@ -39,12 +39,14 @@ class CANNAnalysisChain:
         self.db = db
         self.gears = gears
         self.last_event_record = {
+            Constant.ACL_LEVEL: Event.invalid_event(),
             Constant.MODEL_LEVEL: Event.invalid_event(),
             Constant.NODE_LEVEL: Event.invalid_event(),
             Constant.TASK_LEVEL: Event.invalid_event(),
             Constant.HCCL_LEVEL: Event.invalid_event()
         }
         self.now_stack = {
+            Constant.ACL_LEVEL: Event.invalid_event(),
             Constant.MODEL_LEVEL: Event.invalid_event(),
             Constant.NODE_LEVEL: Event.invalid_event(),
             Constant.TASK_LEVEL: Event.invalid_event(),
@@ -92,11 +94,16 @@ class CANNAnalysisChain:
                 return parent
             event = self.event_q.top()
 
-            # the current level has been processed.
-            if not event.is_additional() and event.cann_level < parent.event.cann_level:
-                return parent
             # Some data in parent level is lost or not be uploaded.
             if event.bound > parent.event.bound:
+                return parent
+            # acl层级只能挂载在root层级下,否则不参与建树
+            if event.cann_level == Constant.ACL_LEVEL and parent.event.cann_level != Constant.ROOT_LEVEL:
+                self.event_q.pop()
+                continue
+
+            # the current level has been processed.
+            if not event.is_additional() and event.cann_level < parent.event.cann_level:
                 return parent
 
             event = self.event_q.pop()
