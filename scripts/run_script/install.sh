@@ -35,7 +35,6 @@ function install_whl_package() {
 
 function implement_install() {
   create_directory ${install_path}/${MSPROF_PATH} ${right}
-  create_directory ${install_path}/${arch_name}/${SOFT_LINK_MSPROF_PATH} ${right}
   create_directory ${install_path}/${arch_name}/lib64 ${right}
   create_directory ${install_path}/${arch_name}/include/acl ${right}
   create_directory ${install_path}/${arch_name}/include/ge ${right}
@@ -43,7 +42,6 @@ function implement_install() {
 	# 1. install collector
 	# msprof bin
 	copy_file ${MSPROF} ${install_path}/${MSPROF_PATH}/${MSPROF}
-	create_msprof_soft_link
 	# libmsprofiler.so
 	copy_file ${LIB_MS_PROFILER} ${install_path}/${arch_name}/lib64/${LIB_MS_PROFILER}
 	# libprofapi.so
@@ -77,20 +75,6 @@ function create_directory() {
  	fi
 }
 
-function create_msprof_soft_link() {
-  local source="${install_path}/${MSPROF_PATH}/${MSPROF}"
-  local target="${install_path}/${arch_name}/${SOFT_LINK_MSPROF_PATH}/${MSPROF}"
-
-  [[ -e "${source}" ]] || return 0
-  [[ -e "${target}" ]] && return 0
-
-  # If the target file does not exist, create a soft link.
-  ln -s "${source}" "${target}" || {
-        echo "ERROR: Failed to create symlink: ${target} -> ${source}" >&2
-        return 1
-    }
-}
-
 function copy_file() {
 	local filename=${1}
 	local target_file=$(readlink -f ${2})
@@ -112,7 +96,7 @@ function copy_file() {
 		chmod ${parent_right} ${parent_dir}
 	else
  	  cp -r ${filename} ${target_file}
- 	  chmod -R ${parent_right} ${target_file}
+ 	  chmod -R ${right} ${target_file}
  	fi
 	print "INFO" "$filename is replaced."
 }
