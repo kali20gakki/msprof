@@ -49,7 +49,7 @@ class Event:
         return hash(self.id)
 
     def __eq__(self, other):
-        return self.id == other.id
+        return self.id == other.id if isinstance(other, Event) else False
 
     def __str__(self):
         return self.struct_type + "-" + str(self.id)
