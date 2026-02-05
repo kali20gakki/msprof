@@ -21,7 +21,7 @@ class DataParsersConfig(MetaConfig):
     DATA = {
         'CaptureStreamInfoParser': [
             ('path', 'msparser.compact_info.capture_stream_info_parser'),
-            ('chip_model', '5'),
+            ('chip_model', '5,15,16'),
             ('level', '2'),
             ('position', 'H')
         ],
@@ -96,7 +96,7 @@ class DataParsersConfig(MetaConfig):
         ],
         'ParsingHBMData': [
             ('path', 'msparser.hardware.hbm_parser'),
-            ('chip_model', '0,1,2,3,4,5,7,8,11'),
+            ('chip_model', '0,1,2,3,4,5,7,8,11,15,16'),
             ('position', 'D')
         ],
         'ParsingQosData': [
@@ -142,7 +142,7 @@ class DataParsersConfig(MetaConfig):
         ],
         'MsprofTxParser': [
             ('path', 'msparser.msproftx.msproftx_parser'),
-            ('chip_model', '0,1,2,3,4,5,7,8,11'),
+            ('chip_model', '0,1,2,3,4,5,7,8,11,15,16'),
             ('level', '4'),
             ('position', 'H')
         ],
@@ -193,7 +193,7 @@ class DataParsersConfig(MetaConfig):
         ],
         'NpuMemParser': [
             ('path', 'msparser.npu_mem.npu_mem_parser'),
-            ('chip_model', '0,1,3,4,5,7,8,11'),
+            ('chip_model', '0,1,3,4,5,7,8,11,15,16'),
             ('position', 'D')
         ],
         'NpuModuleMemParser': [
