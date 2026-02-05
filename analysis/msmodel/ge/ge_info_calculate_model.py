@@ -16,17 +16,17 @@
 
 import logging
 import os
-
+from typing import List
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
-from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
 from common_func.profiling_scene import ProfilingScene
 from msmodel.interface.base_model import BaseModel
 from msmodel.step_trace.ts_track_model import TsTrackModel
+from profiling_bean.db_dto.ge_task_dto import GeTaskDto
 
 
 class GeInfoModel(BaseModel):
@@ -167,3 +167,12 @@ class GeInfoModel(BaseModel):
             for task in task_data:
                 task_data_dict[task[0]] = set(task[1].split(','))
         return task_data_dict
+
+    def get_task_info(self, device_ids: List[int]) -> list:
+        sql = f"SELECT op_name, task_type, stream_id, task_id, batch_id, context_id from {DBNameConstant.TABLE_GE_TASK}"
+        if device_ids:
+            valid_device_ids = [did for did in device_ids if isinstance(did, int)]
+            if valid_device_ids:
+                sql += f" WHERE device_id in ({','.join(map(str, valid_device_ids))})"
+        task_info = DBManager.fetch_all_data(self.cur, sql, dto_class=GeTaskDto)
+        return task_info

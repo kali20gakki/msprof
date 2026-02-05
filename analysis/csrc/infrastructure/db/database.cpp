@@ -39,6 +39,7 @@ namespace {
         {"context_ids", SQL_TEXT_TYPE},
         {"batch_id", SQL_INTEGER_TYPE},
         {"task_type", SQL_TEXT_TYPE},
+        {"kernel_name", SQL_TEXT_TYPE},
         {"device_id", SQL_INTEGER_TYPE},
         {"timestamp", SQL_NUMERIC_TYPE},
         {"connection_id", SQL_INTEGER_TYPE},

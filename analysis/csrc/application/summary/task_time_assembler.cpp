@@ -36,6 +36,7 @@ TaskTimeAssembler::TaskTimeAssembler(const std::string &name, const std::string 
 uint8_t TaskTimeAssembler::AssembleData(DataInventory &dataInventory)
 {
     auto taskInfoData = dataInventory.GetPtr<std::vector<TaskInfoData>>();
+    auto hostTaskData = dataInventory.GetPtr<std::vector<HostTask>>();
     auto ascendTaskData = dataInventory.GetPtr<std::vector<AscendTaskData>>();
     if (ascendTaskData == nullptr) {
         WARN("AscendTask not exists, can't export task time data.");
@@ -46,6 +47,11 @@ uint8_t TaskTimeAssembler::AssembleData(DataInventory &dataInventory)
         WARN("No ge data collected, maybe the TaskInfo table is not created, now try to export data with no ge data");
     } else {
         FormatTaskInfoData(*taskInfoData);
+    }
+    if (hostTaskData == nullptr) {
+        WARN("No host data collected, maybe the HostTask table is not created, now try to export data with no host data");
+    } else {
+        FormatHostTaskData(*hostTaskData);
     }
 
     AssembleTaskTime(*ascendTaskData);
@@ -69,10 +75,76 @@ void TaskTimeAssembler::FormatTaskInfoData(const std::vector<TaskInfoData> &task
         return;
     }
     for (const auto &taskInfoDatum : taskInfoData) {
-        TaskTimeKey taskId{static_cast<uint16_t>(taskInfoDatum.streamId), static_cast<uint16_t>(taskInfoDatum.batchId),
-                           static_cast<uint16_t>(taskInfoDatum.taskId)};
+        TaskId taskId{static_cast<uint16_t>(taskInfoDatum.streamId), static_cast<uint16_t>(taskInfoDatum.batchId),
+            taskInfoDatum.taskId, taskInfoDatum.contextId, taskInfoDatum.deviceId};
         formatedTaskInfo_.insert({taskId, {taskInfoDatum.opName, taskInfoDatum.taskType}});
     }
+}
+
+void TaskTimeAssembler::FormatHostTaskData(const std::vector<HostTask> &hostTaskData)
+{
+    if (hostTaskData.empty()) {
+        WARN("host task data is empty, no host task data for task time, check host task please.");
+        return;
+    }
+    for (const auto &taskInfoDatum : hostTaskData) {
+        TaskId taskId{static_cast<uint16_t>(taskInfoDatum.streamId), taskInfoDatum.batchId,
+            taskInfoDatum.taskId, taskInfoDatum.contextId, taskInfoDatum.deviceId};
+         opNameMap.insert({taskId, taskInfoDatum.kernelNameStr});
+    }
+}
+
+std::vector<AscendTaskData> FilterAscendTaskData(const std::vector<AscendTaskData> &ascendTaskDatas) {
+    struct TupleHash {
+        size_t operator()(const std::tuple<uint32_t, uint32_t, uint32_t>& key) const {
+            const size_t h1 = std::hash<uint32_t>()(std::get<0>(key));
+            const size_t h2 = std::hash<uint32_t>()(std::get<1>(key));
+            const size_t h3 = std::hash<uint32_t>()(std::get<2>(key));
+            return h1 ^ (h2 << 1) ^ (h3 << 2);
+        }
+    };
+    struct TupleEqual {
+        bool operator()(const std::tuple<uint32_t, uint32_t, uint32_t>& a,
+                       const std::tuple<uint32_t, uint32_t, uint32_t>& b) const {
+            return std::get<0>(a) == std::get<0>(b) &&
+                   std::get<1>(a) == std::get<1>(b) &&
+                   std::get<2>(a) == std::get<2>(b);
+        }
+    };
+    typedef std::tuple<uint32_t, uint32_t, uint32_t> KeyType;
+    std::unordered_map<KeyType, std::vector<AscendTaskData>, TupleHash, TupleEqual> groups_dict;
+    groups_dict.reserve(ascendTaskDatas.size() / 2);
+    for (const auto& item : ascendTaskDatas) {
+        groups_dict[KeyType(item.streamId, item.taskId, item.batchId)].push_back(item);
+    }
+    std::vector<AscendTaskData> result;
+    size_t estimated_size = 0;
+    for (const auto& pair : groups_dict) {
+        estimated_size += pair.second.size();
+    }
+    result.reserve(estimated_size);
+    for (const auto& pair : groups_dict) {
+        const auto& tasks = pair.second;
+        if (tasks.size() == 1) {
+            result.push_back(tasks[0]);
+            continue;
+        }
+        bool isMix = true;
+        for (const auto& task : tasks) {
+            if (task.contextId > 0 && task.contextId != INVALID_CONTEXT_ID ) {
+                isMix = false;
+                break;
+            }
+        }
+        if (isMix) {
+            for (const auto& task : tasks) {
+                if (task.contextId == 0) {
+                    result.push_back(task);
+                }
+            }
+        }
+    }
+    return result;
 }
 
 void TaskTimeAssembler::AssembleTaskTime(const std::vector<AscendTaskData> &ascendTaskData)
@@ -83,30 +155,30 @@ void TaskTimeAssembler::AssembleTaskTime(const std::vector<AscendTaskData> &asce
     }
 
     const std::string DIVIDE_CHAR = "\t";
-    for (auto &ascendTaskDatum : ascendTaskData) {
-        TaskTimeKey taskId{static_cast<uint16_t>(ascendTaskDatum.streamId),
-                           static_cast<uint16_t>(ascendTaskDatum.batchId),
-                           static_cast<uint16_t>(ascendTaskDatum.taskId)};
-        if (ascendTaskDatum.contextId != UINT32_MAX) {
-            continue;
-        }
-        auto it = formatedTaskInfo_.find(taskId);
-        std::string opName;
-        std::string taskType;
-        if (it != formatedTaskInfo_.end()) {
-            opName = it->second.first;
-            taskType = it->second.second == NA ? ascendTaskDatum.taskType : it->second.second;
-        } else {
-            opName = NA;
-            taskType = ascendTaskDatum.taskType;
-        }
+    for (auto &ascendTaskDatum : FilterAscendTaskData(ascendTaskData)) {
+        TaskId taskId{static_cast<uint16_t>(ascendTaskDatum.streamId), static_cast<uint16_t>(ascendTaskDatum.batchId),
+            ascendTaskDatum.taskId, ascendTaskDatum.contextId, ascendTaskDatum.deviceId};
+        auto taskInfoIt = formatedTaskInfo_.find(taskId);
+        const std::string opName = [&]() -> std::string {
+            auto opNameIt = opNameMap.find(taskId);
+            if (opNameIt != opNameMap.end()) {
+                return opNameIt->second;
+            }
+            if (taskInfoIt != formatedTaskInfo_.end()) {
+                return taskInfoIt->second.first;
+            }
+            return NA;
+        }();
+        const std::string taskType = (taskInfoIt != formatedTaskInfo_.end() && taskInfoIt->second.second != NA)
+                                   ? taskInfoIt->second.second
+                                   : ascendTaskDatum.taskType;
+
         auto row = {std::to_string(ascendTaskDatum.deviceId),
                     opName, taskType, std::to_string(taskId.streamId),
                     std::to_string(taskId.taskId),
                     DivideByPowersOfTenWithPrecision(static_cast<uint64_t>(ascendTaskDatum.duration)),
                     DivideByPowersOfTenWithPrecision(ascendTaskDatum.timestamp) + DIVIDE_CHAR,
                     DivideByPowersOfTenWithPrecision(ascendTaskDatum.end) + DIVIDE_CHAR};
-        // The original code contains a task start time filtering logic, of which is done in processor.
         res_.emplace_back(row);
     }
 }

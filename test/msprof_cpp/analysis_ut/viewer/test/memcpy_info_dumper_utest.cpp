@@ -31,6 +31,7 @@ using HostTaskData = std::vector<
             uint32_t,
             uint32_t,
             std::string,
+            std::string,
             uint32_t,
             uint64_t,
             int64_t,
@@ -41,9 +42,9 @@ const std::string HOST_PATH = File::PathJoin({PROF0, "host"});
 const std::string SQLITE_PATH = File::PathJoin({HOST_PATH, "sqlite"});
 const std::string HOST_TASK_TABLE_NAME = "HostTask";
 const uint32_t RUNTIME_LEVEL_NUMBER = 5000;
-const HostTaskData DATA_A{{4294967295, -1, 30, 4, 4294967295, 0, "MEMCPY_ASYNC", 0, 52851917869135, 2000, 1},
-                          {4294967295, -1, 30, 3, 4294967295, 0, "MEMCPY_ASYNC", 0, 52851917869135, 2000, 1},
-                          {4294967295, -1, 30, 10, 4294967295, 0, "MEMCPY_ASYNC", 0, 52851917869135, 2000, 2}
+const HostTaskData DATA_A{{4294967295, -1, 30, 4, 4294967295, 0, "MEMCPY_ASYNC", "aclnn", 0, 52851917869135, 2000, 1},
+                          {4294967295, -1, 30, 3, 4294967295, 0, "MEMCPY_ASYNC", "aclnn", 0, 52851917869135, 2000, 1},
+                          {4294967295, -1, 30, 10, 4294967295, 0, "MEMCPY_ASYNC", "aclnn", 0, 52851917869135, 2000, 2}
 };
 class MemcpyInfoDumperUtest : public testing::Test {
 protected:

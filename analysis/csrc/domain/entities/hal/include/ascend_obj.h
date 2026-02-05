@@ -130,6 +130,7 @@ struct HostTask {
     uint64_t timeStamp = 0;
     uint64_t kernelName = 0;
     std::string taskTypeStr;
+    std::string kernelNameStr;
     std::shared_ptr<Operator> op = nullptr;
 };
 

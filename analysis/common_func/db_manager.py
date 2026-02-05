@@ -200,19 +200,18 @@ class DBManager:
         """
         execute sql
         """
+        if not isinstance(conn, (sqlite3.Connection, sqlite3.Cursor)):
+            logging.error("conn is invalid param: must be sqlite3.Connection or sqlite3.Cursor")
+            return False
         try:
+            cursor = conn.cursor() if isinstance(conn, sqlite3.Connection) else conn
+            cursor.execute(sql, param or ())
             if isinstance(conn, sqlite3.Connection):
-                if param:
-                    conn.cursor().execute(sql, param)
-                else:
-                    conn.cursor().execute(sql)
                 conn.commit()
-                return True
+            return True
         except sqlite3.Error as err:
             logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
             return False
-        logging.error("conn is invalid param")
-        return False
 
     @staticmethod
     def executemany_sql(conn: any, sql: str, param: any) -> bool:

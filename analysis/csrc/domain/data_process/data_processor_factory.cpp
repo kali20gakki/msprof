@@ -15,6 +15,7 @@
  * -------------------------------------------------------------------------*/
 
 #include "analysis/csrc/domain/data_process/include/data_processor_factory.h"
+#include "analysis/csrc/domain/data_process/ai_task/host_task_processor.h"
 #include "analysis/csrc/domain/data_process/ai_task/api_processor.h"
 #include "analysis/csrc/domain/data_process/ai_task/communication_info_processor.h"
 #include "analysis/csrc/domain/data_process/ai_task/compute_task_info_processor.h"
@@ -135,6 +136,8 @@ std::unordered_map<std::string, ProcessorCreator> DataProcessorFactory::processo
         MAKE_SHARED_RETURN_VOID(processor, HcclStatisticProcessor, profPath);}},
     {PROCESSOR_NAME_OP_STATISTIC, [](const std::string &profPath, std::shared_ptr<DataProcessor> &processor) {
         MAKE_SHARED_RETURN_VOID(processor, OpStatisticProcessor, profPath);}},
+    {PROCESSOR_HOST_TASK, [](const std::string &profPath, std::shared_ptr<DataProcessor> &processor) {
+        MAKE_SHARED_RETURN_VOID(processor, HostTaskProcessor, profPath);}},
 };
 
 std::shared_ptr<DataProcessor> DataProcessorFactory::GetDataProcessByName(const std::string &profPath,

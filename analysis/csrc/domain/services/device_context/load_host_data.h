@@ -17,10 +17,14 @@
 #ifndef MSPROF_ANALYSIS_LOAD_HOST_DATA_H
 #define MSPROF_ANALYSIS_LOAD_HOST_DATA_H
 
+#include "analysis/csrc/domain/entities/hal/include/ascend_obj.h"
+#include "analysis/csrc/domain/valueobject/include/task_id.h"
 #include "analysis/csrc/infrastructure/process/include/process_register.h"
 
 namespace Analysis {
 namespace Domain {
+
+using TaskId2HostTask = std::map<TaskId, std::vector<HostTask>>;
 
 struct StreamIdInfo {
     // key: taskId, value: streamId
@@ -28,6 +32,10 @@ struct StreamIdInfo {
 };
 
 class LoadHostData : public Infra::Process {
+public:
+    static bool ReadHostRuntimeFromDB(std::string& profPath, TaskId2HostTask& hostRuntime,
+        const std::vector<std::string>& deviceIds);
+
 private:
     uint32_t ProcessEntry(Infra::DataInventory &dataInventory, const Infra::Context &deviceContext) override;
 };

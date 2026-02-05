@@ -1307,6 +1307,7 @@ class TablesConfig(MetaConfig):
             ('context_ids', 'TEXT,null'),
             ('batch_id', 'INTEGER,null'),
             ('task_type', 'TEXT,null'),
+            ('kernel_name', 'TEXT,null'),
             ('device_id', 'INTEGER,null'),
             ('timestamp', 'NUMERIC,null'),
             ('connection_id', 'INTEGER,null'),

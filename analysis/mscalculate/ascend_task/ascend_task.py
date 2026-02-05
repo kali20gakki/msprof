@@ -30,6 +30,7 @@ class HostTask:
     context_id: int
     batch_id: int
     task_type: str
+    kernel_name: str
     device_id: int
     host_timestamp: int
     connection_id: int

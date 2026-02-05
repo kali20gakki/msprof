@@ -28,16 +28,16 @@ class TestRuntimeHostTaskModel(TestDirCRBaseModel):
 
     def test__get_host_tasks_should_return_no_empty_when_not_all_in_different_scene(self):
         host_data = [
-            [2, 0, 2, 15, "1", 0, "AI_CORE", 0, 1000, 0],
-            [2, 0, 2, 16, "1", 0, "AI_CORE", 0, 1001, 1],
-            [2, 0, 2, 15, "1", 1, "AI_CORE", 0, 1002, 2],
-            # dynamic and static mix
-            [2, 1, 2, 25, "1", 1, "AI_CORE", 0, 1002.5, 3],
-            [3, 1, 3, 22, "1", 0, "AI_CORE", 0, 1003, 4],
-            [3, 1, 3, 23, "1", 0, "AI_CORE", 0, 1004, 5],
-            [3, 1, 3, 22, "1", 1, "AI_CORE", 0, 1005, 6],
-            # model unload
-            [5, 0, 2, 15, "1", 0, "AI_CORE", 0, 1009, 7],
+            [2, 0, 2, 15, "1", 0, "AI_CORE", 'aclnn', 0, 1000, 0],
+            [2, 0, 2, 16, "1", 0, "AI_CORE", 'aclnn', 0, 1001, 1],
+            [2, 0, 2, 15, "1", 1, "AI_CORE", 'aclnn', 0, 1002, 2],
+            # dynamic and static mix 'aclnn',
+            [2, 1, 2, 25, "1", 1, "AI_CORE", 'aclnn', 0, 1002.5, 3],
+            [3, 1, 3, 22, "1", 0, "AI_CORE", 'aclnn', 0, 1003, 4],
+            [3, 1, 3, 23, "1", 0, "AI_CORE", 'aclnn', 0, 1004, 5],
+            [3, 1, 3, 22, "1", 1, "AI_CORE", 'aclnn', 0, 1005, 6],
+            # model unload 'aclnn',
+            [5, 0, 2, 15, "1", 0, "AI_CORE", 'aclnn', 0, 1009, 7],
         ]
         model = RuntimeHostTaskModel(self.PROF_DEVICE_DIR)
         model.init()
@@ -59,9 +59,9 @@ class TestRuntimeHostTaskModel(TestDirCRBaseModel):
 
     def test__get_host_tasks_should_return_no_empty_when_all_in_different_scene(self):
         host_data = [
-            [4294967295, -1, 4, 22, "1", 0, "AI_CORE", 0, 1006, 0],
-            [4294967295, -1, 4, 23, "1", 0, "AI_CORE", 0, 1007, 1],
-            [4294967295, -1, 4, 22, "1", 1, "AI_CORE", 0, 1008, 2],
+            [4294967295, -1, 4, 22, "1", 0, "AI_CORE", 'aclnn', 0, 1006, 0],
+            [4294967295, -1, 4, 23, "1", 0, "AI_CORE", 'aclnn', 0, 1007, 1],
+            [4294967295, -1, 4, 22, "1", 1, "AI_CORE", 'aclnn', 0, 1008, 2],
         ]
         model = RuntimeHostTaskModel(self.PROF_DEVICE_DIR)
         model.init()

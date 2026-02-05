@@ -42,7 +42,7 @@ class RuntimeHostTaskModel(ParserModel):
 
     def get_host_tasks(self: any, is_all: bool, model_id: int, iter_id: int, device_id: int) -> list:
         sql = "select {0}.model_id, {0}.request_id as index_id, {0}.stream_id, {0}.task_id, " \
-              "{0}.context_ids, {0}.batch_id, {0}.task_type, {0}.device_id,{0}.timestamp, " \
+              "{0}.context_ids, {0}.batch_id, {0}.task_type, {0}.kernel_name, {0}.device_id,{0}.timestamp, " \
               "{0}.connection_id from {0} {1} order by {0}.timestamp" \
             .format(DBNameConstant.TABLE_HOST_TASK,
                     SqlWhereCondition.get_host_select_condition(is_all, model_id, iter_id, device_id))

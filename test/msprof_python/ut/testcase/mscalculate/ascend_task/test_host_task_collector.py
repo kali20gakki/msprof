@@ -72,8 +72,8 @@ class TestHostTaskCollector(unittest.TestCase):
             self.assertEqual(len(visible_host_tasks), 0)
 
         all_host_tasks = [
-            HostTask(1, 2, 3, 4, 1, 0, "", 0, 1000, 0),
-            HostTask(1, 2, 4, 7, 2, 1, "", 0, 1000, 1),
+            HostTask(1, 2, 3, 4, 1, 0, "", '', 0, 1000, 0),
+            HostTask(1, 2, 4, 7, 2, 1, "", '', 0, 1000, 1),
         ]
         with mock.patch(NAMESPACE + ".HostTaskCollector._check_host_tasks_exists", return_value=True), \
                 mock.patch(NAMESPACE + ".HostTaskCollector._get_host_tasks", return_value=all_host_tasks):
@@ -91,8 +91,8 @@ class TestHostTaskCollector(unittest.TestCase):
             self.assertEqual(len(visible_host_tasks), 0)
 
         all_host_tasks = [
-            HostTask(1, 2, 3, 4, 1, 0, "", 0, 1000, 0),
-            HostTask(1, 2, 4, 7, 2, 1, "", 0, 1000, 1),
+            HostTask(1, 2, 3, 4, 1, 0, "", '', 0, 1000, 0),
+            HostTask(1, 2, 4, 7, 2, 1, "", '', 0, 1000, 1),
         ]
         with mock.patch(NAMESPACE + ".HostTaskCollector._check_host_tasks_exists", return_value=True), \
                 mock.patch(NAMESPACE + ".HostTaskCollector._get_host_tasks", return_value=all_host_tasks):

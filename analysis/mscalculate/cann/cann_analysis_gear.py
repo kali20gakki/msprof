@@ -430,7 +430,7 @@ class TaskGear(CANNGear):
 
         self.host_tasks.append(
             [model_id, request_id, task_track_dto.stream_id, task_track_dto.task_id,
-             context_ids, task_track_dto.batch_id, task_track_dto.task_type,
+             context_ids, task_track_dto.batch_id, task_track_dto.task_type, task_track_dto.kernel_name,
              task_track_dto.device_id, task_track_dto.timestamp, connection_id]
         )
 

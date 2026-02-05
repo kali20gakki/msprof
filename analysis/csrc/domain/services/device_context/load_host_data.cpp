@@ -14,7 +14,6 @@
  * See the Mulan PSL v2 for more details.
  * -------------------------------------------------------------------------*/
 
-#include "analysis/csrc/domain/services/device_context/load_host_data.h"
 #include <string>
 #include "analysis/csrc/infrastructure/db/include/database.h"
 #include "analysis/csrc/infrastructure/db/include/db_runner.h"
@@ -24,7 +23,7 @@
 #include "analysis/csrc/domain/services/modeling/include/log_modeling.h"
 #include "analysis/csrc/infrastructure/resource/chip_id.h"
 #include "analysis/csrc/infrastructure/dfx/error_code.h"
-#include "analysis/csrc/domain/entities/hal/include/ascend_obj.h"
+#include "analysis/csrc/domain/services/device_context/load_host_data.h"
 
 using namespace Analysis;
 using namespace Analysis::Viewer::Database;
@@ -38,10 +37,9 @@ const std::string HOST_TASK_TABLE = "HostTask";
 const std::string TASK_INFO_TABLE = "TaskInfo";
 const std::string HCCL_OP_TABLE = "HCCLOP";
 const std::string HCCL_TASK_TABLE = "HCCLTask";
-using DeviceId2HostRunTime = std::map<TaskId, std::vector<HostTask>>;
 using OriDataFormat = std::vector<std::tuple<uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t>>;
 using RuntimeOriDataFormat = std::vector<std::tuple<uint32_t, int32_t, uint16_t, uint32_t, std::string, uint64_t,
-                             std::string, int64_t>>;
+                             std::string, std::string, int64_t, uint16_t>>;
 using HcclTaskOriDataFormat = std::vector<std::tuple<uint64_t, int32_t, std::string, std::string, int32_t, uint64_t,
                               double, uint32_t, uint16_t, uint32_t, uint16_t, uint16_t, uint16_t, uint32_t, uint32_t,
                               uint32_t, std::string, double, std::string, std::string, std::string, std::string>>;
@@ -104,14 +102,11 @@ uint32_t ReadHostGEInfo(DataInventory& dataInventory, const DeviceContext& devic
     return ANALYSIS_OK;
 }
 
-bool ReadHostRuntimeFromDB(const DeviceContext& deviceContext,
-    DeviceId2HostRunTime& hostRuntime)
+bool LoadHostData::ReadHostRuntimeFromDB(std::string& profPath, TaskId2HostTask& hostRuntime,
+    const std::vector<std::string>& deviceIds)
 {
     RuntimeDB runtimeDb;
-    DeviceInfo deviceInfo{};
-    deviceContext.Getter(deviceInfo);
-    auto hostPath = deviceContext.GetDeviceFilePath();
-    std::string hostDbDirectory = Utils::File::PathJoin({hostPath, "../", "/host", "/sqlite", runtimeDb.GetDBName()});
+    std::string hostDbDirectory = File::PathJoin({profPath, "/", HOST, "/", SQLITE, runtimeDb.GetDBName()});
     DBRunner hostRuntimeDBRunner(hostDbDirectory);
 
     if (!CheckPathAndTableExists(hostDbDirectory, hostRuntimeDBRunner, HOST_TASK_TABLE)) {
@@ -119,8 +114,10 @@ bool ReadHostRuntimeFromDB(const DeviceContext& deviceContext,
     }
 
     std::string sql{"SELECT stream_id, request_id, batch_id, task_id, context_ids, "
-                    "model_id, task_type, connection_id FROM HostTask where device_id = "};
-    sql += std::to_string(deviceInfo.deviceId);
+                    "model_id, task_type, kernel_name, connection_id, device_id FROM HostTask"};
+    if (!deviceIds.empty()) {
+        sql += " WHERE device_id IN (" + Join(deviceIds, ",") + ")";
+    }
     RuntimeOriDataFormat result(0);
     bool rc = hostRuntimeDBRunner.QueryData(sql, result);
     if (!rc) {
@@ -129,25 +126,14 @@ bool ReadHostRuntimeFromDB(const DeviceContext& deviceContext,
     }
 
     for (const auto& row : result) {
-        int32_t request_id;
-        uint32_t stream_id, task_id, context_id_u32;
-        uint16_t batch_id;
-        uint64_t model_id;
-        std::string task_type, context_id;
-        int64_t connection_id;
-        std::tie(stream_id, request_id, batch_id, task_id, context_id, model_id, task_type, connection_id) = row;
+        uint32_t context_id_u32;
+        std::string task_type, kernel_name, context_id;
         HostTask hostTask;
-        hostTask.modelId = model_id;
-        hostTask.taskTypeStr = task_type;
-        hostTask.streamId = stream_id;
+        std::tie(hostTask.streamId, hostTask.requestId, hostTask.batchId, hostTask.taskId, context_id,
+            hostTask.modelId, hostTask.taskTypeStr, hostTask.kernelNameStr, hostTask.connection_id, hostTask.deviceId) = row;
         StrToU32(context_id_u32, context_id);
-        TaskId id = {(uint16_t)stream_id, (uint16_t)batch_id, (uint16_t)task_id, context_id_u32};
+        TaskId id = {static_cast<uint16_t>(hostTask.streamId), hostTask.batchId, hostTask.taskId, context_id_u32};
         hostTask.contextId = context_id_u32;
-        hostTask.taskId = task_id;
-        hostTask.batchId = batch_id;
-        hostTask.streamId = stream_id;
-        hostTask.connection_id = connection_id;
-        hostTask.requestId = request_id;
         hostRuntime[id].push_back(hostTask);
     }
     return true;
@@ -156,11 +142,13 @@ bool ReadHostRuntimeFromDB(const DeviceContext& deviceContext,
 uint32_t ReadHostRuntime(DataInventory& dataInventory,
     const DeviceContext& deviceContext)
 {
-    DeviceId2HostRunTime hostRuntime;
-    if (!ReadHostRuntimeFromDB(deviceContext, hostRuntime)) {
+    TaskId2HostTask hostRuntime;
+    DeviceInfo deviceInfo{};
+    deviceContext.Getter(deviceInfo);
+    std::string profPath = File::PathJoin({ deviceContext.GetDeviceFilePath(), "../"});
+    if (!LoadHostData::ReadHostRuntimeFromDB(profPath, hostRuntime, {std::to_string(deviceInfo.deviceId)})) {
         return ANALYSIS_ERROR;
     }
-
     if (deviceContext.GetChipID() == CHIP_V6_1_0) {
         std::shared_ptr<StreamIdInfo> streamIdInfo;
         MAKE_SHARED_RETURN_VALUE(streamIdInfo, StreamIdInfo, ANALYSIS_ERROR);
@@ -169,9 +157,8 @@ uint32_t ReadHostRuntime(DataInventory& dataInventory,
         }
         dataInventory.Inject(streamIdInfo);
     }
-
-    std::shared_ptr<DeviceId2HostRunTime> data;
-    MAKE_SHARED_RETURN_VALUE(data, DeviceId2HostRunTime, ANALYSIS_ERROR, std::move(hostRuntime));
+    std::shared_ptr<TaskId2HostTask> data;
+    MAKE_SHARED_RETURN_VALUE(data, TaskId2HostTask, ANALYSIS_ERROR, std::move(hostRuntime));
     dataInventory.Inject(data);
     return ANALYSIS_OK;
 }
