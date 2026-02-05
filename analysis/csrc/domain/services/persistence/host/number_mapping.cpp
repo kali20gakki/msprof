@@ -177,8 +177,9 @@ namespace {
         {7,  "DSA_SQE"},
         {8,  "DVPP"},
         {9,  "COMMUNICATION"},
-        {10, "INVALID"},
-        {11, "HCCL_AI_CPU"}
+        {10, "FUSION"},
+        {11, "INVALID"},
+        {256, "HCCL_AI_CPU"}
     };
     const std::unordered_map<uint32_t, std::string> hcclDataTypeMap {
         {0,          "INT8"},
@@ -194,6 +195,10 @@ namespace {
         {10,         "FP64"},
         {11,         "BFP16"},
         {12,         "INT128"},
+        {14,         "HIF8"},
+        {15,         "FP8E4M3"},
+        {16,         "FP8E5M2"},
+        {17,         "FP8E8M0"},
         {255,        "RESERVED"},
         {4294967295, "INVALID_TYPE"},
     };
@@ -212,6 +217,7 @@ namespace {
         {0,          "SDMA"},
         {1,          "RDMA"},
         {2,          "LOCAL"},
+        {3,          "UB"},
         {255,        "RESERVED"},
         {4294967295, "INVALID_TYPE"},
     };

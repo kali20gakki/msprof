@@ -493,7 +493,7 @@ TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerWhenScenario1L0)
                                           400, 400, 400, 400, 400, 400, 400, 800, -1, -1, -1, -1};
     // 特殊场景校验分别代表AI_CORE和HCCL_AICPU
     std::string expectHcclComputeTaskTaskTypeStr = "null null null null null null null null null null "
-                                                   "null 9 11 null 0 null null null ";
+                                                   "null 9 256 null 0 null null null ";
     const uint64_t expectbigOPsNum = 4;
     std::vector<uint64_t> expectbigOPsCount{420, 506, 660, 2080};
     std::vector<int64_t> expectKfcConnectionId{29, -1, -1, -1};
@@ -652,7 +652,7 @@ TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerWhenScenario1L2)
                                            DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID,
                                            DEFAULT_CONTEXT_ID};
     // 特殊场景校验分别代表AI_CORE，AI_CPU和HCCL_AICPU
-    std::string expectHcclComputeTaskTaskTypeStr = "null null 0 0 0 0 1 1 1 1 null null 1 9 11 1 9 null ";
+    std::string expectHcclComputeTaskTaskTypeStr = "null null 0 0 0 0 1 1 1 1 null null 1 9 256 1 9 null ";
     const uint64_t expectbigOPsNum = 4;
     std::vector<uint64_t> expectbigOPsCount{422, 504, 660, 2080};
     std::vector<int64_t> expectKfcConnectionId{83, -1, -1, -1};

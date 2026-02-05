@@ -20,7 +20,7 @@ import struct
 from msparser.data_struct_size_constant import StructFmt
 from profiling_bean.struct_info.struct_decoder import StructDecoder
 from common_func.hccl_info_common import ReduceOpType
-from common_func.hccl_info_common import HCCLDataType
+from common_func.hccl_info_common import DataType
 
 
 class CCUAddInfoBean(StructDecoder):
@@ -234,7 +234,7 @@ class CCUGroupInfoBean(CCUAddInfoBean):
     @property
     def input_data_type(self) -> str:
         try:
-            input_data_type = HCCLDataType(self._input_data_type).name
+            input_data_type = DataType(self._input_data_type).name
         except ValueError:
             logging.warning("Invalid ccu input data type, type enum is {}, please check!".format(self._input_data_type))
             input_data_type = self._input_data_type
@@ -243,7 +243,7 @@ class CCUGroupInfoBean(CCUAddInfoBean):
     @property
     def output_data_type(self) -> str:
         try:
-            output_data_type = HCCLDataType(self._output_data_type).name
+            output_data_type = DataType(self._output_data_type).name
         except ValueError:
             logging.warning("Invalid ccu output data type,"
                             " type enum is {}, please check!".format(self._output_data_type))

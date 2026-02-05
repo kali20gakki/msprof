@@ -33,7 +33,11 @@ class OpType(Enum):
     INVALID_TYPE = 4294967295
 
 
+@unique
 class DataType(Enum):
+    """
+    Data type enum
+    """
     INT8 = 0
     INT16 = 1
     INT32 = 2
@@ -47,8 +51,20 @@ class DataType(Enum):
     FP64 = 10
     BFP16 = 11
     INT128 = 12
+    HIF8 = 14
+    FP8E4M3 = 15
+    FP8E5M2 = 16
+    FP8E8M0 = 17
     RESERVED = 255
     INVALID_TYPE = 4294967295
+
+    @classmethod
+    def member_map(cls: any) -> dict:
+        """
+        enum map for DataFormat value and data format member
+        :return:
+        """
+        return cls._value2member_map_
 
 
 class LinkType(Enum):
@@ -67,6 +83,7 @@ class TransPortType(Enum):
     SDMA = 0
     RDMA = 1
     LOCAL = 2
+    UB = 3
     RESERVED = 255
     INVALID_TYPE = 4294967295
 
@@ -106,40 +123,6 @@ class ReduceOpType(Enum):
     PROD = 1
     MAX = 2
     MIN = 3
-    RESERVED = 255
-
-    @classmethod
-    def member_map(cls: any) -> dict:
-        """
-        enum map for DataFormat value and data format member
-        :return:
-        """
-        return cls._value2member_map_
-
-
-@unique
-class HCCLDataType(Enum):
-    """
-    DataType enum for reduce op
-    """
-    INT8 = 0
-    INT16 = 1
-    INT32 = 2
-    FP16 = 3
-    FP32 = 4
-    INT64 = 5
-    UINT64 = 6
-    UINT8 = 7
-    UINT16 = 8
-    UINT32 = 9
-    FP64 = 10
-    BFP16 = 11
-    INT128 = 12
-    BF16_SAT = 13
-    HIF8 = 14
-    FP8E4M3 = 15
-    FP8E5M2 = 16
-    INVALID = 17
     RESERVED = 255
 
     @classmethod
