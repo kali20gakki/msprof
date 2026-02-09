@@ -96,7 +96,7 @@ class RuntimeOpInfoParser(DataParser, MsMultiProcess):
         self._runtime_op_info_data.append([
             body.level, struct_type, body.thread_id, body.timestamp,
             body.device_id, body.model_id, body.stream_id, body.task_id,
-            op_name, body.task_type, op_type,
+            op_name, body.task_type, op_type, body.hash_id,
             body.block_num, body.mix_block_num, body.op_flag, op_state, body.tensor_num,
             tensor.input_format if tensor.input_format else Constant.NA,
             tensor.input_data_type if tensor.input_data_type else Constant.NA,
@@ -117,14 +117,16 @@ class RuntimeOpInfoParser(DataParser, MsMultiProcess):
             self._var_size = self._var_size + 1
             body = RuntimeOpInfoBean.decode(_all_data[offset: middle])
 
+            # 结构体中的data_len长度无法涵盖tensor范围，或者tensor范围已超数据剩余长度
             data_len = body.tensor_num * StructFmt.RUNTIME_OP_INFO_TENSOR_SIZE
-            if (data_len + StructFmt.RUNTIME_OP_INFO_WITHOUT_HEAD_SIZE) != body.data_len:
+            if (data_len + StructFmt.RUNTIME_OP_INFO_WITHOUT_HEAD_SIZE) < body.data_len or \
+                    middle + data_len > file_size:
                 logging.error("data_len error: data_len is %d, tensor num is %d", body.data_len, body.tensor_num)
                 offset = middle + body.data_len - StructFmt.RUNTIME_OP_INFO_WITHOUT_HEAD_SIZE
                 continue
 
-            end = middle + body.tensor_num * StructFmt.RUNTIME_OP_INFO_TENSOR_SIZE
-            tensor = RuntimeTensorBean().decode(_all_data[middle: offset + end],
+            end = middle + body.data_len - StructFmt.RUNTIME_OP_INFO_WITHOUT_HEAD_SIZE
+            tensor = RuntimeTensorBean().decode(_all_data[middle: end],
                                                 StructFmt.RUNTIME_OP_INFO_TENSOR_FMT,
                                                 body.tensor_num)
             self._assemble_data(mode, body, tensor)

@@ -17,6 +17,7 @@
 import logging
 import struct
 
+from common_func.constant import Constant
 from common_func.ms_constant.ge_enum_constant import GeTaskType
 from msparser.add_info.add_info_bean import AddInfoBean
 from msparser.data_struct_size_constant import StructFmt
@@ -39,7 +40,8 @@ class RuntimeOpInfoBean(AddInfoBean):
         self._block_num = data[11]
         self._node_id = data[12]
         self._op_type = data[13]
-        # reserve * 2
+        self._hash_id = data[14]
+        # reserve * 1
         self._op_flag = data[16]
         self._tensor_num = data[17]
 
@@ -89,6 +91,13 @@ class RuntimeOpInfoBean(AddInfoBean):
         for op type
         """
         return str(self._op_type)
+
+    @property
+    def hash_id(self: any) -> str:
+        """
+        for attr hashId
+        """
+        return str(self._hash_id) if self._hash_id else Constant.NA
 
     @property
     def node_id(self: any) -> str:

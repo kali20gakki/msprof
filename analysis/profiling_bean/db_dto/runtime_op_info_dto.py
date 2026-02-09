@@ -35,6 +35,7 @@ class RuntimeOpInfoDto(metaclass=InstanceCheckMeta):
     mix_block_num: int = 0
     op_flag: int = 0
     is_dynamic: str = Constant.NA
+    hash_id: str = Constant.NA
     tensor_num: int = None
     input_formats: str = None
     input_data_types: str = None

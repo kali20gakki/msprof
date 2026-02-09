@@ -675,7 +675,7 @@ class TaskGear(CANNGear):
                                    0, 0, Constant.NA, task_type, op_type, request_id,
                                    rts_trk.thread_id, rts_trk.timestamp, rts_trk.batch_id, None,
                                    None, None, None, None, None, None,
-                                   rts_trk.device_id, context_id, op_flag, Constant.NA])
+                                   rts_trk.device_id, context_id, op_flag, op_info.hash_id])
         else:
             self.task_info.append([op_info.model_id, op_name, rts_trk.stream_id, rts_trk.task_id,
                                    op_info.block_num, op_info.mix_block_num, op_info.is_dynamic, task_type,
@@ -683,7 +683,7 @@ class TaskGear(CANNGear):
                                    rts_trk.batch_id, op_info.tensor_num, op_info.input_formats,
                                    op_info.input_data_types, op_info.input_shapes,
                                    op_info.output_formats, op_info.output_data_types, op_info.output_shapes,
-                                   rts_trk.device_id, context_id, op_flag, Constant.NA])
+                                   rts_trk.device_id, context_id, op_flag, op_info.hash_id])
 
     def run(self, event: Event, call_stack: dict):
         # pure runtime api

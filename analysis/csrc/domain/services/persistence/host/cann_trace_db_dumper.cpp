@@ -338,13 +338,13 @@ void CANNTraceDBDumper::AddTaskInfoForOnlyTaskTrack(const std::shared_ptr<HostTa
     if (isLevel0) {
         data.emplace_back(info.modelId, opName, task->streamId, task->taskId, 0, 0, NA,
                           taskType, opType, task->requestId, task->thread_id, task->timeStamp, task->batchId,
-                          0, NA, NA, NA, NA, NA, NA, task->deviceId, task->contextId, opFlag, NA);
+                          0, NA, NA, NA, NA, NA, NA, task->deviceId, task->contextId, opFlag, info.hashId);
     } else {
         data.emplace_back(info.modelId, opName, task->streamId, task->taskId, info.blockNum, info.mixBlockNum,
                           info.isDynamic, taskType, opType, task->requestId, task->thread_id, task->timeStamp,
                           task->batchId, info.tensorNum, info.inputFormats, info.inputDataTypes, info.inputShapes,
                           info.outputFormats, info.outputDataTypes, info.outputShapes,
-                          task->deviceId, task->contextId, opFlag, NA);
+                          task->deviceId, task->contextId, opFlag, info.hashId);
     }
 }
 

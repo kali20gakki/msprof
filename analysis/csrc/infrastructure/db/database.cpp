@@ -188,6 +188,7 @@ namespace {
         {"op_name", SQL_TEXT_TYPE},
         {"task_type", SQL_TEXT_TYPE},
         {"op_type", SQL_TEXT_TYPE},
+        {"hash_id", SQL_TEXT_TYPE},
         {"block_num", SQL_INTEGER_TYPE},
         {"mix_block_num", SQL_INTEGER_TYPE},
         {"op_flag", SQL_INTEGER_TYPE},

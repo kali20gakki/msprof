@@ -31,18 +31,19 @@ using namespace Analysis::Domain;
 
 namespace {
 using dataFormat = std::vector<std::tuple<std::string, std::string, uint32_t, uint32_t, uint16_t, uint64_t, uint32_t,
-                                          uint16_t, std::string, std::string, std::string, uint16_t, uint16_t,
-                                          uint16_t, std::string, uint16_t, std::string, std::string, std::string,
+                                          uint16_t, std::string, std::string, std::string, std::string,
+                                          uint16_t, uint16_t, uint16_t,
+                                          std::string, uint16_t, std::string, std::string, std::string,
                                           std::string, std::string, std::string>>;
 using captureStreamDataFormat = std::vector<std::tuple<uint16_t, uint64_t, uint16_t, uint32_t, uint16_t,
                                             uint16_t, uint64_t>>;
 
 const dataFormat DATA{
-    {"node", "123", 123, 111, 5, 800, 30, 10, "12345", "AI_CORE", "123456", 20, 0, 0, "dynamic", 3,
+    {"node", "123", 123, 111, 5, 800, 30, 10, "12345", "AI_CORE", "123456", "1111", 20, 0, 0, "dynamic", 3,
      "NCL;NCL", "FLOAT;FLOAT", "\"63,63,511;63,63,511\"", "ND", "FLOAT", "\"261121\""},
-    {"node", "123", 123, 111, 5, 800, 30, 11, "54321", "AI_VECTOR_CORE", "654321", 20, 0, 0, "static", 3,
+    {"node", "123", 123, 111, 5, 800, 30, 11, "54321", "AI_VECTOR_CORE", "654321", "1111", 20, 0, 0, "static", 3,
      "NCL;ND", "BOOL;INT64", "\"63,63,511;1\"", "ND", "BOOL", "\"63,63\""},
-    {"node", "123", 123, 111, 5, 800, 30, 12, "abcde", "AI_VECTOR_CORE", "abcde", 20, 0, 0, "static", 3,
+    {"node", "123", 123, 111, 5, 800, 30, 12, "abcde", "AI_VECTOR_CORE", "abcde", "1111", 20, 0, 0, "static", 3,
         "NCL;ND", "BOOL;INT64", "\"63,63,511;1\"", "ND", "BOOL", "\"63,63\""}};
 const captureStreamDataFormat CAPTURE_STREAM_DATA{
     {0, 49, 3, 95, 0, 0, 27063567062060},
@@ -77,6 +78,7 @@ protected:
         fw.WriteText("123456:matmul\n");
         fw.WriteText("54321:mulV2\n");
         fw.WriteText("654321:mul\n");
+        fw.WriteText("1111:testAttr\n"); // 暂时没用，存的是hash
         fw.Close();
     }
     // 所有测试用例之后执行
@@ -130,6 +132,7 @@ void CheckRuntimeOpInfo(RuntimeOpInfo info, RuntimeOpInfo expect)
     EXPECT_EQ(info.taskType, expect.taskType);
     EXPECT_EQ(info.opType, expect.opType);
     EXPECT_EQ(info.opName, expect.opName);
+    EXPECT_EQ(info.hashId, expect.hashId);
     EXPECT_EQ(info.inputDataTypes, expect.inputDataTypes);
     EXPECT_EQ(info.inputShapes, expect.inputShapes);
     EXPECT_EQ(info.inputFormats, expect.inputFormats);
@@ -147,9 +150,9 @@ TEST_F(RTAddInfoCenterUTest, LoadThenTestGetWhenLoadSuccess)
     auto info2 = RTAddInfoCenter::GetInstance().Get(5, 30, 11);
     auto info3 = RTAddInfoCenter::GetInstance().Get(5, 20, 10);
 
-    RuntimeOpInfo expect1{5, 10, 20, 0, 0, 3, 30, 800, "AI_CORE", "matmul", "matmulV2", "dynamic",
+    RuntimeOpInfo expect1{5, 10, 20, 0, 0, 3, 30, 800, "AI_CORE", "matmul", "matmulV2", "1111", "dynamic",
                           "NCL;NCL", "FLOAT;FLOAT", "\"63,63,511;63,63,511\"", "ND", "FLOAT", "\"261121\""};
-    RuntimeOpInfo expect2{5, 11, 20, 0, 0, 3, 30, 800, "AI_VECTOR_CORE", "mul", "mulV2", "static",
+    RuntimeOpInfo expect2{5, 11, 20, 0, 0, 3, 30, 800, "AI_VECTOR_CORE", "mul", "mulV2", "1111", "static",
                           "NCL;ND", "BOOL;INT64", "\"63,63,511;1\"", "ND", "BOOL", "\"63,63\""};
     CheckRuntimeOpInfo(info1, expect1);
     CheckRuntimeOpInfo(info2, expect2);

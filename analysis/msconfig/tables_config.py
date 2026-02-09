@@ -1154,6 +1154,7 @@ class TablesConfig(MetaConfig):
             ('op_name', 'TEXT,null'),
             ('task_type', 'TEXT,null'),
             ('op_type', 'TEXT,null'),
+            ('hash_id', 'TEXT,null'),
             ('block_num', 'INTEGER,null'),
             ('mix_block_num', 'INTEGER,null'),
             ('op_flag', 'INTEGER,null'),
