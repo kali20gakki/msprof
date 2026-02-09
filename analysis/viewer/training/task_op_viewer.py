@@ -92,14 +92,24 @@ class TaskOpViewer:
         return list(groups_dict.values())
 
     @staticmethod
-    def is_mix(group_task_data: list) -> bool:
+    def operate_type(group_task_data: list) -> Tuple[bool, bool, bool, bool]:
+        """
+        :param group_task_data:
+        :return:  (regular, mix, ffts, static_graph)
+        """
+        regular, mix, ffts, static_graph = False, False, False, False
         if len(group_task_data) <= 1:
-            return False
+            regular = True
+            return regular, mix, ffts, static_graph
         # ctx > 0 为ffts+
         for item in group_task_data:
             if item.context_id > 0 and item.context_id != TaskOpViewer.INVALID_CONTEXT_ID:
-                return False
-        return True
+                ffts = True
+                return regular, mix, ffts, static_graph
+            if item.context_id == 0:
+                mix = True
+        static_graph = not mix
+        return regular, mix, ffts, static_graph
 
     @staticmethod
     def _reformat_task_info(task_data: List, message: dict) -> List:
@@ -122,10 +132,11 @@ class TaskOpViewer:
                     }
         task_info_result = []
         for task_data_arr in task_data:
-            is_mix = TaskOpViewer.is_mix(task_data_arr)
-            if len(task_data_arr) > 1 and not is_mix:
+            regular, mix, ffts, static_graph = TaskOpViewer.operate_type(task_data_arr)
+            if ffts:
                 continue
-            task_data_arr = [i for i in task_data_arr if i.context_id == 0] if is_mix else task_data_arr
+            if mix:
+                task_data_arr = [i for i in task_data_arr if i.context_id == 0]
             for item in task_data_arr:
                 stream_id, task_id, batch_id, context_id, host_task_type, start_time, duration, device_task_type = (
                     item.stream_id, item.task_id, item.batch_id, item.context_id, item.host_task_type,
@@ -137,6 +148,7 @@ class TaskOpViewer:
                 op_info_task_type = op_info.get("task_type")
                 task_type = op_info_task_type if op_info_task_type not in (None, Constant.NA) else default_task_type
                 task_time: float = round(duration / DBManager.NSTOUS, NumberConstant.ROUND_THREE_DECIMAL)
+
                 task_start = format_high_precision_for_csv(
                     InfoConfReader().trans_into_local_time(start_time))
                 task_stop = format_high_precision_for_csv(
@@ -145,4 +157,6 @@ class TaskOpViewer:
                     op_name, task_type, stream_id, task_id,
                     task_time, task_start, task_stop,
                 ))
+        # sort task time data by [task_start]
+        task_info_result.sort(key = lambda i: i[5])
         return task_info_result

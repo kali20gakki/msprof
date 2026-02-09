@@ -155,7 +155,7 @@ TEST_F(TaskTimeAssemblerUTest, ShouldReturnTrueWhenTaskTimeDataAssembleSuccess)
     FileReader reader(files.back());
     std::vector<std::string> res;
     EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
-    EXPECT_EQ(3ul, res.size());
+    EXPECT_EQ(5ul, res.size());
     std::string expectHeader{"Device_id,kernel_name,kernel_type,stream_id,task_id,task_time(us),"
                              "task_start(us),task_stop(us)"};
     EXPECT_EQ(expectHeader, res[0]);
@@ -179,12 +179,12 @@ TEST_F(TaskTimeAssemblerUTest, ShouldReturnTrueWhenExistTaskInfoAndAscendTask)
     FileReader reader(files.back());
     std::vector<std::string> res;
     EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
-    EXPECT_EQ(3ul, res.size());
+    EXPECT_EQ(5ul, res.size());
 
     std::string expectHeader{"Device_id,kernel_name,kernel_type,stream_id,task_id,task_time(us),"
                              "task_start(us),task_stop(us)"};
     EXPECT_EQ(expectHeader, res[0]);
 
-    std::string expectOneRow{"0,MatMulV3_1,,1,12,15.000,1717575960208070.758\t,1717575960208085.758\t"};
+    std::string expectOneRow{"0,MatMulV3,,1,10,151.000,1717575960208020.758\t,1717575960208171.758\t"};
     EXPECT_EQ(expectOneRow, res[1]);
 }

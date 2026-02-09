@@ -129,16 +129,23 @@ std::vector<AscendTaskData> FilterAscendTaskData(const std::vector<AscendTaskDat
             result.push_back(tasks[0]);
             continue;
         }
-        bool isMix = true;
+        bool mix = false;
+        bool staticGraph = true;
         for (const auto& task : tasks) {
             if (task.contextId > 0 && task.contextId != INVALID_CONTEXT_ID ) {
-                isMix = false;
                 break;
             }
+            if (task.contextId == 0) {
+                mix = true;
+                staticGraph = false;
+            }
         }
-        if (isMix) {
+        if (mix || staticGraph) {
             for (const auto& task : tasks) {
-                if (task.contextId == 0) {
+                if (mix && task.contextId == 0) {
+                    result.push_back(task);
+                }
+                if (staticGraph) {
                     result.push_back(task);
                 }
             }

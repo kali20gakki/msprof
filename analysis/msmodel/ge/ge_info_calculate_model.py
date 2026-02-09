@@ -171,8 +171,6 @@ class GeInfoModel(BaseModel):
     def get_task_info(self, device_ids: List[int]) -> list:
         sql = f"SELECT op_name, task_type, stream_id, task_id, batch_id, context_id from {DBNameConstant.TABLE_GE_TASK}"
         if device_ids:
-            valid_device_ids = [did for did in device_ids if isinstance(did, int)]
-            if valid_device_ids:
-                sql += f" WHERE device_id in ({','.join(map(str, valid_device_ids))})"
+            sql += f" WHERE device_id in ({','.join(map(str, device_ids))})"
         task_info = DBManager.fetch_all_data(self.cur, sql, dto_class=GeTaskDto)
         return task_info
