@@ -192,7 +192,7 @@ class TsTrackViewModel(ViewModel):
               "ON t1.model_id=t2.model_id AND (t1.index_id=t2.index_id OR t2.index_id=0 ) " \
               "AND t1.stream_id = t2.stream_id AND t1.task_id = t2.task_id AND " \
               "t2.device_id = {3} ORDER BY t1.timestamp".format(
-            DBNameConstant.TABLE_STEP_TRACE, DBNameConstant.TABLE_GE_TASK, Constant.TASK_TYPE_HCCL, device_id)
+            DBNameConstant.TABLE_STEP_TRACE, DBNameConstant.TABLE_GE_TASK, Constant.TASK_TYPE_COMMUNICATION, device_id)
         return DBManager.fetch_all_data(self.cur, sql, dto_class=StepTraceGeDto)
 
     def get_ai_cpu_data(self) -> list:

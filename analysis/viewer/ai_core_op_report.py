@@ -110,7 +110,7 @@ class AiCoreOpReport:
                 union_data.append(datum + (Constant.NA,) * ai_core_data_len)
                 continue
             ai_core_datum = ai_core_queue.popleft()
-            if datum[task_type_idx] == Constant.TASK_TYPE_HCCL and not \
+            if datum[task_type_idx] == Constant.TASK_TYPE_COMMUNICATION and not \
                     datum[op_name_idx].endswith(StrConstant.AIV_KERNEL):
                 # 去除运行在AI_CORE的HCCL小算子
                 logging.info("Found ai core hccl small op of stream %d, task %d", datum[2], datum[1])
@@ -129,7 +129,7 @@ class AiCoreOpReport:
         # 全导和按step导，task type的索引是6; 按子图导，task type的索引是7
         task_type_idx, op_name_idx = (7, 4) if ProfilingScene().is_graph_export() else (6, 3)
         for datum in data:
-            if datum[task_type_idx] in (Constant.TASK_TYPE_HCCL_AI_CPU, Constant.TASK_TYPE_HCCL) and not \
+            if datum[task_type_idx] in (Constant.TASK_TYPE_HCCL_AI_CPU, Constant.TASK_TYPE_COMMUNICATION) and not \
                     datum[op_name_idx].endswith(StrConstant.AIV_KERNEL):
                 logging.info("Found hccl small op of stream %d, task %d", datum[2], datum[1])
                 continue

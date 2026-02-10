@@ -100,7 +100,7 @@ class CriticalPathParser(MetaParser):
         op_dict = {
             Constant.TASK_TYPE_AI_CORE: [],
             Constant.TASK_TYPE_AI_CPU: [],
-            Constant.TASK_TYPE_HCCL: []
+            Constant.TASK_TYPE_COMMUNICATION: []
         }
         for event in critical_path:
             op_task_type = event.get(CriticalPathParser.TASK_TYPE)
@@ -112,7 +112,7 @@ class CriticalPathParser(MetaParser):
             sorted_op_list, op_num, op_time = cls.parse_op_list(op_dict.get(op_type), top_type)
 
             # Filter out Receive and Send operators
-            if op_type == Constant.TASK_TYPE_HCCL:
+            if op_type == Constant.TASK_TYPE_COMMUNICATION:
                 topk_op = [op for i, op in zip(range(top_k), filter(cls.filter_method, sorted_op_list))]
             else:
                 topk_op = sorted_op_list[0:top_k]
@@ -198,7 +198,7 @@ class CriticalPathParser(MetaParser):
         """"get execution type of event in critical path """
         execution_type_analysis_result = []
         for event in critical_path:
-            if event.get(CriticalPathParser.TASK_TYPE) != Constant.TASK_TYPE_HCCL:
+            if event.get(CriticalPathParser.TASK_TYPE) != Constant.TASK_TYPE_COMMUNICATION:
                 continue
             intersection_event_list = self.get_time_intersection_event(event)
             serial_time, parallel_time = self.get_event_serial_parallel_time(event, intersection_event_list)
@@ -230,7 +230,7 @@ class CriticalPathParser(MetaParser):
         for hccl_op, hccl_events in self.hccl_op_events.items():
             hccl_op_dict = {
                 CriticalPathParser.NAME: hccl_op,
-                CriticalPathParser.TASK_TYPE: Constant.TASK_TYPE_HCCL,
+                CriticalPathParser.TASK_TYPE: Constant.TASK_TYPE_COMMUNICATION,
                 CriticalPathParser.TID: hccl_events[0].stream_id,
                 CriticalPathParser.TS: hccl_events[0].first_timestamp,
                 CriticalPathParser.ES: max([event.timestamp + event.duration for event in hccl_events])
@@ -249,7 +249,7 @@ class CriticalPathParser(MetaParser):
         critical_path_event = self.get_critical_path()
         event_execution_type_analysis_data = self.event_execution_type_analysis(critical_path_event)
         op_type_analysis = self.event_type_analysis(event_execution_type_analysis_data)
-        hccl_result = op_type_analysis.get(Constant.TASK_TYPE_HCCL)
+        hccl_result = op_type_analysis.get(Constant.TASK_TYPE_COMMUNICATION)
         logging.info("With critical path analysis, total ops num: %d, hccl ops num: %d ",
                      len(critical_path_event), hccl_result.get('op_num'))
 

@@ -170,7 +170,7 @@ class MergeOpCounterCalculator(MsMultiProcess):
 
     def _get_ge_data(self: any, ge_curs: any) -> list:
         device_id = InfoConfReader().get_device_id()
-        hccl_task_type = Constant.TASK_TYPE_HCCL
+        hccl_task_type = Constant.TASK_TYPE_COMMUNICATION
         hccl_ai_cpu = Constant.TASK_TYPE_HCCL_AI_CPU
         ge_data = []
         iter_list = MsprofIteration(self.project_path).get_index_id_list_with_index_and_model(self.iter_range)

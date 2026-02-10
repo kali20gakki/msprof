@@ -589,7 +589,7 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
 
     def _format_ge_data(self: any, ge_data: list) -> None:
         for data in ge_data:
-            if data.task_type not in [Constant.TASK_TYPE_AI_CORE, Constant.TASK_TYPE_AIV, Constant.TASK_TYPE_HCCL,
+            if data.task_type not in [Constant.TASK_TYPE_AI_CORE, Constant.TASK_TYPE_AIV, Constant.TASK_TYPE_COMMUNICATION,
                                       Constant.TASK_TYPE_MIX_AIC, Constant.TASK_TYPE_MIX_AIV]:
                 continue
             _key = self.STREAM_TASK_CONTEXT_KEY_FMT.format(data.stream_id, data.task_id, data.context_id)

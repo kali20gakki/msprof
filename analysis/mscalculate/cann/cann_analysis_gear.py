@@ -542,13 +542,13 @@ class TaskGear(CANNGear):
         return False
 
     def get_truth_task_type_for_kernel_hccl_task(self, add_dto):
-        task_type = Constant.TASK_TYPE_HCCL
+        task_type = Constant.TASK_TYPE_COMMUNICATION
         if add_dto.task_type == self.KERNEL_AICPU:
             # helper场景: HCCL算子运行在AI_CPU上
             task_type = Constant.TASK_TYPE_HCCL_AI_CPU
         if add_dto.task_type == self.KERNEL_AICORE:
             # Reduce tbe
-            task_type = Constant.TASK_TYPE_HCCL
+            task_type = Constant.TASK_TYPE_COMMUNICATION
         return task_type
 
     def add_kernel_task(self, call_stack: dict, add_dto: TaskTrackDto, is_level0: bool):
@@ -635,7 +635,8 @@ class TaskGear(CANNGear):
             # notice: reduce TBE op
             op_name = hccl_dto.item_id
             task_type = self.get_truth_task_type_for_kernel_hccl_task(add_dto)
-        elif task_type == Constant.TASK_TYPE_HCCL and add_dto.task_type == self.KERNEL_AICPU:
+        elif (task_type in (Constant.TASK_TYPE_COMMUNICATION, Constant.TASK_TYPE_HCCL) and
+              add_dto.task_type == self.KERNEL_AICPU):
             # helper场景, HCCL算子运行在AI_CPU上, 但没有HCCL层api
             task_type = Constant.TASK_TYPE_AI_CPU
         for cxt_id in cxt_ids:

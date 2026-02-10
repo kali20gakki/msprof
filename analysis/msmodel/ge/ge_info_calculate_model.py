@@ -82,7 +82,7 @@ class GeInfoModel(BaseModel):
                  "from {0} where index_id != 0 and (task_type = '{1}' or task_type = '{2}') " \
                  "group by model_id, index_id, stream_id) as min_time_table " \
                  "on {0}.timestamp = min_time_table.timestamp".format(
-            DBNameConstant.TABLE_GE_TASK, Constant.TASK_TYPE_AI_CORE, Constant.TASK_TYPE_HCCL)
+            DBNameConstant.TABLE_GE_TASK, Constant.TASK_TYPE_AI_CORE, Constant.TASK_TYPE_COMMUNICATION)
         ge_data = DBManager.fetch_all_data(self.cur, ge_sql)
 
         if Utils.is_single_op_scene(self.result_dir):
@@ -138,20 +138,20 @@ class GeInfoModel(BaseModel):
             sql = "select model_id, GROUP_CONCAT(stream_id||'-'||task_id||'-'||batch_id) from {0} " \
                   "where index_id=0 and (task_type = '{1}' or task_type = '{2}') " \
                   "group by model_id".format(DBNameConstant.TABLE_GE_TASK,
-                                             Constant.TASK_TYPE_AI_CORE, Constant.TASK_TYPE_HCCL)
+                                             Constant.TASK_TYPE_AI_CORE, Constant.TASK_TYPE_COMMUNICATION)
         else:
             sql = "select model_id||'-'||index_id, " \
                   "GROUP_CONCAT(stream_id||'-'||task_id||'-'||batch_id) from {0} " \
                   "where index_id<>0 and (task_type = '{1}' or task_type = '{2}') " \
                   "group by model_id||'-'||index_id".format(DBNameConstant.TABLE_GE_TASK,
-                                                            Constant.TASK_TYPE_AI_CORE, Constant.TASK_TYPE_HCCL)
+                                                            Constant.TASK_TYPE_AI_CORE, Constant.TASK_TYPE_COMMUNICATION)
         if ProfilingScene().is_step_export():
             if is_static_shape == Constant.GE_STATIC_SHAPE:
                 sql = "select {model_id}, GROUP_CONCAT(stream_id||'-'||task_id||'-'||batch_id) from {0} " \
                       "where index_id=0 and (task_type = '{1}' or task_type = '{2}') " \
                       "group by {model_id}".format(DBNameConstant.TABLE_GE_TASK,
                                                    Constant.TASK_TYPE_AI_CORE,
-                                                   Constant.TASK_TYPE_HCCL,
+                                                   Constant.TASK_TYPE_COMMUNICATION,
                                                    model_id=NumberConstant.INVALID_MODEL_ID)
             else:
                 sql = "select {model_id}||'-'||index_id, " \
@@ -159,7 +159,7 @@ class GeInfoModel(BaseModel):
                       "where index_id<>0 and (task_type = '{1}' or task_type = '{2}') " \
                       "group by {model_id}||'-'||index_id".format(DBNameConstant.TABLE_GE_TASK,
                                                                   Constant.TASK_TYPE_AI_CORE,
-                                                                  Constant.TASK_TYPE_HCCL,
+                                                                  Constant.TASK_TYPE_COMMUNICATION,
                                                                   model_id=NumberConstant.INVALID_MODEL_ID)
         task_data = DBManager.fetch_all_data(self.cur, sql)
         task_data_dict = {}
