@@ -109,6 +109,7 @@ class DBNameConstant(metaclass=ABCMeta):
     DB_CCU_ADD_INFO = "ccu_add_info.db"
     DB_SOC_PMU = "soc_pmu.db"
     DB_VOLTAGE = "voltage.db"
+    DB_FUSION_TASK = "fusion_task.db"
 
     # DB tables
     TABLE_ACL_DATA = "AclData"
@@ -376,6 +377,12 @@ class DBNameConstant(metaclass=ABCMeta):
 
     # netdev stats
     TABLE_NETDEV_STATS_ORIGIN = 'NetDevStatsOriginalData'
+
+    # fusion task
+    TABLE_FUSION_CCU = "FusionCcu"
+    TABLE_FUSION_AI_CORE = "FusionAICore"
+    TABLE_FUSION_AI_CPU = "FusionAICPU"
+    TABLE_FUSION_COMMON_CPU = "FusionCommonCpu"
 
     @abstractmethod
     def get_db_name(self: any) -> str:

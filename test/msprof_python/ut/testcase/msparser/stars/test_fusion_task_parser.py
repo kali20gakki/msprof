@@ -13,23 +13,22 @@
 # MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
 # See the Mulan PSL v2 for more details.
 # -------------------------------------------------------------------------
+import struct
+import unittest
 
-
-from msparser.stars.acc_pmu_parser import AccPmuParser
-from msparser.stars.acsq_task_parser import AcsqTaskParser
-from msparser.stars.block_log_parser import BlockLogParser
-from msparser.stars.ffts_log_parser import FftsLogParser
-from msparser.stars.inter_soc_parser import InterSocParser
-from msparser.stars.low_power_parser import LowPowerParser
-from msparser.stars.sio_parser import SioParser
-from msparser.stars.stars_chip_trans_parser import StarsChipTransParser
-from msparser.stars.stars_qos_parser import StarsQosParser
 from msparser.stars.fusion_task_parser import FusionTaskParser
+from common_func.platform.chip_manager import ChipManager
+from profiling_bean.prof_enum.chip_model import ChipModel
+from common_func.info_conf_reader import InfoConfReader
 
-__all__ = [
-    "AcsqTaskParser", "FftsLogParser",
-    "InterSocParser", "AccPmuParser",
-    "StarsChipTransParser", "LowPowerParser",
-    "SioParser", "BlockLogParser",
-    "StarsQosParser", "FusionTaskParser"
-]
+NAMESPACE = 'msparser.stars.fusion_task_parser'
+sample_config = {"model_id": 1, 'iter_id': '1919', 'result_dir': '114514',
+                 "ai_core_profiling_mode": "task-based", "aiv_profiling_mode": "sample-based"}
+
+class FusionTaskParserTest(unittest.TestCase):
+
+    def test_fusion_task_parser(self):
+        check = FusionTaskParser(sample_config.get('result_dir'), 'test.db', [])
+        check.handle("010111", "114514")
+        check.preprocess_data()
+        check.flush()
