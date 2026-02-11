@@ -39,6 +39,9 @@ class TraceViewHeaderConstant:
     TOP_DOWN_TIME_GRAPH_HEAD = ['name', 'pid', 'tid', 'ts', 'dur', 'args']
     GRPC_TIME_GRAPH_HEAD = ['name', 'pid', 'tid', 'ts', 'dur', 'args', 'cat']
 
+    # don't filter phase
+    NOT_FILTER_PHASE = ["M", "s"]
+
     # meta data head format
     METADATA_HEAD = ["name", "pid", "tid", "args"]
 

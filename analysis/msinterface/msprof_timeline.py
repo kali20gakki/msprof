@@ -153,8 +153,8 @@ class MsprofTimeline:
                 if data_type not in ["api"]:
                     start_time, end_time = self.get_start_end_time()
                     export_data = filter(
-                        lambda value: value["ph"] == "M" or self.is_in_iteration(value, start_time, end_time),
-                        export_data)
+                        lambda value: value["ph"] in TraceViewHeaderConstant.NOT_FILTER_PHASE
+                            or self.is_in_iteration(value, start_time, end_time), export_data)
                 self._export_data_list.extend(export_data)
         except (TypeError, ValueError) as err:
             logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
