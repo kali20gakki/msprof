@@ -32,9 +32,10 @@ from framework.offset_calculator import OffsetCalculator
 from mscalculate.aic.aic_utils import AicPmuUtils
 from mscalculate.aic.pmu_calculator import PmuCalculator
 from mscalculate.calculate_ai_core_data import CalculateAiCoreData
-from msmodel.aic.aic_pmu_model import AicPmuModel
+from msmodel.aic.aic_pmu_model import AicPmuModel, V5AicPmuModel
 from msmodel.ge.ge_info_calculate_model import GeInfoModel
 from msmodel.iter_rec.iter_rec_model import HwtsIterModel
+from msmodel.v5.v5_stars_model import V5StarsViewModel
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.struct_info.aic_pmu import AicPmuBean
 from viewer.calculate_rts_data import judge_custom_pmu_scene
@@ -162,3 +163,58 @@ class AicCalculator(PmuCalculator, MsMultiProcess):
             _aic_pmu_log = AicPmuBean.decode(log_data)
             total_time = self.calculate_total_time(_aic_pmu_log)
             self.calculate_pmu_list(_aic_pmu_log, aic_pmu_events, self._aic_data_list, total_time)
+
+
+class V5AicCalculator(AicCalculator):
+    """
+    class used to parse aicore data by iter
+    """
+
+    def __init__(self: any, file_list: dict, sample_config: dict) -> None:
+        super().__init__(file_list, sample_config)
+        # table_name_list[:2]:'total_time(ms)', 'total_cycles', unused
+        self.table_name_list = get_metrics_from_sample_config(self._project_path,
+                                                              StrConstant.AI_CORE_PROFILING_METRICS)[2:]
+
+    def calculate(self: any) -> None:
+        """
+        calculate the ai core
+        :return: None
+        """
+        db_path = PathManager.get_db_path(self._project_path, DBNameConstant.DB_METRICS_SUMMARY)
+        if DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_METRIC_SUMMARY):
+            logging.info("The Table %s already exists in the %s, and won't be calculate again.",
+                         DBNameConstant.TABLE_METRIC_SUMMARY, DBNameConstant.DB_METRICS_SUMMARY)
+            return
+        self._parse_without_decode()
+
+    def save(self: any) -> None:
+        """
+        save ai core data
+        :return: None
+        """
+        if not self._aic_data_list:
+            return
+        with V5AicPmuModel(self._project_path) as _model:
+            _model.flush(self._aic_data_list)
+
+    def ms_run(self: any) -> None:
+        """
+        entrance or ai core calculator
+        :return: None
+        """
+        if self._sample_json.get('ai_core_profiling_mode') == StrConstant.AIC_SAMPLE_BASED_MODE:
+            return
+
+        self.init_params()
+        self.calculate()
+        self.save()
+
+    def _parse_without_decode(self: any) -> None:
+        with V5StarsViewModel(self._project_path) as _model:
+            pmu_data = _model.get_v5_pmu_details()
+            aic_pmu_events = AicPmuUtils.get_pmu_events(self._sample_json.get("ai_core_profiling_events"))
+        for data in pmu_data:
+            core_num = self._core_num_dict.get("aic")
+            total_time = Utils.cal_total_time(data.total_cycle, int(self._freq), data.block_num, core_num)
+            self.calculate_pmu_list(data, aic_pmu_events, self._aic_data_list, total_time)

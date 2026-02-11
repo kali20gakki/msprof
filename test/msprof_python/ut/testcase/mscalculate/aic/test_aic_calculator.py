@@ -24,10 +24,12 @@ import unittest
 from unittest import mock
 
 from common_func.info_conf_reader import InfoConfReader
+from common_func.ms_constant.str_constant import StrConstant
 from common_func.profiling_scene import ProfilingScene
 from common_func.profiling_scene import ExportMode
 from constant.constant import CONFIG
 from mscalculate.aic.aic_calculator import AicCalculator
+from mscalculate.aic.aic_calculator import V5AicCalculator
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.struct_info.aic_pmu import AicPmuBean
 
@@ -144,4 +146,54 @@ class TestAicCalculator(unittest.TestCase):
                 mock.patch(NAMESPACE + '.AicCalculator.calculate', return_value='test'), \
                 mock.patch(NAMESPACE + '.AicCalculator.save', return_value='test'):
             check = AicCalculator(self.file_list, CONFIG)
+            check.ms_run()
+
+
+class TestV5AicCalculator(unittest.TestCase):
+
+    def test_calculate_when_nomal_then_pass(self):
+        with mock.patch('msmodel.v5.v5_stars_model.V5StarsViewModel.get_v5_pmu_details'), \
+                mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
+                mock.patch("mscalculate.aic.aic_utils.AicPmuUtils.get_pmu_events"), \
+                mock.patch('mscalculate.aic.aic_calculator.AicCalculator._core_num_dict'), \
+                mock.patch('common_func.utils.Utils.cal_total_time'), \
+                mock.patch('mscalculate.aic.aic_calculator.AicCalculator.calculate_pmu_list'):
+            check = V5AicCalculator({}, CONFIG)
+            check._aic_data_list = [123]
+            check.calculate()
+
+    def test_calculate_when_table_exist_then_do_not_execute(self):
+        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
+                mock.patch('common_func.db_manager.DBManager.check_tables_in_db', return_value=True), \
+                mock.patch('logging.info'):
+            check = V5AicCalculator({}, CONFIG)
+            check._aic_data_list = [123]
+            check._parse_without_decode = mock.Mock()
+            check.calculate()
+            check._parse_without_decode.assert_not_called()
+
+    def test_save_when_nomal_then_pass(self):
+        with mock.patch('msmodel.aic.aic_pmu_model.V5AicPmuModel.init'), \
+                mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
+                mock.patch('msmodel.aic.aic_pmu_model.V5AicPmuModel.flush'), \
+                mock.patch('msmodel.aic.aic_pmu_model.V5AicPmuModel.finalize'):
+            InfoConfReader()._info_json = {"devices": '0'}
+            check = V5AicCalculator({}, CONFIG)
+            check._aic_data_list = [123]
+            check.save()
+
+    def test_ms_run_when_json_empty_then_return(self):
+        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config",
+                        return_value={'ai_core_profiling_mode': StrConstant.AIC_SAMPLE_BASED_MODE}), \
+                mock.patch(NAMESPACE + '.PathManager.get_sample_json_path', return_value='test'):
+            check = V5AicCalculator({}, CONFIG)
+            check.ms_run()
+
+    def test_ms_run_when_normal_then_pass(self):
+        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
+                mock.patch(NAMESPACE + '.PathManager.get_sample_json_path', return_value='test'), \
+                mock.patch(NAMESPACE + '.V5AicCalculator.init_params', return_value='test'), \
+                mock.patch(NAMESPACE + '.V5AicCalculator.calculate', return_value='test'), \
+                mock.patch(NAMESPACE + '.V5AicCalculator.save', return_value='test'):
+            check = V5AicCalculator({}, CONFIG)
             check.ms_run()

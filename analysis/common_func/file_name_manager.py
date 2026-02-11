@@ -249,6 +249,13 @@ class FileNameManagerConstant:
     AICPU_FILE_PATTERN = r"^aicpu\.data\.(\d+)\.slice_\d+"
     HCCL_OP_INFO_FILE_PATTERN = r"^(unaging|aging)\.compact\.hccl_op_info\.slice_\d+"
 
+    # V5
+    V5_MODEL_EXEOM_PATTERN = r"^unaging\.additional\.model_exeom\.slice_\d+"
+    V5_STARS_PROFILE_PATTERN = r"^nano_stars_profile\.data.\d+\.slice_\d+"
+
+    # dbg
+    DBG_PATTERN = r".+\.dbg$"
+
     # mc2
     MC2_COMM_INFO_PATTERN = r"^(unaging|aging)\.additional\.mc2_comm_info\.slice_\d+"
 
@@ -1134,3 +1141,27 @@ def get_ccu_wait_signal_info_compiles() -> tuple:
     :return: ccu wait signal info data regex
     """
     return (re.compile(FileNameManagerConstant. CCU_WAIT_SIGNAL_INFO_PATTERN),)
+
+
+def get_v5_model_exeom_compiles() -> tuple:
+    """
+    get v5 host info files regex compiles
+    :return: v5 host info files regex
+    """
+    return (re.compile(FileNameManagerConstant.V5_MODEL_EXEOM_PATTERN),)
+
+
+def get_v5_stars_profile_compiles() -> tuple:
+    """
+    get v5 device info files regex compiles
+    :return: v5 device info files regex
+    """
+    return (re.compile(FileNameManagerConstant.V5_STARS_PROFILE_PATTERN),)
+
+
+def get_dbg_file_compiles() -> tuple:
+    """
+    get v5 host info files regex compiles
+    :return: v5 host info files regex
+    """
+    return (re.compile(FileNameManagerConstant.DBG_PATTERN),)

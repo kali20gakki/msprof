@@ -428,6 +428,7 @@ class Constant:
     CHIP_V4_1_0 = "5"
     CHIP_V1_1_1 = "7"
     CHIP_V1_1_2 = "8"
+    CHIP_V5_1_0 = "9"
     CHIP_V1_1_3 = "11"
     CHIP_V6_1_0 = "15"
     CHIP_V6_2_0 = "16"

@@ -354,6 +354,9 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_HCCL_OP_INFO = "HcclOpInfo"
     TABLE_STREAM_EXPAND_SPEC = "StreamExpandSpec"
 
+    # v5
+    TABLE_V5_TASK = "V5Task"
+
     # flip
     TABLE_HOST_TASK_FLIP = "HostTaskFlip"
     TABLE_DEVICE_TASK_FLIP = "DeviceTaskFlip"

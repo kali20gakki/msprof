@@ -34,6 +34,7 @@ from msmodel.task_time.hwts_aiv_model import HwtsAivModel
 from msmodel.task_time.hwts_log_model import HwtsLogModel
 from msmodel.task_time.runtime_task_time_model import RuntimeTaskTimeModel
 from msmodel.step_trace.ts_track_model import TsTrackModel
+from msmodel.v5.v5_stars_model import V5StarsViewModel
 from profiling_bean.db_dto.step_trace_dto import IterationRange
 from profiling_bean.prof_enum.chip_model import ChipModel
 
@@ -52,6 +53,7 @@ class DeviceTaskCollector:
             ChipModel.CHIP_V1_1_1: self._gather_chip_stars_device_tasks,
             ChipModel.CHIP_V1_1_2: self._gather_chip_stars_device_tasks,
             ChipModel.CHIP_V1_1_3: self._gather_chip_stars_device_tasks,
+            ChipModel.CHIP_V5_1_0: self._gather_chip_stars_device_tasks,
             ChipModel.CHIP_V6_1_0: self._gather_chip_stars_device_tasks,
             ChipModel.CHIP_V6_2_0: self._gather_chip_stars_device_tasks,
         }
@@ -66,6 +68,7 @@ class DeviceTaskCollector:
             ChipModel.CHIP_V1_1_1: [DBNameConstant.DB_SOC_LOG],
             ChipModel.CHIP_V1_1_2: [DBNameConstant.DB_SOC_LOG],
             ChipModel.CHIP_V1_1_3: [DBNameConstant.DB_SOC_LOG],
+            ChipModel.CHIP_V5_1_0: [DBNameConstant.DB_SOC_LOG],
             ChipModel.CHIP_V6_1_0: [DBNameConstant.DB_SOC_LOG],
             ChipModel.CHIP_V6_2_0: [DBNameConstant.DB_SOC_LOG],
         }
@@ -149,6 +152,16 @@ class DeviceTaskCollector:
         with FftsLogModel(self.result_dir, DBNameConstant.DB_SOC_LOG, [DBNameConstant.TABLE_SUBTASK_TIME]) as model:
             return model.get_ffts_plus_sub_task_data_within_time_range(start_time, end_time)
 
+    def _gather_device_chip_v5_tasks_from_stars(self: any, start_time: float,
+                                                end_time: float) -> List[DeviceTask]:
+        db_path = PathManager.get_db_path(self.result_dir, DBNameConstant.DB_SOC_LOG)
+        if not DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_V5_TASK):
+            logging.warning("no %s.%s found", DBNameConstant.DB_SOC_LOG, DBNameConstant.TABLE_V5_TASK)
+            return []
+
+        with V5StarsViewModel(self.result_dir) as model:
+            return model.get_v5_data_within_time_range(start_time, end_time)
+
     def _gather_device_tasks_from_runtime(self: any, start_time: float,
                                           end_time: float) -> List[DeviceTask]:
         db_path = PathManager.get_db_path(self.result_dir, DBNameConstant.DB_RUNTIME)
@@ -194,7 +207,8 @@ class DeviceTaskCollector:
         # in this chip ai_core and ai_cpu data will be uploaded in soc_stars data
         device_acsq_tasks = self._gather_device_acsq_tasks_from_stars(start_time, end_time)
         device_ffts_tasks = self._gather_device_ffts_plus_sub_tasks_from_stars(start_time, end_time)
-        device_tasks = [*device_acsq_tasks, *device_ffts_tasks]
+        device_v5_tasks = self._gather_device_chip_v5_tasks_from_stars(start_time, end_time)
+        device_tasks = [*device_acsq_tasks, *device_ffts_tasks, *device_v5_tasks]
 
         if not device_tasks:
             logging.error("no acsq, ffts device task found.")

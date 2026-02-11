@@ -13,37 +13,32 @@
 # MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
 # See the Mulan PSL v2 for more details.
 # -------------------------------------------------------------------------
-
-from enum import Enum
-from enum import unique
+from dataclasses import dataclass
 
 
-@unique
-class ChipModel(Enum):
+@dataclass
+class V5PmuDto:
     """
-    Define the chip type
+    Dto for v5 pmu data
     """
-    CHIP_V1_1_0 = 0
-    CHIP_V2_1_0 = 1
-    CHIP_V3_1_0 = 2
-    CHIP_V3_2_0 = 3
-    CHIP_V3_3_0 = 4
-    CHIP_V4_1_0 = 5
-    CHIP_V1_1_1 = 7
-    CHIP_V1_1_2 = 8
-    CHIP_V5_1_0 = 9
-    CHIP_V1_1_3 = 11
-    CHIP_V6_1_0 = 15
-    CHIP_V6_2_0 = 16
 
+    stream_id: int = None
+    task_id: int = None
+    total_cycle: int = None
+    block_num: int = None
+    pmu0: float = None
+    pmu1: float = None
+    pmu2: float = None
+    pmu3: float = None
+    pmu4: float = None
+    pmu5: float = None
+    pmu6: float = None
+    pmu7: float = None
+    pmu8: float = None
+    pmu9: float = None
 
-class ChipMaxCoreId(Enum):
-    """
-    Define the ai core num of stars chip
-    """
-    CHIP_V4_1_0 = 24
-    CHIP_V1_1_1 = 0
-    CHIP_V1_1_2 = 0
-    CHIP_V1_1_3 = 0
-    CHIP_V6_1_0 = 35
-    CHIP_V6_2_0 = 35
+    @property
+    def pmu_list(self: any) -> any:
+        return [self.pmu0, self.pmu1, self.pmu2, self.pmu3,
+                self.pmu4, self.pmu5, self.pmu6, self.pmu7,
+                self.pmu8, self.pmu9]

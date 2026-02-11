@@ -1,5 +1,5 @@
 # -------------------------------------------------------------------------
-# Copyright (c) 2025 Huawei Technologies Co., Ltd.
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
 # This file is part of the MindStudio project.
 #
 # MindStudio is licensed under Mulan PSL v2.
@@ -13,32 +13,33 @@
 # MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
 # See the Mulan PSL v2 for more details.
 # -------------------------------------------------------------------------
-from dataclasses import dataclass
+
+from msparser.add_info.add_info_bean import AddInfoBean
 
 
-@dataclass
-class NanoPmuDto:
+class V5ExeomBean(AddInfoBean):
     """
-    Dto for nano pmu data
+    V5 Exeom bean data for the data parsing.
     """
 
-    stream_id: int = None
-    task_id: int = None
-    total_cycle: int = None
-    block_dim: int = None
-    pmu0: float = None
-    pmu1: float = None
-    pmu2: float = None
-    pmu3: float = None
-    pmu4: float = None
-    pmu5: float = None
-    pmu6: float = None
-    pmu7: float = None
-    pmu8: float = None
-    pmu9: float = None
+    def __init__(self: any, *args) -> None:
+        super().__init__(*args)
+        filed = args[0]
+        self._model_id = filed[6]
+        self._model_name = filed[7]
 
     @property
-    def pmu_list(self: any) -> any:
-        return [self.pmu0, self.pmu1, self.pmu2, self.pmu3,
-                self.pmu4, self.pmu5, self.pmu6, self.pmu7,
-                self.pmu8, self.pmu9]
+    def graph_id(self: any) -> int:
+        """
+        v5 host data model_id
+        :return: model_id
+        """
+        return self._model_id
+
+    @property
+    def model_name(self: any) -> str:
+        """
+        v5 host data model_name
+        :return: model_name
+        """
+        return str(self._model_name)
