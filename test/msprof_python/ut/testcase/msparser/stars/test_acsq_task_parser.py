@@ -16,16 +16,22 @@
 import unittest
 from unittest import mock
 
+from common_func.platform.chip_manager import ChipManager
 from constant.info_json_construct import DeviceInfo
 from constant.info_json_construct import InfoJson
 from constant.info_json_construct import InfoJsonReaderManager
 from msparser.stars.acsq_task_parser import AcsqTaskParser
+from profiling_bean.prof_enum.chip_model import ChipModel
 from profiling_bean.stars.acsq_task import AcsqTask
 
 NAMESPACE = 'msparser.stars.acsq_task_parser'
 
 
 class TestAcsqTaskParser(unittest.TestCase):
+
+    def setUp(self) -> None:
+        ChipManager().chip_id = ChipModel.CHIP_V4_1_0
+
     def test_preprocess_data(self):
         result_dir = ''
         db = ''

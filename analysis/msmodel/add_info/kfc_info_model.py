@@ -145,6 +145,10 @@ class KfcInfoViewModel(ViewModel):
         aicpu_task_flip = self.get_sql_data(sql)
         return [self.AICPU_TASK_FLIP(*data) for data in aicpu_task_flip]
 
+    def get_kfc_info_dict(self: any) -> dict:
+        kfc_info = self.get_kfc_info_data()
+        return {item.task_id: item.stream_id for item in kfc_info}
+
 
 @dataclass
 class KfcTurnData:

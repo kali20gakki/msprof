@@ -48,6 +48,9 @@ class TestAicpuAddInfoParser(unittest.TestCase):
         'job_id': 'job_default', 'model_id': -1
     }
 
+    def setUp(self) -> None:
+        InfoConfReader()._info_json = {"DeviceInfo": [{'hwts_frequency': 100}], "devices": "0"}
+
     def setup_class(self):
         if not os.path.exists(self.DIR_PATH):
             os.mkdir(self.DIR_PATH)
@@ -74,7 +77,6 @@ class TestAicpuAddInfoParser(unittest.TestCase):
         check.save()
 
     def test_parse_should_return_aicpu_node_data_when_type_0_and_start_time_not_0(self):
-        InfoConfReader()._info_json = {"DeviceInfo": [{'hwts_frequency': 100}]}
         aicpu_data = (
             23130, 6000, 0, 1, 128, 2000,
             1, 2, 0, 0, 1000, 10000, 10000, 15000,
@@ -93,7 +95,6 @@ class TestAicpuAddInfoParser(unittest.TestCase):
         InfoConfReader()._info_json = {}
 
     def test_parse_should_return_aicpu_node_data_when_type_0_and_start_time_0(self):
-        InfoConfReader()._info_json = {"DeviceInfo": [{'hwts_frequency': 100}]}
         aicpu_data = (
             23130, 6000, 0, 1, 128, 2000,
             1, 2, 0, 0, 0, 10000, 10000, 15000,
@@ -176,7 +177,6 @@ class TestAicpuAddInfoParser(unittest.TestCase):
         self.assertEqual(1000, data[0].data.wait_compute_start_time)
 
     def test_parse_should_return_kfc_hccl_info_data_when_type_13(self):
-        InfoConfReader()._info_json = {"DeviceInfo": [{'hwts_frequency': 100}]}
         aicpu_data = [23130, 6000, 13, 1, 128, 20000] + \
                      [12345, 0, 123, 0, 8, 8, 0, 4294967295, 255143588, 0.1, 0, 0, 8, 2, 0, 1, 1, 1, 1, 1, 1, 1, 1,
                       255, 0, 0, 0, 0, 0, 0, 0, 0, 0] + \
@@ -195,7 +195,6 @@ class TestAicpuAddInfoParser(unittest.TestCase):
         InfoConfReader()._info_json = {}
 
     def test_parse_should_return_device_hccl_op_info_data_when_type_10(self):
-        InfoConfReader()._info_json = {"DeviceInfo": [{'hwts_frequency': 100}]}
         aicpu_data = [23130, 6000, 10, 1, 128, 20000,
                       0, 0, 0, 1, 12345, 8, 6, 1] + [0] * 196
         struct_data = struct.pack(StructFmt.DEVICE_HCCL_OP_INFO_FMT, *aicpu_data)

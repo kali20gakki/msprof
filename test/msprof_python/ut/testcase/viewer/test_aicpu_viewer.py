@@ -20,10 +20,12 @@ from unittest import mock
 
 from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader
+from common_func.platform.chip_manager import ChipManager
 from common_func.profiling_scene import ProfilingScene
 from constant.constant import ITER_RANGE
 from profiling_bean.db_dto.ge_task_dto import GeTaskDto
 from profiling_bean.db_dto.task_time_dto import TaskTimeDto
+from profiling_bean.prof_enum.chip_model import ChipModel
 from sqlite.db_manager import DBOpen
 from viewer.aicpu_viewer import AiCpuData
 from viewer.aicpu_viewer import ParseAiCpuData
@@ -266,6 +268,26 @@ class TestAicpuViewer(unittest.TestCase):
 
         tasks = check._sep_task_by_stream_task(ascend_task_results)
         self.assertEqual(len(tasks), 6)
+
+    def test_analysis_aicpu_chip6_when_normal_then_pass(self):
+        project_path = 'home\\project'
+        with mock.patch(NAMESPACE + '.ParseAiCpuData.get_ai_cpu_data'), \
+                mock.patch(NAMESPACE + '.ParseAiCpuData.get_ge_summary_aicpu_data'), \
+                mock.patch(NAMESPACE + '.ParseAiCpuData.match_aicpu_with_ge_summary', return_value=[]):
+            result = ParseAiCpuData.analysis_aicpu_by_sqe_id(project_path, ITER_RANGE)
+            unittest.TestCase().assertEqual(result, [])
+
+    def test_get_ge_summary_aicpu_data_when_use_sqe_id_true_then_return_data(self):
+        ge_task_data = [["2zx", 2, 1, 0], ]
+        res = self.get_ge_task_dto(ge_task_data)
+        with mock.patch(NAMESPACE + '.PathManager.get_db_path'), \
+                mock.patch(NAMESPACE + '.DBManager.check_connect_db_path',
+                           return_value=(True, True)), \
+                mock.patch(NAMESPACE + '.ParseAiCpuData._get_ge_summary_data', return_value=res), \
+                mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
+            check = ParseAiCpuData()
+            result = check.get_ge_summary_aicpu_data("", use_sqe_id=True)
+            unittest.TestCase().assertEqual(result, res)
 
 
 if __name__ == '__main__':

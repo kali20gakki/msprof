@@ -32,7 +32,7 @@ class AicpuNodeBean:
     def __init__(self: any, *args) -> None:
         data = args[0]
         self._stream_id = StarsCommon.set_stream_id(data[6], data[7], SqeType.StarsSqeType.AI_CPU)
-        self._task_id = StarsCommon.set_task_id(data[6], data[7], SqeType.StarsSqeType.AI_CPU)
+        self._task_id = StarsCommon.set_task_id(data[6], data[7], SqeType.StarsSqeType.AI_CPU, need_merge=False)
         self._ai_cpu_task_start = data[10]
         self._compute_time = (data[12] - data[11]) / NumberConstant.MILLI_SECOND  # ms
         self._mem_copy_time = (data[13] - data[12]) / NumberConstant.MILLI_SECOND
@@ -228,7 +228,7 @@ class KfcHcclInfoBean:
         self._src_addr = data[10]
         self._dst_addr = data[11]
         self._data_size = data[12]
-        self._task_id = StarsCommon.set_task_id(data[15], data[13], SqeType.StarsSqeType.AI_CPU)
+        self._task_id = StarsCommon.set_task_id(data[15], data[13], SqeType.StarsSqeType.AI_CPU, need_merge=False)
         self._stream_id = StarsCommon.set_stream_id(data[15], data[13], SqeType.StarsSqeType.AI_CPU)
         self._plane_id = data[16]
         self._op_type = data[17]
@@ -473,7 +473,7 @@ class DeviceHcclOpInfoBean(HcclOpInfoBean):
         self._group_name = data[10]
         self._rank_size = data[11]
         self._stream_id = StarsCommon.set_stream_id(data[12], data[13], SqeType.StarsSqeType.AI_CPU)
-        self._task_id = StarsCommon.set_task_id(data[12], data[13], SqeType.StarsSqeType.AI_CPU)
+        self._task_id = StarsCommon.set_task_id(data[12], data[13], SqeType.StarsSqeType.AI_CPU, need_merge=False)
 
     @property
     def stream_id(self: any) -> int:

@@ -173,6 +173,13 @@ class ChipManager:
         """
         return self.chip_id in (ChipModel.CHIP_V6_1_0, ChipModel.CHIP_V6_2_0)
 
+    def is_sqe_id_supported(self: any) -> bool:
+        """
+        check the scene of sqe id
+        :return: True or False
+        """
+        return self.is_chip_v6()
+
     def is_chip_all_data_export(self: any) -> bool:
         """
         check the all data export scene of chip

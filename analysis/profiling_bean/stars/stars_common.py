@@ -14,6 +14,7 @@
 # See the Mulan PSL v2 for more details.
 # -------------------------------------------------------------------------
 
+from common_func.platform.chip_manager import ChipManager
 from common_func.utils import Utils
 from common_func.info_conf_reader import InfoConfReader
 from msparser.compact_info.stream_expand_spec_reader import StreamExpandSpecReader
@@ -83,6 +84,8 @@ class StarsCommon:
           (using COMMON_LOW_OPERATOR mask), then return processed result via Utils.get_stream_id()
         - Otherwise, return processed stream_id via Utils.get_stream_id()
         """
+        if ChipManager().is_chip_v6():
+            return stream_id
         if StreamExpandSpecReader().is_stream_expand:
             if sqe_type in [SqeType.StarsSqeType.PLACE_HOLDER_SQE, SqeType.StarsSqeType.EVENT_RECORD_SQE]:
                 return stream_id & cls.EXPANDING_LOW_OPERATOR
@@ -102,7 +105,7 @@ class StarsCommon:
             return Utils.get_stream_id(stream_id)
 
     @classmethod
-    def set_task_id(cls, stream_id, task_id, sqe_type=0):
+    def set_task_id(cls, stream_id, task_id, sqe_type=0, need_merge=True):
         """
         In the FFTS scenario, task ID composition varies based on stream ID bits and SQE type:
 
@@ -122,6 +125,8 @@ class StarsCommon:
             - High bits from task_id (using COMMON_HIGH_OPERATOR mask)
         - Otherwise, return original task_id
         """
+        if ChipManager().is_chip_v6():
+            return cls.set_unique_task_id(stream_id, task_id, need_merge)
         if StreamExpandSpecReader().is_stream_expand:
             if sqe_type in [SqeType.StarsSqeType.PLACE_HOLDER_SQE, SqeType.StarsSqeType.EVENT_RECORD_SQE]:
                 return task_id
@@ -139,9 +144,18 @@ class StarsCommon:
             return task_id
 
     @staticmethod
-    def set_unique_task_id(stream_id, task_id):
+    def set_unique_task_id(stream_id, task_id, need_merge=True):
         """
         唯一id场景下，原本16bit task id扩展到32bit，
         使用原stream id的bit位，原stream id低位、task id高位，合并为新task id
+        param:
+            stream_id: 原stream id
+            task_id: 原task id
+            need_merge: 是否需要合并stream id和task id, 用于32bit sqe id场景，默认True
+                        传入task id为32bit时，设置为False
+        return:
+            合并后的task id
         """
+        if not need_merge:
+            return task_id
         return (task_id << 16) | stream_id

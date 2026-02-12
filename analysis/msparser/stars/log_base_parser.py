@@ -21,6 +21,7 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.platform.chip_manager import ChipManager
 from mscalculate.ascend_task.host_task_collector import HostTaskCollector
 from msmodel.sqe_type_map import SqeType
+from msmodel.add_info.kfc_info_model import KfcInfoViewModel
 from msparser.interface.istars_parser import IStarsParser
 from profiling_bean.stars.block_log_bean import BlockLogBean
 
@@ -127,11 +128,15 @@ class LogBaseParser(IStarsParser):
             return
         device_id = InfoConfReader().get_device_id()
         host_task_dict = HostTaskCollector(self._result_dir).get_host_task_stream_table(int(device_id))
+        with KfcInfoViewModel(self._result_dir, []) as model:
+            hccl_data_dict = model.get_kfc_info_dict()
         failed_count = 0
         for data in self._data_list:
-            if data.task_id not in host_task_dict:
+            if data.task_id not in host_task_dict and data.task_id not in hccl_data_dict:
                 failed_count += 1
+                data.stream_id = None
                 continue
-            data.stream_id = host_task_dict.get(data.task_id)
+            # 优先从host task中获取stream id，aicpu小算子信息在host task中不存在，从hccl task中获取
+            data.stream_id = host_task_dict.get(data.task_id, hccl_data_dict.get(data.task_id))
         if failed_count > 0:
             logging.warning(f"{failed_count} task items not found in host task")

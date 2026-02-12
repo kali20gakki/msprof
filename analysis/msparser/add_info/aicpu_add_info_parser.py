@@ -22,6 +22,7 @@ from common_func.ms_multi_process import MsMultiProcess
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.hash_dict_constant import HashDictData
+from common_func.singleton import singleton
 from common_func.hccl_info_common import trans_enum_name
 from common_func.hccl_info_common import RoleType
 from common_func.hccl_info_common import OpType
@@ -30,6 +31,7 @@ from common_func.hccl_info_common import LinkType
 from common_func.hccl_info_common import TransPortType
 from common_func.hccl_info_common import RdmaType
 from common_func.hccl_info_common import DeviceHcclSource
+from mscalculate.ascend_task.host_task_collector import HostTaskCollector
 from common_func.platform.chip_manager import ChipManager
 from msmodel.ai_cpu.ai_cpu_model import AiCpuModel
 from msmodel.step_trace.ts_track_model import TsTrackModel
@@ -40,6 +42,7 @@ from msparser.add_info.aicpu_add_info_bean import KfcHcclInfoBean
 from msparser.data_struct_size_constant import StructFmt
 from msparser.interface.data_parser import DataParser
 from profiling_bean.prof_enum.data_tag import DataTag
+
 
 
 class AicpuAddInfoParser(DataParser, MsMultiProcess):
@@ -55,6 +58,7 @@ class AicpuAddInfoParser(DataParser, MsMultiProcess):
         self._file_list = file_list
         self.project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
         self.hash_data = {}
+        self.host_tasks_map = {}
         self.is_chip_v6 = ChipManager().is_chip_v6()
         self.unique_id_map = dict()
         self._aicpu_data = {
@@ -85,7 +89,7 @@ class AicpuAddInfoParser(DataParser, MsMultiProcess):
     def save_aicpu_node_data(self: any, aicpu_info_list: List[AicpuAddInfoBean]):
         result = [
             [
-                aicpu_info.data.stream_id,
+                self._get_stream_id_from_host(aicpu_info),
                 aicpu_info.data.task_id,
                 aicpu_info.data.ai_cpu_task_start_time,
                 aicpu_info.data.ai_cpu_task_end_time,
@@ -148,7 +152,7 @@ class AicpuAddInfoParser(DataParser, MsMultiProcess):
         result = [
             [
                 aicpu_info.data.device_id,
-                aicpu_info.data.stream_id,
+                self._get_stream_id_from_host(aicpu_info),
                 aicpu_info.data.task_id,
                 aicpu_info.data.comm_turn,
                 aicpu_info.data.current_turn,
@@ -169,7 +173,7 @@ class AicpuAddInfoParser(DataParser, MsMultiProcess):
         result = [
             [
                 aicpu_info.data.device_id,
-                aicpu_info.data.stream_id,
+                self._get_stream_id_from_host(aicpu_info),
                 aicpu_info.data.task_id,
                 aicpu_info.data.compute_turn,
                 aicpu_info.data.current_turn,
@@ -185,7 +189,7 @@ class AicpuAddInfoParser(DataParser, MsMultiProcess):
     def save_aicpu_flip_task_data(self: any, aicpu_info_list: List[AicpuAddInfoBean]):
         result = [
             [
-                aicpu_info.data.stream_id,
+                self._get_stream_id_from_host(aicpu_info),
                 InfoConfReader().time_from_syscnt(aicpu_info.timestamp),
                 aicpu_info.data.task_id,
                 aicpu_info.data.flip_num,
@@ -199,7 +203,7 @@ class AicpuAddInfoParser(DataParser, MsMultiProcess):
         result = [
             [
                 InfoConfReader().time_from_syscnt(aicpu_info.timestamp),
-                aicpu_info.data.aicpu_stream_id,
+                self._get_stream_id_from_host(aicpu_info),
                 aicpu_info.data.aicpu_task_id,
                 self.unique_id_map.get(aicpu_info.data.task_id, aicpu_info.data.stream_id),
                 aicpu_info.data.task_id,
@@ -220,7 +224,7 @@ class AicpuAddInfoParser(DataParser, MsMultiProcess):
                 self.hash_data.get(aicpu_info.data.alg_type, aicpu_info.data.alg_type),
                 aicpu_info.data.count,
                 aicpu_info.data.group_name,
-                aicpu_info.data.stream_id,
+                self._get_stream_id_from_host(aicpu_info),
                 aicpu_info.data.task_id,
                 aicpu_info.data.rank_size,
                 DeviceHcclSource.HCCL.value,
@@ -300,6 +304,7 @@ class AicpuAddInfoParser(DataParser, MsMultiProcess):
             return
         logging.info("start parsing aicpu data, files: %s", str(self._file_list.get(DataTag.AICPU_ADD_INFO)))
         self.parse()
+        self._pre_process_host_info()
         self.save()
 
     def set_aicpu_data(self: any, aicpu_data: list) -> None:
@@ -313,11 +318,25 @@ class AicpuAddInfoParser(DataParser, MsMultiProcess):
             else:
                 self._aicpu_data.get(struct_type).append(aicpu_info)
 
+    def _pre_process_host_info(self: any) -> None:
+        device_id = InfoConfReader().get_device_id()
+        host_collector = HostTaskCollector(self._project_path)
+        self.host_tasks_map = host_collector.get_host_task_stream_table(device_id) if self.is_chip_v6 else {}
+
+    def _get_stream_id_from_host(self: any, aicpu_info: AicpuAddInfoBean) -> int:
+        """
+        获取处理后的 stream_id
+        :param aicpu_info: AicpuAddInfoBean 对象
+        :return: 处理后的 stream_id
+        """
+        return self.host_tasks_map.get(aicpu_info.data.task_id, aicpu_info.data.stream_id)
+
     def _pre_process_kfc_info(self: any, aicpu_info: AicpuAddInfoBean) -> list:
         result_list = []
         for kfc_hccl_info in [aicpu_info.data.first_hccl_info, aicpu_info.data.second_hccl_info]:
             if kfc_hccl_info.group_name == "0":
                 continue
+            if self.is_chip_v6:
+                self.unique_id_map[kfc_hccl_info.task_id] = kfc_hccl_info.stream_id
             result_list.append(kfc_hccl_info)
-            # reserved for chip v6, set taskId(sqeId)-streamId in self.unique_id_map as key-value
         return result_list

@@ -186,7 +186,7 @@ class TestBlockLogParser(unittest.TestCase):
         expect_ret = (
             [
                 [1000, 4, 12, 'AI_CORE', 56, 58, 40.0, 1, 9],
-                [7, 7, 22, 'AI_CORE', 89, 91, 40.0, 1, 9]
+                [None, 7, 22, 'AI_CORE', 89, 91, 40.0, 1, 9]
             ],
             []
         )

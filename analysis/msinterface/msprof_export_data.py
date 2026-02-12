@@ -427,8 +427,12 @@ class MsProfExportDataUtils:
 
     @staticmethod
     def _get_aicpu_data(configs: dict, params: dict) -> any:
-        aicpu_data = ParseAiCpuData.analysis_aicpu(params.get(StrConstant.PARAM_RESULT_DIR),
+        if ChipManager().is_sqe_id_supported():
+            aicpu_data = ParseAiCpuData.analysis_aicpu_by_sqe_id(params.get(StrConstant.PARAM_RESULT_DIR),
                                                    params.get(StrConstant.PARAM_ITER_ID))
+        else:
+            aicpu_data = ParseAiCpuData.analysis_aicpu(params.get(StrConstant.PARAM_RESULT_DIR),
+                                                    params.get(StrConstant.PARAM_ITER_ID))
         return configs.get(StrConstant.CONFIG_HEADERS), aicpu_data, len(aicpu_data)
 
     @staticmethod

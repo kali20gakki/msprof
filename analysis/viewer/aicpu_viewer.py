@@ -72,6 +72,18 @@ class ParseAiCpuData:
         return res
 
     @staticmethod
+    def analysis_aicpu_by_sqe_id(project_path: str, iter_range: IterationRange) -> list:
+        """
+        parse and analysis AI CPU related dp data by chip v6
+        :return: ai cpu data , headers
+        """
+        ai_cpu_results = ParseAiCpuData.get_ai_cpu_data(project_path, iter_range)
+        ge_results = ParseAiCpuData.get_ge_summary_aicpu_data(project_path, True)
+        res = ParseAiCpuData.match_aicpu_with_ge_summary(ai_cpu_results, ge_results)
+        res.sort(key=lambda x: x[0])
+        return res
+
+    @staticmethod
     def get_aicpu_batch_id(ai_cpu_data: List[AiCpuData], ascend_task_data: List[TaskTimeDto]) -> List[AiCpuData]:
         """
         get ai cpu batch_id from ascend_task data
@@ -120,7 +132,7 @@ class ParseAiCpuData:
         return res[:index]
 
     @staticmethod
-    def get_ge_summary_aicpu_data(project_path: str) -> list:
+    def get_ge_summary_aicpu_data(project_path: str, use_sqe_id: bool = False) -> list:
         """
         get ge_summary data
         """
@@ -130,7 +142,10 @@ class ParseAiCpuData:
             logging.warning("Can't connect ai_core_op_summary.db!")
             return []
 
-        ge_results = ParseAiCpuData._get_ge_summary_aicpu_data(ge_summary_conn)
+        if not use_sqe_id:
+            ge_results = ParseAiCpuData._get_ge_summary_aicpu_data(ge_summary_conn)
+        else:
+            ge_results = ParseAiCpuData._get_ge_summary_data(ge_summary_conn)
         DBManager.destroy_db_connect(ge_summary_conn, ge_summary_curs)
         return ge_results
 
@@ -217,6 +232,11 @@ class ParseAiCpuData:
                 task_index += 1
 
         return ai_cpu_data
+
+    @staticmethod
+    def _get_ge_summary_data(ge_summary_conn):
+        sql = "select op_name, stream_id, task_id from {0} ".format(DBNameConstant.TABLE_SUMMARY_GE)
+        return DBManager.fetch_all_data(ge_summary_conn.cursor(), sql, dto_class=GeTaskDto)
 
     @staticmethod
     def _get_ge_summary_aicpu_data(ge_summary_conn):
