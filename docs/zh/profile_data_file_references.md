@@ -1705,18 +1705,19 @@ msprof\_\*.json文件Communication层数据如下图所示。
 |relay|通信算子是否发生借轨。显示为yes（表示发生了借轨）或no（表示没有发生借轨）。支持型号：<br/>Atlas A2 训练系列产品/Atlas A2 推理系列产品：仅显示为no，无意义<br/>Atlas A3 训练系列产品/Atlas A3 推理系列产品|
 |retry|通信算子是否发生重执行。显示为yes（表示发生了重执行）或no（表示没有发生重执行）。支持型号：<br/>Atlas A2 训练系列产品/Atlas A2 推理系列产品<br/>Atlas A3 训练系列产品/Atlas A3 推理系列产品|
 |**通信小算子信息**||
-|notify id|notify唯一ID。|
+|notify id|notify唯一ID。notify id仅对task type为notify类型及用于传输notify record信号的RDMA send类的task有效；其他task type时无效，显示为18446744073709551615。|
 |duration estimated(us)|预估任务持续时间，单位us。|
 |stream id|Stream任务的ID。|
 |task id|Task任务的ID。|
 |task type|Task类型。|
 |src rank|源Rank。|
-|dst rank|目的Rank。|
+|dst rank|目的Rank。若此字段显示为4294967295，则为本地片内操作。|
 |transport type|传输类型，包含：LOCAL、SDMA、RDMA等。|
-|size(Byte)|数据量，单位Byte。|
+|size(Byte)|数据量，单位Byte。在task type为notify类型时无效，填充为0。|
 |data type|数据类型。|
 |link type|链路类型，包含：HCCS、PCIe、RoCE等。|
 |bandwidth(GB/s)|带宽大小，单位GB/s。|
+|model id|模型ID。|
 
 
 **计算及通信的流水掩盖分析<a name="zh-cn_topic_0000001658339478_section18441122912161"></a>**

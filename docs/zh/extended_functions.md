@@ -1,4 +1,4 @@
-# 附录
+# 扩展功能
 
 ## 获取设备信息
 
@@ -38,7 +38,7 @@ python3 get_msprof_info.py -dir <dir> [-help]
 |-dir或--collection-dir|必选|收集到的Profiling数据目录。非集群场景须指定为PROF\_XXX目录下的host或device\_{id}目录；集群场景须指定为PROF\_XXX目录的父目录。|
 |-h或--help|可选|显示帮助信息，仅在获取使用方式时使用。|
 
-**使用示例<a name="zh-cn_topic_0000001276273570_section20415205113454"></a>**
+**使用示例**
 
 1.  以运行用户登录工具所在环境。
 2.  切换至“get\_msprof\_info.py”脚本所在目录。
