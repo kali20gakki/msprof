@@ -78,7 +78,7 @@ class DataParsersConfig(MetaConfig):
         ],
         'ParsingCtrlCPUData': [
             ('path', 'msparser.hardware.ctrl_cpu_parser'),
-            ('chip_model', '0,1,2,3,4,5,7,8,11'),
+            ('chip_model', '0,1,2,3,4,5,7,8,11,15,16'),
             ('position', 'D')
         ],
         'ParsingMemoryData': [

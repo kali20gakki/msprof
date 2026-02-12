@@ -74,6 +74,8 @@ class CCUMissionViewer(BaseViewer, ABC):
 
     @staticmethod
     def get_max_delay_channel_and_channel_delay(host_data: list, mission_data: any, channel_data: list) -> any:
+        if not channel_data:
+            return None, None
         host_channel_ids = {channel.channel_id for channel in host_data}
         within_channel = [channel for channel in channel_data if channel.channel_id in host_channel_ids]
         seq_channel = [channel
@@ -91,7 +93,7 @@ class CCUMissionViewer(BaseViewer, ABC):
              self.pid, self.tid,
              TraceViewHeaderConstant.PROCESS_CCU],
             ["thread_name",
-             self.pid, self.tid, "Communication"],
+             self.pid, self.tid, TraceViewHeaderConstant.PROCESS_COMMUNICATION],
         ]
         return TraceViewManager.metadata_event(header)
 
@@ -114,14 +116,14 @@ class CCUMissionViewer(BaseViewer, ABC):
         model_dict = self.get_model_instance()
         if self.params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.TIMELINE:
             for tag, model in model_dict.items():
-                if not model or not model.check_db():
+                if not model or not model.check_table():
                     continue
                 data = model.get_timeline_data()
                 ccu_data_dict[tag] = data
                 model.finalize()
         else:
             mission_model = model_dict.get(DataTag.CCU_MISSION)
-            if not mission_model or not mission_model.check_db():
+            if not mission_model or not mission_model.check_table():
                 return ccu_data_dict
             mission_summary_data = mission_model.get_summary_data()
             ccu_data_dict = {DataTag.CCU_MISSION: mission_summary_data}
@@ -171,6 +173,8 @@ class CCUMissionViewer(BaseViewer, ABC):
 
     def get_formatted_loop_data(self, device_loop_data, group_data):
         result = []
+        if not device_loop_data:
+            return result
         grouped_loop_data = defaultdict(list)
         for item in device_loop_data:
             key = (item.stream_id, item.task_id, item.lp_instr_id)
@@ -218,6 +222,8 @@ class CCUMissionViewer(BaseViewer, ABC):
 
     def get_formatted_wait_data(self, wait_data, wait_signal_data, channel_data):
         result = []
+        if not wait_data:
+            return result
         grouped_loop_data = defaultdict(list)
         for item in wait_data:
             key = (item.stream_id, item.task_id, item.setckebit_instr_id)

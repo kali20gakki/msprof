@@ -72,7 +72,7 @@ class AiCoreMetricsManager:
                     "l0c_read_bw(GB/s),l0c_read_bw_cube(GB/s),l0c_write_bw_cube(GB/s)",
         PMU_MEM_UB: "ub_read_bw_mte(GB/s),ub_write_bw_mte(GB/s)," \
                     "ub_read_bw_vector(GB/s),ub_write_bw_vector(GB/s)," \
-                    "ub_read_bw_scalar(GB/s),ub_write_bw_scalar(GB/s)",
+                    "ub_read_bw_scalar(GB/s),ub_write_bw_scalar(GB/s),fixp2ub_write_bw(GB/s)",
         PMU_ARITH: "mac_fp16_ratio,mac_int8_ratio",
         PMU_L2_CACHE: "read_local_l2_hit,read_local_l2_miss," \
                       "read_local_l2_victim,write_local_l2_hit," \

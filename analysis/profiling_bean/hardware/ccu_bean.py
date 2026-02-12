@@ -99,7 +99,8 @@ class CCUMissionBean(StructDecoder):
             for i in range(0, 16):
                 if setckebit_start_syscnt != 0:
                     device_id = 15 - i
-                    end_time = setckebit_start_syscnt + mission_data[i]
+                    # for mission_data bit problems, post fix it with mul 4
+                    end_time = setckebit_start_syscnt + mission_data[i] * 4
                     self._rel_end_time.append((device_id, end_time))
             return True
         logging.error("CCU mission data struct is incomplete, please check the file.")

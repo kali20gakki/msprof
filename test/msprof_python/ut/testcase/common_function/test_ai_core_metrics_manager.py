@@ -11,7 +11,7 @@ class TestAiCoreMetricsManager(unittest.TestCase):
         valid_metrics = AiCoreMetricsManager.VALID_METRICS_SET
         ret = ("ub_read_bw_mte(GB/s),ub_write_bw_mte(GB/s),"
                "ub_read_bw_vector(GB/s),ub_write_bw_vector(GB/s),"
-               "ub_read_bw_scalar(GB/s),ub_write_bw_scalar(GB/s)")
+               "ub_read_bw_scalar(GB/s),ub_write_bw_scalar(GB/s),fixp2ub_write_bw(GB/s)")
         valid_metrics_ret = set(
             AiCoreMetricsManager.AICORE_METRICS_LIST.get(AiCoreMetricsManager.PMU_PIPE).split(",")[:-1]
         )
