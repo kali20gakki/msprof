@@ -20,6 +20,9 @@ import re
 
 from common_func.constant import Constant
 from common_func.file_name_manager import get_acl_compiles
+from common_func.file_name_manager import get_v5_model_exeom_compiles
+from common_func.file_name_manager import get_v5_stars_profile_compiles
+from common_func.file_name_manager import get_dbg_file_compiles
 from common_func.file_name_manager import get_acl_hash_compiles
 from common_func.file_name_manager import get_ai_core_compiles
 from common_func.file_name_manager import get_ai_cpu_compiles
@@ -195,6 +198,9 @@ class FileDispatch:
         DataTag.LPM_INFO: get_lpm_info_compiles(),
         DataTag.STREAM_EXPAND: get_host_stream_expand_spec_info_compiles(),
         DataTag.RUNTIME_OP_INFO: get_runtime_op_info_compiles(),
+        DataTag.V5_MODEL_EXEOM: get_v5_model_exeom_compiles(),
+        DataTag.V5_STARS_PROFILE: get_v5_stars_profile_compiles(),
+        DataTag.DBG_FILE: get_dbg_file_compiles(),
     }
 
     def __init__(self: any, sample_config: dict) -> None:

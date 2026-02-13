@@ -93,6 +93,8 @@ class StructDecoder:
         "BiuPerfInstructionBean": StructFmt.BIU_PERF_FMT,
         "RuntimeOpInfoBean": StructFmt.RUNTIME_OP_INFO_FMT,
         "RuntimeOpInfo256Bean": StructFmt.RUNTIME_OP_INFO_256_FMT,
+        "V5ExeomBean": StructFmt.V5_MODEL_EXEOM_FMT,
+        "V5StarsBean": StructFmt.V5_STARS_PROFILE_FMT,
     }
 
     @classmethod

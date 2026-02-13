@@ -87,6 +87,9 @@ class DataTag(Enum):
     CTX_ID = 65
     GE_LOGIC_STREAM_INFO = 66
     MEMORY_OP = 67
+    V5_MODEL_EXEOM = 68
+    V5_STARS_PROFILE = 69
+    DBG_FILE = 70
     NPU_MODULE_MEM = 71
     AICPU_ADD_INFO = 72
     NODE_ATTR_INFO = 73

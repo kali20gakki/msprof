@@ -62,7 +62,22 @@ class AiCoreMetricsManager:
 
     AICORE_METRICS_LIST = AICORE_METRICS_LIST_DEFAULT
 
-    # set AICORE_METRICS_LIST by chip_id
+    AICORE_METRICS_CHIP_V5 = {
+        PMU_PIPE: "vec_exe_ratio,mac_exe_ratio,scalar_ratio,mte1_ratio,mte2_ratio,"
+                  "mte3_ratio,fixpipe_ratio,mte_preload_ratio,icache_miss_rate",
+        PMU_MEM: "main_mem_read_bw(GB/s),main_mem_write_bw(GB/s)",
+        PMU_MEM_UB: "ub_read_bw_mte2(GB/s),ub_write_bw_mte2(GB/s),"
+                    "ub_read_bw_mte(GB/s),ub_write_bw_mte(GB/s),"
+                    "ub_read_bw_vector(GB/s),ub_write_bw_vector(GB/s),"
+                    "ub_read_bw_scalar(GB/s),ub_write_bw_scalar(GB/s)",
+        PMU_PIPE_STALL_CYCLE: "cube_self_stall_cycles,vec_self_stall_cycles,"
+                              "cube_mte2_cflt_stall_cycles,cube_mte3_cflt_stall_cycles,"
+                              "cube_mte1_cflt_stall_cycles,vec_mte2_cflt_stall_cycles,"
+                              "vec_mte3_cflt_stall_cycles,vec_mte1_cflt_stall_cycles,"
+                              "mte1_mte2_stall_cycles,mte1_mte3_stall_cycles",
+        PMU_SCALAR_RATIO: "acess_stack_ratio,control_flow_mis_prediction_rate",
+    }
+
     AICORE_METRICS_CHIP_V6 = {
         PMU_PIPE: "vec_ratio,mac_ratio,scalar_ratio,mte1_ratio,mte2_ratio," \
                   "mte3_ratio,fixpipe_ratio,icache_miss_rate",
@@ -82,6 +97,7 @@ class AiCoreMetricsManager:
 
     # set AICORE_METRICS_LIST by chip_id
     AICORE_METRICS_MAP = {
+        ChipModel.CHIP_V5_1_0: AICORE_METRICS_CHIP_V5,
         ChipModel.CHIP_V6_1_0: AICORE_METRICS_CHIP_V6,
         ChipModel.CHIP_V6_2_0: AICORE_METRICS_CHIP_V6
     }

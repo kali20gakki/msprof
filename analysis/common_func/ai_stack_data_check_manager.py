@@ -122,11 +122,12 @@ class AiStackDataCheckManager(DataCheckManager):
         The data path contain task_time data or not
         """
         return AiStackDataCheckManager._check_output(result_dir, device_id) and \
-               (cls._contain_ts_track_data(result_dir, device_id=device_id) or \
-                cls._contain_hwts_data(result_dir, device_id=device_id) or \
-                cls.contain_stars_soc_data(result_dir, device_id=device_id) or \
-                (cls._contain_hwts_aiv_data(result_dir, device_id=device_id) or
-                 cls._contain_ts_track_aiv_data(result_dir, device_id=device_id)))
+            (cls._contain_ts_track_data(result_dir, device_id=device_id) or \
+             cls._contain_hwts_data(result_dir, device_id=device_id) or \
+             cls.contain_stars_soc_data(result_dir, device_id=device_id) or \
+             (cls._contain_hwts_aiv_data(result_dir, device_id=device_id) or
+              cls._contain_ts_track_aiv_data(result_dir, device_id=device_id)) or
+             cls._contain_v5_data(result_dir, device_id=device_id))
 
     @classmethod
     def contain_task_time_task(cls: any, result_dir: str, device_id: any = None) -> bool:
@@ -465,4 +466,12 @@ class AiStackDataCheckManager(DataCheckManager):
         The data path contain step_trace data or not
         """
         return cls.check_data_exist(result_dir, file_name_manager.get_ts_track_compiles(),
+                                    device_id=device_id)
+
+    @classmethod
+    def _contain_v5_data(cls: any, result_dir: str, device_id: any = None) -> bool:
+        """
+        The data path contain v5_device data or not
+        """
+        return cls.check_data_exist(result_dir, file_name_manager.get_v5_stars_profile_compiles(),
                                     device_id=device_id)
