@@ -169,6 +169,8 @@ class GeInfoModel(BaseModel):
         return task_data_dict
 
     def get_task_info(self, device_ids: List[int]) -> list:
+        if not self.check_table():
+            return []
         sql = f"SELECT op_name, task_type, stream_id, task_id, batch_id, context_id from {DBNameConstant.TABLE_GE_TASK}"
         if device_ids:
             sql += f" WHERE device_id in ({','.join(map(str, device_ids))})"

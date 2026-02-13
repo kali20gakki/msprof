@@ -15,6 +15,7 @@
 # -------------------------------------------------------------------------
 
 import logging
+import os
 from typing import List, Tuple
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
@@ -22,6 +23,7 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.msvp_common import format_high_precision_for_csv, float_calculate
 from common_func.ms_constant.number_constant import NumberConstant
+from common_func.path_manager import PathManager
 from common_func.utils import Utils
 from msmodel.ge.ge_info_calculate_model import GeInfoModel
 from msmodel.runtime.runtime_host_task_model import RuntimeHostTaskModel
@@ -112,8 +114,11 @@ class TaskOpViewer:
         return regular, mix, ffts, static_graph
 
     @staticmethod
-    def _reformat_task_info(task_data: List, message: dict) -> List:
-        with GeInfoModel(message['result_dir']) as geModel, RuntimeHostTaskModel(message['result_dir']) as hostTaskModel :
+    def _get_ge_info_map(message: dict):
+        task_info_dict = {}
+        if not os.path.exists(PathManager.get_db_path(message['result_dir'], DBNameConstant.DB_GE_INFO)):
+            return task_info_dict
+        with GeInfoModel(message['result_dir']) as geModel:
             task_info = geModel.get_task_info([message['device_id']])
             task_info_dict = {
                 (row.stream_id, row.task_id, row.batch_id, row.context_id): {
@@ -122,14 +127,26 @@ class TaskOpViewer:
                 }
                 for row in task_info
             }
+        return task_info_dict
+
+    @staticmethod
+    def _get_runtime_map(message: dict):
+        host_task_dict = {}
+        if not os.path.exists(PathManager.get_db_path(message['result_dir'], DBNameConstant.DB_RUNTIME)):
+            return host_task_dict
+        with RuntimeHostTaskModel(message['result_dir']) as hostTaskModel:
             host_task = hostTaskModel.get_host_tasks(True, 0, 0, message['device_id'])
-            host_task_dict = {}
             for row in host_task:
                 stream_id, task_id, batch_id, context_id, kernel_name = row[2], row[3], row[5], row[4], row[7]
                 for ctx in list(map(int, context_id.split(","))):
                     host_task_dict[(stream_id, task_id, batch_id, ctx)] = {
                         "kernel_name": kernel_name
                     }
+        return host_task_dict
+
+    @staticmethod
+    def _reformat_task_info(task_data: List, message: dict) -> List:
+        task_info_dict, host_task_dict = TaskOpViewer._get_ge_info_map(message), TaskOpViewer._get_runtime_map(message)
         task_info_result = []
         for task_data_arr in task_data:
             regular, mix, ffts, static_graph = TaskOpViewer.operate_type(task_data_arr)

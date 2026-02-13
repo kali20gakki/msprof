@@ -96,6 +96,7 @@ class TestTaskOpViewer(unittest.TestCase):
         ]
 
         with mock.patch("msmodel.task_time.ascend_task_model.AscendTaskModel.get_ascend_task_data_without_unknown", return_value=ascend_task_data), \
+         mock.patch("os.path.exists", return_value=True), \
          mock.patch("msmodel.ge.ge_info_calculate_model.GeInfoModel.get_task_info", return_value=ge_info), \
          mock.patch("msmodel.runtime.runtime_host_task_model.RuntimeHostTaskModel.get_host_tasks", return_value=host_task):
             task_info, length = TaskOpViewer.get_task_data_summary(message)
