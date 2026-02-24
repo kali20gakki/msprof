@@ -113,6 +113,8 @@ class AiCoreMetricsManager:
     VALID_METRICS_SET = VALID_METRICS_SET_DEFAULT
 
     VALID_METRICS_MAP = {
+        ChipModel.CHIP_V5_1_0: {'acess_stack_ratio', 'fixpipe_ratio', 'mac_exe_ratio', 'mte1_ratio', 'mte2_ratio',
+                                'mte3_ratio', 'mte_preload_ratio', 'scalar_ratio', 'vec_exe_ratio'},
         ChipModel.CHIP_V6_1_0: {'mac_ratio', 'mte1_ratio', 'mte2_ratio', 'mte3_ratio', 'scalar_ratio', 'vec_ratio',
                                 'fixpipe_ratio'},
         ChipModel.CHIP_V6_2_0: {'mac_ratio', 'mte1_ratio', 'mte2_ratio', 'mte3_ratio', 'scalar_ratio', 'vec_ratio',
