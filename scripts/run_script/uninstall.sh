@@ -16,7 +16,7 @@
 # See the Mulan PSL v2 for more details.
 # -------------------------------------------------------------------------
 CUR_DIR=$(dirname $(readlink -f $0))
-CANN_INSTALL_PATH=${CUR_DIR}/../../../..
+CANN_INSTALL_PATH=$(readlink -f "${CUR_DIR}/../../../..")
 if [ -z "${1}" ]; then
  	  install_path=${CANN_INSTALL_PATH}
 else
@@ -36,4 +36,5 @@ function delete_register_uninstall() {
 
 source utils.sh
 remove ${install_path}/${ANALYSIS_PATH}
+remove ${install_path}/share/info/msprof
 delete_register_uninstall
