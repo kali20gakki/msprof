@@ -42,6 +42,8 @@ function implement_install() {
   create_directory ${install_path}/${SHARE_INFO_DIR}/${MSPROF} ${right}
   # 1. uninstall.sh
   copy_file ${UNINSTALL_SCRIPT} ${install_path}/${SHARE_INFO_DIR}/${MSPROF}/${UNINSTALL_SCRIPT}
+  # 2. utils.sh
+  copy_file ${UTILS_SCRIPT} ${install_path}/${SHARE_INFO_DIR}/${MSPROF}/${UTILS_SCRIPT}
 	# 2. install collector
 	# msprof bin
 	copy_file ${MSPROF} ${install_path}/${MSPROF_PATH}/${MSPROF}

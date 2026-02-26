@@ -25,12 +25,12 @@ fi
 
 function delete_register_uninstall() {
  	if [ ! -f "${install_path}/${CANN_UNINSTALL_SCRIPT}" ]; then
- 	  print ${LEVEL_ERROR} "Failed to delete_register_uninstall, no such file: ${install_path}/${CANN_UNINSTALL_SCRIPT}"
+ 	  print "ERROR" "Failed to delete_register_uninstall, no such file: ${install_path}/${CANN_UNINSTALL_SCRIPT}"
  	  return 1
  	fi
  	  local script_right=$(stat -c '%a' "${install_path}/${CANN_UNINSTALL_SCRIPT}")
  	  chmod u+w "${install_path}/${CANN_UNINSTALL_SCRIPT}"
- 	  sed -i "/uninstall_package \"share\/info\/msprof\/script\"/d" "${install_path}/${CANN_UNINSTALL_SCRIPT}"
+ 	  sed -i "/uninstall_package \"share\/info\/msprof\"/d" "${install_path}/${CANN_UNINSTALL_SCRIPT}"
  	  chmod ${script_right} "${install_path}/${CANN_UNINSTALL_SCRIPT}"
 }
 

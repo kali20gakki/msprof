@@ -72,7 +72,7 @@ function execute_run() {
  	      fi
  	      print "INFO" "${MSPROF_RUN_NAME} package uninstall success."
  	  elif [ ${install_args_num} -gt 0 ]; then
- 	      bash install.sh ${install_path} ${install_for_all_flag}
+ 	      bash install.sh ${install_path} ${package_arch} ${install_for_all_flag}
  	      if [ $? -ne 0 ]; then
  	          print "ERROR" "${MSPROF_RUN_NAME} package install failed."
  	          exit 1

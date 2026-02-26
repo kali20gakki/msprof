@@ -31,6 +31,7 @@ ANALYSIS_PATH="tools/profiler/profiler_tool"
 MSPROF_PATH="tools/profiler/bin"
 SHARE_INFO_DIR="share/info"
 UNINSTALL_SCRIPT="uninstall.sh"
+UTILS_SCRIPT="utils.sh"
 CANN_UNINSTALL_SCRIPT="cann_uninstall.sh"
 
 # msprof analysis whl
