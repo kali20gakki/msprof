@@ -69,16 +69,19 @@ function implement_install() {
 	copy_file ${GE_PROF_H} ${install_path}/${arch_name}/include/ge/${GE_PROF_H}
 
 	# 5. install analyse
+	local analysis_right=$(stat -c '%a' ${install_path}/${ANALYSIS_PATH})
+ 	chmod -R 777 ${install_path}/${ANALYSIS_PATH}
 	copy_file ${ANALYSIS} ${install_path}/${ANALYSIS_PATH}/${ANALYSIS}
-    msprof_analyse_whl=${install_path}/${ANALYSIS_PATH}/${MSPROF_ANALYSIS_WHL}
-    copy_file ${MSPROF_ANALYSIS_WHL} $msprof_analyse_whl
-    if [ -f "${MSPROF_ANALYSIS_WHL}" ]; then
-        install_whl_package $pylocal ${msprof_analyse_whl} ${install_path}/${ANALYSIS_PATH}
-    fi
-    if [ $? -ne 0 ]; then
-        print "ERROR" "Install msprof analysis whl failed."
-        return 1
-    fi
+  msprof_analyse_whl=${install_path}/${ANALYSIS_PATH}/${MSPROF_ANALYSIS_WHL}
+  copy_file ${MSPROF_ANALYSIS_WHL} $msprof_analyse_whl
+  if [ -f "${MSPROF_ANALYSIS_WHL}" ]; then
+      install_whl_package $pylocal ${msprof_analyse_whl} ${install_path}/${ANALYSIS_PATH}
+      chmod -R ${analysis_right} ${install_path}/${ANALYSIS_PATH}
+  fi
+  if [ $? -ne 0 ]; then
+      print "ERROR" "Install msprof analysis whl failed."
+      return 1
+  fi
 }
 
 function create_directory() {
