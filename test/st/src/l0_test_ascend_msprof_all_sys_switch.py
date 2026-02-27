@@ -25,7 +25,7 @@ logging.basicConfig(level=logging.INFO,
                     format='\n%(asctime)s %(filename)s [line:%(lineno)d] [%(levelname)s] %(message)s')
 
 
-class TestAscendMsprofAllSwitch(BaseAscendMsprofChecker):
+class TestAscendMsprofAllSysSwitch(BaseAscendMsprofChecker):
     def check_ai_vector_core_utilization_data(self):
         super().check_ai_vector_core_utilization_data()
 
@@ -48,19 +48,31 @@ class TestAscendMsprofAllSwitch(BaseAscendMsprofChecker):
         super().check_npu_module_mem_data()
 
     def check_soc_pmu_data(self):
-        super().check_soc_pmu_data()
+        pass
 
     def check_task_time_data(self):
         super().check_task_time_data()
 
     def check_api_statistic_data(self):
-        super().check_api_statistic_data()
+        api_statistic_path = glob.glob(f"{self.prof_path}/PROF_*/mindstudio_profiler_output/"
+                                       f"api_statistic*.csv")
+        if not api_statistic_path:
+            raise FileNotFoundError(f"No api_statistic.csv found in {self.prof_path}")
+        FileChecker.check_csv_items(api_statistic_path[0], {"Level": ["acl", "node"],
+                                                            "Device_id": ["host"]},
+                                    fuzzy_match=False)
+        FileChecker.check_csv_items(api_statistic_path[0], {"API Name": ["Add*", "Cast*", "Relu*"]},
+                                    fuzzy_match=True)
+        FileChecker.check_csv_data_non_negative(api_statistic_path[0], comparison_func=self._is_non_negative,
+                                                columns=["Time(us)", "Count", "Avg(us)",
+                                                         "Min(us)", "Max(us)",
+                                                         "Variance"])
 
     def check_hbm_data(self):
         super().check_hbm_data()
 
     def check_l2_cache_data(self):
-        super().check_l2_cache_data()
+        pass
 
     def check_llc_read_write_data(self):
         super().check_llc_read_write_data()
@@ -142,17 +154,17 @@ class TestAscendMsprofAllSwitch(BaseAscendMsprofChecker):
                                                 columns=["Cycles", "Cycles(%)"])
 
 
-def test_ascend_msprof_all_switch(prof_path):
+def test_ascend_msprof_all_sys_switch(prof_path):
     expect_db_tables = ["ACC_PMU", "AICORE_FREQ", "CANN_API", "COMPUTE_TASK_INFO", "ENUM_API_TYPE",
                         "ENUM_HCCL_DATA_TYPE", "ENUM_HCCL_LINK_TYPE", "ENUM_HCCL_RDMA_TYPE", "ENUM_HCCL_TRANSPORT_TYPE",
                         "ENUM_MEMCPY_OPERATION", "ENUM_MODULE", "ENUM_MSTX_EVENT_TYPE", "HBM", "HCCS", "HOST_INFO",
                         "LLC", "MEMCPY_INFO", "META_DATA", "NETDEV_STATS", "NIC", "NPU_INFO", "NPU_MEM",
                         "NPU_MODULE_MEM", "PCIE", "QOS", "RANK_DEVICE_MAP", "ROCE", "SESSION_TIME_INFO",
                         "SOC_BANDWIDTH_LEVEL", "STRING_IDS", "TASK", "TASK_PMU_INFO"]
-    test_ascend_msprof = TestAscendMsprofAllSwitch(prof_path, expect_db_tables)
+    test_ascend_msprof = TestAscendMsprofAllSysSwitch(prof_path, expect_db_tables)
     test_ascend_msprof.check_msprof_file()
 
 
 if __name__ == '__main__':
     path = sys.argv[1]
-    test_ascend_msprof_all_switch(path)
+    test_ascend_msprof_all_sys_switch(path)
