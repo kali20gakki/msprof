@@ -567,17 +567,20 @@ ComputeOpDescs TreeAnalyzer::GetComputeOpDescs(const std::shared_ptr<TreeNode> &
             std::shared_ptr<MsprofCompactInfo> trace;
             MAKE_SHARED_RETURN_VALUE(trace, MsprofCompactInfo, opDescs, *(record->compactPtr));
             UpdateComputeOpDescs<MsprofCompactInfo, &OpDesc::nodeDesc>(opDescs, trace,
-                                                                       trace->data.nodeBasicInfo.opName);
+                                                                       trace->data.nodeBasicInfo.opName,
+                                                                       nodeNode->event->id);
         } else if (record->info.type == EventType::EVENT_TYPE_NODE_ATTR_INFO) {
             std::shared_ptr<MsprofCompactInfo> trace;
             MAKE_SHARED_RETURN_VALUE(trace, MsprofCompactInfo, opDescs, *(record->compactPtr));
             UpdateComputeOpDescs<MsprofCompactInfo, &OpDesc::nodeAttr>(opDescs, trace,
-                                                                       trace->data.nodeAttrInfo.opName);
+                                                                       trace->data.nodeAttrInfo.opName,
+                                                                       nodeNode->event->id);
         } else if (record->info.type == EventType::EVENT_TYPE_TENSOR_INFO) {
             std::shared_ptr<ConcatTensorInfo> trace;
             MAKE_SHARED_RETURN_VALUE(trace, ConcatTensorInfo, opDescs, *(record->tensorPtr));
             UpdateComputeOpDescs<ConcatTensorInfo, &OpDesc::tensorDesc>(opDescs, trace,
-                                                                        trace->opName);
+                                                                        trace->opName,
+                                                                        nodeNode->event->id);
         } else if (record->info.type == EventType::EVENT_TYPE_CONTEXT_ID) {
             if (!useCtxId) {
                 continue;
@@ -586,7 +589,8 @@ ComputeOpDescs TreeAnalyzer::GetComputeOpDescs(const std::shared_ptr<TreeNode> &
             MAKE_SHARED_RETURN_VALUE(trace, MsprofAdditionalInfo, opDescs, *(record->additionPtr));
             auto ctxIdNode = ReinterpretConvert<MsprofContextIdInfo *>(trace->data);
             UpdateComputeOpDescs<MsprofAdditionalInfo, &OpDesc::ctxId>(opDescs, trace,
-                                                                       ctxIdNode->opName);
+                                                                       ctxIdNode->opName,
+                                                                       nodeNode->event->id);
         } else if (record->info.type == EventType::EVENT_TYPE_HCCL_OP_INFO) {
             continue;
         } else {

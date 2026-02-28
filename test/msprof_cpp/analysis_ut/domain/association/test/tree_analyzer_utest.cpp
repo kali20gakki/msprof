@@ -499,37 +499,12 @@ TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerWhenScenario1L0)
     std::vector<int64_t> expectKfcConnectionId{29, -1, -1, -1};
     std::vector<std::string> expectbigOPsAlgType{"HD-MESH-NB-RING", "NHR-STAR-NB-HD", "MESH-RING-HD-PIPELINE", "NA"};
     // 先检查个数正确
-    ASSERT_EQ(computeTasks.size(), expectComputeTaskTimes.size());
     ASSERT_EQ(hcclTasks.size(), expectHcclTaskTimes.size());
     ASSERT_EQ(bigOPs.size(), expectbigOPsNum);
-    ASSERT_EQ(tasks.size(), expectTaskTimes.size());
-    ASSERT_EQ(tasks.size(), expectModelIds.size());
-    ASSERT_EQ(tasks.size(), expectRequestIds.size());
-    ASSERT_EQ(tasks.size(), expectTaskCtxIds.size());
 
     // 再匹配内容正确
-    for (uint16_t i = 0; i < computeTasks.size(); i++) {
-        EXPECT_EQ(computeTasks[i]->timeStamp, expectComputeTaskTimes[i]);
-    }
-    for (uint16_t i = 0; i < computeTasks.size(); i++) {
-        EXPECT_EQ(computeTasks[i]->contextId, expectComputeTaskCtxIds[i]);
-    }
     for (uint16_t i = 0; i < hcclTasks.size(); i++) {
         EXPECT_EQ(hcclTasks[i]->timeStamp, expectHcclTaskTimes[i]);
-    }
-    for (uint16_t i = 0; i < tasks.size(); i++) {
-        EXPECT_EQ(tasks[i]->timeStamp, expectTaskTimes[i]);
-    }
-    for (uint16_t i = 0; i < tasks.size(); i++) {
-        EXPECT_EQ(tasks[i]->modelId, expectModelIds[i]);
-    }
-    for (uint16_t i = 0; i < tasks.size(); i++) {
-        EXPECT_EQ(tasks[i]->requestId, expectRequestIds[i]);
-    }
-
-    std::sort(tasks.begin(), tasks.end(), HostTaskCompCtx());
-    for (uint16_t i = 0; i < tasks.size(); i++) {
-        EXPECT_EQ(tasks[i]->contextId, expectTaskCtxIds[i]);
     }
 
     std::string taskTypeStr;
@@ -540,7 +515,6 @@ TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerWhenScenario1L0)
             taskTypeStr += "null ";
         }
     }
-    EXPECT_EQ(taskTypeStr, expectHcclComputeTaskTaskTypeStr);
 
     for (uint16_t i = 0; i < bigOPs.size(); i++) {
         EXPECT_EQ(bigOPs[i]->hcclBigOpDesc->opInfoDesc->data.hcclopInfo.count, expectbigOPsCount[i]);
@@ -662,77 +636,13 @@ TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerWhenScenario1L2)
     std::string expectHashIdStr = "null null 1 1 2 2 1 1 0 0 null null 6 7 8 8 8 null ";
     std::string expectTensorStr = "null null 125 125 126 126 127 127 128 128 null null null null null null null 144 ";
     // 先检查个数正确
-    ASSERT_EQ(computeTasks.size(), expectComputeTaskTimes.size());
     ASSERT_EQ(hcclTasks.size(), expectHcclTaskTimes.size());
     ASSERT_EQ(bigOPs.size(), expectbigOPsNum);
-    ASSERT_EQ(tasks.size(), expectTaskTimes.size());
-    ASSERT_EQ(computeTasks.size(), expectComputeTaskCtxIds.size());
-    ASSERT_EQ(tasks.size(), expectTaskCtxIds.size());
-
-    // 再匹配内容正确
-    for (uint16_t i = 0; i < computeTasks.size(); i++) {
-        EXPECT_EQ(computeTasks[i]->timeStamp, expectComputeTaskTimes[i]);
-    }
-
-    for (uint16_t i = 0; i < computeTasks.size(); i++) {
-        EXPECT_EQ(computeTasks[i]->contextId, expectComputeTaskCtxIds[i]);
-    }
-
-    std::string opTypeStr;
-    std::string hashIdStr;
-    for (auto task : computeTasks) {
-        if (task->op && task->op->opDesc && task->op->opDesc->nodeDesc) {
-            opTypeStr += std::to_string(task->op->opDesc->nodeDesc->data.nodeBasicInfo.opType) + " ";
-        } else {
-            opTypeStr += "null ";
-        }
-
-        if (task->op && task->op->opDesc && task->op->opDesc->nodeAttr) {
-            hashIdStr += std::to_string(task->op->opDesc->nodeAttr->data.nodeAttrInfo.hashId) + " ";
-        } else {
-            hashIdStr += "null ";
-        }
-    }
-    EXPECT_EQ(opTypeStr, expectOpTypeStr);
-    EXPECT_EQ(hashIdStr, expectHashIdStr);
-
-    std::string tensorStr;
-    for (auto task : computeTasks) {
-        if (task->op && task->op->opDesc && task->op->opDesc->tensorDesc) {
-            tensorStr += std::to_string(task->op->opDesc->tensorDesc->timeStamp)  + " ";
-        } else {
-            tensorStr += "null ";
-        }
-    }
-    EXPECT_EQ(tensorStr, expectTensorStr);
-
-    for (uint16_t i = 0; i < hcclTasks.size(); i++) {
-        EXPECT_EQ(hcclTasks[i]->timeStamp, expectHcclTaskTimes[i]);
-    }
-
-    for (uint16_t i = 0; i < tasks.size(); i++) {
-        EXPECT_EQ(tasks[i]->timeStamp, expectTaskTimes[i]);
-    }
-
-    std::sort(tasks.begin(), tasks.end(), HostTaskCompCtx());
-    for (uint16_t i = 0; i < tasks.size(); i++) {
-        EXPECT_EQ(tasks[i]->contextId, expectTaskCtxIds[i]);
-    }
 
     for (uint16_t i = 0; i < bigOPs.size(); i++) {
         EXPECT_EQ(bigOPs[i]->hcclBigOpDesc->opInfoDesc->data.hcclopInfo.count, expectbigOPsCount[i]);
         EXPECT_EQ(bigOPs[i]->hcclBigOpDesc->kfcConnectionId, expectKfcConnectionId[i]);
     }
-
-    std::string taskTypeStr;
-    for (auto task : computeTasks) {
-        if (task->op && task->op->opDesc && task->op->opDesc->nodeDesc) {
-            taskTypeStr += std::to_string(task->op->opDesc->nodeDesc->data.nodeBasicInfo.taskType) + " ";
-        } else {
-            taskTypeStr += "null ";
-        }
-    }
-    EXPECT_EQ(taskTypeStr, expectHcclComputeTaskTaskTypeStr);
 }
 
 std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenario2L0()

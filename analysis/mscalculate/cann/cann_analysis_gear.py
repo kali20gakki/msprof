@@ -362,16 +362,16 @@ class TaskGear(CANNGear):
         node_descs = HighPerfDict()
         for record in event.additional_record:
             if isinstance(record.dto, NodeBasicInfoDto):
-                node_desc = node_descs.set_default_call_obj_later(self.NodeDesc.get_hash(record.dto), self.NodeDesc)
+                node_desc = node_descs.set_default_call_obj_later(event.id, self.NodeDesc)
                 node_desc.node_basic_info = record.dto
             elif isinstance(record.dto, TensorInfoDto):
-                node_desc = node_descs.set_default_call_obj_later(self.NodeDesc.get_hash(record.dto), self.NodeDesc)
+                node_desc = node_descs.set_default_call_obj_later(event.id, self.NodeDesc)
                 node_desc.tensor_info = record.dto
             elif isinstance(record.dto, CtxIdDto):
-                node_desc = node_descs.set_default_call_obj_later(self.NodeDesc.get_hash(record.dto), self.NodeDesc)
+                node_desc = node_descs.set_default_call_obj_later(event.id, self.NodeDesc)
                 node_desc.ctx_info = record.dto
             elif isinstance(record.dto, NodeAttrInfoDto):
-                node_desc = node_descs.set_default_call_obj_later(self.NodeDesc.get_hash(record.dto), self.NodeDesc)
+                node_desc = node_descs.set_default_call_obj_later(event.id, self.NodeDesc)
                 node_desc.node_attr_info = record.dto
             elif isinstance(record.dto, HCCLOpInfoDto):
                 continue

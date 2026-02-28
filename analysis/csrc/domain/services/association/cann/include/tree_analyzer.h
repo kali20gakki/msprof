@@ -71,9 +71,9 @@ public:
 private:
     // 更新计算类算子模板函数
     template<typename T, std::shared_ptr<T> Domain::OpDesc::*element>
-    void UpdateComputeOpDescs(ComputeOpDescs &opDescs, const std::shared_ptr<T> &trace, uint64_t opName)
+    void UpdateComputeOpDescs(ComputeOpDescs &opDescs, const std::shared_ptr<T> &trace, uint64_t opName, uint64_t nodeEventId)
     {
-        std::string key = Utils::Join("_", opName, trace->timeStamp);
+        std::string key = std::to_string(nodeEventId);
         if (opDescs.find(key) == opDescs.end()) {
             std::shared_ptr<Domain::OpDesc> desc;
             MAKE_SHARED0_RETURN_VOID(desc, Domain::OpDesc);
