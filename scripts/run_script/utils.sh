@@ -12,7 +12,7 @@ mindstudio_msprof_spc_right=500
 
 root_libmsprofiler_right=444
 user_libmsprofiler_right=440
-
+package_arch=$(uname -m)
 PATH_LENGTH=4096
 
 MSPROF_RUN_NAME="mindstudio-profiler"

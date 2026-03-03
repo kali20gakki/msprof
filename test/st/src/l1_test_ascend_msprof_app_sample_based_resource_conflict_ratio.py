@@ -82,7 +82,6 @@ class TestAscendMsprofAppSampleBasedResourceConflictRatio(BaseAscendMsprofChecke
         super().check_other_data()
 
 
-@arg_mark(level_mark='level1')
 def test_ascend_msprof_app_sample_based_resource_conflict_ratio(prof_path):
     expect_db_tables = ["ACC_PMU", "AICORE_FREQ", "CANN_API", "COMPUTE_TASK_INFO", "ENUM_API_TYPE",
                         "ENUM_HCCL_DATA_TYPE", "ENUM_HCCL_LINK_TYPE", "ENUM_HCCL_RDMA_TYPE", "ENUM_HCCL_TRANSPORT_TYPE",

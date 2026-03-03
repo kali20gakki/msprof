@@ -57,17 +57,19 @@ if [ ! -z "$test_list" ]; then
     for i in $test_list
     do
         echo -e "${WHITE}====================${i%.sh} Test Case ====================${NC}"
+        start_time=$(date "+%s")
         bash $i $output_path
-        if [ 0 -ne $? ]; then
+        check_exit_code=$?
+        end_time=$(date "+%s")
+        duration_time=$(( ${end_time} - ${start_time} ))
+        if [ 0 -ne ${check_exit_code} ]; then
             echo "$i fail" >> $result_file
             echo -e "--------------------------------------${WHITE}${i%.sh}${NC}------${RED}FAIL${NC}"
         else
-            echo "$i pass" >> $result_file
+            echo "$i pass ${duration_time}" >> $result_file
             echo -e "--------------------------------------${WHITE}${i%.sh}${NC}------${GREEN}PASS${NC}"
         fi
     done
-    rm -rf $result_file
-    rm -rf $output_path
     echo -e "${GREEN}[DEBUG] End msprof_smoke_test${NC}"
 else
     echo -e "${RED}[DEBUG] No test cases: $test_list${NC}"
