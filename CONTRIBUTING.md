@@ -3,6 +3,7 @@
 感谢您考虑为 MindStudio Profiler（msProf）做出贡献！我们欢迎任何形式的贡献，包括错误修复、功能增强、文档改进等，甚至只是反馈。无论您是经验丰富的开发者还是第一次参与开源项目，您的帮助都是非常宝贵的。
 
 您可以通过多种方式支持本项目：
+
 - 通过[Issues](https://gitcode.com/Ascend/msprof/issues)反馈问题。
 - 建议或实现新功能。
 - 改进或扩展文档。
@@ -12,6 +13,7 @@
 ## 寻找可贡献的问题
 
 想要开始贡献？可以查看以下类型的问题：
+
 - [Good first issues](https://gitcode.com/Ascend/msprof/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22good%20first%20issue%22)
 - [Call for contribution](https://gitcode.com/Ascend/msprof/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22help%20wanted%22)
 
@@ -202,7 +204,7 @@ bash scripts/generate_coverage_cpp.sh
 
 提交信息应该清晰地描述更改的内容和原因：
 
-```
+```bash
 <type>: <subject>
 
 <body>
@@ -222,7 +224,7 @@ bash scripts/generate_coverage_cpp.sh
 
 示例：
 
-```
+```bash
 feat：添加内存使用分析功能
 
 - 实现内存数据采集模块

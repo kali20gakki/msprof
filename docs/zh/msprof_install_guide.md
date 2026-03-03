@@ -1,9 +1,11 @@
 # msProf工具安装指南
 
 ## 安装说明
+
 本文档主要介绍msProf工具的安装方式。
 
 ## 安装前准备
+
 完成安装配套版本的CANN Toolkit开发套件包和ops算子包并配置CANN环境变量，具体请参见《[CANN软件安装指南](https://www.hiascend.com/document/detail/zh/canncommercial/850/softwareinst/instg/instg_0000.html?Mode=PmIns&InstallType=netconda&OS=openEuler)》。
 
 ## 安装run包
@@ -40,6 +42,7 @@
      ```
    
 2. 下载源码。
+
     ```shell
     git clone https://gitcode.com/Ascend/msprof.git
     ```
@@ -67,6 +70,7 @@
 #### 编译解析run包
 
 1. 下载源码。
+
     ```shell
     git clone https://gitcode.com/Ascend/msprof.git
     ```
@@ -82,6 +86,7 @@
        # 编译解析包
        bash build/build.sh --mode=analysis --version=<version>
       ```
+
    编译命令支持通过--mode参数，分别编译包含msProf采集和解析功能的软件包或仅包含msProf采集功能以及仅包含msProf解析功能的软件包，更多编译参数详细介绍请参见[编译run包参数说明](#编译run包参数说明)。
    
    编译完成后，会在msprof/output目录下生成msProf工具的run包，run包名称格式为`mindstudio-profiler_<version>_<arch>.run`。
@@ -119,6 +124,7 @@
     ```
 
 ## 附录
+
 ### 编译run包参数说明
 
 msProf工具run包的编译命令可配置如下参数。
@@ -128,7 +134,6 @@ msProf工具run包的编译命令可配置如下参数。
 | --build_type      | 可选    | 编包类型，可取值: <br/>&#8226; Release：编译出用于生产环境部署的软件包。<br/>&#8226; Debug：编译出用于开发调试的软件包（只支持编译**解析**部分的Debug软件包）。<br/> 默认值为Release。               |
 | --mode            | 可选    | 编包方式。可取值: <br/>&#8226; all：编译出包含msProf采集和解析功能的软件包。<br/>&#8226; collector：编译出仅包含msProf采集功能的软件包。<br/>&#8226; analysis：编译出仅包含msProf解析功能的软件包。<br/>默认值为analysis。 |
 | --version | 可选    | 配置run包的版本号。<br/>默认值为none。                                                                                                                     |
-
 
 ### 安装run包参数说明
 

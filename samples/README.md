@@ -1,3 +1,5 @@
+# mstx样例
+
 ## 简介
 
 本目录包含有mstx各种接口的使用用例，各个文件夹对应不同用例，供用户理解使用mstx接口。目录以及用例具体说明如下：
@@ -20,19 +22,19 @@
 
    - 正常执行用例脚本sample_run.sh的情况下，使用msprof配置--msproftx=on采集所有的打点数据（包括默认domain和用户自定义domain范围内的数据），命令如下：
 
-     ```
+     ```bash
      msprof --msproftx=on bash sample_run.sh
      ```
 
    - 可以通过增加配置--mstx-domain-include开关来控制想要采集的domain的打点数据，如只想采集"default"域的打点数据，可以配置命令如下：
 
-     ```
+     ```bash
      msprof --msproftx=on --mstx-domain-include="default" bash sample_run.sh
      ```
 
    - 可以通过增加配置--mstx-domain-exclude开关来控制不想要采集的domain的打点数据，如想采集除"default"域之外的打点数据，可以配置命令如下：
 
-     ```
+     ```bash
      msprof --msproftx=on --mstx-domain-exclude="default" bash sample_run.sh
      ```
 
