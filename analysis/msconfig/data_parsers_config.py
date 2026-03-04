@@ -21,7 +21,7 @@ class DataParsersConfig(MetaConfig):
     DATA = {
         'CaptureStreamInfoParser': [
             ('path', 'msparser.compact_info.capture_stream_info_parser'),
-            ('chip_model', '5,15,16'),
+            ('chip_model', '2,3,4,5,15,16'),
             ('level', '2'),
             ('position', 'H')
         ],
@@ -382,7 +382,7 @@ class DataParsersConfig(MetaConfig):
         ],
         'RuntimeOpInfoParser': [
             ('path', 'msparser.add_info.runtime_op_info_parser'),
-            ('chip_model', '5,15,16'),
+            ('chip_model', '2,3,4,5,15,16'),
             ('level', '2'),
             ('position', 'H')
         ],
