@@ -264,8 +264,10 @@ void TreeAnalyzer::UpdateHcclBigOpDescs(const std::shared_ptr<TreeNode> &node)
     auto modelTrace = path_.find(MSPROF_REPORT_MODEL_LEVEL) != path_.end() ?
                       path_[MSPROF_REPORT_MODEL_LEVEL] : nullptr;
     auto modelApi = modelTrace != nullptr ? modelTrace->event->apiPtr : nullptr;
-    auto index_id = modelApi != nullptr ? modelApi->reserve : -1;
-    auto model_id = modelApi != nullptr ? modelApi->itemId : INVALID_MODEL_ID;
+    auto indexId = modelApi != nullptr ? modelApi->reserve : -1;
+    auto modelId = GetModelId(modelApi, deviceId, track->data.runtimeTrack.streamId,
+                               static_cast<uint16_t>(track->data.runtimeTrack.taskId >> TWO_BYTES),
+                               track->timeStamp);
     auto connectionId = nodeNode->event->id;
     auto nodeRecords = GetNodeRecordsByType(nodeNode, EventType::EVENT_TYPE_NODE_BASIC_INFO);
     std::shared_ptr<MsprofCompactInfo> nodeDesc = nullptr;
@@ -277,7 +279,7 @@ void TreeAnalyzer::UpdateHcclBigOpDescs(const std::shared_ptr<TreeNode> &node)
     if (!hcclOpRecords.empty() && hcclOpRecords.front() != nullptr) {
         hcclOpDesc = hcclOpRecords.front()->compactPtr;
     } else {
-        ERROR("Not report hccl op info for api: %", model_id);
+        ERROR("Not report hccl op info for api: %", modelId);
     }
     int64_t kfcConnectionId = INVALID_VALUE;
     for (const auto &child: nodeNode->children) {
@@ -289,7 +291,7 @@ void TreeAnalyzer::UpdateHcclBigOpDescs(const std::shared_ptr<TreeNode> &node)
     auto nodeApi = nodeNode->event->apiPtr;
     std::shared_ptr<HcclBigOpDesc> desc;
     MAKE_SHARED_RETURN_VOID(desc, HcclBigOpDesc, nodeApi->beginTime,
-                            nodeApi->endTime, deviceId, model_id, index_id,
+                            nodeApi->endTime, deviceId, modelId, indexId,
                             connectionId, track->threadId, nodeDesc, hcclOpDesc, kfcConnectionId);
     std::shared_ptr<Operator> op;
     MAKE_SHARED_RETURN_VOID(op, Operator, desc, nodeApi->itemId, OpType::OPTYPE_HCCL_BIG);
