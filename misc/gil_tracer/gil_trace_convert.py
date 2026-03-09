@@ -15,10 +15,10 @@
 # -------------------------------------------------------------------------
 
 import argparse
-import json
 import logging
 import sys
 from collections import defaultdict
+from decimal import Decimal
 from file_manager import FileManager
 
 logging.basicConfig(level=logging.DEBUG, format='[%(asctime)s] [%(levelname)s]:%(message)s')
@@ -49,6 +49,10 @@ def create_x_event(name: str, ts: float, dur: float, pid: int, tid: int) -> dict
 def convert_gil_trace(trace_data: list) -> list:
     if not trace_data:
         return []
+    if not isinstance(trace_data, list):
+        msg = f"Invalid trace data format, expected list, got {type(trace_data)}"
+        raise ValueError(msg)
+
     events_by_thread = defaultdict(list)
     pid_tid_map = defaultdict(set)
     for event in trace_data:
@@ -58,48 +62,31 @@ def convert_gil_trace(trace_data: list) -> list:
     converted_events = []
     for (pid, tid), events in events_by_thread.items():
         events.sort(key=lambda x: x['ts'])
-        take_gil_e_time = None
 
         i = 0
         while i < len(events):
             event = events[i]
 
-            if event['name'] == TAKE_GIL_EVENT_NAME and event['ph'] == 'B':
+            if event['name'] == TAKE_GIL_EVENT_NAME:
                 j = i + 1
-                while j < len(events) and not (events[j]['name'] == TAKE_GIL_EVENT_NAME and events[j]['ph'] == 'E'):
+                while j < len(events) and not events[j]['name'] == DROP_GIL_EVENT_NAME:
                     j += 1
 
                 if j < len(events):
-                    take_gil_x_event = create_x_event(TAKE_GIL_EVENT_NAME, event['ts'], events[j]['ts'] - event['ts'], pid, tid)
-                    converted_events.append(take_gil_x_event)
-
-                    take_gil_e_time = events[j]['ts']
-
-                    i = j + 1
-                else:
-                    i += 1
-
-            elif event['name'] == DROP_GIL_EVENT_NAME and event['ph'] == 'B':
-                j = i + 1
-                while j < len(events) and not (events[j]['name'] == DROP_GIL_EVENT_NAME and events[j]['ph'] == 'E'):
-                    j += 1
-
-                if j < len(events):
-                    if take_gil_e_time is not None:
-                        hold_gil_x_event = create_x_event(HOLD_GIL_EVENT_NAME, take_gil_e_time, event['ts'] - take_gil_e_time, pid, tid)
-                        converted_events.append(hold_gil_x_event)
-
-                    drop_gil_x_event = create_x_event(DROP_GIL_EVENT_NAME, event['ts'], events[j]['ts'] - event['ts'], pid, tid)
-                    converted_events.append(drop_gil_x_event)
-
+                    event['ts'] = str(event['ts'])
+                    events[j]['ts'] = str(events[j]['ts'])
+                    hold_gil_ts = Decimal(event['ts']) + Decimal(event['dur'])
+                    hold_gil_dur = Decimal(events[j]['ts']) - hold_gil_ts
+                    hold_gil_x_event = create_x_event(HOLD_GIL_EVENT_NAME, str(hold_gil_ts), float(hold_gil_dur), pid, tid)
+                    converted_events.append(event)
+                    converted_events.append(hold_gil_x_event)
+                    converted_events.append(events[j])
                     i = j + 1
                 else:
                     i += 1
 
             else:
                 i += 1
-
-    converted_events.sort(key=lambda x: x['ts'])
 
     for pid, tids in pid_tid_map.items():
         m_events = [{'name': 'process_name', 'ph': 'M', 'pid': pid, 'tid': 0, 'args': {'name': "GIL Trace"}}]
@@ -121,7 +108,11 @@ def main():
         logging.error(f"{e}")
         sys.exit(1)
 
-    converted_events = convert_gil_trace(trace_data)
+    try:
+        converted_events = convert_gil_trace(trace_data)
+    except Exception as e:
+        logging.error(f"Failed to convert GIL trace file: {e}")
+        sys.exit(1)
 
     try:
         if not args.output.endswith('.json'):
