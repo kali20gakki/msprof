@@ -38,6 +38,7 @@
 #include "analysis/csrc/application/timeline/device_tx_assembler.h"
 #include "analysis/csrc/application/timeline/biu_perf_assembler.h"
 #include "analysis/csrc/application/timeline/ub_assembler.h"
+#include "analysis/csrc/application/timeline/block_detail_assembler.h"
 
 namespace Analysis {
 namespace Application {
@@ -97,7 +98,9 @@ std::unordered_map<std::string, AssemblerCreator> TimelineFactory::assemblerTabl
     {PROCESS_BIU_PERF, [](std::shared_ptr<JsonAssembler> &assembler) {
         MAKE_SHARED0_NO_OPERATION(assembler, BiuPerfAssembler);}},
     {PROCESS_UB, [](std::shared_ptr<JsonAssembler> &assembler) {
-        MAKE_SHARED0_NO_OPERATION(assembler, UbAssembler);}}
+        MAKE_SHARED0_NO_OPERATION(assembler, UbAssembler);}},
+    {PROCESS_BLOCK_DETAIL, [](std::shared_ptr<JsonAssembler> &assembler) {
+        MAKE_SHARED0_NO_OPERATION(assembler, BlockDetailAssembler);}}
 };
 
 std::shared_ptr<JsonAssembler> TimelineFactory::GetAssemblerByName(const std::string& processName)

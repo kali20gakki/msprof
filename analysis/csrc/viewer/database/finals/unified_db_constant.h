@@ -196,6 +196,7 @@ const std::string PROCESSOR_HOST_TASK = "HOST_TASK";
 const std::string PROCESSOR_NAME_BIU_PERF = "BIU_PERF";
 const std::string PROCESSOR_NAME_UB = "UB";
 
+const std::string PROCESSOR_NAME_BLOCK_DETAIL = "BLOCK_DETAIL";
 // mstx event type
 const std::unordered_map<std::string, uint16_t> MSTX_EVENT_TYPE_TABLE = {
     {"marker", 0},

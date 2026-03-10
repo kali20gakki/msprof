@@ -46,7 +46,8 @@ enum class JsonProcess {
     QOS,
     DEVICE_TX,
     BIU_PERF,
-    UB
+    UB,
+    BLOCK_DETAIL,
 };
 
 const std::unordered_map<std::string, JsonProcess> strToJsonProcess = {
@@ -78,6 +79,7 @@ const std::unordered_map<std::string, JsonProcess> strToJsonProcess = {
     {"device_tx",        JsonProcess::DEVICE_TX},
     {"biu_perf",         JsonProcess::BIU_PERF},
     {"ub",               JsonProcess::UB},
+    {"block_detail",     JsonProcess::BLOCK_DETAIL},
 };
 
 const std::vector<JsonProcess> allProcesses{
@@ -86,7 +88,8 @@ const std::vector<JsonProcess> allProcesses{
     JsonProcess::NETWORK_USAGE, JsonProcess::DISK_USAGE, JsonProcess::MEMORY_USAGE, JsonProcess::CPU_USAGE,
     JsonProcess::MSPROFTX, JsonProcess::NPU_MEM, JsonProcess::OVERLAP_ANALYSE, JsonProcess::PCIE, JsonProcess::SIO,
     JsonProcess::STARS_SOC, JsonProcess::STEP_TRACE, JsonProcess::FREQ, JsonProcess::LLC, JsonProcess::NIC,
-    JsonProcess::ROCE, JsonProcess::QOS, JsonProcess::DEVICE_TX, JsonProcess::BIU_PERF, JsonProcess::UB
+    JsonProcess::ROCE, JsonProcess::QOS, JsonProcess::DEVICE_TX, JsonProcess::BIU_PERF, JsonProcess::UB,
+    JsonProcess::BLOCK_DETAIL
 };
 }
 }

@@ -809,6 +809,17 @@ namespace {
         {"max", SQL_NUMERIC_TYPE},
         {"ratio", SQL_TEXT_TYPE},
     };
+
+    const TableColumns V6BlockPmu = {
+        {"stream_id", SQL_NUMERIC_TYPE},
+        {"task_id", SQL_NUMERIC_TYPE},
+        {"subtask_id", SQL_NUMERIC_TYPE},
+        {"batch_id", SQL_NUMERIC_TYPE},
+        {"start_time", SQL_NUMERIC_TYPE},
+        {"duration", SQL_REAL_TYPE},
+        {"core_type", SQL_TEXT_TYPE},
+        {"core_id", SQL_INTEGER_TYPE}
+    };
 }
 
 std::string Database::GetDBName() const
@@ -1111,6 +1122,12 @@ OpCounterDB::OpCounterDB()
 {
     dbName_ = "op_counter.db";
     tableColNames_["op_report"] = OpReport;
+}
+
+MetricSummaryDB::MetricSummaryDB()
+{
+    dbName_ = "metric_summary.db";
+    tableColNames_["V6BlockPmu"] = V6BlockPmu;
 }
 } // namespace Infra
 } // namespace Analysis

@@ -52,6 +52,8 @@
 #include "analysis/csrc/domain/data_process/ai_task/op_statistic_processor.h"
 #include "analysis/csrc/domain/data_process/system/biu_perf_processor.h"
 #include "analysis/csrc/domain/data_process/system/ub_processor.h"
+#include "analysis/csrc/domain/data_process/system/block_detail_processor.h"
+
 namespace Analysis {
 namespace Domain {
 std::unordered_map<std::string, ProcessorCreator> DataProcessorFactory::processorTable_{
@@ -143,6 +145,8 @@ std::unordered_map<std::string, ProcessorCreator> DataProcessorFactory::processo
         MAKE_SHARED_RETURN_VOID(processor, BiuPerfProcessor, profPath);}},
     {PROCESSOR_NAME_UB, [](const std::string &profPath, std::shared_ptr<DataProcessor> &processor) {
         MAKE_SHARED_RETURN_VOID(processor, UbProcessor, profPath);}},
+    {PROCESSOR_NAME_BLOCK_DETAIL, [](const std::string &profPath, std::shared_ptr<DataProcessor> &processor) {
+ 	         MAKE_SHARED_RETURN_VOID(processor, BlockDetailProcessor, profPath);}}
 };
 
 std::shared_ptr<DataProcessor> DataProcessorFactory::GetDataProcessByName(const std::string &profPath,

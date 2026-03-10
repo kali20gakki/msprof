@@ -268,6 +268,11 @@ public:
     OpCounterDB();
 };
 
+class MetricSummaryDB : public Database {
+public:
+    MetricSummaryDB();
+};
+
 } // namespace Infra
 } // namespace Analysis
 #endif // ANALYSIS_VIEWER_DATABASE_DATABASE_H

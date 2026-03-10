@@ -59,6 +59,7 @@ const std::unordered_map<JsonProcess, std::string> JSON_TO_ASSEMBLER_TABLE{
     {JsonProcess::DEVICE_TX,        PROCESS_DEVICE_TX},
     {JsonProcess::BIU_PERF,         PROCESS_BIU_PERF},
     {JsonProcess::UB,               PROCESS_UB},
+    {JsonProcess::BLOCK_DETAIL,     PROCESS_BLOCK_DETAIL},
 };
 
 std::set<std::string> TIMELINE_DATA_PROCESS_LIST{
@@ -98,6 +99,7 @@ std::set<std::string> TIMELINE_DATA_PROCESS_LIST{
     PROCESSOR_NAME_ROCE_TIMELINE,
     PROCESSOR_NAME_BIU_PERF,
     PROCESSOR_NAME_UB,
+    PROCESSOR_NAME_BLOCK_DETAIL,
 };
 }
 
