@@ -36,6 +36,7 @@
 #include "analysis/csrc/application/timeline/sys_io_assembler.h"
 #include "analysis/csrc/application/timeline/qos_assembler.h"
 #include "analysis/csrc/application/timeline/device_tx_assembler.h"
+#include "analysis/csrc/application/timeline/low_power_assembler.h"
 #include "analysis/csrc/application/timeline/biu_perf_assembler.h"
 #include "analysis/csrc/application/timeline/ub_assembler.h"
 #include "analysis/csrc/application/timeline/block_detail_assembler.h"
@@ -95,6 +96,8 @@ std::unordered_map<std::string, AssemblerCreator> TimelineFactory::assemblerTabl
         MAKE_SHARED0_NO_OPERATION(assembler, QosAssembler);}},
     {PROCESS_DEVICE_TX, [](std::shared_ptr<JsonAssembler> &assembler) {
         MAKE_SHARED0_NO_OPERATION(assembler, DeviceTxAssembler);}},
+    {PROCESS_LOW_POWER, [](std::shared_ptr<JsonAssembler> &assembler) {
+        MAKE_SHARED0_NO_OPERATION(assembler, LowPowerAssembler);}},
     {PROCESS_BIU_PERF, [](std::shared_ptr<JsonAssembler> &assembler) {
         MAKE_SHARED0_NO_OPERATION(assembler, BiuPerfAssembler);}},
     {PROCESS_UB, [](std::shared_ptr<JsonAssembler> &assembler) {

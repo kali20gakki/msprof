@@ -15,6 +15,7 @@
  * -------------------------------------------------------------------------*/
 
 #include "analysis/csrc/application/timeline/chip_trans_assembler.h"
+#include "analysis/csrc/application/timeline/chip_trans_v6_assembler.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/chip_trans_data.h"
 #include "analysis/csrc/domain/services/environment/context.h"
 #include "analysis/csrc/infrastructure/dfx/error_code.h"
@@ -82,6 +83,11 @@ void GeneratePcieInfoTrace(std::vector<PcieInfoData> &pcieInfoData,
 
 uint8_t ChipTransAssembler::AssembleData(DataInventory &dataInventory, JsonWriter &ostream, const std::string &profPath)
 {
+    auto version = Context::GetInstance().GetPlatformVersion(DEFAULT_DEVICE_ID, profPath);
+    if (Context::GetInstance().IsChipV6(version)) {
+        ChipTransV6Assembler chipTransV6Assembler;
+        return chipTransV6Assembler.AssembleData(dataInventory, ostream, profPath);
+    }
     auto paLinkInfoData = dataInventory.GetPtr<std::vector<PaLinkInfoData>>();
     if (paLinkInfoData == nullptr) {
         WARN("Can't get paLinkInfoData from dataInventory");

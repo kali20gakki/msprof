@@ -1,5 +1,5 @@
 /* -------------------------------------------------------------------------
- * Copyright (c) 2025 Huawei Technologies Co., Ltd.
+ * Copyright (c) 2026 Huawei Technologies Co., Ltd.
  * This file is part of the MindStudio project.
  *
  * MindStudio is licensed under Mulan PSL v2.
@@ -13,23 +13,22 @@
  * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
  * See the Mulan PSL v2 for more details.
  * -------------------------------------------------------------------------*/
+#ifndef ANALYSIS_APPLICATION_CHIP_TRANS_V6_ASSEMBLER_H
+#define ANALYSIS_APPLICATION_CHIP_TRANS_V6_ASSEMBLER_H
 
-#ifndef ANALYSIS_APPLICATION_QOS_ASSEMBLER_H
-#define ANALYSIS_APPLICATION_QOS_ASSEMBLER_H
-
-#include <array>
 #include "analysis/csrc/application/timeline/json_assembler.h"
 
 namespace Analysis {
 namespace Application {
-class QosAssembler : public JsonAssembler {
+class ChipTransV6Assembler : public JsonAssembler {
 public:
-    QosAssembler();
+    ChipTransV6Assembler();
 private:
+    friend class ChipTransAssembler;
     uint8_t AssembleData(DataInventory& dataInventory, JsonWriter &ostream, const std::string &profPath) override;
 private:
     std::vector<std::shared_ptr<TraceEvent>> res_;
 };
 }
 }
-#endif // ANALYSIS_APPLICATION_QOS_ASSEMBLER_H
+#endif // ANALYSIS_APPLICATION_CHIP_TRANS_V6_ASSEMBLER_H

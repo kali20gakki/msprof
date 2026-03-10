@@ -31,21 +31,37 @@ const std::unordered_map<uint16_t, std::string> SERIES_MAP {
     {0, "die 0"},
     {1, "die 1"}
 };
+const std::unordered_map<uint16_t, std::string> SERIES_V6_MAP {
+    {0, "D-DIE0"},
+    {2, "U-DIE0"},
+    {3, "U-DIE1"}
+};
 }
 
 SioAssembler::SioAssembler() : JsonAssembler(PROCESS_SIO, {{MSPROF_JSON_FILE, FileCategory::MSPROF}}) {}
 
 void GenerateSioTrace(std::vector<SioData> &sioData, const std::unordered_map<uint16_t, uint32_t> &pidMap,
-                      std::vector<std::shared_ptr<TraceEvent>> &res)
+                      std::vector<std::shared_ptr<TraceEvent>> &res, const std::string &profPath)
 {
     std::shared_ptr<CounterEvent> event;
     std::string time;
     std::string seriesName;
     uint32_t pid;
     std::unordered_map<std::string, std::shared_ptr<CounterEvent>> eventMap;
+    auto version = Context::GetInstance().GetPlatformVersion(DEFAULT_DEVICE_ID, profPath);
     for (const auto &data : sioData) {
         time = DivideByPowersOfTenWithPrecision(data.timestamp);
-        seriesName = SERIES_MAP.at(data.dieId);
+        if (Context::GetInstance().IsChipV6(version)) {
+            if (SERIES_V6_MAP.find(data.dieId) == SERIES_V6_MAP.end()) {
+                continue;
+            }
+            seriesName = SERIES_V6_MAP.at(data.dieId);
+        } else if (Context::GetInstance().IsChipV4(version) || version == static_cast<int>(Chip::CHIP_V1_1_1)) {
+            seriesName = SERIES_MAP.at(data.dieId);
+        } else {
+            WARN("Current platform does not support sioData");
+            return;
+        }
         pid = pidMap.at(data.deviceId);
         std::vector<double> bandwidth {data.reqRxBandwidth, data.rspRxBandwidth, data.snpRxBandwidth,
             data.datRxBandwidth, data.reqTxBandwidth, data.rspTxBandwidth, data.snpTxBandwidth, data.datTxBandwidth};
@@ -82,8 +98,9 @@ uint8_t SioAssembler::AssembleData(DataInventory &dataInventory, JsonWriter &ost
         uint32_t formatPid = JsonAssembler::GetFormatPid(pid, layerInfo.sortIndex, deviceId);
         pidMap[deviceId] = formatPid;
     }
+    
     GenerateHWMetaData(pidMap, layerInfo, res_);
-    GenerateSioTrace(*sioData, pidMap, res_);
+    GenerateSioTrace(*sioData, pidMap, res_, profPath);
     if (res_.empty()) {
         ERROR("Can't Generate any SIO process data");
         return ASSEMBLE_FAILED;

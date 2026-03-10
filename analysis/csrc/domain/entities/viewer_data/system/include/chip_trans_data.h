@@ -34,6 +34,12 @@ struct PcieInfoData : public BasicData {
     uint64_t pcieWriteBandwidth;
     uint64_t pcieReadBandwidth;
 };
+struct PcieInfoV6Data : public BasicData {
+    uint16_t deviceId = UINT16_MAX;
+    uint32_t dieId;
+    uint64_t pcieWriteBandwidth;
+    uint64_t pcieReadBandwidth;
+};
 
 }
 }

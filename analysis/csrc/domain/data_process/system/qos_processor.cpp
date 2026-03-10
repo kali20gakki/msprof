@@ -85,7 +85,7 @@ bool QosProcessor::ProcessSingleDevice(const std::string &devicePath, std::vecto
 OriQosData QosProcessor::LoadData(const DBInfo &qosDB)
 {
     OriQosData oriData;
-    std::string sql{"SELECT timestamp, bw1, bw2, bw3, bw4, bw5, bw6, bw7, bw8, bw9, bw10 FROM " +
+    std::string sql{"SELECT timestamp, die_id, bw1, bw2, bw3, bw4, bw5, bw6, bw7, bw8, bw9, bw10 FROM " +
         qosDB.tableName};
     if (!qosDB.dbRunner->QueryData(sql, oriData) || oriData.empty()) {
         ERROR("Failed to obtain data from the % table.", qosDB.tableName);
@@ -104,8 +104,8 @@ std::vector<QosData> QosProcessor::FormatData(const OriQosData &oriData, const L
     tempData.deviceId = localtimeContext.deviceId;
     double oriTimestamp;
     for (const auto &row: oriData) {
-        std::tie(oriTimestamp, tempData.bw1, tempData.bw2, tempData.bw3, tempData.bw4, tempData.bw5, tempData.bw6,
-                 tempData.bw7, tempData.bw8, tempData.bw9, tempData.bw10) = row;
+        std::tie(oriTimestamp, tempData.dieId, tempData.bw1, tempData.bw2, tempData.bw3, tempData.bw4, tempData.bw5,
+                 tempData.bw6, tempData.bw7, tempData.bw8, tempData.bw9, tempData.bw10) = row;
         HPFloat timestamp = oriTimestamp;
         tempData.timestamp = GetLocalTime(timestamp, localtimeContext.timeRecord).Uint64();
         formatData.push_back(tempData);

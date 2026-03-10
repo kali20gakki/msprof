@@ -28,9 +28,14 @@ ChipTransProcessor::ChipTransProcessor(const std::string& profPaths)
 
 bool ChipTransProcessor::Process(DataInventory& dataInventory)
 {
-    ChipTransData chipTransData;
     auto deviceList = Utils::File::GetFilesWithPrefix(profPath_, DEVICE_PREFIX);
     bool flag = true;
+    ChipTransData chipTransData;
+    auto version = Context::GetInstance().GetPlatformVersion(DEFAULT_DEVICE_ID, profPath_);
+    if (Context::GetInstance().IsChipV6(version)) {
+        ChipTransV6Processor chipTransV6Processor(profPath_);
+        return chipTransV6Processor.Process(dataInventory);
+    }
     for (const auto& devicePath : deviceList) {
         if (!ProcessOneDevice(devicePath, chipTransData)) {
             flag = false;

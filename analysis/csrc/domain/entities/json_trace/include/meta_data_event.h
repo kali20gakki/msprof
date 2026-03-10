@@ -82,6 +82,7 @@ const std::string PROCESS_NETWORK_USAGE = "Network Usage";
 const std::string PROCESS_DISK_USAGE = "Disk Usage";
 const std::string PROCESS_OS_RUNTIME_API = "OS Runtime API";
 const std::string PROCESS_AI_CORE_FREQ = "AI Core Freq";
+const std::string PROCESS_LOW_POWER = "Low Power";
 const std::string PROCESS_HCCL = "Communication";
 const std::string PROCESS_NPU_MEM = "NPU MEM";
 const std::string PROCESS_DDR = "DDR";

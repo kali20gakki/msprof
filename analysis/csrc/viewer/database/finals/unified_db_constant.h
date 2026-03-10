@@ -145,6 +145,9 @@ const std::string TABLE_NAME_META_DATA = "META_DATA";
 const std::string PROCESSOR_NAME_AICORE_FREQ = "AICORE_FREQ";
 const std::string TABLE_NAME_AICORE_FREQ = "AICORE_FREQ";
 
+const std::string PROCESSOR_NAME_LOW_POWER = "LOW_POWER";
+const std::string TABLE_NAME_LOW_POWER = "LOW_POWER";
+
 const std::string PROCESSOR_NAME_MSTX = "MSTX";
 const std::string TABLE_NAME_MSTX = "MSTX_EVENTS";
 const std::string TABLE_NAME_MSTX_EVENT_TYPE = "ENUM_MSTX_EVENT_TYPE";
@@ -154,8 +157,10 @@ const std::string TABLE_NAME_MEMCPY_INFO = "MEMCPY_INFO";
 const std::string TABLE_NAME_ENUM_MEMCPY_OPERATION = "ENUM_MEMCPY_OPERATION";
 
 const std::string PROCESSOR_NAME_CHIP_TRAINS = "CHIP_TRAINS";
+const std::string PROCESSOR_NAME_CHIP_TRAINS_V6 = "CHIP_TRAINS_V6";
 const std::string TABLE_NAME_PA_LINK_INFO = "PA_LINK_INFO";
 const std::string TABLE_NAME_PCIE_INFO = "ENUM_PCIE_INFO";
+const std::string TABLE_NAME_PCIE_INFO_V6 = "ENUM_PCIE_INFO_V6";
 const std::string PROCESSOR_NAME_KFC_TASK = "KFC_TASK";
 const std::string PROCESSOR_NAME_KFC_COMM = "KFC_COMM";
 const std::string PROCESSOR_NAME_DEVICE_TX = "DEVICE_MSTX";

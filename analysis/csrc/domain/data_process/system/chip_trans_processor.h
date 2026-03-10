@@ -19,6 +19,7 @@
 
 #include "analysis/csrc/domain/data_process/data_processor.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/chip_trans_data.h"
+#include "chip_trans_v6_processor.h"
 
 
 namespace Analysis {

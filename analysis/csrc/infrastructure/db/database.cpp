@@ -758,6 +758,7 @@ namespace {
 
     const TableColumns QosBwData = {
         {"timestamp", SQL_NUMERIC_TYPE},
+        {"die_id", SQL_NUMERIC_TYPE},
         {"bw1", SQL_NUMERIC_TYPE},
         {"bw2", SQL_NUMERIC_TYPE},
         {"bw3", SQL_NUMERIC_TYPE},

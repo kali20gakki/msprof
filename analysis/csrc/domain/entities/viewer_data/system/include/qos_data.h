@@ -24,6 +24,7 @@ namespace Analysis {
 namespace Domain {
 struct QosData : public BasicData {
     uint16_t deviceId = UINT16_MAX;
+    uint16_t dieId = 0;
     uint32_t bw1 = 0; // MB/s
     uint32_t bw2 = 0;
     uint32_t bw3 = 0;

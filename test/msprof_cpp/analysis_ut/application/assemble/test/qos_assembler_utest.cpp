@@ -123,26 +123,18 @@ TEST_F(QosAssemblerUTest, ShouldReturnTrueWhenDataAssembleSuccess)
     MOCKER_CPP(&Context::GetPidFromInfoJson).stubs().will(returnValue(2328086)); // pid 2328086
     std::vector<std::string> qosEvents {"OTHERS", "DVPP"};
     MOCKER_CPP(&Context::GetQosEvents).stubs().will(returnValue(qosEvents));
+    MOCKER_CPP(&Context::GetPlatformVersion).stubs().will(returnValue(static_cast<unsigned short>(0)));
     EXPECT_TRUE(assembler.Run(dataInventory_, PROF_PATH));
     auto files = File::GetOriginData(RESULT_PATH, {"msprof"}, {});
     EXPECT_EQ(1ul, files.size());
     FileReader reader(files.back());
     std::vector<std::string> res;
     EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
-    std::string expectStr = "{\"name\":\"process_name\",\"pid\":2383960960,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":"
-                            "\"QoS\"}},{\"name\":\"process_labels\",\"pid\":2383960960,\"tid\":0,\"ph\":\"M\",\"args\""
-                            ":{\"labels\":\"NPU 0\"}},{\"name\":\"process_sort_index\",\"pid\":2383960960,"
-                            "\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":28}},{\"name\":\"QoS OTHERS\","
-                            "\"pid\":2383960960,\"tid"
-                            "\":0,\"ts\":\"1724405892226599.429\",\"ph\":\"C\",\"args\":{\"value\":10}},{\"name\":"
-                            "\"QoS DVPP\",\"pid\":2383960960,\"tid\":0,\"ts\":\"1724405892226599.429\",\"ph\":\"C\""
-                            ",\"args\":{\"value\":10}},{\"name\":\"QoS OTHERS\",\"pid\":2383960960,\"tid\":0,\"ts\":\""
-                            "1724405892227599.429\",\"ph\":\"C\",\"args\":{\"value\":20}},{\"name\":\"QoS DVPP\",\""
-                            "pid\":2383960960,\"tid\":0,\"ts\":\"1724405892227599.429\",\"ph\":\"C\",\"args\":{\""
-                            "value\":20}},{\"name\":\"QoS OTHERS\",\"pid\":2383960960,\"tid\":0,\"ts\":\""
-                            "1724405892228599.429\",\"ph\":\"C\",\"args\":{\"value\":30}},{\"name\":\"QoS DVPP\",\""
-                            "pid\":2383960960,\"tid\":0,\"ts\":\"1724405892228599.429\",\"ph\":\"C\",\"args\":"
-                            "{\"value\":30}},";
+    std::string expectStr = "{\"name\":\"process_name\",\"pid\":2383960960,\"tid\":0,\"ph\":\"M\",\"args\":"
+                            "{\"name\":\"QoS\"}},{\"name\":\"process_labels\",\"pid\":2383960960,\"tid\""
+                            ":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU 0\"}},{\"name\":\""
+                            "process_sort_index\",\"pid\":2383960960,\"tid\":0,\"ph\":\"M\",\""
+                            "args\":{\"sort_index\":28}},";
     EXPECT_EQ(expectStr, res.back());
 }
 

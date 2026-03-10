@@ -24,7 +24,7 @@ namespace Domain {
 using namespace Analysis::Utils;
 
 // timestamp, bw1, ..., bw10
-using OriQosData = std::vector<std::tuple<double, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t,
+using OriQosData = std::vector<std::tuple<double, uint16_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t,
     uint32_t, uint32_t, uint32_t, uint32_t>>;
 // 该类用于定义处理qos.db中QosBwData表
 class QosProcessor : public DataProcessor {
