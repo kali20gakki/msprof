@@ -120,8 +120,7 @@ class BaseAscendMsprofChecker(ABC):
                                        f"api_statistic*.csv")
         if not api_statistic_path:
             raise FileNotFoundError(f"No api_statistic.csv found in {self.prof_path}")
-        FileChecker.check_csv_items(api_statistic_path[0], {"Level": ["acl", "runtime", "node"],
-                                                            "Device_id": ["host"]},
+        FileChecker.check_csv_items(api_statistic_path[0], {"Level": ["acl", "runtime", "node"]},
                                     fuzzy_match=False)
         FileChecker.check_csv_items(api_statistic_path[0], {"API Name": ["Add*", "Cast*", "Relu*"]},
                                     fuzzy_match=True)

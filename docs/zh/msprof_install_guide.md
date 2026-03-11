@@ -58,13 +58,34 @@
    
 #### 编译解析run包
 
-1. 下载源码。
+解析run包包含msProf的解析功能。
+
+1. 安装依赖。
+
+   编译前需要下载一定的依赖，具体如下。
+
+   - sqlite3
+   
+      Ubuntu系统上安装SQLite3：
+      
+      ```shell
+      sudo apt update
+      sudo apt install sqlite3 libsqlite3-dev
+      ```
+      
+      openEuler/CentOS系统上安装SQLite3：
+      
+      ```shell
+      sudo yum install sqlite sqlite-devel
+      ```
+
+2. 下载源码。
 
     ```shell
     git clone https://gitcode.com/Ascend/msprof.git
     ```
 
-2. 编译run包。
+3. 编译run包。
 
    操作方式如下：
 
