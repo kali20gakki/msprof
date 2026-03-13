@@ -83,6 +83,7 @@ class NumberConstant:
     DEFAULT_STREAM_ID = 65535
     DEFAULT_TASK_ID = 65535
     PROF_PATH_MAX_LEN = 1024
+    INT64_MAX = 2 ** 63 - 1
     UINT64_MAX = 18446744073709551615
 
     # memory units transfer

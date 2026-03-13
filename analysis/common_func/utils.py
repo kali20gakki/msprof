@@ -272,3 +272,7 @@ class Utils:
                 _index += 1
         filtered_data = filtered_data[:_index]
         return filtered_data
+
+    @classmethod
+    def get_valid_int_data(cls: any, int_data: int) -> int:
+        return NumberConstant.INT64_MAX if int_data > NumberConstant.INT64_MAX else int_data

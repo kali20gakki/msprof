@@ -15,6 +15,7 @@
 # -------------------------------------------------------------------------
 import struct
 
+from common_func.utils import Utils
 from msparser.add_info.add_info_bean import AddInfoBean
 from msparser.data_struct_size_constant import StructFmt
 from common_func.info_conf_reader import InfoConfReader
@@ -253,15 +254,15 @@ class KfcHcclInfoBean:
 
     @property
     def local_rank(self: any) -> int:
-        return self._local_rank
+        return Utils.get_valid_int_data(self._local_rank)
 
     @property
     def remote_rank(self: any) -> int:
-        return self._remote_rank
+        return Utils.get_valid_int_data(self._remote_rank)
 
     @property
     def rank_size(self: any) -> int:
-        return self._rank_size
+        return Utils.get_valid_int_data(self._rank_size)
 
     @property
     def work_flow_mode(self: any) -> str:
@@ -269,7 +270,7 @@ class KfcHcclInfoBean:
 
     @property
     def plane_id(self: any) -> int:
-        return self._plane_id
+        return Utils.get_valid_int_data(self._plane_id)
 
     @property
     def notify_id(self: any) -> str:
@@ -285,7 +286,7 @@ class KfcHcclInfoBean:
 
     @property
     def duration_estimated(self: any) -> int:
-        return self._duration_estimated
+        return Utils.get_valid_int_data(self._duration_estimated)
 
     @property
     def src_addr(self: any) -> str:
@@ -297,7 +298,7 @@ class KfcHcclInfoBean:
 
     @property
     def data_size(self: any) -> int:
-        return self._data_size
+        return Utils.get_valid_int_data(self._data_size)
 
     @property
     def op_type(self: any) -> str:
@@ -321,15 +322,15 @@ class KfcHcclInfoBean:
 
     @property
     def task_id(self: any) -> int:
-        return self._task_id
+        return Utils.get_valid_int_data(self._task_id)
 
     @property
     def stream_id(self: any) -> int:
-        return self._stream_id
+        return Utils.get_valid_int_data(self._stream_id)
 
     @property
     def timestamp(self: any) -> int:
-        return self._timestamp
+        return Utils.get_valid_int_data(self._timestamp)
 
 
 class MergedKfcHcclInfoBean:

@@ -194,6 +194,23 @@ class TestAicpuAddInfoParser(unittest.TestCase):
         self.assertEqual("1", data[0].rdma_type)  # rdma type
         InfoConfReader()._info_json = {}
 
+    def test_parse_should_return_kfc_hccl_info_data_when_type_13_and_data_more_than_int64max(self):
+        aicpu_data = [23130, 6000, 13, 1, 128, 20000] + \
+                     [12345, 0, 123, 0, 8, 8, 0, 4294967295, 255143588, 0.1, 0, 0, 18446744073709551111,
+                      2, 0, 1, 1, 1, 1, 1, 1, 1, 1, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0] + \
+                     [12345, 0, 444444, 0, 8, 8, 0, 4294967295, 255144588, 0.1, 0, 0, 18446744073709551111,
+                      3, 0, 1, 1, 1, 1, 1, 1, 1, 1, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        struct_data = struct.pack(StructFmt.BYTE_ORDER_CHAR + StructFmt.KFC_HCCL_INFO_FMT, *aicpu_data)
+        data = AicpuAddInfoBean.decode(struct_data)
+        with mock.patch(NAMESPACE + '.AicpuAddInfoParser.parse_bean_data', return_value=[data]):
+            check = AicpuAddInfoParser(self.file_list, self.CONFIG)
+            check.parse()
+            check.save()
+        data = check._aicpu_data.get(AicpuAddInfoBean.KFC_HCCL_INFO, [])
+        self.assertEqual(2, len(data))
+        self.assertEqual((2 ** 63 -1), data[0].data_size)  # data_size被重置为2 ** 63 -1
+        InfoConfReader()._info_json = {}
+
     def test_parse_should_return_device_hccl_op_info_data_when_type_10(self):
         aicpu_data = [23130, 6000, 10, 1, 128, 20000,
                       0, 0, 0, 1, 12345, 8, 6, 1] + [0] * 196
