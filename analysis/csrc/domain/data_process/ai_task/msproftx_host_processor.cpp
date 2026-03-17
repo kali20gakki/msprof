@@ -107,8 +107,8 @@ void MsprofTxHostProcessor::FormatTxData(const OriMsprofTxHostData &oriTxData,
     for (const auto& row : oriTxData) {
         std::tie(tmpData.pid, tmpData.tid, tmpData.category, tmpData.payloadType, tmpData.messageType,
                  tmpData.payloadValue, tmpData.timestamp, tmpData.end, eventType, tmpData.message) = row;
-        HPFloat start = Utils::GetTimeFromSyscnt(tmpData.timestamp, params);
-        HPFloat end = Utils::GetTimeFromSyscnt(tmpData.end, params);
+        HPFloat start = Utils::GetTimeFromHostCnt(tmpData.timestamp, params);
+        HPFloat end = Utils::GetTimeFromHostCnt(tmpData.end, params);
         tmpData.eventType = GetEnumTypeValue(eventType, NAME_STR(MSTX_EVENT_TYPE_TABLE), MSTX_EVENT_TYPE_TABLE);
         tmpData.timestamp = GetLocalTime(start, record).Uint64();
         tmpData.end = GetLocalTime(end, record).Uint64();
@@ -126,8 +126,8 @@ void MsprofTxHostProcessor::FormatTxExData(const OriMsprofTxExHostData &oriTxExD
     for (const auto& row : oriTxExData) {
         std::tie(tmpData.pid, tmpData.tid, markId, tmpData.timestamp,
             tmpData.end, eventType, tmpData.domain, tmpData.message) = row;
-        Utils::HPFloat start = Utils::GetTimeFromSyscnt(tmpData.timestamp, params);
-        Utils::HPFloat end = Utils::GetTimeFromSyscnt(tmpData.end, params);
+        Utils::HPFloat start = Utils::GetTimeFromHostCnt(tmpData.timestamp, params);
+        Utils::HPFloat end = Utils::GetTimeFromHostCnt(tmpData.end, params);
         tmpData.eventType = GetEnumTypeValue(eventType, NAME_STR(MSTX_EVENT_TYPE_TABLE), MSTX_EVENT_TYPE_TABLE);
         tmpData.connectionId = markId + START_CONNECTION_ID_MSTX;
         tmpData.timestamp = GetLocalTime(start, record).Uint64();
