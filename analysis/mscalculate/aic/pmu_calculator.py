@@ -21,6 +21,7 @@ from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.file_manager import FileManager
 from common_func.info_conf_reader import InfoConfReader
+from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_iteration import MsprofIteration
 from common_func.path_manager import PathManager
@@ -115,18 +116,31 @@ class PmuCalculator(ICalculator):
                 self._block_num.get('mix_block_num', {}).setdefault(_key, []).append(int(data.mix_block_num))
 
     def __get_block_num_data(self: any, ge_curs: any) -> list:
+        """
+        为避免warmup中算子过多，导致数据翻转，后续pmu计算blockNum取用异常，非图模式算子时间以prof开启时间为基准进行过滤
+        """
         device_id = InfoConfReader().get_device_id()
         host_start_cnt = InfoConfReader().trans_from_start_info_raw_time_into_host_cnt()
+        ge_data = []
         if ProfilingScene().is_all_export() or ProfilingScene().is_step_export():
             sql = "select task_id, stream_id, context_id, task_type, block_num, mix_block_num from {0} " \
-                  "where device_id={1} and timestamp >= {2} " \
-                  "order by timestamp".format(DBNameConstant.TABLE_GE_TASK, device_id, host_start_cnt)
-            return DBManager.fetch_all_data(ge_curs, sql, dto_class=GeTaskDto)
-        ge_data = []
+                  "where device_id={1} and timestamp >= {2} and model_id = {3} " \
+                  "order by timestamp".format(DBNameConstant.TABLE_GE_TASK, device_id, host_start_cnt,
+                                              NumberConstant.INVALID_MODEL_ID)
+            ge_data.extend(DBManager.fetch_all_data(ge_curs, sql, dto_class=GeTaskDto))
+
+            sql = "select task_id, stream_id, context_id, task_type, block_num, mix_block_num from {0} " \
+                  "where device_id={1} and model_id != {2} " \
+                  "order by timestamp".format(DBNameConstant.TABLE_GE_TASK, device_id,
+                                              NumberConstant.INVALID_MODEL_ID)
+            ge_data.extend(DBManager.fetch_all_data(ge_curs, sql, dto_class=GeTaskDto))
+            return ge_data
+
         iter_list = MsprofIteration(self._project_path).get_index_id_list_with_index_and_model(self._iter_range)
         sql = "select task_id, stream_id, context_id, task_type, block_num, mix_block_num from {0} " \
-              "where model_id=? and (index_id=0 or index_id=?) and device_id={1} and timestamp >= {2} " \
-              " order by timestamp".format(DBNameConstant.TABLE_GE_TASK, device_id, host_start_cnt)
+              "where model_id=? and (index_id=0 or index_id=?) and device_id={1} ? " \
+              "order by timestamp".format(DBNameConstant.TABLE_GE_TASK, device_id)
         for iter_id, model_id in iter_list:
-            ge_data.extend(DBManager.fetch_all_data(ge_curs, sql, (model_id, iter_id), dto_class=GeTaskDto))
+            condition = f"and timestamp >= {host_start_cnt} " if model_id == NumberConstant.INVALID_MODEL_ID else " "
+            ge_data.extend(DBManager.fetch_all_data(ge_curs, sql, (model_id, iter_id, condition), dto_class=GeTaskDto))
         return ge_data
