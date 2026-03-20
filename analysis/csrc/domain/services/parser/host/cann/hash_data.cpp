@@ -86,7 +86,7 @@ bool HashData::ReadFiles(const std::vector<std::string> &files)
     return true;
 }
 
-void HashData::Clear()
+void HashData::Clear() const
 {
     hashData_.clear();
 }

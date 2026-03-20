@@ -33,7 +33,7 @@ void ResetBaseGcCount()
     g_count = 0;
 }
 
-void BaseGc::CommonFun()
+void BaseGc::CommonFun() const
 {
     std::lock_guard<std::mutex> lg(g_mutex);
     g_count++;

@@ -17,7 +17,6 @@
 #ifndef MSPROF_ANALYSIS_STEP_TRACE_TASKS_H
 #define MSPROF_ANALYSIS_STEP_TRACE_TASKS_H
 
-#include <cstdint>
 #include <vector>
 #include <map>
 

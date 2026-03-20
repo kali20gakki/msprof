@@ -191,7 +191,7 @@ protected:
         EXPECT_TRUE(dbRunner->InsertData(tableName, data));
     }
 
-    void DropTable(const std::string& dpPath, const std::string &tableName)
+    void DropTable(const std::string& dpPath, const std::string &tableName) const
     {
         std::shared_ptr<DBRunner> dbRunner;
         MAKE_SHARED_RETURN_VOID(dbRunner, DBRunner, dpPath);

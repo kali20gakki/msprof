@@ -16,7 +16,6 @@
 #ifndef ANALYSIS_DOMAIN_TASK_INFO_DATA_H
 #define ANALYSIS_DOMAIN_TASK_INFO_DATA_H
 
-#include <cstdint>
 #include <string>
 
 namespace Analysis {

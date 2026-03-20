@@ -15,8 +15,6 @@
  * -------------------------------------------------------------------------*/
 
 #include "analysis/csrc/domain/data_process/ai_task/kfc_task_processor.h"
-#include <string>
-#include <functional>
 
 namespace Analysis {
 namespace Domain {

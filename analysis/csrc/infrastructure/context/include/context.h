@@ -18,7 +18,6 @@
 #define ANALYSIS_INFRASTRUCTURE_CONTEXT_INCLUDE_CONTEXT_H
 
 #include <string>
-#include <cstdint>
 
 namespace Analysis {
 

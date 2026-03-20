@@ -18,7 +18,6 @@
 #define ANALYSIS_WORKER_KERNEL_PARSER_WORKER_H
 #include <string>
 #include <atomic>
-#include <vector>
 
 namespace Analysis {
 namespace Domain {

@@ -119,7 +119,7 @@ protected:
         MOCKER_CPP(&TreeAnalyzer::GetTasks).stubs().will(returnValue(*tasks));
     }
 
-    void MockGetHcclBigOps()
+    void MockGetHcclBigOps() const
     {
         auto trace = new MsprofCompactInfo;
         auto nodeBasicInfo = new MsprofNodeBasicInfo;

@@ -27,7 +27,7 @@ const long INVALID_FILE_SIZE = -1;
 const uint64_t MAX_FILE_SIZE = 10737418240; // 10 * 1024 *1024 *1024, means 10GB
 }
 
-uint32_t Parser::GetFileSize(const char *filePath)
+uint32_t Parser::GetFileSize(const char *filePath) const
 {
     FILE *fp = fopen(filePath, "r");
     if (fp == nullptr) {
@@ -148,7 +148,7 @@ uint32_t Parser::ReadDataEntry(const DeviceContext &deviceContext)
     // 计算处理块个数
     size_t structCount = fileSize / trunkSize;
     size_t firstFileOffset = fileSize % trunkSize;
-    if (firstFileOffset) {
+    if (firstFileOffset != 0) {
         // 如果有余，从开始offset偏移获取！
         INFO("offset: %", firstFileOffset);
     }

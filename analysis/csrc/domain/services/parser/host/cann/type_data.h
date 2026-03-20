@@ -32,13 +32,13 @@ namespace Cann {
 class TypeData : public Utils::Singleton<TypeData> {
 public:
     bool Load(const std::string &path);
-    void Clear();
+    void Clear() const;
     std::string Get(uint16_t level, uint64_t type);
     std::unordered_map<uint16_t, std::unordered_map<uint64_t, std::string>>& GetAll();
 
 private:
     bool ReadFiles(const std::vector<std::string>& files);
-    std::unordered_map<uint16_t, std::unordered_map<uint64_t, std::string>> typeData_;
+    mutable std::unordered_map<uint16_t, std::unordered_map<uint64_t, std::string>> typeData_;
     std::vector<std::string> filePrefix_ = {
         "unaging.additional.type_info_dic.slice",
         "aging.additional.type_info_dic.slice",

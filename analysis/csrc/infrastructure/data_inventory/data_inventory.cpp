@@ -14,7 +14,6 @@
  * See the Mulan PSL v2 for more details.
  * -------------------------------------------------------------------------*/
 #include "analysis/csrc/infrastructure/data_inventory/include/data_inventory.h"
-#include <algorithm>
 
 using namespace Analysis;
 

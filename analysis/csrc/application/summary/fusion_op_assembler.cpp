@@ -15,7 +15,6 @@
  * -------------------------------------------------------------------------*/
 
 #include "analysis/csrc/application/summary/fusion_op_assembler.h"
-#include <sstream>
 #include "analysis/csrc/infrastructure/dfx/error_code.h"
 #include "analysis/csrc/infrastructure/db/include/db_runner.h"
 #include "analysis/csrc/infrastructure/db/include/database.h"

@@ -15,7 +15,6 @@
  * -------------------------------------------------------------------------*/
 
 #include "analysis/csrc/domain/data_process/ai_task/msproftx_device_processor.h"
-#include <algorithm>
 #include "analysis/csrc/domain/services/environment/context.h"
 
 namespace Analysis {

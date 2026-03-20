@@ -14,8 +14,6 @@
  * See the Mulan PSL v2 for more details.
  * -------------------------------------------------------------------------*/
 
-#include <algorithm>
-
 #include "analysis/csrc/infrastructure/dfx/log.h"
 #include "analysis/csrc/infrastructure/utils/time_logger.h"
 #include "analysis/csrc/domain/entities/tree/include/event_queue.h"

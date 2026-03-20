@@ -17,10 +17,7 @@
 #ifndef ANALYSIS_VIEWER_DATABASE_DRAFTS_NUMBER_MAPPING_H
 #define ANALYSIS_VIEWER_DATABASE_DRAFTS_NUMBER_MAPPING_H
 
-#include <unordered_map>
-#include <cstdint>
 #include <string>
-#include <vector>
 
 namespace Analysis {
 namespace Domain {

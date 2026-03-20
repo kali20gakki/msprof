@@ -36,7 +36,7 @@ protected:
 private:
     uint32_t ProcessEntry(Infra::DataInventory &dataInventory, const Infra::Context &context) override;
 
-    uint32_t GetFileSize(const char *filePath);
+    uint32_t GetFileSize(const char *filePath) const;
 
     uint64_t GetFilesSize(const std::vector<std::string> &paths);
 

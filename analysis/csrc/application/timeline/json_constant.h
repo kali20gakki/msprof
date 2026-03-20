@@ -18,7 +18,6 @@
 #define ANALYSIS_APPLICATION_DELIVERABLES_CONSTANT_H
 
 #include <string>
-#include <cstdint>
 
 namespace Analysis {
 namespace Application {

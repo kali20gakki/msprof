@@ -17,7 +17,6 @@
 #ifndef MSPROF_ANALYSIS_STREAM_EXPAND_SPEC_H
 #define MSPROF_ANALYSIS_STREAM_EXPAND_SPEC_H
 
-#include <cstdint>
 #include <string>
 
 namespace Analysis {

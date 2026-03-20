@@ -17,9 +17,7 @@
 #ifndef ANALYSIS_DOMAIN_SERVICES_CONSTANT_DEFAULT_VALUE_CONSTANT_H
 #define ANALYSIS_DOMAIN_SERVICES_CONSTANT_DEFAULT_VALUE_CONSTANT_H
 
-#include <cstdint>
 #include <string>
-#include <unordered_map>
 
 namespace Analysis {
 namespace Domain {

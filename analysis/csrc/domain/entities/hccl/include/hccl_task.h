@@ -17,7 +17,6 @@
 #ifndef MSPROF_ANALYSIS_ORI_HCCL_TASK_H
 #define MSPROF_ANALYSIS_ORI_HCCL_TASK_H
 
-#include <cstdint>
 #include <string>
 namespace Analysis {
 namespace Domain {

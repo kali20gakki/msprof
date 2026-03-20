@@ -17,7 +17,6 @@
 #ifndef ANALYSIS_DOMAIN_CCU_MISSION_DATA_H
 #define ANALYSIS_DOMAIN_CCU_MISSION_DATA_H
 
-#include <cstdint>
 #include <string>
 
 namespace Analysis {

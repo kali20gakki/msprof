@@ -15,7 +15,6 @@
  * -------------------------------------------------------------------------*/
 
 #include "analysis/csrc/application/timeline/ccu_assembler.h"
-#include <utility>
 #include "analysis/csrc/infrastructure/utils/utils.h"
 
 namespace Analysis {

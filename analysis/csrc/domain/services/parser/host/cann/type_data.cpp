@@ -111,7 +111,7 @@ bool TypeData::ReadFiles(const std::vector<std::string> &files)
     return true;
 }
 
-void TypeData::Clear()
+void TypeData::Clear() const
 {
     typeData_.clear();
 }

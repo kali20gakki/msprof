@@ -15,7 +15,6 @@
  * -------------------------------------------------------------------------*/
 
 #include "analysis/csrc/domain/services/parser/parser_item_factory.h"
-#include <unordered_map>
 #include "analysis/csrc/infrastructure/dfx/log.h"
 
 namespace Analysis {

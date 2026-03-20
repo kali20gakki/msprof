@@ -17,7 +17,6 @@
 #ifndef ANALYSIS_DOMAIN_ENTITIES_HAL_TOP_DOWN_TASK_H
 #define ANALYSIS_DOMAIN_ENTITIES_HAL_TOP_DOWN_TASK_H
 
-#include <cstdint>
 #include <string>
 
 struct TopDownTask {

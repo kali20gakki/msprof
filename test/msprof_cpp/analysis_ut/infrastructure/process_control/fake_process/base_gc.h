@@ -26,7 +26,7 @@ public:
     BaseGc() = default;
     virtual ~BaseGc() = default;
 protected:
-    void CommonFun();
+    void CommonFun() const;
 };
 
 uint32_t GetBaseGcCount();

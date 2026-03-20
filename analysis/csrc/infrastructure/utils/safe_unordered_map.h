@@ -19,7 +19,6 @@
 #define ANALYSIS_UTILS_SAFE_UNORDERED_MAP_H
 
 #include <unordered_map>
-#include <shared_mutex>
 #include <functional>
 #include <mutex>
 

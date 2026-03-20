@@ -15,7 +15,6 @@
  * -------------------------------------------------------------------------*/
 
 #include "analysis/csrc/domain/data_process/system/aicore_freq_processor.h"
-#include <algorithm>
 #include "analysis/csrc/domain/services/environment/context.h"
 
 namespace Analysis {
