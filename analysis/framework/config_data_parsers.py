@@ -22,7 +22,7 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.platform.chip_manager import ChipManager
 from common_func.profiling_scene import ProfilingScene
-from common_func.cpp_enable_scene import DeviceParseScene
+from common_func.cpp_enable_scene import CannCalculatorScene, DeviceParseScene
 from common_func.utils import Utils
 from msconfig.config_manager import ConfigManager
 
@@ -55,7 +55,8 @@ class ConfigDataParsers:
             position = cls.POSITION_OF_HOST
         conf_parser_read = ConfigManager.get(config_name)
         parser_section = conf_parser_read.sections()
-        cpp_parse_flag = DeviceParseScene().is_cpp_enable()
+        host_cpp_parse_flag = CannCalculatorScene().is_cpp_enable()
+        device_cpp_parse_flag = DeviceParseScene().is_cpp_enable()
         all_export_flag = ProfilingScene().is_all_export() and InfoConfReader().is_all_export_version() and task_flag
         for _section in parser_section:
             chip_model_list = cls._load_parser_chip_model(conf_parser_read, _section)
@@ -63,9 +64,9 @@ class ConfigDataParsers:
                 continue
             if position not in cls._load_parser_position(conf_parser_read, _section):
                 continue
-            if cpp_parse_flag and cls._load_can_cpp_parse(_section):
+            if host_cpp_parse_flag and cls._load_can_cpp_parse(_section):
                 continue
-            if cpp_parse_flag and all_export_flag and cls._load_can_cpp_parse_or_calculate_device_data(_section):
+            if device_cpp_parse_flag and all_export_flag and cls._load_can_cpp_parse_or_calculate_device_data(_section):
                 continue
             parser_level = cls._load_parser_level(conf_parser_read, _section)
             parsers_dict.setdefault(parser_level, []).append(cls._load_parser_module(conf_parser_read, _section))
