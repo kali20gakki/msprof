@@ -86,7 +86,7 @@ uint32_t ReadHostGEInfo(DataInventory& dataInventory, const DeviceContext& devic
     for (auto row : result) {
         uint32_t stream_id, batch_id, task_id, context_id, blockNum, mixBlockNum;
         std::tie(stream_id, batch_id, task_id, context_id, blockNum, mixBlockNum) = row;
-        TaskId id = {(uint16_t)stream_id, (uint16_t)batch_id, (uint16_t)task_id, context_id};
+        TaskId id = {(uint16_t)stream_id, (uint16_t)batch_id, task_id, context_id};
         auto item = deviceTaskMap->find(id);
         if (item != deviceTaskMap->end()) {
             std::vector<DeviceTask> &deviceTasks = item->second;

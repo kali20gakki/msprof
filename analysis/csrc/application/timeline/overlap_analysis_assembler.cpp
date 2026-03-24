@@ -162,7 +162,7 @@ void OverlapAnalysisAssembler::RecordCompAndCommTaskTime(
     if (ascendTasks) {
         for (auto &task : *ascendTasks) {
             TaskId id{static_cast<uint16_t >(task.streamId), static_cast<uint16_t >(task.batchId),
-                      static_cast<uint16_t >(task.taskId), task.contextId, task.deviceId};
+                      task.taskId, task.contextId, task.deviceId};
             TimeDuration timePair{task.timestamp, task.timestamp + static_cast<uint64_t>(task.duration)};
             if (allTaskPool.find(id) != allTaskPool.end()) {
                 allTaskPool[id].emplace_back(timePair);
@@ -324,7 +324,7 @@ void OverlapAnalysisAssembler::SepCompTaskAndKFCCommSections(
     std::set<TaskId> usedTaskIds;
     for (auto &task : *compTasks) {
         TaskId id{static_cast<uint16_t >(task.streamId), static_cast<uint16_t >(task.batchId),
-                  static_cast<uint16_t >(task.taskId), task.contextId, task.deviceId};
+                  task.taskId, task.contextId, task.deviceId};
         if (usedTaskIds.find(id) != usedTaskIds.end()) {
             // 避免重复处理，图模式触发
             continue;
