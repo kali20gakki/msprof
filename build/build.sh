@@ -53,6 +53,7 @@ function build_runtime() {
     git clone https://gitcode.com/cann/runtime.git
     cd runtime
     echo "build runtime start."
+    bash install_deps.sh
     bash build.sh
     cd build_out/
     chmod +x cann-npu-runtime_*.run
