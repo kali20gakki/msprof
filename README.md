@@ -21,10 +21,10 @@ MindStudio Profiler（msProf）是面向 AI 训练与推理场景的性能分析
 
 ## 功能介绍
 
-| 功能点        | 功能简介 |                      资料链接                      |  源码仓库 |
-|------------| --- |:----------------------------------------------:|-----------|
-| **性能数据采集** | 通过 `msProf` 命令采集 CANN 平台及昇腾 AI 处理器的软硬件性能数据。 |    [点击查看](https://www.hiascend.com/document/detail/zh/CANNCommunityEdition/850alpha002/devaids/Profiling/atlasprofiling_16_0010.html)    | [点击查看](https://gitcode.com/cann/runtime/tree/master/src/dfx/msprof)  |
-| **性能数据解析** | 使用 `msProf` 工具对采集到的性能数据进行解析，生成可读的分析结果。 |   [点击查看](docs/zh/msprof_parsing_instruct.md)   | [点击查看](https://gitcode.com/Ascend/msprof/tree/master/analysis)  |
+| 功能点        | 功能简介 |                                                                资料链接                                                                |  源码仓库 |
+|------------| --- |:----------------------------------------------------------------------------------------------------------------------------------:|-----------|
+| **性能数据采集** | 通过 `msProf` 命令采集 CANN 平台及昇腾 AI 处理器的软硬件性能数据。 | [点击查看](https://www.hiascend.com/document/detail/zh/CANNCommunityEdition/850alpha002/devaids/Profiling/atlasprofiling_16_0010.html) | [点击查看](https://gitcode.com/cann/runtime/tree/master/src/dfx/msprof)  |
+| **性能数据解析** | 使用 `msProf` 工具对采集到的性能数据进行解析，生成可读的分析结果。 |                                       [点击查看](docs/zh/user_guide/msprof_parsing_instruct.md)                                        | [点击查看](https://gitcode.com/Ascend/msprof/tree/master/analysis)  |
 
 ### 工具安装
 
@@ -43,7 +43,7 @@ source ${install_path}/set_env.sh
 msprof --help
 ```  
 
-如需通过源码编译方式安装，请参见 [《msProf 源码编译、安装指南》](./docs/zh/msprof_install_guide.md)。
+如需通过源码编译方式安装，请参见 [《msProf 源码编译、安装指南》](docs/zh/getting_started/msprof_install_guide.md)。
 
 ## 快速入门
 
@@ -63,7 +63,7 @@ msprof --output=./output --application="python3 train.py"
 msprof --output=./output --application="./run_standalone_train.sh"
 ```
 
-以 ResNet50 模型训练任务为例，[《msProf 快速上手》](docs/zh/quick_start.md)贯穿性能调优全流程，帮助您在 10 分钟内快速体验 msProf 工具在数据采集、解析导出、性能分析等环节的核心功能。
+以 ResNet50 模型训练任务为例，[《msProf 快速上手》](docs/zh/getting_started/quick_start.md)贯穿性能调优全流程，帮助您在 10 分钟内快速体验 msProf 工具在数据采集、解析导出、性能分析等环节的核心功能。
 
 ## 目录结构
 

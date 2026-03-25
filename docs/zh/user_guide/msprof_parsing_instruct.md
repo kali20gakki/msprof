@@ -461,7 +461,7 @@ msprof --analyze=on --output=/home/profiler_data/PROF_XXX
 - --type=text或--type=db以及--rule=communication
 
 **图 1**  CommAnalyzerTime<a name="zh-cn_topic_0000001631250206_fig1437311348497"></a>  
-![](figures/CommAnalyzerTime.png "CommAnalyzerTime")
+![](../figures/CommAnalyzerTime.png "CommAnalyzerTime")
 
 **表 3**  CommAnalyzerTime
 
@@ -477,7 +477,7 @@ msprof --analyze=on --output=/home/profiler_data/PROF_XXX
 |idle_time|空闲时间，单位ms。空闲时间（idle_time） = 算子的通信总耗时（elapse_time） - 通信时长（transit_time） - 等待时长（wait_time）。|
 
 **图 2**  CommAnalyzerBandwidth<a name="zh-cn_topic_0000001631250206_fig1670544917497"></a>  
-![](figures/CommAnalyzerBandwidth.png "CommAnalyzerBandwidth")
+![](../figures/CommAnalyzerBandwidth.png "CommAnalyzerBandwidth")
 
 **表 4**  CommAnalyzerBandwidth
 
@@ -497,7 +497,7 @@ msprof --analyze=on --output=/home/profiler_data/PROF_XXX
 - --type=text或--type=db以及--rule=communication\_matrix
 
     **图 3**  CommAnalyzerMatrix<a name="zh-cn_topic_0000001631250206_fig746925911497"></a>  
-    ![](figures/CommAnalyzerMatrix.png "CommAnalyzerMatrix")
+    ![](../figures/CommAnalyzerMatrix.png "CommAnalyzerMatrix")
 
     **表 5**  CommAnalyzerMatrix
 
@@ -515,9 +515,9 @@ msprof --analyze=on --output=/home/profiler_data/PROF_XXX
 - --type=text、--rule=communication
 
     **图 4**  communication.json<a name="zh-cn_topic_0000001631250206_fig176088819116"></a>  
-    ![](figures/communication-json.png "communication-json")
+    ![](../figures/communication-json.png "communication-json")
 
 - --type=text、--rule=communication\_matrix
 
     **图 5**  communication\_matrix.json<a name="zh-cn_topic_0000001631250206_fig182611711341"></a>  
-    ![](figures/communication_matrix-json.png "communication_matrix-json")
+    ![](../figures/communication_matrix-json.png "communication_matrix-json")
