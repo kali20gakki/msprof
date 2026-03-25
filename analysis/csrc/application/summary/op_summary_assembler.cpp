@@ -111,7 +111,7 @@ void OpSummaryAssembler::SplitDataByTaskId(std::vector<TaskInfoData> &taskInfo)
 {
     for (auto &data : taskInfo) {
         TaskId id{static_cast<uint16_t>(data.streamId), static_cast<uint16_t>(data.batchId),
-                  static_cast<uint16_t>(data.taskId), data.contextId, data.deviceId};
+                  data.taskId, data.contextId, data.deviceId};
         computeTask_[id] = &data;
     }
 }
@@ -169,7 +169,7 @@ void OpSummaryAssembler::GenerateOpBody(std::vector<AscendTaskData> &taskData, s
     };
     for (const auto &task : taskData) {
         TaskId id{static_cast<uint16_t>(task.streamId), static_cast<uint16_t>(task.batchId),
-                  static_cast<uint16_t>(task.taskId), task.contextId, task.deviceId};
+                  task.taskId, task.contextId, task.deviceId};
         auto it = computeTask_.find(id);
         if (it != computeTask_.end()) {
             const std::string& taskType = it->second->taskType;

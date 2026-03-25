@@ -93,7 +93,7 @@ void AscendHardwareAssembler::InitData(DataInventory &dataInventory, std::vector
     if (taskInfo != nullptr) {
         for (const auto &node : *taskInfo) {
             const TaskId& taskId = TaskId{static_cast<uint16_t >(node.streamId), static_cast<uint16_t >(node.batchId),
-                static_cast<uint16_t >(node.taskId), node.contextId, node.deviceId};
+                node.taskId, node.contextId, node.deviceId};
             opName_.emplace(taskId, node.opName);
             taskType_.emplace(taskId, node.taskType);
         }
@@ -109,7 +109,7 @@ void AscendHardwareAssembler::InitData(DataInventory &dataInventory, std::vector
     for (const auto& data : taskData) {
         if (data.contextId != UINT32_MAX) {
             ffts_.emplace(TaskId{static_cast<uint16_t>(data.streamId), static_cast<uint16_t>(data.batchId),
-                                 static_cast<uint16_t>(data.taskId), UINT32_MAX, data.deviceId});
+                                 data.taskId, UINT32_MAX, data.deviceId});
         }
         if (data.hostType == MEMCPY_ASYNC) {
             memcpyAsyncDeviceTasks_.push_back(data);
@@ -120,7 +120,7 @@ void AscendHardwareAssembler::InitData(DataInventory &dataInventory, std::vector
 std::string AscendHardwareAssembler::GetOpName(const AscendTaskData& data)
 {
     TaskId id{static_cast<uint16_t>(data.streamId), static_cast<uint16_t>(data.batchId),
-        static_cast<uint16_t>(data.taskId), data.contextId, data.deviceId};
+        data.taskId, data.contextId, data.deviceId};
     auto it = opName_.find(id);
     if (it != opName_.end()) {
         return it->second;
@@ -134,7 +134,7 @@ std::string AscendHardwareAssembler::GetOpName(const AscendTaskData& data)
 std::string AscendHardwareAssembler::GetTaskType(const AscendTaskData& data)
 {
     TaskId id{static_cast<uint16_t>(data.streamId), static_cast<uint16_t>(data.batchId),
-        static_cast<uint16_t>(data.taskId), data.contextId, data.deviceId};
+        data.taskId, data.contextId, data.deviceId};
     auto it = taskType_.find(id);
     if (it != taskType_.end() && it->second != TASK_TYPE_NA) {
         return it->second;
@@ -167,7 +167,7 @@ void AscendHardwareAssembler::GenerateTaskTrace(const std::vector<AscendTaskData
             continue;  // MEMCPY_ASYNC类型的task有新增args,需要单独处理
         }
         id = {static_cast<uint16_t>(data.streamId), static_cast<uint16_t>(data.batchId),
-              static_cast<uint16_t>(data.taskId), data.contextId, data.deviceId};
+              data.taskId, data.contextId, data.deviceId};
         if (ffts_.find(id) != ffts_.end()) { // 当前task存在ffts+任务，只呈现ffts+任务即可
             continue;
         }

@@ -117,7 +117,7 @@ struct Operator {
 
 // 用于存储分析树结果，DBDumper将此信息落盘
 struct HostTask {
-    uint16_t taskId = 0;       // 和采集侧的数据类型不一致，采集侧的高低16位会被分别用作batchId和TaskId
+    uint32_t taskId = 0;       // 和采集侧的数据类型不一致，采集侧的高低16位会被分别用作batchId和TaskId
     uint16_t batchId = 0;
     uint16_t deviceId = 0;
     int32_t requestId = 0;
