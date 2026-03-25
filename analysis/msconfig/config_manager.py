@@ -28,7 +28,7 @@ from msconfig.meta_config import MetaConfig
 from msconfig.msprof_export_data_config import MsProfExportDataConfig
 from msconfig.prof_condition_config import ProfConditionConfig
 from msconfig.soc_pmu_config import SocPmuConfig
-from msconfig.stars_config import StarsConfig
+from msconfig.stars_config import StarsConfig, FuncTypeConfig
 from msconfig.tables_config import TablesConfig
 from msconfig.tables_operator_config import TablesOperatorConfig
 from msconfig.tables_training_config import TablesTrainingConfig
@@ -52,6 +52,7 @@ class ConfigManager:
     L2_CACHE = "L2CacheConfig"
     SOC_PMU = "SocPmuConfig"
     FILENAME_INTRODUCTION = "FilenameIntroductionConfig"
+    FUNC_TYPE = "FuncTypeConfig"
 
     CONFIG_MAP = {
         PROF_CONDITION: ProfConditionConfig,
@@ -70,6 +71,7 @@ class ConfigManager:
         L2_CACHE: L2CacheConfig,
         SOC_PMU: SocPmuConfig,
         FILENAME_INTRODUCTION: FilenameIntroductionConfig,
+        FUNC_TYPE: FuncTypeConfig,
     }
 
     @classmethod
