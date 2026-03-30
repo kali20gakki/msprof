@@ -314,10 +314,10 @@ bool MetricProcessor::FormatTaskBasedData(const std::vector<std::vector<std::str
         for (size_t col = 0; col < colSize - DATA_OFFSET; ++col) {
             processedDatum.emplace_back(oriData[col][row]);
         }
-        std::vector<uint16_t> tmpId;
+        std::vector<uint32_t> tmpId;
         for (size_t col = colSize - KEY_OFFSET; col < colSize; ++col) {
-            uint16_t temp;
-            if (Utils::StrToU16(temp, oriData[col][row])) {
+            uint32_t temp;
+            if (Utils::StrToU32(temp, oriData[col][row])) {
                 break;
             }
             tmpId.emplace_back(temp);
@@ -334,7 +334,8 @@ bool MetricProcessor::FormatTaskBasedData(const std::vector<std::vector<std::str
                 continue;
             }
         }
-        TaskId tempTaskId = {tmpId[0], tmpId[2], tmpId[1], tempContextId, deviceId};
+        TaskId tempTaskId = {static_cast<uint16_t>(tmpId[0]), static_cast<uint16_t>(tmpId[2]), tmpId[1],
+                             tempContextId, deviceId};
 
         if (processedData.find(tempTaskId) != processedData.end()) {
             processedData[tempTaskId].emplace_back(processedDatum);
