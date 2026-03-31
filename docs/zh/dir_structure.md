@@ -23,9 +23,8 @@
     └── build                                     // 构建目录
         ├── build.sh                              // 构建脚本
         ├── setup.py                              // 构建解析python代码脚本
-    └── cmake                                     // 存放解析C化部分cmake文件
+    └── cmake                                     // 存放解析功能C化部分的cmake文件
     └── docs                                      // 文档
-        └── zh                                    // 中文文档
     └── samples                                   // 工具样例存放目录
         ├── README.md                             // 工具样例说明
     └── scripts                                   // 存放run包安装、升级相关脚本
