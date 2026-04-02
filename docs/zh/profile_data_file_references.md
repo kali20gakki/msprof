@@ -491,7 +491,7 @@ task数据，呈现所有硬件执行的算子信息。
 |dataType|INTEGER|数据格式，ENUM_HCCL_DATA_TYPE(dataType)|
 |linkType|INTEGER|链路类型，包含：HCCS、PCIe、RoCE，ENUM_HCCL_LINK_TYPE(linkType)|
 |opId|INTEGER|对应的大算子Id，用于关联COMMUNICATION_OP表|
-|isMaster|INTEGER|标记主从流通信算子，分析时以主流算子为准，取值为：0：从流1：主流|
+|isMaster|INTEGER|标记主从流通信算子，分析时以主流算子为准，取值为：<br>0：从流<br>1：主流|
 |bandwidth|NUMERIC|该通信小算子的带宽数据，单位Byte / s|
 
 **COMMUNICATION\_OP<a name="zh-cn_topic_0000002076410600_section1238183491611"></a>**
@@ -502,21 +502,21 @@ task数据，呈现所有硬件执行的算子信息。
 
 **表 24**  格式
 
-|字段名|类型|含义|
-|--|--|--|
-|opName|INTEGER|算子名，STRING_IDS(opName)，例：hcom_allReduce__428_0_1|
-|startNs|INTEGER|通信大算子的开始时间，单位ns|
-|endNs|INTEGER|通信大算子的结束时间，单位ns|
-|connectionId|INTEGER|生成host-device连线|
-|groupName|INTEGER|通信域，STRING_IDS(groupName)，例：10.170.22.98%enp67s0f5_60000_0_1708156014257149|
-|opId|INTEGER|索引，通信大算子Id，用于关联COMMUNICATION_TASK_INFO表|
-|relay|INTEGER|借轨通信标识|
-|retry|INTEGER|重传标识|
-|dataType|INTEGER|大算子传输的数据类型，如（INT8，FP32），ENUM_HCCL_DATA_TYPE(dataType)|
-|algType|INTEGER|通信算子使用的算法，可分为多个阶段，STRING_IDS(algType)，如（HD-MESH）|
-|count|NUMERIC|算子传输的dataType类型的数据量|
-|opType|INTEGER|算子类型，STRING_IDS(opType)，例：hcom_broadcast_|
-|deviceld|INTEGER|设备ID|
+| 字段名          |类型|含义|
+|--------------|--|--|
+| opName       |INTEGER|算子名，STRING_IDS(opName)，例：hcom_allReduce__428_0_1|
+| startNs      |INTEGER|通信大算子的开始时间，单位ns|
+| endNs        |INTEGER|通信大算子的结束时间，单位ns|
+| connectionId |INTEGER|生成host-device连线|
+| groupName    |INTEGER|通信域，STRING_IDS(groupName)，例：10.170.22.98%enp67s0f5_60000_0_1708156014257149|
+| opId         |INTEGER|索引，通信大算子Id，用于关联COMMUNICATION_TASK_INFO表|
+| relay        |INTEGER|借轨通信标识|
+| retry        |INTEGER|重传标识|
+| dataType     |INTEGER|大算子传输的数据类型，如（INT8，FP32），ENUM_HCCL_DATA_TYPE(dataType)|
+| algType      |INTEGER|通信算子使用的算法，可分为多个阶段，STRING_IDS(algType)，如（HD-MESH）|
+| count        |NUMERIC|算子传输的dataType类型的数据量|
+| opType       |INTEGER|算子类型，STRING_IDS(opType)，例：hcom_broadcast_|
+| deviceId     |INTEGER|设备ID|
 
 **CANN\_API<a name="zh-cn_topic_0000002076410600_section2740528151615"></a>**
 
@@ -558,11 +558,11 @@ AI Core频率信息。
 
 **表 27**  格式
 
-|字段名|类型|含义|
-|--|--|--|
-|deviceld|INTEGER|设备ID|
-|timestampNs|NUMERIC|频率变化时的本地时间，单位ns|
-|freq|INTEGER|AI Core频率值，单位MHz|
+| 字段名         |类型|含义|
+|-------------|--|--|
+| deviceId    |INTEGER|设备ID|
+| timestampNs |NUMERIC|频率变化时的本地时间，单位ns|
+| freq        |INTEGER|AI Core频率值，单位MHz|
 
 **ACC\_PMU<a name="zh-cn_topic_0000002076410600_section68271524191613"></a>**
 
@@ -904,18 +904,18 @@ mstx接口采集的Host侧数据，Device侧数据在TASK表中整合。
 
 **表 45**  格式
 
-|字段名|类型|含义|
-|--|--|--|
-|startNs|INTEGER|Host侧tx打点数据开始时间，单位ns|
-|endNs|INTEGER|Host侧tx打点数据结束时间，单位ns|
-|eventType|INTEGER|Host侧tx打点数据类型，ENUM_MSTX_EVENT_TYPE(eventType)|
-|rangeId|INTEGER|Host侧range类型tx数据对应的range ID|
-|category|INTEGER|Host侧tx数据所属的分类ID|
-|message|INTEGER|Host侧tx打点数据携带信息，STRING_IDS(message)|
-|globalTID|INTEGER|Host侧tx打点数据开始线程的全局TID|
-|endGlobalTid|INTEGER|Host侧tx打点数据结束线程的全局TID|
-|domainId|INTEGER|Host侧tx打点数据所属域的域ID|
-|connectionId|INTEGER|Host侧tx打点数据的关联ID，TASK(connectionId)|
+| 字段名          |类型|含义|
+|--------------|--|--|
+| startNs      |INTEGER|Host侧tx打点数据开始时间，单位ns|
+| endNs        |INTEGER|Host侧tx打点数据结束时间，单位ns|
+| eventType    |INTEGER|Host侧tx打点数据类型，ENUM_MSTX_EVENT_TYPE(eventType)|
+| rangeId      |INTEGER|Host侧range类型tx数据对应的range ID|
+| category     |INTEGER|Host侧tx数据所属的分类ID|
+| message      |INTEGER|Host侧tx打点数据携带信息，STRING_IDS(message)|
+| globalTid    |INTEGER|Host侧tx打点数据开始线程的全局TID|
+| endGlobalTid |INTEGER|Host侧tx打点数据结束线程的全局TID|
+| domainId     |INTEGER|Host侧tx打点数据所属域的域ID|
+| connectionId |INTEGER|Host侧tx打点数据的关联ID，TASK(connectionId)|
 
 **COMMUNICATION\_SCHEDULE\_TASK\_INFO<a name="zh-cn_topic_0000002076410600_section16366112743116"></a>**
 

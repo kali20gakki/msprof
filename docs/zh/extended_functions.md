@@ -19,9 +19,9 @@
 
 **表 1**  脚本介绍
 
-|脚本名|功能| 路径                                                                                                                                                             |
-|--|--|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|get_msprof_info.py|获取设备信息。| `${INSTALL_DIR}/tools/profiler/profiler_tool/analysis/interface`，${INSTAL\_DIR}请替换为CANN软件安装后文件存储路径。若安装的Toolkit软件包，以root安装举例，则安装后文件存储路径为：/usr/local/Ascend/cann。 |
+|脚本名|功能| 路径                                                                                                                                                               |
+|--|--|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|get_msprof_info.py|获取设备信息。| `${INSTALL_DIR}/tools/profiler/profiler_tool/analysis/interface`，${INSTALL\_DIR}请替换为CANN软件安装后文件存储路径。若安装的Toolkit软件包，以root安装举例，则安装后文件存储路径为：/usr/local/Ascend/cann。 |
 
 **命令格式<a name="zh-cn_topic_0000001276273570_section25968322563"></a>**
 
@@ -56,13 +56,6 @@ python3 get_msprof_info.py -dir <dir> [-help]
         python3 get_msprof_info.py -dir /home/1/
         ```
 
-    **表 3**  参数说明
-
-|参数|**可选/必选**| 说明                                                                                  |
-|--|--|-------------------------------------------------------------------------------------|
-|-dir或--collection-dir|必选| 收集到的Profiling数据目录。非集群场景须指定为PROF\_XXX目录下的host或device\_{id}目录；集群场景须指定为PROF\_XXX目录的父目录。 |
-|-h或--help|可选| 显示帮助信息，仅在获取使用方式时使用。                                                                 |
-
 **输出说明<a name="zh-cn_topic_0000001276273570_section1320820550911"></a>**
 
 非集群场景会打印输出结果，如[图1](#zh-cn_topic_0000001276273570_fig1935196101)所示，各字段含义如[表4](#zh-cn_topic_0000001276273570_table293151916103)所示；集群场景在-dir参数指定目录下生成/query/cluster\_info.json文件保存集群场景各节点信息，如[图2](#zh-cn_topic_0000001276273570_fig095121901016)所示，各字段含义如[表5](#zh-cn_topic_0000001276273570_table1095119171010)所示。
@@ -70,7 +63,7 @@ python3 get_msprof_info.py -dir <dir> [-help]
 **图 1**  设备信息（非集群场景）<a name="zh-cn_topic_0000001276273570_fig1935196101"></a>  
 ![](figures/设备信息（非集群场景）.png "设备信息（非集群场景）")
 
-**表 4**  字段说明（非集群场景）<a name="zh-cn_topic_0000001276273570_table293151916103"></a>
+**表 3**  字段说明（非集群场景）<a name="zh-cn_topic_0000001276273570_table293151916103"></a>
 
 |字段|**说明**|
 |--|--|
@@ -108,7 +101,7 @@ python3 get_msprof_info.py -dir <dir> [-help]
 **图 2**  设备信息（集群场景）<a name="zh-cn_topic_0000001276273570_fig095121901016"></a>  
 ![](figures/设备信息（集群场景）.png "设备信息（集群场景）")
 
-**表 5**  字段说明（集群场景）<a name="zh-cn_topic_0000001276273570_table1095119171010"></a>
+**表 4**  字段说明（集群场景）<a name="zh-cn_topic_0000001276273570_table1095119171010"></a>
 
 |字段|说明|
 |--|--|
@@ -403,7 +396,7 @@ msprof工具的查询功能获取到的信息如[表2](#zh-cn_topic_000000131270
 
 **输出说明<a name="zh-cn_topic_0000001265069834_section54271276213"></a>**
 
-执行完上述命令后，会在collection-dir目录下的PROF\_XXX目录下生成mindstudio\_profiler\_output目录和msprof\_\*.db文件。
+执行完上述命令后，会在--collection-dir目录下的PROF\_XXX目录下生成mindstudio\_profiler\_output目录和msprof\_\*.db文件。
 
 生成的**Profiling数据**目录结构如下所示。
 
