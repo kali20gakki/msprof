@@ -132,7 +132,7 @@ msprof\_\*.json下的“SIO”层级展示通道间传输带宽的信息。
 Atlas A3 训练系列产品/Atlas A3 推理系列产品中，SIO数据的每条流使用两条虚拟通道，die 0和die 1。
 
 **图 5**  SIO（Atlas A3 训练系列产品/Atlas A3 推理系列产品）<a name="zh-cn_topic_0000001751419248_fig1090119416103"></a>  
-![](../figures/SIO（Ascend-910C）.png "SIO（Ascend-910C）")
+![](../figures/SIO.png "SIO")
 
 图中色块横坐标对应时间Time，单位ms，纵坐标对应带宽Value，单位MB/s。
 
