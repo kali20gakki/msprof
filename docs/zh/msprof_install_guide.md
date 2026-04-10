@@ -1,22 +1,11 @@
 # msProf工具安装指南
 
-本文档主要介绍msProf工具的两种安装方式，**使用CANN包安装**和**源码编译安装**。
+msProf工具的安装方式包括：
 
-## 使用CANN包安装
+- 使用CANN包安装：msProf工具完整功能已集成在CANN包中发布，可直接安装CANN包，具体请参见[CANN快速安装](https://www.hiascend.com/cann/download)。
+- [使用run包安装](#使用run包安装)：msProf工具完整功能集成在CANN包中且msProf依赖CANN包，因此使用msProf工具需要**先完成CANN包的安装**，若需要升级安装本工具代码仓中的最新功能，可使用源码编译方式编译最新的msProf工具的run包进行覆盖安装，操作方式如下。
 
-msProf工具完整功能已集成在CANN包中发布，可通过以下方式完成安装：
-
-- 方式一：依据CANN官方文档安装
-
-  请参见《[CANN安装官方文档](https://www.hiascend.com/document/detail/zh/canncommercial/850/softwareinst)》，按文档逐步完成安装与配置。
-
-- 方式二：使用CANN官方容器镜像
-
-  请访问《[CANN官方镜像仓库](https://www.hiascend.com/developer/ascendhub/detail/17da20d1c2b6493cb38765adeba85884)》，按仓库中的指引完成镜像拉取及容器启动。
-
-## （可选）源码编译安装
-
-msProf工具完整功能集成在CANN包中且msProf依赖CANN包，因此使用msProf工具需要完成[使用CANN包安装](#使用cann包安装)，若需要升级安装本工具代码仓中的最新功能，可使用源码编译方式编译最新的msProf软件包进行覆盖安装，操作方式如下。
+## 使用run包安装
 
 ### 编译环境准备
 

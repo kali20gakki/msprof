@@ -1,6 +1,6 @@
-# 离线推理场景性能分析快速入门
+# 快速入门
 
-离线推理场景下，推荐使用**msprof命令行**方式采集和解析性能数据，并通过生成的结果文件分析性能瓶颈。
+本快速入门以离线推理场景为例，介绍**msprof**命令行采集和解析性能数据，并通过生成的结果文件分析性能瓶颈。
 
 ## 前提条件
 
@@ -75,7 +75,7 @@
    >
    > 上表中，“*”表示时间戳。
 
-   - db文件推荐使用MindStudio Insight工具进行分析，详细介绍请参见《[MindStudio Insight工具用户指南](https://www.hiascend.com/document/detail/zh/mindstudio/830/GUI_baseddevelopmenttool/msascendinsightug/Insight_userguide_0002.html)》。
+   - db文件推荐使用MindStudio Insight工具进行分析，详细介绍请参见《[MindStudio Insight工具用户指南](https://gitcode.com/Ascend/msinsight/blob/26.0.0/docs/zh/user_guide/overview.md)》。
 
    - json文件需要在Chrome浏览器中输入`chrome://tracing`，将文件拖到空白处进行打开，通过键盘上的快捷键（w：放大，s：缩小，a：左移，d：右移）。通过json文件可查看当前AI任务运行的时序信息，比如运行过程中接口调用时间线，如下图所示。
 

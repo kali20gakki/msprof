@@ -54,7 +54,7 @@
 
 **查看整体性能数据<a name="zh-cn_topic_0000001798537961_section268312488227"></a>**
 
-msprof\_\*.db为汇总整体性能数据的文件，mindstudio\_profiler\_output目录下的timeline和summary文件则是将各类性能数据拆分成多个文件，以上两类文件均可以使用MindStudio Insight工具导入后进行整体数据的可视化展示，详细操作请参见《MindStudio Insight工具用户指南》。
+msprof\_\*.db为汇总整体性能数据的文件，mindstudio\_profiler\_output目录下的timeline和summary文件则是将各类性能数据拆分成多个文件，以上两类文件均可以使用MindStudio Insight工具导入后进行整体数据的可视化展示，详细操作请参见《[MindStudio Insight工具用户指南](https://gitcode.com/Ascend/msinsight/blob/26.0.0/docs/zh/user_guide/overview.md)》。
 
 **查看timeline文件<a name="zh-cn_topic_0000001798537961_section2083110814512"></a>**
 
@@ -1159,7 +1159,7 @@ msprof\_\*.json下的“SIO”层级展示通道间传输带宽的信息。
 Atlas A3 训练系列产品/Atlas A3 推理系列产品中，SIO数据的每条流使用两条虚拟通道，die 0和die 1。
 
 **图 5**  SIO（Atlas A3 训练系列产品/Atlas A3 推理系列产品）<a name="zh-cn_topic_0000001751419248_fig1090119416103"></a>  
-![](figures/SIO（Ascend-910C）.png "SIO（Ascend-910C）")
+![](figures/SIO.png "SIO")
 
 图中色块横坐标对应时间Time，单位ms，纵坐标对应带宽Value，单位MB/s。
 
@@ -1566,7 +1566,7 @@ step\_trace\_\*.csv文件内容格式示例如下：
 
 数据增强信息仅在训练场景下生成且仅生成summary数据dp\_\*.csv。
 
-在TensorFlow训练场景开启数据预处理下沉（即enable\_data\_pre\_proc开关配置为True）时可生成dp\_\*.csv文件。详情请参见《TensorFlow 1.15模型迁移指南》中的“训练迭代循环下沉”章节。
+在TensorFlow训练场景开启数据预处理下沉（即enable\_data\_pre\_proc开关配置为True）时可生成dp\_\*.csv文件。详情请参见《TensorFlow 1.15模型迁移指南》中的“[训练迭代循环下沉](https://www.hiascend.com/document/detail/zh/TensorFlowCommunity/850/migration/tfmigr1/tfmigr1_000048.html)”章节。
 
 **产品支持情况<a name="zh-cn_topic_0000001752181593_section91616487538"></a>**
 
