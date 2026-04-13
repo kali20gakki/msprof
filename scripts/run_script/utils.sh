@@ -98,12 +98,12 @@ function check_path() {
         exit 1
     fi
     # black list
-    if echo "${path_str}" | grep -Eq '\/{2,}|\.{3,}'; then
+    if echo "${path_str}" | grep -Eq '/{2,}|\.{3,}'; then
         print "ERROR" "The path ${path_str} is invalid, cannot contain the following characters: // ...!"
         exit 1
     fi
     # white list
-    if echo "${path_str}" | grep -Eq '^\~?[a-zA-Z0-9./_-]*$'; then
+    if echo "${path_str}" | grep -Eq '^~?[a-zA-Z0-9./_-]*$'; then
         return
     else
         print "ERROR" "The path ${path_str} is invalid, only [a-z,A-Z,0-9,-,_] is support!"
