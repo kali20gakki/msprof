@@ -21,6 +21,7 @@ import os
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.path_manager import PathManager
 from msconfig.config_manager import ConfigManager
+from common_func.platform.chip_manager import ChipManager
 
 
 class ParserDispatcher:
@@ -35,6 +36,8 @@ class ParserDispatcher:
         self.parser_list = []
         self.result_dir = result_dir
         self.cfg_parser = None
+        self.known_func_type_list = ConfigManager.get(ConfigManager.FUNC_TYPE).KNOWN_FUNC_TYPE_LIST_V6 \
+            if ChipManager().is_chip_v6() else ConfigManager.get(ConfigManager.FUNC_TYPE).KNOWN_FUNC_TYPE_LIST
         self.modules = importlib.import_module("msparser.stars")
 
     def init(self: any) -> None:
@@ -69,8 +72,10 @@ class ParserDispatcher:
         if func_type in self.parser_map:
             self.parser_map.get(func_type).handle(func_type, data)
         else:
-            logging.error("Not support data type %s", func_type)
-
+            if func_type not in self.known_func_type_list:
+                logging.error("Invalid func type %s", func_type)
+            else:
+                logging.warning("Not support func type %s", func_type)
     def flush_all_parser(self: any) -> None:
         """
         flush all parser data to db
