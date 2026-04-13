@@ -21,12 +21,14 @@ from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
 from common_func.file_manager import FileManager
 from common_func.file_manager import FileOpen
+from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msprof_exception import ProfException
 from common_func.msvp_common import is_valid_original_data
 from common_func.path_manager import PathManager
 from framework.offset_calculator import OffsetCalculator
+from mscalculate.ascend_task.host_task_collector import HostTaskCollector
 from msmodel.hardware.ccu_mission_model import CCUMissionModel
 from msparser.data_struct_size_constant import StructFmt
 from profiling_bean.prof_enum.data_tag import DataTag
@@ -95,6 +97,7 @@ class CCUMissionParser(MsMultiProcess):
         for file_name in self._file_list:
             if is_valid_original_data(file_name, self._project_path):
                 self._handle_original_data(file_name)
+        self._set_stream_id_by_host()
         logging.info("Parse CCU mission data finished!")
 
     def save(self: any) -> None:
@@ -122,3 +125,14 @@ class CCUMissionParser(MsMultiProcess):
         if self.read_binary_data(file_name) == NumberConstant.ERROR:
             logging.error('Parse CCU mission data file: %s error.', file_name)
         FileManager.add_complete_file(self._project_path, file_name)
+
+    def _set_stream_id_by_host(self: any):
+        try:
+            device_id = int(InfoConfReader().get_device_id())
+        except (ValueError, TypeError) as err:
+            logging.error("Device id is not a valid integer, skip setting stream id by host. Error: %s", err)
+            return
+        host_task_dict = HostTaskCollector(self._project_path).get_host_task_stream_table(device_id)
+        for data in self.mission_data:
+            task_id = data[1]
+            data[0] = host_task_dict.get(task_id, Constant.UINT16_MAX)

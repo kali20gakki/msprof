@@ -19,6 +19,7 @@ from typing import Tuple
 
 from common_func.info_conf_reader import InfoConfReader
 from common_func.platform.chip_manager import ChipManager
+from common_func.constant import Constant
 from mscalculate.ascend_task.host_task_collector import HostTaskCollector
 from msmodel.sqe_type_map import SqeType
 from msmodel.add_info.kfc_info_model import KfcInfoViewModel
@@ -134,7 +135,7 @@ class LogBaseParser(IStarsParser):
         for data in self._data_list:
             if data.task_id not in host_task_dict and data.task_id not in hccl_data_dict:
                 failed_count += 1
-                data.stream_id = None
+                data.stream_id = Constant.UINT16_MAX
                 continue
             # 优先从host task中获取stream id，aicpu小算子信息在host task中不存在，从hccl task中获取
             data.stream_id = host_task_dict.get(data.task_id, hccl_data_dict.get(data.task_id))

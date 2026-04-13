@@ -177,12 +177,12 @@ class CCUMissionViewer(BaseViewer, ABC):
             return result
         grouped_loop_data = defaultdict(list)
         for item in device_loop_data:
-            key = (item.stream_id, item.task_id, item.lp_instr_id)
+            key = (item.task_id, item.lp_instr_id)
             grouped_loop_data[key] = item
 
         grouped_group_data = defaultdict(list)
         for item in group_data:
-            key = (item.stream_id, item.task_id, item.instr_id)
+            key = (item.task_id, item.instr_id)
             grouped_group_data[key].append(item)
 
         for key, data in grouped_loop_data.items():
@@ -226,12 +226,12 @@ class CCUMissionViewer(BaseViewer, ABC):
             return result
         grouped_loop_data = defaultdict(list)
         for item in wait_data:
-            key = (item.stream_id, item.task_id, item.setckebit_instr_id)
+            key = (item.task_id, item.setckebit_instr_id)
             grouped_loop_data[key].append(item)
 
         grouped_wait_signal_data = defaultdict(list)
         for item in wait_signal_data:
-            key = (item.stream_id, item.task_id, item.instr_id)
+            key = (item.task_id, item.instr_id)
             grouped_wait_signal_data[key].append(item)
 
         for key, data_list in grouped_loop_data.items():

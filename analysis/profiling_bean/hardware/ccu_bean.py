@@ -17,6 +17,7 @@
 import logging
 import struct
 
+from profiling_bean.stars.stars_common import StarsCommon
 from msparser.data_struct_size_constant import StructFmt
 from profiling_bean.struct_info.struct_decoder import StructDecoder
 
@@ -89,7 +90,7 @@ class CCUMissionBean(StructDecoder):
         data_lens = 23
         if mission_data and len(mission_data) == data_lens:
             self._stream_id = mission_data[21]
-            self._task_id = mission_data[22]
+            self._task_id = StarsCommon.set_task_id(mission_data[21], mission_data[22])
             self._lp_instr_id = mission_data[20]
             self._lp_start_time = mission_data[19]
             self._lp_end_time = mission_data[18]

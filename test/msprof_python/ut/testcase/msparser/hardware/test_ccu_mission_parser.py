@@ -25,7 +25,7 @@ class TestCcuMissionParser(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        InfoConfReader()._info_json = {"DeviceInfo": [{"hwts_frequency": "25.000000"}]}
+        InfoConfReader()._info_json = {"DeviceInfo": [{"hwts_frequency": "25.000000"}], "devices": "0"}
         if not os.path.exists(cls.DATA_PATH):
             os.makedirs(cls.DATA_PATH)
             os.makedirs(cls.SQLITE_PATH)
