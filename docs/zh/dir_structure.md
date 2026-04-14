@@ -36,7 +36,7 @@
         └── msprof_cpp                            // 数据解析c++代码测试用例
         └── msprof_python                         // 数据解析python代码测试用例
     └── misc                                      // 存放其他工具
-        ├── function_monitor                      // 轻量化函数监控工具
+        ├── function_monitor                      // 轻量化函数监测工具
         └── gil_tracer                            // Python GIL 锁检测工具
     └── README.md                                 // 整体仓说明文档
 
