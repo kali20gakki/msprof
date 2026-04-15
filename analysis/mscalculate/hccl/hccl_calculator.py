@@ -55,7 +55,7 @@ class HcclCalculator(ICalculator, MsMultiProcess):
         self._hccl_op_data = []
         self._hccl_op_report_data = []
         start_ts, _ = InfoConfReader().get_collect_time()
-        self.hot_start_time_raw_timestamp = InfoConfReader().trans_from_local_time_into_dev_raw_time(start_ts)
+        self.start_time_raw_timestamp = InfoConfReader().trans_from_local_time_into_dev_raw_time(start_ts)
 
     @staticmethod
     def update_bandwidth(communication_data: List[HcclTask]):
@@ -163,13 +163,15 @@ class HcclCalculator(ICalculator, MsMultiProcess):
         group_dict = defaultdict(lambda: {"first_timestamp": 0, "count": -1})
         for num, data in enumerate(communication_data):
             # if data start in warmup, index will be set -1
-            # else index++ when group name in group_dict or group name set first
-            if (data.timestamp > self.hot_start_time_raw_timestamp and
-                    data.first_timestamp > group_dict[data.group_name]["first_timestamp"]):
-                group_dict[data.group_name]["first_timestamp"] = data.first_timestamp
-                group_dict[data.group_name]["count"] += 1
+            # else index++ when group_name and task_type in group_dict or group name set first
+            task_type = StrConstant.AICPU_KERNEL if StrConstant.AICPU_KERNEL in data.op_name else StrConstant.NORMAL
+            key = (data.group_name, task_type)
+            if (data.timestamp > self.start_time_raw_timestamp and
+                    data.first_timestamp > group_dict[key]["first_timestamp"]):
+                group_dict[key]["first_timestamp"] = data.first_timestamp
+                group_dict[key]["count"] += 1
 
-            index = group_dict[data.group_name]["count"]
+            index = group_dict[key]["count"]
             communication_data[num] = data.replace(
                 op_name=f"{data.op_name}_{data.group_name[-3:]}_{str(index)}_{str(data.iter_id)}")
 
@@ -182,7 +184,7 @@ class HcclCalculator(ICalculator, MsMultiProcess):
             return {}
         grouped_data = defaultdict(lambda: {"min_timestamp": float("inf"), "max_timestamp": -float("inf")})
         for data in communication_data:
-            if data.is_master == 0 or data.timestamp < self.hot_start_time_raw_timestamp:
+            if data.is_master == 0 or data.timestamp < self.start_time_raw_timestamp:
                 continue
             key = (data.op_name, data.first_timestamp, data.op_type)
             grouped_data[key]["min_timestamp"] = min(grouped_data[key]["min_timestamp"], data.timestamp)

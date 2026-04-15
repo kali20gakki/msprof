@@ -32,8 +32,16 @@ using HcclOpDataFormat = std::vector<std::tuple<uint16_t, uint64_t, int32_t, uin
 const HcclOpDataFormat HCCL_OP_DATA = {
     {1, 4294967295, -1, 2037145, "hcom_broadcast_", "HCCL", "hcom_broadcast_", 8864918572019, 63965, "1",
         17, 0, 0, "INT64", "MESH-RING", 5, "559228325453745108"},
+    {1, 4294967295, -1, 2037145, "hcom_scatter_AicpuKernel", "HCCL", "hcom_scatter_AicpuKernel", 8864977572019,
+        30000, "1", 11111, 0, 0, "FP32", "RING-HD", 1, "456135115796354833"},
     {1, 4294967295, -1, 2037145, "hcom_allReduce_", "HCCL", "hcom_allReduce_", 8865013596227, 31531, "1",
         9537, 0, 0, "FP32", "RING-HD", 1, "18121985196749930015"},
+    {1, 4294967295, -1, 2037145, "hcom_allGather_AicpuKernel", "HCCL", "hcom_allGather_AicpuKernel", 8865013684561,
+        68888, "1", 11111, 0, 0, "FP32", "RING-HD", 1, "18121985196749930015"},
+    {1, 4294967295, -1, 2037145, "hcom_alltoall_AicpuKernel", "HCCL", "hcom_alltoall_AicpuKernel", 8865013802241,
+        30000, "1", 15000, 0, 0, "INT32", "RING-HD", 1, "456135115796354833"},
+    {1, 4294967295, -1, 2037145, "hcom_alltoallv_AicpuKernel", "HCCL", "hcom_alltoallv_AicpuKernel", 8865013874784,
+        20000, "1", 16885, 0, 0, "FP16", "RING-HD", 1, "456135115796354833"},
 };
 
 // modelId, indexId, name, groupName, planeId, timestamp, duration, streamId, taskId, contextId, batchId,
@@ -62,6 +70,10 @@ const HcclTaskDataFormat HCCL_TASK_DATA = {
         "SDMA", 0, "INVALID_TYPE", "INVALID_TYPE", "25769804280", "INVALID_TYPE", 2037145},
     {4294967295, -1, "Notify_Wait", "559228325453745108", 0, 8864918631924, 0.02, 5, 5450, 8, 0, 1, 1, 1, 6,
         "LOCAL", 0, "INVALID_TYPE", "INVALID_TYPE", "4294967784", "INVALID_TYPE", 2037145},
+    {4294967295, -1, "Notify_Record", "456135115796354833", 0, 8864977577019, 1, 7, 980, 0, 0, 1, 0, 1, 0,
+        "SDMA", 0, "INVALID_TYPE", "INVALID_TYPE", "504", "INVALID_TYPE", 2037145},
+    {4294967295, -1, "Notify_Wait", "456135115796354833", 0, 8864977597019, 0.02, 7, 990, 0, 0, 1, 1, 1, 6,
+        "LOCAL", 0, "INVALID_TYPE", "INVALID_TYPE", "4294968712", "INVALID_TYPE", 2037145},
     {4294967295, -1, "Memcpy", "18121985196749930015", 0, 8865013624852, 0.60020725388601, 6, 34, 0, 0, 1, 1, 1, 1,
         "SDMA", 4, "INVALID_TYPE", "ON_CHIP", "18446744073709551615", "INVALID_TYPE", 2037145},
     {4294967295, -1, "Memcpy", "18121985196749930015", 0, 8865013624852, 0.6, 6, 34, 1, 0, 1, 1, 1, 1,
@@ -86,6 +98,18 @@ const HcclTaskDataFormat HCCL_TASK_DATA = {
         "LOCAL", 0, "INVALID_TYPE", "INVALID_TYPE", "4294968712", "INVALID_TYPE", 2037145},
     {4294967295, -1, "RDMASend", "18121985196749930015", 0, 8865013624852, 7, 6, 34, 11, 0, 1, 1, 1, 0,
      "RDMA", 300, "INVALID_TYPE", "ROCE", "4294968712", "RDMA_SEND_PAYLOAD", 2037145},
+    {4294967295, -1, "Notify_Record", "18121985196749930015", 0, 8865013687777, 1, 7, 1000, 0, 0, 1, 0, 1, 0,
+        "SDMA", 0, "INVALID_TYPE", "INVALID_TYPE", "504", "INVALID_TYPE", 2037145},
+    {4294967295, -1, "Notify_Wait", "18121985196749930015", 0, 8865013745514, 0.02, 7, 1010, 0, 0, 1, 1, 1, 6,
+        "LOCAL", 0, "INVALID_TYPE", "INVALID_TYPE", "4294968712", "INVALID_TYPE", 2037145},
+    {4294967295, -1, "Notify_Record", "456135115796354833", 0, 8865013806666, 1, 7, 1020, 0, 0, 1, 0, 1, 0,
+        "SDMA", 0, "INVALID_TYPE", "INVALID_TYPE", "504", "INVALID_TYPE", 2037145},
+    {4294967295, -1, "Notify_Wait", "456135115796354833", 0, 8865013831941, 0.02, 7, 1030, 0, 0, 1, 1, 1, 6,
+        "LOCAL", 0, "INVALID_TYPE", "INVALID_TYPE", "4294968712", "INVALID_TYPE", 2037145},
+    {4294967295, -1, "Notify_Record", "456135115796354833", 0, 8865013879999, 1, 7, 1040, 0, 0, 1, 0, 1, 0,
+        "SDMA", 0, "INVALID_TYPE", "INVALID_TYPE", "504", "INVALID_TYPE", 2037145},
+    {4294967295, -1, "Notify_Wait", "456135115796354833", 0, 8865013894184, 0.02, 7, 1050, 0, 0, 1, 1, 1, 6,
+        "LOCAL", 0, "INVALID_TYPE", "INVALID_TYPE", "4294968712", "INVALID_TYPE", 2037145},
 };
 
 // modelId, indexId, streamId, taskId, contextId, batchId, startTime, duration,
@@ -93,6 +117,7 @@ const HcclTaskDataFormat HCCL_TASK_DATA = {
 using AscendTaskDataFormat = std::vector<std::tuple<uint32_t, uint32_t, uint16_t, uint16_t, uint32_t, uint16_t,
         double, double, uint16_t, uint16_t, uint32_t>>;
 const AscendTaskDataFormat ASCEND_TASK_DATA = {
+    // hcom_broadcast_
     {4294967295, -1, 5, 5450, 0, 0, 88511176361580, 88511176362300, 0, 0, 17},
     {4294967295, -1, 5, 5450, 1, 0, 88511176364200, 88511176366660, 0, 0, 17},
     {4294967295, -1, 5, 5450, 2, 0, -1, -1, 0, 0, 17},
@@ -102,6 +127,10 @@ const AscendTaskDataFormat ASCEND_TASK_DATA = {
     {4294967295, -1, 5, 5450, 6, 0, 88511176372460, 88511176397140, 0, 0, 17},
     {4294967295, -1, 5, 5450, 7, 0, 88511176368520, 88511176369220, 0, 0, 17},
     {4294967295, -1, 5, 5450, 8, 0, 88511176373420, 88511176391480, 0, 0, 17},
+    // hcom_scatter_AicpuKernel
+    {4294967295, -1, 7, 980, 0, 0, 88513176373420, 88513176391480, 0, 0, 11111},
+    {4294967295, -1, 7, 990, 0, 0, 88513176443420, 88513176451480, 0, 0, 11111},
+    // hcom_allReduce_
     {4294967295, -1, 6, 34, 0, 0, 88512126298900, 88512126299900, 0, 0, 9537},
     {4294967295, -1, 6, 34, 1, 0, -1, -1, 0, 0, 9537},
     {4294967295, -1, 6, 34, 2, 0, -1, -1, 0, 0, 9537},
@@ -114,6 +143,15 @@ const AscendTaskDataFormat ASCEND_TASK_DATA = {
     {4294967295, -1, 6, 34, 9, 0, 88512126312900, 88512126313220, 0, 0, 9537},
     {4294967295, -1, 6, 34, 10, 0, 88512126314920, 88512126317880, 0, 0, 9537},
     {4294967295, -1, 6, 34, 11, 0, 88512126316800, 88512126318800, 0, 0, 9537},
+    // hcom_allGather_AicpuKernel
+    {4294967295, -1, 7, 1000, 0, 0, 88512126318800, 88512126319900, 0, 0, 11111},
+    {4294967295, -1, 7, 1010, 0, 0, 88512126320800, 88512126321800, 0, 0, 11111},
+    // hcom_alltoall_AicpuKernel
+    {4294967295, -1, 7, 1020, 0, 0, 88512126322800, 88512126323800, 0, 0, 15000},
+    {4294967295, -1, 7, 1030, 0, 0, 88512126324800, 88512126325800, 0, 0, 15000},
+    // hcom_alltoallv_AicpuKernel
+    {4294967295, -1, 7, 1040, 0, 0, 88512126326800, 88512126327800, 0, 0, 16885},
+    {4294967295, -1, 7, 1050, 0, 0, 88512126328800, 88512126329800, 0, 0, 16885},
 };
 
 
@@ -201,16 +239,47 @@ TEST_F(HcclCalculatorUTest, TestProcessEntryWhenProcessSuccessThenReturnOK)
     EXPECT_EQ(HCCL_TASK_DATA.size() - 4, hcclTaskData->size());
     std::vector<double> expectBandwidth = {
         0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.004, 0.0125, 0.0, 0.00036166365280289331,
-        0.0125, 0.0, 0.0125, 0.0, 0.15
+        0.0125, 0.0, 0.0125, 0.0, 0.15, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
     };
+
+    std::vector<std::string> expectOpName = {
+        "hcom_broadcast__108_0_1",
+        "hcom_broadcast__108_0_2",
+        "hcom_broadcast__108_0_1",
+        "hcom_broadcast__108_0_1",
+        "hcom_broadcast__108_0_1",
+        "hcom_broadcast__108_0_1",
+        "hcom_broadcast__108_0_1",
+        "hcom_broadcast__108_0_1",
+        "hcom_broadcast__108_0_1",
+        "hcom_allReduce__015_0_1",
+        "hcom_allReduce__015_0_1",
+        "hcom_allReduce__015_0_1",
+        "hcom_allReduce__015_0_1",
+        "hcom_allReduce__015_0_1",
+        "hcom_allReduce__015_0_1",
+        "hcom_allReduce__015_0_1",
+        "hcom_allReduce__015_0_1",
+        "hcom_allReduce__015_0_1",
+        "hcom_allGather_AicpuKernel_015_0_1",
+        "hcom_allGather_AicpuKernel_015_0_1",
+        "hcom_alltoall_AicpuKernel_833_1_1",
+        "hcom_alltoall_AicpuKernel_833_1_1",
+        "hcom_alltoallv_AicpuKernel_833_2_1",
+        "hcom_alltoallv_AicpuKernel_833_2_1",
+        "hcom_scatter_AicpuKernel_833_0_1",
+        "hcom_scatter_AicpuKernel_833_0_1",
+    };
+
     size_t i = 0;
     for (const auto& data : *hcclTaskData) {
         EXPECT_DOUBLE_EQ(expectBandwidth[i], data.bandwidth);
+        EXPECT_EQ(expectOpName[i], data.opName);
         i++;
     }
 
     auto hcclStatisticsData = dataInventory_.GetPtr<std::vector<HcclStatistics>>();
-    size_t expectStatisticsDataNum = 2;
+    size_t expectStatisticsDataNum = 6;
     EXPECT_EQ(expectStatisticsDataNum, hcclStatisticsData->size());
 }
 
@@ -237,7 +306,42 @@ TEST_F(HcclCalculatorUTest, TestGetHcclStatisticsDataShouldBeFilteredWhenProcess
     // 去除4条时间为-1的非法数据
     EXPECT_EQ(HCCL_TASK_DATA.size() - 4, hcclTaskData->size());
 
+    std::vector<std::string> expectOpName = {
+        "hcom_broadcast__108_-1_1",
+        "hcom_broadcast__108_-1_2",
+        "hcom_broadcast__108_-1_1",
+        "hcom_broadcast__108_-1_1",
+        "hcom_broadcast__108_-1_1",
+        "hcom_broadcast__108_-1_1",
+        "hcom_broadcast__108_-1_1",
+        "hcom_broadcast__108_-1_1",
+        "hcom_broadcast__108_-1_1",
+        "hcom_allReduce__015_-1_1",
+        "hcom_allReduce__015_0_1",
+        "hcom_allReduce__015_0_1",
+        "hcom_allReduce__015_0_1",
+        "hcom_allReduce__015_0_1",
+        "hcom_allReduce__015_0_1",
+        "hcom_allReduce__015_0_1",
+        "hcom_allReduce__015_0_1",
+        "hcom_allReduce__015_0_1",
+        "hcom_allGather_AicpuKernel_015_0_1",
+        "hcom_allGather_AicpuKernel_015_0_1",
+        "hcom_alltoall_AicpuKernel_833_1_1",
+        "hcom_alltoall_AicpuKernel_833_1_1",
+        "hcom_alltoallv_AicpuKernel_833_2_1",
+        "hcom_alltoallv_AicpuKernel_833_2_1",
+        "hcom_scatter_AicpuKernel_833_0_1",
+        "hcom_scatter_AicpuKernel_833_0_1",
+    };
+
+    size_t i = 0;
+    for (const auto& data : *hcclTaskData) {
+        EXPECT_EQ(expectOpName[i], data.opName);
+        i++;
+    }
+
     auto hcclStatisticsData = dataInventory_.GetPtr<std::vector<HcclStatistics>>();
-    size_t expectStatisticsDataNum = 1;
+    size_t expectStatisticsDataNum = 5;
     EXPECT_EQ(expectStatisticsDataNum, hcclStatisticsData->size());
 }

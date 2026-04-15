@@ -48,6 +48,8 @@ const uint16_t PERCENTAGE = 100;
 const std::string RDMA_SEND_PAYLOAD = "RDMA_SEND_PAYLOAD";
 const std::string NA = "N/A";
 const int POS_COMPARE_BASE = 3;
+const std::string AICPU_KERNEL = "AicpuKernel";
+const std::string NORMAL = "Normal";
 }
 
 uint32_t HcclCalculator::ProcessEntry(DataInventory& dataInventory, const Context& context)
@@ -282,9 +284,11 @@ void HcclCalculator::UpdateHcclOpNameByGroupName(uint64_t clockMonotonicRaw)
     INFO("Start UpdateHcclOpNameByGroupName.");
     std::unordered_map<std::string, GroupData> hcclGroup;
     //  if data start in warmup, index will be set -1
-    //  else index++ when group name in group_dict or group name set first
+    //  else index++ when groupName and taskType in group_dict or group name set first
     for (auto& data : taskData_) {
-        auto& groupEntry = hcclGroup[data.groupName];
+        auto taskType = (data.opName.find(AICPU_KERNEL) != std::string::npos) ? AICPU_KERNEL : NORMAL;
+        auto key = Utils::Join("_", taskType, data.groupName);
+        auto& groupEntry = hcclGroup[key];
         if (data.timestamp > clockMonotonicRaw && data.firstTimestamp > groupEntry.firstTimestamp) {
             groupEntry.firstTimestamp = data.firstTimestamp;
             groupEntry.count++;

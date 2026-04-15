@@ -32,37 +32,54 @@ NAMESPACE = 'mscalculate.hccl.kfc_calculator'
 
 class TestKfcCalculator(unittest.TestCase):
     def test_ms_run_should_return_when_no_kfc_info_db(self: any) -> None:
+        InfoConfReader()._start_info = {"collectionTimeBegin": "9"}
+        InfoConfReader()._end_info = {}
         check = KfcCalculator([], CONFIG)
         check.ms_run()
+        InfoConfReader()._start_info.clear()
 
     def test_ms_run_should_drop_table_when_has_kfc_info_db_and_calculate_again(self: any) -> None:
+        InfoConfReader()._start_info = {"collectionTimeBegin": "9"}
+        InfoConfReader()._end_info = {}
         with mock.patch("os.path.exists", return_value=True), \
                 mock.patch(NAMESPACE + ".KfcCalculator._judge_calculate_again", return_value=True), \
                 mock.patch(NAMESPACE + ".KfcCalculator.calculate"):
             check = KfcCalculator([], CONFIG)
             check.ms_run()
+        InfoConfReader()._start_info.clear()
 
     def test_judge_calculate_again_should_return_true_when_not_all_export(self: any) -> None:
+        InfoConfReader()._start_info = {"collectionTimeBegin": "9"}
+        InfoConfReader()._end_info = {}
         ProfilingScene().set_mode(ExportMode.GRAPH_EXPORT)
         check = KfcCalculator([], CONFIG)
         check._judge_calculate_again()
         ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
+        InfoConfReader()._start_info.clear()
 
     def test_judge_calculate_again_should_return_true_when_all_export_and_not_have_kfc_op_table(self: any) -> None:
+        InfoConfReader()._start_info = {"collectionTimeBegin": "9"}
+        InfoConfReader()._end_info = {}
         with mock.patch(NAMESPACE + ".DBManager.check_tables_in_db", return_value=False):
             check = KfcCalculator([], CONFIG)
             self.assertTrue(check._judge_calculate_again())
+        InfoConfReader()._start_info.clear()
 
     def test_judge_calculate_again_should_return_false_when_all_export_and_have_kfc_op_table(self: any) -> None:
+        InfoConfReader()._start_info = {"collectionTimeBegin": "9"}
+        InfoConfReader()._end_info = {}
         with mock.patch(NAMESPACE + ".DBManager.check_tables_in_db", return_value=True):
             check = KfcCalculator([], CONFIG)
             self.assertFalse(check._judge_calculate_again())
+        InfoConfReader()._start_info.clear()
 
     def test_calculate_should_return_2_kfc_op_and_11_kfc_task_when_2_kfc_stream(self: any) -> None:
         group_name = "group"
         InfoConfReader()._info_json = {
             "devices": 0
         }
+        InfoConfReader()._start_info = {"collectionTimeBegin": "9"}
+        InfoConfReader()._end_info = {}
         kfc_op_data = [
             # hccl aicpu kernel, 异步
             AscendTaskViewModel.ASCEND_TASK_TYPE(0, 0, 19, 0, 4294967295, 0, 38140478700000,
@@ -133,7 +150,7 @@ class TestKfcCalculator(unittest.TestCase):
         ]
         comm_info = [
             Mc2CommInfoViewModel.MC2_COMM_INFO_TYPE(group_name, 8, 0, 0, 19, "52,53,54,55,56,57,58,59"),
-            Mc2CommInfoViewModel.MC2_COMM_INFO_TYPE(group_name, 2, 0, 0, 30, "80,81"), # 异常数据,和host数据无法对齐
+            Mc2CommInfoViewModel.MC2_COMM_INFO_TYPE(group_name, 2, 0, 0, 30, "80,81"),  # 异常数据,和host数据无法对齐
         ]
         ge_data = [
             (4294967295, 'allgather', 19, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -205,8 +222,60 @@ class TestKfcCalculator(unittest.TestCase):
             check.save()
         self.assertEqual(2, len(check._kfc_op_data.get(group_name, [])))
         self.assertEqual(11, len(check._kfc_task_data.get(group_name, [])))
-        InfoConfReader()._info_json = {}
+        InfoConfReader()._info_json.clear()
+        InfoConfReader()._start_info.clear()
 
     def test_make_default_kfc_info_should_return_len_28_named_tuple(self: any) -> None:
         default_kfc_info = KfcCalculator.make_default_kfc_info()
         self.assertEqual(30, len(default_kfc_info))
+
+    def test_update_op_name_by_group_should_set_correct_op_name_by_timestamp(self):
+        InfoConfReader()._start_info = {"collectionTimeBegin": "9"}
+        InfoConfReader()._end_info = {}
+        ascend_task_model = AscendTaskViewModel("test", [""])
+        task = ascend_task_model.ASCEND_TASK_TYPE(
+            model_id=None,
+            index_id=None,
+            stream_id=None,
+            task_id=None,
+            context_id=None,
+            batch_id=None,
+            timestamp=150,
+            duration=20,
+            host_task_type=None,
+            device_task_type=None,
+            connection_id=None,
+            op_name=None,
+            ts_virtual_batch_id=None
+        )
+        task1 = task
+        task2 = task.replace(timestamp=400, duration=70)
+        task3 = task.replace(timestamp=500, duration=40)
+        task4 = task.replace(timestamp=600, duration=20)
+        allreduce = "hcom_allreduce_AicpuKernel"
+        allgather = "hcom_allgather_AicpuKernel"
+        expect_op_name_list = ["hcom_allreduce_AicpuKernel_321_-1_0", "hcom_allreduce_AicpuKernel_321_0_0",
+                               "hcom_allreduce_AicpuKernel_321_1_0", "hcom_allgather_AicpuKernel_321_2_0"]
+
+        check = KfcCalculator([], CONFIG)
+        hccl_data = [
+            check.KFC_OP_DATA(ascend_data=task1, group_name="45321", op_name=allreduce, first_timestamp=65,
+                              iter_id=0, op_type="N/A", relay=-1, retry=-1, data_type="N/A",
+                              alg_type="N/A", count=-1, rank_size=-1, source=0),
+            check.KFC_OP_DATA(ascend_data=task2, group_name="45321", op_name=allreduce, first_timestamp=100,
+                              iter_id=0, op_type="N/A", relay=-1, retry=-1, data_type="N/A",
+                              alg_type="N/A", count=-1, rank_size=-1, source=0),
+            check.KFC_OP_DATA(ascend_data=task3, group_name="45321", op_name=allreduce, first_timestamp=110,
+                              iter_id=0, op_type="N/A", relay=-1, retry=-1, data_type="N/A",
+                              alg_type="N/A", count=-1, rank_size=-1, source=0),
+            check.KFC_OP_DATA(ascend_data=task4, group_name="45321", op_name=allgather, first_timestamp=130,
+                              iter_id=0, op_type="N/A", relay=-1, retry=-1, data_type="N/A",
+                              alg_type="N/A", count=-1, rank_size=-1, source=0)
+        ]
+        check.start_time_raw_timestamp = 200
+        check.update_op_name_by_group(hccl_data)
+        op_name_list = []
+        for data in hccl_data:
+            op_name_list.append(data.op_name)
+        self.assertEqual(op_name_list, expect_op_name_list)
+        InfoConfReader()._start_info.clear()

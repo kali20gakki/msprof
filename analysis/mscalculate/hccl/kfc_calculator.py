@@ -63,6 +63,8 @@ class KfcCalculator(ICalculator, MsMultiProcess):
         self._master_stream = {}
         self._master_stream_first_task = set()
         self._source = {}
+        start_ts, _ = InfoConfReader().get_collect_time()
+        self.start_time_raw_timestamp = InfoConfReader().trans_from_local_time_into_dev_raw_time(start_ts)
 
     @staticmethod
     def make_default_kfc_info() -> KfcInfoViewModel.KFC_HCCL_INFO_TYPE:
@@ -105,21 +107,19 @@ class KfcCalculator(ICalculator, MsMultiProcess):
             time_idx += 1
         return op_data, time_idx
 
-    @staticmethod
-    def update_op_name_by_group(kfc_op_data: KFC_OP_DATA):
-        group_dict = defaultdict(lambda: {"first_timestamp": 0, "count": 0})
+    def update_op_name_by_group(self, kfc_op_data: KFC_OP_DATA):
+        group_dict = defaultdict(lambda: {"first_timestamp": 0, "count": -1})
         for num, data in enumerate(kfc_op_data):
-            if data.group_name in group_dict:
-                if data.first_timestamp > group_dict[data.group_name]["first_timestamp"]:
-                    group_dict[data.group_name]["first_timestamp"] = data.first_timestamp
-                    group_dict[data.group_name]["count"] += 1
-                elif data.first_timestamp < group_dict[data.group_name]["first_timestamp"]:
-                    group_dict[data.group_name]["first_timestamp"] = data.first_timestamp
-                    group_dict[data.group_name]["count"] = 0
-            else:
-                group_dict[data.group_name]["first_timestamp"] = data.first_timestamp
-                group_dict[data.group_name]["count"] = 0
-            index = group_dict[data.group_name]["count"]
+            # if data start in warmup, index will be set -1
+            # else index++ when group_name and task_type in group_dict or group name set first
+            task_type = StrConstant.AICPU_KERNEL if StrConstant.AICPU_KERNEL in data.op_name else StrConstant.NORMAL
+            key = (data.group_name, task_type)
+            if (data.ascend_data.timestamp > self.start_time_raw_timestamp and
+                    data.first_timestamp > group_dict[key]["first_timestamp"]):
+                group_dict[key]["first_timestamp"] = data.first_timestamp
+                group_dict[key]["count"] += 1
+
+            index = group_dict[key]["count"]
             kfc_op_data[num] = data.replace(
                 op_name=f"{data.op_name}_{data.group_name[-3:]}_{str(index)}_{str(data.iter_id)}")
 

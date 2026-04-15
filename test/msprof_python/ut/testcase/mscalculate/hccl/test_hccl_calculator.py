@@ -460,21 +460,29 @@ class TestHcclCalculator(unittest.TestCase):
                           all_gather: {"count": 2, "total_time": 5, "max": 3, "min": 2, "avg": 2.5}
                           })
 
-    def test_update_op_name_by_group_name_should_set_correct_op_namee_by_timestamp(self):
+    def test_update_op_name_by_group_name_should_set_correct_op_name_by_timestamp(self):
         InfoConfReader()._start_info = {"collectionTimeBegin": "9"}
         InfoConfReader()._end_info = {}
         hcom_allreduce = "hcom_allreduce"
+        hcom_allgather = "hcom_allgather"
+        allreduce_aicpu = "hcom_allreduce_AicpuKernel"
         expect_op_name_list = ["hcom_allreduce_321_-1_0", "hcom_allreduce_321_-1_0", "hcom_allreduce_321_-1_0",
-                               "hcom_allreduce_321_0_0", "hcom_allreduce_321_1_0"]
+                               "hcom_allreduce_321_0_0", "hcom_allreduce_321_1_0", "hcom_allgather_321_2_0",
+                               "hcom_allreduce_AicpuKernel_321_-1_0", "hcom_allreduce_AicpuKernel_321_0_0",
+                               "hcom_allreduce_AicpuKernel_321_1_0"]
         hccl_data = [
             HcclTask(op_name=hcom_allreduce, group_name="45321", timestamp=100, duration=30, first_timestamp=50),
             HcclTask(op_name=hcom_allreduce, group_name="45321", timestamp=140, duration=10, first_timestamp=60),
             HcclTask(op_name=hcom_allreduce, group_name="45321", timestamp=180, duration=10, first_timestamp=70),
             HcclTask(op_name=hcom_allreduce, group_name="45321", timestamp=220, duration=70, first_timestamp=80),
-            HcclTask(op_name=hcom_allreduce, group_name="45321", timestamp=330, duration=40, first_timestamp=90)
+            HcclTask(op_name=hcom_allreduce, group_name="45321", timestamp=330, duration=40, first_timestamp=90),
+            HcclTask(op_name=hcom_allgather, group_name="45321", timestamp=380, duration=10, first_timestamp=95),
+            HcclTask(op_name=allreduce_aicpu, group_name="45321", timestamp=150, duration=20, first_timestamp=65),
+            HcclTask(op_name=allreduce_aicpu, group_name="45321", timestamp=400, duration=70, first_timestamp=100),
+            HcclTask(op_name=allreduce_aicpu, group_name="45321", timestamp=500, duration=40, first_timestamp=110)
         ]
         check = HcclCalculator([], CONFIG)
-        check.hot_start_time_raw_timestamp = 200
+        check.start_time_raw_timestamp = 200
         check.update_op_name_by_group_name(hccl_data)
         op_name_list = []
         for data in hccl_data:
