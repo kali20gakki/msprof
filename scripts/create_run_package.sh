@@ -30,27 +30,39 @@ UTILS_SCRIPT=utils.sh
 
 MSPROF_RUN_NAME="mindstudio-profiler"
 VERSION="none"
+WHL_VERSION="0.0.1"
 BUILD_MODE="analysis"
 
 PKG_LIMIT_SIZE=524288000 # 500M
 
+arch_name="$(uname -m)-linux"
+
 function parse_script_args() {
-    if [ $# -gt 2 ]; then
-        echo "[ERROR] Too many arguments. Only one or two arguments are allowed."
+    if [ $# -gt 3 ]; then
+        echo "[ERROR] Too many arguments. Maximum 3 arguments allowed: VERSION, WHL_VERSION, BUILD_MODE"
         exit 1
+    elif [ $# -eq 3 ]; then
+        VERSION="$1"
+        WHL_VERSION="$2"
+        BUILD_MODE="$3"
     elif [ $# -eq 2 ]; then
         VERSION="$1"
-        BUILD_MODE="$2"
+        WHL_VERSION="$2"
     elif [ $# -eq 1 ]; then
         VERSION="$1"
+    else
+        echo "[ERROR] At least one argument (VERSION) is required"
+        exit 1
     fi
 }
 
 # build python whl
 function build_python_whl() {
   cd ${TOP_DIR}/build/analysis/build
+  export WHL_VERSION=${WHL_VERSION}
   python3  ${TOP_DIR}/build/setup.py bdist_wheel --python-tag=py3 --py-limited-api=cp37
   cd - > /dev/null
+  unset WHL_VERSION
 }
 
 function create_collector_temp_dir() {
@@ -59,11 +71,11 @@ function create_collector_temp_dir() {
     local oam_tools_dir=${3}
 
     # 1. runtime
-    cp ${runtime_dir}/runtime/lib/libmsprofiler.so ${temp_dir}
-    cp ${runtime_dir}/runtime/lib/libprofapi.so ${temp_dir}
-    cp ${runtime_dir}/runtime/lib/libprofimpl.so ${temp_dir}
-    cp ${runtime_dir}/runtime/include/external/acl/acl_prof.h ${temp_dir}
-    cp ${runtime_dir}/runtime/include/external/ge/ge_prof.h ${temp_dir}
+    cp ${runtime_dir}/${arch_name}/lib64/libmsprofiler.so ${temp_dir}
+    cp ${runtime_dir}/${arch_name}/lib64/libprofapi.so ${temp_dir}
+    cp ${runtime_dir}/${arch_name}/lib64/libprofimpl.so ${temp_dir}
+    cp ${runtime_dir}/${arch_name}/include/acl/acl_prof.h ${temp_dir}
+    cp ${runtime_dir}/${arch_name}/include/ge/ge_prof.h ${temp_dir}
     # 2. oam_tools
     cp ${oam_tools_dir}/oam_tools/profiler/bin/msprof ${temp_dir}
 }
@@ -71,7 +83,7 @@ function create_collector_temp_dir() {
 function create_analysis_temp_dir() {
     local temp_dir=${1}
 
-    cp ${TOP_DIR}/build/analysis/dist/msprof-0.0.1-py3-none-any.whl ${temp_dir}
+    cp ${TOP_DIR}/build/analysis/dist/msprof-*-py3-none-any.whl ${temp_dir}
     cp -r ${TOP_DIR}/analysis ${temp_dir}
     rm -rf ${temp_dir}/analysis/csrc
 }
@@ -118,12 +130,22 @@ function copy_script() {
     chmod 500 "${temp_dir}/${script_name}"
 }
 
+function update_version_info() {
+    local version_file="${TOP_DIR}/version.info"
+    [ "$VERSION" = "none" ] && return 0
+    [ -f "$version_file" ] || { echo "ERROR: $version_file not found"; return 1; }
+
+    # Compatible with both cases with and without spaces
+    sed -i "s/^[[:space:]]*Version=.*/Version=$VERSION/" "$version_file"
+    echo "INFO: Updated Version to $VERSION in $version_file"
+}
+
 function get_version() {
     if [[ "$VERSION" != "none" ]]; then
         echo "${VERSION}"
     elif [ -f "${TOP_DIR}/version.info" ]; then
-        local version=$(grep "Version=" "${TOP_DIR}/version.info" | sed 's/^[[:space:]]*//' | cut -d"=" -f2 | tr -d '[:space:]')
-        echo "${version}"
+        # Compatible with both cases with and without spaces
+        grep "Version=" "${TOP_DIR}/version.info" | sed 's/^[[:space:]]*Version=//'
     else
         echo "${VERSION}"
     fi
@@ -132,7 +154,7 @@ function get_version() {
 function get_package_name() {
     local name=${MSPROF_RUN_NAME}
 
-    local version=$(echo $(get_version) | cut -d '.' -f 1,2,3)
+    local version=$(get_version)
     local os_arch=$(arch)
     echo "${name}_${version}_${os_arch}.run"
 }
@@ -258,4 +280,5 @@ function main() {
 }
 
 parse_script_args $*
+update_version_info
 main ${MAIN_SCRIPT} ${FILTER_PARAM_SCRIPT}

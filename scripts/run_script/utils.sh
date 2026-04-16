@@ -35,9 +35,6 @@ UTILS_SCRIPT="utils.sh"
 CANN_UNINSTALL_SCRIPT="cann_uninstall.sh"
 VERSION_INFO="version.info"
 
-# msprof analysis whl
-MSPROF_ANALYSIS_WHL="msprof-0.0.1-py3-none-any.whl"
-
 function print() {
     if [ ! -f "$log_file" ]; then
         echo "[${MSPROF_RUN_NAME}] [$(date +"%Y-%m-%d %H:%M:%S")] [$1]: $2"
@@ -66,6 +63,7 @@ function get_log_file() {
 	  else
 		    log_dir="${HOME}/var/log/ascend_seclog"
 	  fi
+	  mkdir -p "${log_dir}"
 	  echo "${log_dir}/ascend_install.log"
 }
 

@@ -6,6 +6,7 @@ set -e
 CUR_DIR=$(dirname $(readlink -f $0))
 TOP_DIR=${CUR_DIR}/..
 VERSION="none"
+WHL_VERSION="0.0.1"
 BUILD_TYPE="Release"
 BUILD_MODE="analysis"
 
@@ -31,6 +32,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --version=*)
             VERSION="${1#*=}"
+            shift
+            ;;
+        --whl_version=*)
+            WHL_VERSION="${1#*=}"
             shift
             ;;
         *)
@@ -119,4 +124,4 @@ case "$BUILD_MODE" in
 esac
 
 # 2. package
-bash ${TOP_DIR}/scripts/create_run_package.sh ${VERSION} ${BUILD_MODE}
+bash ${TOP_DIR}/scripts/create_run_package.sh ${VERSION} ${WHL_VERSION} ${BUILD_MODE}

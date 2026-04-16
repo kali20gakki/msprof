@@ -19,10 +19,26 @@ import os
 from setuptools import setup
 from setuptools import find_packages
 
-__version__ = '0.0.1'
+try:
+    from packaging.version import Version, InvalidVersion
+    __version__ = os.environ.get("WHL_VERSION", "0.0.1")
+    try:
+        # Verify whether the version number complies with PEP 440
+        Version(__version__)
+        print(f"Using version: {__version__}")
+    except InvalidVersion as e:
+        print(f"Warning: Version '{__version__}' is invalid: {e}. Using default '0.0.1'")
+        __version__ = "0.0.1"
+except ImportError:
+    # If there is no packaging library, use the simplified verification method
+    print("Warning: packaging module not available, using version as-is")
+    __version__ = os.environ.get("WHL_VERSION", "0.0.1")
+except Exception as e:
+    print(f"Error: Failed to process version, using default '0.0.1'. Error: {e}")
+    __version__ = "0.0.1"
+
 cur_path = os.path.abspath(os.path.dirname(__file__))
 root_path = os.path.join(cur_path, "../")
-
 
 setup(
     name="msprof",
