@@ -30,7 +30,7 @@
    | --output                          | 可选          | 收集到的Profiling数据的存放路径，默认为AI任务文件所在目录。路径中不能包含特殊字符：`"\n", "\\n", "\f", "\\f", "\r", "\\r", "\b", "\\b", "\t", "\\t", "\v", "\\v", "\u007F", "\\u007F", "\"", "\\\"", "'", "\'", "\\", "\\\\", "%", "\\%", ">", "\\>", "<", "\\<", "`。 |
    | 传入用户程序[app arguments] | 必选          | 请根据实际情况在msprof命令末尾添加AI任务执行命令来传入用户程序或执行脚本。<br>格式：msprof [msprof arguments] {用户程序} [app arguments]<br>&#8226; 举例1（msprof传入Python执行脚本和脚本参数）：msprof --output=/home/projects/output python3 /home/projects/MyApp/out/sample_run.py parameter1 parameter2<br>&#8226; 举例2（msprof传入main二进制执行程序）：msprof --output=/home/projects/output main<br>&#8226; 举例3（msprof传入main二进制执行程序）：msprof --output=/home/projects/output /home/projects/MyApp/out/main<br>&#8226; 举例4（在msprof传入main二进制执行程序和程序参数）：msprof --output=/home/projects/output /home/projects/MyApp/out/main parameter1 parameter2<br>&#8226; 举例5（msprof传入sh执行脚本和脚本参数）：msprof --output=/home/projects/output /home/projects/MyApp/out/sample_run.sh parameter1 parameter2 |
 
-   > [!NOTE] 说明
+   > [!NOTE]
    >
    > 以上为最基本的采集命令，如有其他采集需求，请参见[性能数据采集和自动解析](https://www.hiascend.com/document/detail/zh/mindstudio/830/T&ITools/Profiling/atlasprofiling_16_0007.html#ZH-CN_TOPIC_0000002536038281)。
 
@@ -71,7 +71,7 @@
    | fusion_op_*.csv     | 模型中算子融合前后信息。单算子场景下无此性能数据文件。       |
    | api_statistic_*.csv | 用于统计CANN层的API执行耗时信息。                            |
 
-   > [!NOTE] 说明
+   > [!NOTE]
    >
    > 上表中，“*”表示时间戳。
 
