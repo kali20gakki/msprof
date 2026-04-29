@@ -386,4 +386,10 @@ class DataParsersConfig(MetaConfig):
             ('level', '2'),
             ('position', 'H')
         ],
+        'DPUHcclInfoParser': [
+            ('path', 'msparser.add_info.dpu_hccl_track_parser'),
+            ('chip_model', '15,16'),
+            ('level', '2'),
+            ('position', 'H')
+        ],
     }

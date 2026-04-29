@@ -338,4 +338,9 @@ class MsProfExportDataConfig(MetaConfig):
             ('table', DBNameConstant.TABLE_SOC_PMU_SUMMARY),
             ('headers', 'Stream Id,Task Id,TLB Hit Rate,TLB Miss Rate')
         ],
+        'dpu': [
+            ('handler', '_get_dpu_data'),
+            ('db', DBNameConstant.DB_DPU),
+            ('table', [DBNameConstant.TABLE_DPU_TASK_TRACK, DBNameConstant.TABLE_DPU_HCCL_TRACK]),
+        ],
     }

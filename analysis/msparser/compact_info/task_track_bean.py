@@ -97,11 +97,8 @@ class TaskTrackChip6Bean(TaskTrackBean):
     def __init__(self: any, *args) -> None:
         super().__init__(*args)
         data = args[0]
-        self._device_id = data[6]
-        self._stream_id = data[7]
         self._task_id = data[9] << 16 | data[8]
         self._batch_id = 0
-        self._task_type = data[10]
 
 
 class DPUTaskTrackBean(CompactInfoBean):

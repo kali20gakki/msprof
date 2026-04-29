@@ -29,7 +29,6 @@ class DPUTrackDto(metaclass=InstanceCheckMeta):
     aicpu_task_id: int = Constant.DEFAULT_INVALID_VALUE
     task_id: int = Constant.DEFAULT_INVALID_VALUE
     task_type: str = Constant.NA
-    kernel_name: str = Constant.NA
     ccl_tag: str = Constant.NA
     data_type: str = Constant.NA
     dst_addr: str = Constant.DEFAULT_INVALID_VALUE

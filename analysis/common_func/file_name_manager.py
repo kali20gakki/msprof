@@ -252,7 +252,7 @@ class FileNameManagerConstant:
 
     # dpu
     DPU_TASK_TRACK_FILE_PATTERN = r"^(aging|unaging)\.compact\.dpu_track\.slice_\d+"
-    DPU_HCCL_TRACK_FILE_PATTERN = r"^(aging|unaging)\.additional\.dpu_hccl_track\.slice_\d+"
+    DPU_HCCL_TRACK_FILE_PATTERN = r"^(aging|unaging)\.additional\.dpu_hccl_info\.slice_\d+"
 
     # V5
     V5_MODEL_EXEOM_PATTERN = r"^unaging\.additional\.model_exeom\.slice_\d+"

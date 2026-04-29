@@ -55,7 +55,8 @@ class DPUTaskViewModel(ViewModel):
         task_track = []
         hccl_track = []
         if DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_DPU_TASK_TRACK):
-            sql = "select dpu_device_id, thread_id, start_time, end_time, task_type, stream_id, task_id, kernel_name "\
+            sql = "select dpu_device_id, thread_id, start_time, end_time, task_type, stream_id, task_id, " \
+                  "kernel_name AS op_name " \
                   "from {} ".format(DBNameConstant.TABLE_DPU_TASK_TRACK)
             task_track = DBManager.fetch_all_data(self.cur, sql, dto_class=DPUTrackDto)
 
