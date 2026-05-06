@@ -80,10 +80,9 @@ const std::unordered_map<std::string, JsonProcess> strToJsonProcess = {
     {"roce",             JsonProcess::ROCE},
     {"qos",              JsonProcess::QOS},
     {"device_tx",        JsonProcess::DEVICE_TX},
-    {"low_power",        JsonProcess::LOW_POWER},
     {"biu_perf",         JsonProcess::BIU_PERF},
     {"ub",               JsonProcess::UB},
-    {"block_detail",     JsonProcess::BLOCK_DETAIL},
+    {"block_detail",     JsonProcess::BLOCK_DETAIL}
 };
 
 const std::vector<JsonProcess> allProcesses{
