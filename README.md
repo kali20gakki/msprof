@@ -30,7 +30,6 @@ MindStudio Profiler（msProf）是面向 AI 训练与推理场景的性能分析
 
 msProf 工具内置在 CANN Toolkit 开发套件中，推荐直接下载 CANN 包进行安装，具体请参见《[CANN快速安装](https://www.hiascend.com/cann/download)。
 
-
 CANN 包安装成功后，执行以下命令设置环境变量：  
 
 ```bash
@@ -96,7 +95,6 @@ msprof --output=./output --application="./run_standalone_train.sh"
 - 《[License声明](./LICENSE)》 
 
 - 《[安全声明](docs/zh/security_statement.md)》 
-
 
 ## 💬 建议与交流
 
