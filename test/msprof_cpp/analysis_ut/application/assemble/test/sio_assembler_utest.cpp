@@ -136,10 +136,10 @@ TEST_F(SioAssemblerUTest, ShouldReturnTrueWhenDataAssembleSuccess)
     FileReader reader(files.back());
     std::vector<std::string> res;
     EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
-    std::string expectStr = "{\"name\":\"process_name\",\"pid\":2383960928,\"tid\":0,\"ph\":\"M\",\"args\":{\""
-                            "name\":\"SIO\"}},{\"name\":\"process_labels\",\"pid\":2383960928,\"tid\":0,\"ph\""
+    std::string expectStr = "{\"name\":\"process_name\",\"pid\":2383960960,\"tid\":0,\"ph\":\"M\",\"args\":{\""
+                            "name\":\"SIO\"}},{\"name\":\"process_labels\",\"pid\":2383960960,\"tid\":0,\"ph\""
                             ":\"M\",\"args\":{\"labels\":\"NPU 0\"}},{\"name\":\"process_sort_index\",\"pid\""
-                            ":2383960928,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":27}},";
+                            ":2383960960,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":28}},";
     EXPECT_EQ(expectStr, res.back());
 }
 

@@ -150,7 +150,7 @@ class TestTaskTrackParser(unittest.TestCase):
             check.format_dpu_track_data(dpu_tracks)
 
             self.assertEqual(len(check._dpu_data), 1)
-            expect_dpu_data = [[0, 270722, 75838889643892, 75838889645892, 'KERNEL_AICPU', 0, 0, 'dpu1']]
+            expect_dpu_data = [[0, 270722, 75838889643892, 75838889645892, 'AI_CPU', 0, 0, 'dpu1']]
             self.assertEqual(check._dpu_data, expect_dpu_data)
 
     def test_ms_run_with_only_dpu_track(self):

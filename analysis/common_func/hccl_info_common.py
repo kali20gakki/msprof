@@ -84,6 +84,7 @@ class TransPortType(Enum):
     RDMA = 1
     LOCAL = 2
     UB = 3
+    ROCE = 4
     RESERVED = 255
     INVALID_TYPE = 4294967295
 

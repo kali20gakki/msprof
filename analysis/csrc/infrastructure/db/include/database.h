@@ -273,6 +273,11 @@ public:
     MetricSummaryDB();
 };
 
+class DPUDB : public Database {
+public:
+    DPUDB();
+};
+
 } // namespace Infra
 } // namespace Analysis
 #endif // ANALYSIS_VIEWER_DATABASE_DATABASE_H

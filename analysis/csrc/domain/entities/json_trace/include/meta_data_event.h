@@ -27,6 +27,7 @@ namespace Domain {
 enum ProcessSortIndex {
     LAYER_FRAMEWORK_SORT = 6,
     LAYER_CANN_SORT,
+    LAYER_DPU_SORT,
     LAYER_CPU_USAGE_SORT,
     LAYER_MEMORY_USAGE_SORT,
     LAYER_NETWORK_USAGE_SORT,
@@ -61,6 +62,7 @@ const std::string COMPONENT_LAYER_CANN = "CANN";
 const std::string COMPONENT_LAYER_ASCEND_HW = "Ascend Hardware";
 const std::string LABEL_CPU = "CPU";
 const std::string LABEL_NPU = "NPU";
+const std::string LABEL_DPU = "DPU";
 // layer name
 const std::string PROCESS_RUNTIME = "Runtime";
 const std::string PROCESS_AI_CORE_UTILIZATION = "AI Core Utilization";
@@ -103,6 +105,7 @@ const std::string PROCESS_DEVICE_TX = "DEVICE_TX";
 const std::string PROCESS_BIU_PERF = "Biu Perf";
 const std::string PROCESS_UB = "Ub";
 const std::string PROCESS_BLOCK_DETAIL = "Block Detail";
+const std::string PROCESS_DPU = "DPU";
 
 struct LayerInfo {
     std::string component;
@@ -143,6 +146,7 @@ const std::unordered_map<std::string, LayerInfo> LAYER_INFO {
     {PROCESS_BIU_PERF, {PROCESS_BIU_PERF, LABEL_NPU, LAYER_BIU_PERF}},
     {PROCESS_UB, {PROCESS_UB, LABEL_NPU, LAYER_UB}},
     {PROCESS_BLOCK_DETAIL, {PROCESS_BLOCK_DETAIL, LABEL_NPU, LAYER_BLOCK_DETAIL}},
+    {PROCESS_DPU, {PROCESS_DPU, LABEL_DPU, LAYER_DPU_SORT}},
 };
 
 LayerInfo GetLayerInfo(std::string processName);

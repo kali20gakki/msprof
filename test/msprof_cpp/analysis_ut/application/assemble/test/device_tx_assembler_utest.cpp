@@ -109,15 +109,15 @@ TEST_F(DeviceTxAssemblerUTest, ShouldReturnTrueWhenDataAssembleSuccess)
     FileReader reader(files.back());
     std::vector<std::string> res;
     EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
-    std::string expectStr = "{\"name\":\"N/A\",\"pid\":416,\"tid\":1,\"ts\":\"18446744073709551.615\",\"dur\":0.0,"
+    std::string expectStr = "{\"name\":\"N/A\",\"pid\":448,\"tid\":1,\"ts\":\"18446744073709551.615\",\"dur\":0.0,"
                             "\"ph\":\"X\",\"args\":{\"Physic Stream Id\":1,\"Task Id\":13}},{\"name\":\"MsTx_7890\",\""
-                            "pid\":416,\"tid\":1,\"ph\":\"f\",\"cat\":\"MsTx\",\"id\":\"7890\",\"ts\":\""
-                            "18446744073709551.615\",\"bp\":\"e\"},{\"name\":\"process_name\",\"pid\":416,\"tid\":0"
+                            "pid\":448,\"tid\":1,\"ph\":\"f\",\"cat\":\"MsTx\",\"id\":\"7890\",\"ts\":\""
+                            "18446744073709551.615\",\"bp\":\"e\"},{\"name\":\"process_name\",\"pid\":448,\"tid\":0"
                             ",\"ph\":\"M\",\"args\":{\"name\":\"Ascend Hardware\"}},{\"name\":\"process_labels\",\"pid"
-                            "\":416,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU 0\"}},{\"name\":\""
-                            "process_sort_index\",\"pid\":416,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":13}},{\""
-                            "name\":\"thread_name\",\"pid\":416,\"tid\":1,\"ph\":\"M\",\"args\":{\"name\":\"Stream 1\""
-                            "}},{\"name\":\"thread_sort_index\",\"pid\":416,\"tid\":1,\"ph\":\"M\",\"args\":{\""
+                            "\":448,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU 0\"}},{\"name\":\""
+                            "process_sort_index\",\"pid\":448,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":14}},{\""
+                            "name\":\"thread_name\",\"pid\":448,\"tid\":1,\"ph\":\"M\",\"args\":{\"name\":\"Stream 1\""
+                            "}},{\"name\":\"thread_sort_index\",\"pid\":448,\"tid\":1,\"ph\":\"M\",\"args\":{\""
                             "sort_index\":1}},";
     EXPECT_EQ(expectStr, res.back());
 }

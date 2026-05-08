@@ -24,6 +24,7 @@ from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.info_conf_reader import InfoConfReader
 from common_func.platform.chip_manager import ChipManager
+from common_func.ms_constant.ge_enum_constant import GeTaskType
 from msmodel.compact_info.task_track_model import TaskTrackModel
 from msmodel.dpu.dpu_task_model import DPUTaskModel
 from msparser.compact_info.task_track_bean import TaskTrackBean
@@ -127,12 +128,13 @@ class TaskTrackParser(DataParser, MsMultiProcess):
 
         dpu_task_list = []
         for track in bean_data:
+            task_type = self._type_hash_dict.get(track.level, {}).get(track.task_type, track.task_type)
             dpu_task_list.append([
                 track.device_id,
                 track.thread_id,
                 track.start_time,
                 track.timestamp,
-                self._type_hash_dict.get(track.level, {}).get(track.task_type, track.task_type),
+                GeTaskType.AI_CPU.name if task_type == Constant.KERNEL_AICPU else Constant.TASK_TYPE_UNKNOWN,
                 track.stream_id,
                 track.task_id,
                 kernel_name_map.get((track.device_id, track.task_id), Constant.NA)

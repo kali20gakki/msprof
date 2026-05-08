@@ -203,6 +203,8 @@ const std::string PROCESSOR_NAME_BIU_PERF = "BIU_PERF";
 const std::string PROCESSOR_NAME_UB = "UB";
 
 const std::string PROCESSOR_NAME_BLOCK_DETAIL = "BLOCK_DETAIL";
+
+const std::string PROCESSOR_NAME_DPU = "DPU";
 // mstx event type
 const std::unordered_map<std::string, uint16_t> MSTX_EVENT_TYPE_TABLE = {
     {"marker", 0},
@@ -333,6 +335,7 @@ const std::unordered_map<std::string, uint16_t> HCCL_TRANSPORT_TYPE_TABLE = {
     {"RDMA", 1},
     {"LOCAL", 2},
     {"UB", 3},
+    {"ROCE", 4},
     {"RESERVED", 255},
     {NA, UINT16_MAX - 1},
     {"INVALID_TYPE", UINT16_MAX},

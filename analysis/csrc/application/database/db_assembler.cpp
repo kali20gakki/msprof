@@ -232,7 +232,7 @@ void ConvertTaskData(CommunicationTaskDataFormat &processedTaskData, const std::
                                        groupName, notifyId, item.rdmaType, item.srcRank,
                                        item.dstRank, item.transportType, item.size, item.dataType,
                                        item.linkType, opId, item.isMaster,
-                                       item.bandwidth * BYTE_SIZE * BYTE_SIZE * BYTE_SIZE);
+                                       item.bandwidth * 1000 * 1000 * 1000); // 对齐calculator中带宽计算
     }
 }
 

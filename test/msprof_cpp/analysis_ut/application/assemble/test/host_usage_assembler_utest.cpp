@@ -149,12 +149,12 @@ TEST_F(HostUsageAssemblerUTest, ShouldReturnTrueWhenCpuSuccess)
     FileReader reader(files.back());
     std::vector<std::string> res;
     EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
-    std::string expectStr = "{\"name\":\"CPU 1\",\"pid\":2383960351,\"tid\":0,\"ts\":\"1719621074669030.430\","
-                            "\"ph\":\"C\",\"args\":{\"Usage(%)\":30.0}},{\"name\":\"process_name\",\"pid\":2383960351,"
+    std::string expectStr = "{\"name\":\"CPU 1\",\"pid\":2383960383,\"tid\":0,\"ts\":\"1719621074669030.430\","
+                            "\"ph\":\"C\",\"args\":{\"Usage(%)\":30.0}},{\"name\":\"process_name\",\"pid\":2383960383,"
                             "\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"CPU Usage\"}},{\"name\":\"process_labels\","
-                            "\"pid\":2383960351,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"CPU\"}},{\"name\":"
-                            "\"process_sort_index\",\"pid\":2383960351,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index"
-                            "\":8}},";
+                            "\"pid\":2383960383,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"CPU\"}},{\"name\":"
+                            "\"process_sort_index\",\"pid\":2383960383,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index"
+                            "\":9}},";
     EXPECT_EQ(expectStr, res.back());
 }
 
@@ -169,12 +169,12 @@ TEST_F(HostUsageAssemblerUTest, ShouldReturnTrueWhenMemSuccess)
     FileReader reader(files.back());
     std::vector<std::string> res;
     EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
-    std::string expectStr = "{\"name\":\"Memory Usage\",\"pid\":2383960383,\"tid\":0,\"ts\":\"1719621074669030.430"
+    std::string expectStr = "{\"name\":\"Memory Usage\",\"pid\":2383960415,\"tid\":0,\"ts\":\"1719621074669030.430"
                             "\",\"ph\":\"C\",\"args\":{\"Usage(%)\":26.0}},{\"name\":\"process_name\","
-                            "\"pid\":2383960383,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Memory Usage\"}},"
-                            "{\"name\":\"process_labels\",\"pid\":2383960383,\"tid\":0,\"ph\":\"M\",\"args\":"
-                            "{\"labels\":\"CPU\"}},{\"name\":\"process_sort_index\",\"pid\":2383960383,\"tid\":0,"
-                            "\"ph\":\"M\",\"args\":{\"sort_index\":9}},";
+                            "\"pid\":2383960415,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Memory Usage\"}},"
+                            "{\"name\":\"process_labels\",\"pid\":2383960415,\"tid\":0,\"ph\":\"M\",\"args\":"
+                            "{\"labels\":\"CPU\"}},{\"name\":\"process_sort_index\",\"pid\":2383960415,\"tid\":0,"
+                            "\"ph\":\"M\",\"args\":{\"sort_index\":10}},";
     EXPECT_EQ(expectStr, res.back());
 }
 
@@ -189,12 +189,12 @@ TEST_F(HostUsageAssemblerUTest, ShouldReturnTrueWhenDiskSuccess)
     FileReader reader(files.back());
     std::vector<std::string> res;
     EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
-    std::string expectStr = "{\"name\":\"Disk Usage\",\"pid\":2383960447,\"tid\":0,\"ts\":\"1719621074669030.430"
+    std::string expectStr = "{\"name\":\"Disk Usage\",\"pid\":2383960479,\"tid\":0,\"ts\":\"1719621074669030.430"
                             "\",\"ph\":\"C\",\"args\":{\"Usage(%)\":25.0}},{\"name\":\"process_name\","
-                            "\"pid\":2383960447,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Disk Usage\"}},"
-                            "{\"name\":\"process_labels\",\"pid\":2383960447,\"tid\":0,\"ph\":\"M\",\"args\":"
-                            "{\"labels\":\"CPU\"}},{\"name\":\"process_sort_index\",\"pid\":2383960447,"
-                            "\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":11}},";
+                            "\"pid\":2383960479,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Disk Usage\"}},"
+                            "{\"name\":\"process_labels\",\"pid\":2383960479,\"tid\":0,\"ph\":\"M\",\"args\":"
+                            "{\"labels\":\"CPU\"}},{\"name\":\"process_sort_index\",\"pid\":2383960479,"
+                            "\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":12}},";
     EXPECT_EQ(expectStr, res.back());
 }
 
@@ -209,12 +209,12 @@ TEST_F(HostUsageAssemblerUTest, ShouldReturnTrueWhenNetworkSuccess)
     FileReader reader(files.back());
     std::vector<std::string> res;
     EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
-    std::string expectStr = "{\"name\":\"Network Usage\",\"pid\":2383960415,\"tid\":0,\"ts\":\"1719621074669030.430"
+    std::string expectStr = "{\"name\":\"Network Usage\",\"pid\":2383960447,\"tid\":0,\"ts\":\"1719621074669030.430"
                             "\",\"ph\":\"C\",\"args\":{\"Usage(%)\":20.0}},{\"name\":\"process_name\","
-                            "\"pid\":2383960415,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Network Usage\"}},"
-                            "{\"name\":\"process_labels\",\"pid\":2383960415,\"tid\":0,\"ph\":\"M\",\"args\":"
-                            "{\"labels\":\"CPU\"}},{\"name\":\"process_sort_index\",\"pid\":2383960415,\"tid"
-                            "\":0,\"ph\":\"M\",\"args\":{\"sort_index\":10}},";
+                            "\"pid\":2383960447,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Network Usage\"}},"
+                            "{\"name\":\"process_labels\",\"pid\":2383960447,\"tid\":0,\"ph\":\"M\",\"args\":"
+                            "{\"labels\":\"CPU\"}},{\"name\":\"process_sort_index\",\"pid\":2383960447,\"tid"
+                            "\":0,\"ph\":\"M\",\"args\":{\"sort_index\":11}},";
     EXPECT_EQ(expectStr, res.back());
 }
 
@@ -229,14 +229,14 @@ TEST_F(HostUsageAssemblerUTest, ShouldReturnTrueWhenRuntimeApiSuccess)
     FileReader reader(files.back());
     std::vector<std::string> res;
     EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
-    std::string expectStr = "{\"name\":\"clock_nanosleep\",\"pid\":2383960479,\"tid\":123456,\"ts\":"
+    std::string expectStr = "{\"name\":\"clock_nanosleep\",\"pid\":2383960511,\"tid\":123456,\"ts\":"
                             "\"1719621074669030.430\",\"dur\":10.0,\"ph\":\"X\",\"args\":{}},{\"name\":"
-                            "\"thread_name\",\"pid\":2383960479,\"tid\":123456,\"ph\":\"M\",\"args\":{\"name\":"
-                            "\"Thread 123456\"}},{\"name\":\"process_name\",\"pid\":2383960479,\"tid\":0,\"ph\":"
+                            "\"thread_name\",\"pid\":2383960511,\"tid\":123456,\"ph\":\"M\",\"args\":{\"name\":"
+                            "\"Thread 123456\"}},{\"name\":\"process_name\",\"pid\":2383960511,\"tid\":0,\"ph\":"
                             "\"M\",\"args\":{\"name\":\"OS Runtime API\"}},{\"name\":\"process_labels\","
-                            "\"pid\":2383960479,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"CPU\"}},{\"name\":"
-                            "\"process_sort_index\",\"pid\":2383960479,\"tid\":0,\"ph\":\"M\","
-                            "\"args\":{\"sort_index\":12}},";
+                            "\"pid\":2383960511,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"CPU\"}},{\"name\":"
+                            "\"process_sort_index\",\"pid\":2383960511,\"tid\":0,\"ph\":\"M\","
+                            "\"args\":{\"sort_index\":13}},";
     EXPECT_EQ(expectStr, res.back());
 }
 

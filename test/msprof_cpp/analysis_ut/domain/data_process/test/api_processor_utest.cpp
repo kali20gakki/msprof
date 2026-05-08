@@ -20,8 +20,8 @@
 #include "analysis/csrc/infrastructure/dfx/error_code.h"
 #include "analysis/csrc/domain/services/environment/context.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
-#include "analysis/csrc/domain/data_process/data_processor.h";
-#include "analysis/csrc/infrastructure/db/include/db_runner.h";
+#include "analysis/csrc/domain/data_process/data_processor.h"
+#include "analysis/csrc/infrastructure/db/include/db_runner.h"
 #include "reserve_mock_utils.h"
 
 using namespace Analysis::Domain;

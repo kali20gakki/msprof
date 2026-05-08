@@ -821,6 +821,48 @@ namespace {
         {"core_type", SQL_TEXT_TYPE},
         {"core_id", SQL_INTEGER_TYPE}
     };
+
+    const TableColumns DPUTaskTrack = {
+        {"dpu_device_id", SQL_INTEGER_TYPE},
+        {"thread_id", SQL_INTEGER_TYPE},
+        {"start_time", SQL_NUMERIC_TYPE},
+        {"end_time", SQL_NUMERIC_TYPE},
+        {"task_type", SQL_TEXT_TYPE},
+        {"stream_id", SQL_INTEGER_TYPE},
+        {"task_id", SQL_INTEGER_TYPE},
+        {"kernel_name", SQL_TEXT_TYPE}
+    };
+
+    const TableColumns DPUHcclTrack = {
+        {"npu_device_id", SQL_INTEGER_TYPE},
+        {"dpu_device_id", SQL_INTEGER_TYPE},
+        {"thread_id", SQL_INTEGER_TYPE},
+        {"start_time", SQL_NUMERIC_TYPE},
+        {"end_time", SQL_NUMERIC_TYPE},
+        {"op_name", SQL_TEXT_TYPE},
+        {"group_name", SQL_TEXT_TYPE},
+        {"local_rank", SQL_INTEGER_TYPE},
+        {"remote_rank", SQL_INTEGER_TYPE},
+        {"rank_size", SQL_INTEGER_TYPE},
+        {"duration_estimated", SQL_REAL_TYPE},
+        {"src_addr", SQL_TEXT_TYPE},
+        {"dst_addr", SQL_TEXT_TYPE},
+        {"data_size", SQL_INTEGER_TYPE},
+        {"stream_id", SQL_INTEGER_TYPE},
+        {"task_id", SQL_INTEGER_TYPE},
+        {"aicpu_task_id", SQL_INTEGER_TYPE},
+        {"plane_id", SQL_INTEGER_TYPE},
+        {"op_type", SQL_TEXT_TYPE},
+        {"data_type", SQL_TEXT_TYPE},
+        {"link_type", SQL_TEXT_TYPE},
+        {"transport_type", SQL_TEXT_TYPE},
+        {"rdma_type", SQL_TEXT_TYPE},
+        {"role", SQL_TEXT_TYPE},
+        {"ccl_tag", SQL_TEXT_TYPE},
+        {"notify_id", SQL_TEXT_TYPE},
+        {"work_flow_mode", SQL_TEXT_TYPE},
+        {"stage", SQL_TEXT_TYPE}
+    };
 }
 
 std::string Database::GetDBName() const
@@ -1129,6 +1171,13 @@ MetricSummaryDB::MetricSummaryDB()
 {
     dbName_ = "metric_summary.db";
     tableColNames_["V6BlockPmu"] = V6BlockPmu;
+}
+
+DPUDB::DPUDB()
+{
+    dbName_ = "dpu.db";
+    tableColNames_["DPUTaskTrack"] = DPUTaskTrack;
+    tableColNames_["DPUHcclTrack"] = DPUHcclTrack;
 }
 } // namespace Infra
 } // namespace Analysis
