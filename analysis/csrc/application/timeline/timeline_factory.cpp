@@ -41,12 +41,15 @@
 #include "analysis/csrc/application/timeline/biu_perf_assembler.h"
 #include "analysis/csrc/application/timeline/ub_assembler.h"
 #include "analysis/csrc/application/timeline/block_detail_assembler.h"
+#include "analysis/csrc/application/timeline/dpu_assembler.h"
 
 namespace Analysis {
 namespace Application {
 std::unordered_map<std::string, AssemblerCreator> TimelineFactory::assemblerTable_{
     {PROCESS_ACC_PMU, [](std::shared_ptr<JsonAssembler> &assembler) {
         MAKE_SHARED0_NO_OPERATION(assembler, AccPmuAssembler);}},
+    {PROCESS_DPU, [](std::shared_ptr<JsonAssembler> &assembler) {
+        MAKE_SHARED0_NO_OPERATION(assembler, DPUAssembler);}},
     {PROCESS_TASK, [](std::shared_ptr<JsonAssembler> &assembler) {
         MAKE_SHARED0_NO_OPERATION(assembler, AscendHardwareAssembler);}},
     {PROCESS_API, [](std::shared_ptr<JsonAssembler> &assembler) {

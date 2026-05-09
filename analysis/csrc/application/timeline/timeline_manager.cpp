@@ -62,10 +62,12 @@ const std::unordered_map<JsonProcess, std::string> JSON_TO_ASSEMBLER_TABLE{
     {JsonProcess::BIU_PERF,         PROCESS_BIU_PERF},
     {JsonProcess::UB,               PROCESS_UB},
     {JsonProcess::BLOCK_DETAIL,     PROCESS_BLOCK_DETAIL},
+    {JsonProcess::DPU,              PROCESS_DPU},
 };
 
 std::set<std::string> TIMELINE_DATA_PROCESS_LIST{
     PROCESSOR_NAME_API,
+    PROCESSOR_NAME_DPU,
     PROCESSOR_NAME_COMMUNICATION,
     PROCESSOR_NAME_CCU_MISSION,
     PROCESSOR_NAME_COMPUTE_TASK_INFO,
