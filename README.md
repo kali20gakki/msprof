@@ -1,7 +1,7 @@
-
 <h1 align="center">MindStudio Profiler</h1>
+
 <div align="center">
-  <p>🚀 <b>昇腾性能采集工具</b></p>
+  <p><b>昇腾性能采集工具</b></p>
 
 [📖工具文档](https://www.hiascend.com/document/detail/zh/CANNCommunityEdition/850alpha002/devaids/Profiling/atlasprofiling_16_0010.html) |
 [🔥昇腾社区](https://www.hiascend.com/developer/software/mindstudio)|
@@ -26,22 +26,9 @@ MindStudio Profiler（msProf）是面向 AI 训练与推理场景的性能分析
 | **性能数据采集** | 通过 `msProf` 命令采集 CANN 平台及昇腾 AI 处理器的软硬件性能数据。 | [性能数据采集](https://www.hiascend.com/document/detail/zh/CANNCommunityEdition/850alpha002/devaids/Profiling/atlasprofiling_16_0010.html) | [msprof](https://gitcode.com/cann/runtime/tree/master/src/dfx/msprof) |
 | **性能数据解析** | 使用 `msProf` 工具对采集到的性能数据进行解析，生成可读的分析结果。 |                                             [性能数据解析](docs/zh/msprof_parsing_instruct.md)                                             | [analysis](https://gitcode.com/Ascend/msprof/tree/26.0.0/analysis)    |
 
-## 🛠️ 工具安装
+## 🛠️ 安装指南
 
-msProf 工具内置在 CANN Toolkit 开发套件中，推荐直接下载 CANN 包进行安装，具体请参见《[CANN快速安装](https://www.hiascend.com/cann/download)。
-
-CANN 包安装成功后，执行以下命令设置环境变量：  
-
-```bash
-# ${install_path} 为 CANN 软件的安装目录，例如：/usr/local/Ascend/ascend-toolkit。
-source ${install_path}/set_env.sh
-```
-
-运行以下命令验证安装是否成功:  
-
-```bash
-msprof --help
-```
+msProf 工具内置在 CANN Toolkit 开发套件中，推荐直接下载 CANN 包进行安装，具体请参见《[CANN快速安装](https://www.hiascend.com/cann/download)》。
 
 如需通过源码编译方式安装，请参见 《[msProf 工具安装指南](docs/zh/msprof_install_guide.md)》。
 

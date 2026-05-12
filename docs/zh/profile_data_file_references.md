@@ -1305,7 +1305,7 @@ msproftx的timeline数据在msprof\_tx\_\*.json展示。如下所示。
 **图 2**  msproftx timeline数据<a name="zh-cn_topic_0000001798418925_fig912175631213"></a>  
 ![](figures/msproftx-timeline数据.png "msproftx-timeline数据")
 
-如[图2](#zh-cn_topic_0000001798418925_fig912175631213)所示，timeline汇总数据主要展示如下区域：
+如[图2](#zh-cn_topic_0000001798418925_fig912175631213)所示，msproftx timeline数据主要展示如下区域：
 
 - 区域1：msproftx打点，记录上层应用数据，包含上层应用运行的耗时信息。
 - 区域2：底层NPU数据，msproftx打点下发至Device侧的耗时记录。
@@ -2944,26 +2944,33 @@ AI Core和AI Vector的带宽和延时数据无summary信息，timeline信息在m
 **图 3**  aiv\_core\_group<a name="zh-cn_topic_0000001797600917_fig1994919116471"></a>  
 ![](figures/aiv_core_group.png "aiv_core_group")
 
-**表 1**  字段说明
+**表 1**  字段说明（biu_group）
 
-|字段名|字段含义|
-|--|--|
-|**biu_group**|
-|Bandwidth Read|BIU总线接口单元读取指令时的带宽。|
-|Bandwidth Write|BIU总线接口单元写入指令时的带宽。|
-|Latency Read|BIU总线接口单元读取指令时的时延。|
-|Latency Write|BIU总线接口单元写入指令时的时延。|
-|**aic_core_group**|
-|Cube|矩阵类运算指令在本采样周期内的cycle数和占比。|
-|Mte1|L1->L0A/L0B搬运类指令在本采样周期内的cycle数和占比。|
-|Mte2|片上内存->AICORE搬运类指令在本采样周期内的cycle数和占比。|
-|Mte3|AICORE->片上内存搬运类指令在本采样周期内的cycle数和占比。|
-|**aiv_core_group**|
-|Mte1|L1->L0A/L0B搬运类指令在本采样周期内的cycle数和占比。|
-|Mte2|片上内存->AICORE搬运类指令在本采样周期内的cycle数和占比。|
-|Mte3|AICORE->片上内存搬运类指令在本采样周期内的cycle数和占比。|
-|Scalar|标量类运算指令在本采样周期内的cycle数和占比。|
-|Vector|向量类运算指令在本采样周期内的cycle数和占比。|
+| 字段名          | 字段含义                          |
+| --------------- | --------------------------------- |
+| Bandwidth Read  | BIU总线接口单元读取指令时的带宽。 |
+| Bandwidth Write | BIU总线接口单元写入指令时的带宽。 |
+| Latency Read    | BIU总线接口单元读取指令时的时延。 |
+| Latency Write   | BIU总线接口单元写入指令时的时延。 |
+
+**表 2**  字段说明（aic_core_group）
+
+| 字段名 | 字段含义                                                  |
+| ------ | --------------------------------------------------------- |
+| Cube   | 矩阵类运算指令在本采样周期内的cycle数和占比。             |
+| Mte1   | L1->L0A/L0B搬运类指令在本采样周期内的cycle数和占比。      |
+| Mte2   | 片上内存->AICORE搬运类指令在本采样周期内的cycle数和占比。 |
+| Mte3   | AICORE->片上内存搬运类指令在本采样周期内的cycle数和占比。 |
+
+**表 3**  字段说明（aiv_core_group）
+
+| 字段名 | 字段含义                                                  |
+| ------ | --------------------------------------------------------- |
+| Mte1   | L1->L0A/L0B搬运类指令在本采样周期内的cycle数和占比。      |
+| Mte2   | 片上内存->AICORE搬运类指令在本采样周期内的cycle数和占比。 |
+| Mte3   | AICORE->片上内存搬运类指令在本采样周期内的cycle数和占比。 |
+| Scalar | 标量类运算指令在本采样周期内的cycle数和占比。             |
+| Vector | 向量类运算指令在本采样周期内的cycle数和占比。             |
 
 ## Acc PMU（加速器带宽及并发信息）<a name="ZH-CN_TOPIC_0000002509383203"></a>
 
