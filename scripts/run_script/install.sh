@@ -48,6 +48,7 @@ function implement_install() {
   create_directory ${install_path}/${arch_name}/include/ge ${right}
   create_directory ${install_path}/${ANALYSIS_PATH} ${right}
   create_directory ${install_path}/${SHARE_INFO_DIR}/${MSPROF} ${right}
+  create_directory ${install_path}/${SAMPLE_PATH} ${right}
   # 1. uninstall.sh
   copy_file ${UNINSTALL_SCRIPT} ${install_path}/${SHARE_INFO_DIR}/${MSPROF}/${UNINSTALL_SCRIPT}
   # 2. utils.sh
@@ -67,6 +68,8 @@ function implement_install() {
 	copy_file ${ACL_PROF_H} ${install_path}/${arch_name}/include/acl/${ACL_PROF_H}
 	# ge_prof.h
 	copy_file ${GE_PROF_H} ${install_path}/${arch_name}/include/ge/${GE_PROF_H}
+	# samples
+	copy_file ${SAMPLE} ${install_path}/${SAMPLE_PATH}
 
 	# 5. install analyse
  	chmod -R 755 ${install_path}/${ANALYSIS_PATH}

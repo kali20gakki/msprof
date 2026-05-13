@@ -26,8 +26,10 @@ GE_PROF_H="ge_prof.h"
 # never use analysis/, or remove important file by softlink
 ANALYSIS="analysis"
 MSPROF="msprof"
+SAMPLE="samples"
 
 ANALYSIS_PATH="tools/profiler/profiler_tool"
+SAMPLE_PATH="tools/mstx/samples"
 MSPROF_PATH="tools/profiler/bin"
 SHARE_INFO_DIR="share/info"
 UNINSTALL_SCRIPT="uninstall.sh"

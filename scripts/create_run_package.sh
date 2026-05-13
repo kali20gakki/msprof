@@ -115,6 +115,15 @@ function create_temp_dir() {
     copy_script ${INSTALL_SCRIPT} ${temp_dir}
     copy_script ${UN_INSTALL_SCRIPT} ${temp_dir}
     copy_script ${UTILS_SCRIPT} ${temp_dir}
+    build_sample
+}
+
+# build sample
+function build_sample() {
+  git clone https://gitcode.com/cann/runtime.git ${temp_dir}/runtime
+  mkdir -p ${temp_dir}/samples/3_mstx_with_domain
+  cp -R ${temp_dir}/runtime/example/5_performance/profiling/3_mstx_with_domain ${temp_dir}/samples
+  rm -rf ${temp_dir}/runtime
 }
 
 # copy script
