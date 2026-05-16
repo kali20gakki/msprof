@@ -21,6 +21,7 @@ class TraceViewHeaderConstant:
     """
     trace view header constant class
     """
+
     TRACE_HEADER_NAME = 'name'
     TRACE_HEADER_PH = 'ph'
     TRACE_HEADER_TS = 'ts'
@@ -100,7 +101,6 @@ class TraceViewHeaderConstant:
     COMPONENT_LAYER_AICORE_FREQ = "AI Core Freq"
     COMPONENT_LAYER_HCCL = "Communication"
     COMPONENT_LAYER_VOLTAGE = "Voltage Info"
-    COMPONENT_LAYER_DPU = "DPU"
 
     # filtering msprof timeline trace
     MSPROF_TIMELINE_FILTER_LIST = (PROCESS_ALL_REDUCE, PROCESS_AI_CPU)
@@ -129,10 +129,8 @@ class TraceViewHeaderConstant:
         PROCESS_ACL: LayerInfo(COMPONENT_LAYER_CANN, GENERAL_LAYER_CPU, LAYER_CANN_SORT),
         PROCESS_GE: LayerInfo(COMPONENT_LAYER_CANN, GENERAL_LAYER_CPU, LAYER_CANN_SORT),
         PROCESS_RUNTIME: LayerInfo(COMPONENT_LAYER_CANN, GENERAL_LAYER_CPU, LAYER_CANN_SORT),
-        PROCESS_TASK: LayerInfo(COMPONENT_LAYER_ASCEND_HW, GENERAL_LAYER_NPU,
-                                LAYER_ASCEND_HW_SORT),
-        PROCESS_STEP_TRACE: LayerInfo(COMPONENT_LAYER_ASCEND_HW, GENERAL_LAYER_NPU,
-                                      LAYER_ASCEND_HW_SORT),
+        PROCESS_TASK: LayerInfo(COMPONENT_LAYER_ASCEND_HW, GENERAL_LAYER_NPU, LAYER_ASCEND_HW_SORT),
+        PROCESS_STEP_TRACE: LayerInfo(COMPONENT_LAYER_ASCEND_HW, GENERAL_LAYER_NPU, LAYER_ASCEND_HW_SORT),
         PROCESS_API: LayerInfo(COMPONENT_LAYER_CANN, GENERAL_LAYER_CPU, LAYER_CANN_SORT),
         PROCESS_EVENT: LayerInfo(COMPONENT_LAYER_CANN, GENERAL_LAYER_CPU, LAYER_CANN_SORT),
         PROCESS_CPU_USAGE: LayerInfo(COMPONENT_LAYER_CPU_USAGE, GENERAL_LAYER_CPU, LAYER_CPU_USAGE_SORT),
@@ -143,7 +141,7 @@ class TraceViewHeaderConstant:
         PROCESS_AI_CORE_FREQ: LayerInfo(COMPONENT_LAYER_AICORE_FREQ, GENERAL_LAYER_NPU, LAYER_ASCEND_AICORE_FREQ_SORT),
         PROCESS_VOLTAGE: LayerInfo(COMPONENT_LAYER_VOLTAGE, GENERAL_LAYER_NPU, LAYER_VOLTAGE_SORT),
         PROCESS_COMMUNICATION: LayerInfo(COMPONENT_LAYER_HCCL, GENERAL_LAYER_NPU, LAYER_HCCL_SORT),
-        PROCESS_DPU: LayerInfo(COMPONENT_LAYER_DPU, GENERAL_LAYER_DPU, LAYER_DPU_SORT),
+        PROCESS_DPU: LayerInfo(COMPONENT_LAYER_CANN, GENERAL_LAYER_DPU, LAYER_DPU_SORT),
     }
 
     @classmethod
@@ -154,8 +152,12 @@ class TraceViewHeaderConstant:
         if process_name is not None and process_name != "":
             cls.COMPONENT_LAYER_FRAMEWORK = process_name
             cls.LAYER_INFO_MAP.update(
-                {cls.PROCESS_MSPROFTX: cls.LayerInfo(cls.COMPONENT_LAYER_FRAMEWORK,
-                                                     cls.GENERAL_LAYER_CPU, cls.LAYER_FRAMEWORK_SORT)})
+                {
+                    cls.PROCESS_MSPROFTX: cls.LayerInfo(
+                        cls.COMPONENT_LAYER_FRAMEWORK, cls.GENERAL_LAYER_CPU, cls.LAYER_FRAMEWORK_SORT
+                    )
+                }
+            )
 
     def get_trace_view_header_constant_class_name(self: any) -> any:
         """

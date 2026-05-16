@@ -14,13 +14,13 @@
  * See the Mulan PSL v2 for more details.
  * -------------------------------------------------------------------------*/
 
-#include "gtest/gtest.h"
-#include "mockcpp/mockcpp.hpp"
 #include "analysis/csrc/application/timeline/dpu_assembler.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/dpu_data.h"
-#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 #include "analysis/csrc/domain/services/environment/context.h"
 #include "analysis/csrc/infrastructure/dfx/error_code.h"
+#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
+#include "gtest/gtest.h"
+#include "mockcpp/mockcpp.hpp"
 
 using namespace Analysis::Application;
 using namespace Analysis::Utils;
@@ -28,15 +28,17 @@ using namespace Analysis::Domain;
 using namespace Analysis::Viewer::Database;
 using namespace Analysis::Domain::Environment;
 
-namespace {
-    const int DEPTH = 0;
-    const std::string BASE_PATH = "./dpu_test";
-    const std::string PROF_PATH = File::PathJoin({BASE_PATH, "PROF_0"});
-    const std::string RESULT_PATH = File::PathJoin({PROF_PATH, OUTPUT_PATH});
-}
+namespace
+{
+const int DEPTH = 0;
+const std::string BASE_PATH = "./dpu_test";
+const std::string PROF_PATH = File::PathJoin({BASE_PATH, "PROF_0"});
+const std::string RESULT_PATH = File::PathJoin({PROF_PATH, OUTPUT_PATH});
+}  // namespace
 
-class DPUAssemblerUTest : public testing::Test {
-protected:
+class DPUAssemblerUTest : public testing::Test
+{
+   protected:
     virtual void TearDown()
     {
         EXPECT_TRUE(File::RemoveDir(BASE_PATH, DEPTH));
@@ -45,14 +47,16 @@ protected:
     }
     virtual void SetUp()
     {
-        if (File::Check(BASE_PATH)) {
+        if (File::Check(BASE_PATH))
+        {
             File::RemoveDir(BASE_PATH, DEPTH);
         }
         EXPECT_TRUE(File::CreateDir(BASE_PATH));
         EXPECT_TRUE(File::CreateDir(PROF_PATH));
         EXPECT_TRUE(File::CreateDir(RESULT_PATH));
     }
-protected:
+
+   protected:
     DataInventory dataInventory_;
 };
 
@@ -181,15 +185,16 @@ TEST_F(DPUAssemblerUTest, ShouldReturnTrueWhenDPUTrackDataAssembleSuccess)
     FileReader reader(files.back());
     std::vector<std::string> res;
     EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
-    std::string expectStr = "{\"name\":\"process_name\",\"pid\":1024256,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":"
-                            "\"DPU\"}},{\"name\":\"process_labels\",\"pid\":1024256,\"tid\":0,\"ph\":\"M\",\"args\":{"
-                            "\"labels\":\"DPU 0\"}},{\"name\":\"process_sort_index\",\"pid\":1024256,\"tid\":0,\"ph\":"
-                            "\"M\",\"args\":{\"sort_index\":8}},{\"name\":\"thread_name\",\"pid\":1024256,\"tid\":"
-                            "1,\"ph\":\"M\",\"args\":{\"name\":\"Stream 1\"}},{\"name\":\"thread_sort_index\","
-                            "\"pid\":1024256,\"tid\":1,\"ph\":\"M\",\"args\":{\"sort_index\":1}},{\"name\":"
-                            "\"dpu_conv2d\",\"pid\":1024256,\"tid\":1,\"ts\":\"1717575960208020.750\",\"dur\":"
-                            "990.0,\"ph\":\"X\",\"args\":{\"Thread Id\":12345,\"Physic Stream Id\":1,"
-                            "\"Task Id\":100,\"Task Type\":\"AI_CPU\"}},";
+    std::string expectStr =
+        "{\"name\":\"process_name\",\"pid\":1024256,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":"
+        "\"CANN\"}},{\"name\":\"process_labels\",\"pid\":1024256,\"tid\":0,\"ph\":\"M\",\"args\":{"
+        "\"labels\":\"DPU 0\"}},{\"name\":\"process_sort_index\",\"pid\":1024256,\"tid\":0,\"ph\":"
+        "\"M\",\"args\":{\"sort_index\":8}},{\"name\":\"thread_name\",\"pid\":1024256,\"tid\":"
+        "1,\"ph\":\"M\",\"args\":{\"name\":\"Stream 1\"}},{\"name\":\"thread_sort_index\","
+        "\"pid\":1024256,\"tid\":1,\"ph\":\"M\",\"args\":{\"sort_index\":1}},{\"name\":"
+        "\"dpu_conv2d\",\"pid\":1024256,\"tid\":1,\"ts\":\"1717575960208020.750\",\"dur\":"
+        "990.0,\"ph\":\"X\",\"args\":{\"Thread Id\":12345,\"Physic Stream Id\":1,"
+        "\"Task Id\":100,\"Task Type\":\"AI_CPU\"}},";
     EXPECT_EQ(expectStr, res.back());
 }
 
@@ -207,20 +212,21 @@ TEST_F(DPUAssemblerUTest, ShouldReturnTrueWhenDPUHcclTrackDataAssembleSuccess)
     FileReader reader(files.back());
     std::vector<std::string> res;
     EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
-    std::string expectStr = "{\"name\":\"process_name\",\"pid\":1024256,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":"
-                            "\"DPU\"}},{\"name\":\"process_labels\",\"pid\":1024256,\"tid\":0,\"ph\":\"M\",\"args\":{"
-                            "\"labels\":\"DPU 0\"}},{\"name\":\"process_sort_index\",\"pid\":1024256,\"tid\":0,\"ph\":"
-                            "\"M\",\"args\":{\"sort_index\":8}},{\"name\":\"thread_name\",\"pid\":1024256,\"tid\":"
-                            "2,\"ph\":\"M\",\"args\":{\"name\":\"Stream 2\"}},{\"name\":\"thread_sort_index\","
-                            "\"pid\":1024256,\"tid\":2,\"ph\":\"M\",\"args\":{\"sort_index\":2}},{\"name\":"
-                            "\"allreduce_op\",\"pid\":1024256,\"tid\":2,\"ts\":\"1717575960208020.750\",\"dur\":"
-                            "990.0,\"ph\":\"X\",\"args\":{\"Thread Id\":12345,\"Physic Stream Id\":2,\"Task Id\":"
-                            "200,\"OP Type\":\"MAX\",\"AI CPU Device Id\":0,\"AI CPU Task Id\":300,"
-                            "\"Plane Id\":1,\"Notify Id\":\"5555555\",\"Duration Estimated(us)\":100.5,"
-                            "\"Src Rank\":0,\"Dst Rank\":1,\"Transport Type\":\"RDMA\",\"Size(Byte)\":1048576,"
-                            "\"Bandwidth(GB/s)\":1.0591676767676768,\"Data Type\":\"FP32\",\"Link Type\":\"RoCE\","
-                            "\"Rdma Type\":\"RDMA\",\"Role\":\"server\",\"Ccl Tag\":\"3333333\","
-                            "\"Work Flow Mode\":\"1\",\"Stage\":\"1\"}},";
+    std::string expectStr =
+        "{\"name\":\"process_name\",\"pid\":1024256,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":"
+        "\"CANN\"}},{\"name\":\"process_labels\",\"pid\":1024256,\"tid\":0,\"ph\":\"M\",\"args\":{"
+        "\"labels\":\"DPU 0\"}},{\"name\":\"process_sort_index\",\"pid\":1024256,\"tid\":0,\"ph\":"
+        "\"M\",\"args\":{\"sort_index\":8}},{\"name\":\"thread_name\",\"pid\":1024256,\"tid\":"
+        "2,\"ph\":\"M\",\"args\":{\"name\":\"Stream 2\"}},{\"name\":\"thread_sort_index\","
+        "\"pid\":1024256,\"tid\":2,\"ph\":\"M\",\"args\":{\"sort_index\":2}},{\"name\":"
+        "\"allreduce_op\",\"pid\":1024256,\"tid\":2,\"ts\":\"1717575960208020.750\",\"dur\":"
+        "990.0,\"ph\":\"X\",\"args\":{\"Thread Id\":12345,\"Physic Stream Id\":2,\"Task Id\":"
+        "200,\"OP Type\":\"MAX\",\"AI CPU Device Id\":0,\"AI CPU Task Id\":300,"
+        "\"Plane Id\":1,\"Notify Id\":\"5555555\",\"Duration Estimated(us)\":100.5,"
+        "\"Src Rank\":0,\"Dst Rank\":1,\"Transport Type\":\"RDMA\",\"Size(Byte)\":1048576,"
+        "\"Bandwidth(GB/s)\":1.0591676767676768,\"Data Type\":\"FP32\",\"Link Type\":\"RoCE\","
+        "\"Rdma Type\":\"RDMA\",\"Role\":\"server\",\"Ccl Tag\":\"3333333\","
+        "\"Work Flow Mode\":\"1\",\"Stage\":\"1\"}},";
     EXPECT_EQ(expectStr, res.back());
 }
 
@@ -263,7 +269,7 @@ TEST_F(DPUAssemblerUTest, ShouldReturnTrueWhenMultipleDevicesAndStreams)
     DPUAssembler assembler;
     std::shared_ptr<std::vector<DPUData>> dataS;
     std::vector<DPUData> data;
-    
+
     DPUData data1;
     data1.isHccl = false;
     data1.dpuDeviceId = 0;
@@ -275,7 +281,7 @@ TEST_F(DPUAssemblerUTest, ShouldReturnTrueWhenMultipleDevicesAndStreams)
     data1.timestamp = 1717575960208020750;
     data1.endTime = 1717575960209010750;
     data.push_back(data1);
-    
+
     DPUData data2;
     data2.isHccl = false;
     data2.dpuDeviceId = 0;
@@ -287,7 +293,7 @@ TEST_F(DPUAssemblerUTest, ShouldReturnTrueWhenMultipleDevicesAndStreams)
     data2.timestamp = 1717575960210000000;
     data2.endTime = 1717575960211000000;
     data.push_back(data2);
-    
+
     DPUData data3;
     data3.isHccl = false;
     data3.dpuDeviceId = 1;
@@ -299,7 +305,7 @@ TEST_F(DPUAssemblerUTest, ShouldReturnTrueWhenMultipleDevicesAndStreams)
     data3.timestamp = 1717575960212000000;
     data3.endTime = 1717575960213000000;
     data.push_back(data3);
-    
+
     MAKE_SHARED_NO_OPERATION(dataS, std::vector<DPUData>, data);
     dataInventory_.Inject(dataS);
     MOCKER_CPP(&Context::GetPidFromInfoJson).stubs().will(returnValue(1000));
