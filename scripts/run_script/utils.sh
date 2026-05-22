@@ -36,6 +36,7 @@ UNINSTALL_SCRIPT="uninstall.sh"
 UTILS_SCRIPT="utils.sh"
 CANN_UNINSTALL_SCRIPT="cann_uninstall.sh"
 VERSION_INFO="version.info"
+PLATFORM_PROFILER_RUN="platform-profiler.run"
 
 function print() {
     if [ ! -f "$log_file" ]; then
