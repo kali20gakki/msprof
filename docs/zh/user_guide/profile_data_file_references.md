@@ -210,7 +210,7 @@ MC²性能数据结果示例如下：
 
 **电压数据分析<a name="zh-cn_topic_0000001751419248_section5199345010"></a>**
 
-msprof\*.json下的“Voltage Info”层级展示设备电压变压信息。
+msprof\_\*.json下的“Voltage Info”层级展示设备电压变压信息。
 
 支持的型号：
 
@@ -230,6 +230,36 @@ msprof\*.json下的“Voltage Info”层级展示设备电压变压信息。
 |--|--|
 |Aicore Voltage(mV)|AI Core电压，单位mV。|
 |Bus Voltage(mV)|互联总线电压，单位mV。|
+
+**DPU数据分析<a name="zh-cn_topic_0000001751419248_section5199345011"></a>**
+
+msprof\_\*.json下的“DPU”层级展示在DPU下算子的执行耗时信息。
+
+支持的型号：
+
+- Atlas 350 加速卡
+
+**表 4**  字段说明<a name="zh-cn_topic_0000001751419248_table21964325015"></a>
+
+| 字段名                 | 字段含义                                                   |
+| ---------------------- | ---------------------------------------------------------- |
+| Thread Id              | 线程ID。                                                   |
+| Physic Stream Id       | 物理流ID。                                                 |
+| Task Id                | Task任务的ID。                                             |
+| OP Type                | 算子类型。                                                 |
+| AI CPU Device Id       | 对应关联的AI CPU的设备ID。                                 |
+| AI CPU Task Id         | 对应关联的AI CPU的Task任务ID。                             |
+| Plane Id               | 网络平面ID。                                               |
+| Notify Id              | 集合通信任务等待的ID。                                     |
+| Duration Estimated(us) | 预估任务持续时间                                           |
+| Src Rank               | 源Rank。                                                   |
+| Dst Rank               | 目的Rank。若此字段显示为4294967295，则为本地片内操作。     |
+| Transport Type         | 传输类型，包含：LOCAL、SDMA、RDMA等。                      |
+| Size(Byte)             | 数据量，单位Byte。在task type为notify类型时无效，填充为0。 |
+| Bandwidth(GB/s)        | 带宽大小，单位GB/s。                                       |
+| Data Type              | 数据格式。                                                 |
+| Link Type              | 链路类型，包含：HCCS、PCIe、RoCE等。                       |
+| Rdma Type              | RDMA类型，包含：RDMASendNotify、RDMASendPayload等。        |
 
 #### op\_summary（算子详细信息）<a name="ZH-CN_TOPIC_0000002477303242"></a>
 
@@ -1919,6 +1949,8 @@ AI Core和AI Vector的带宽和延时数据无summary信息，timeline信息在m
 
 **msprof\_\*.json文件的biu\_group、aic\_core\_group、aiv\_core\_group层级数据说明<a name="zh-cn_topic_0000001797600917_section432932191111"></a>**
 
+以Atlas A3 训练系列产品/Atlas A3 推理系列产品和Atlas A2 训练系列产品/Atlas A2 推理系列产品数据为例。
+
 **图 1**  biu\_group<a name="zh-cn_topic_0000001797600917_fig13198121214588"></a>  
 ![](../figures/biu_group.png "biu_group")
 
@@ -1932,11 +1964,14 @@ AI Core和AI Vector的带宽和延时数据无summary信息，timeline信息在m
 
 | 字段名          | 字段含义                          |
 | --------------- | --------------------------------- |
-| **biu_group**   |                                   |
 | Bandwidth Read  | BIU总线接口单元读取指令时的带宽。 |
 | Bandwidth Write | BIU总线接口单元写入指令时的带宽。 |
 | Latency Read    | BIU总线接口单元读取指令时的时延。 |
 | Latency Write   | BIU总线接口单元写入指令时的时延。 |
+
+> [!NOTE]
+>
+> 以上biu_group层级为Atlas A3 训练系列产品/Atlas A3 推理系列产品和Atlas A2 训练系列产品/Atlas A2 推理系列产品数据，对于Atlas 350 加速卡，则为Biu Perf层级（BIU指令流水），下层则是以Group{id}-{核id}的维度进行分组，例如Group0-aiv0，分组下的字段和biu_group层级一致。
 
 **表 2**  字段说明（aic_core_group）
 
