@@ -511,6 +511,17 @@ const TableColumns V6BlockPmu = {{"stream_id", SQL_NUMERIC_TYPE},  {"task_id", S
                                  {"start_time", SQL_NUMERIC_TYPE}, {"duration", SQL_REAL_TYPE},
                                  {"core_type", SQL_TEXT_TYPE},     {"core_id", SQL_INTEGER_TYPE}};
 
+const TableColumns UBBwData = {
+    {"device_id", "INTEGER"},          {"port_id", "INTEGER"},      {"time_stamp", "NUMERIC"},
+    {"udma_rx_bind", "NUMERIC"},       {"udma_tx_bind", "NUMERIC"}, {"rx_port_band_width", "NUMERIC"},
+    {"tx_port_band_width", "NUMERIC"},
+};
+
+const TableColumns BiuInstrStatus = {
+    {"group_id", "INTEGER"},  {"core_type", "TEXT"},   {"block_id", "INTEGER"},        {"instruction", "TEXT"},
+    {"timestamp", "NUMERIC"}, {"duration", "NUMERIC"}, {"checkpoint_info", "INTEGER"},
+};
+
 const TableColumns DPUTaskTrack = {{"dpu_device_id", SQL_INTEGER_TYPE}, {"thread_id", SQL_INTEGER_TYPE},
                                    {"start_time", SQL_NUMERIC_TYPE},    {"end_time", SQL_NUMERIC_TYPE},
                                    {"task_type", SQL_TEXT_TYPE},        {"stream_id", SQL_INTEGER_TYPE},
@@ -857,6 +868,18 @@ DPUDB::DPUDB()
     dbName_ = "dpu.db";
     tableColNames_["DPUTaskTrack"] = DPUTaskTrack;
     tableColNames_["DPUHcclTrack"] = DPUHcclTrack;
+}
+
+UbDB::UbDB()
+{
+    dbName_ = "ub.db";
+    tableColNames_["UBBwData"] = UBBwData;
+}
+
+BiuPerfDB::BiuPerfDB()
+{
+    dbName_ = "biu_perf.db";
+    tableColNames_["BiuInstrStatus"] = BiuInstrStatus;
 }
 }  // namespace Infra
 }  // namespace Analysis
