@@ -22,6 +22,7 @@ class DBNameConstant(metaclass=ABCMeta):
     """
     DB name and DB table names
     """
+
     # DB name
     DB_ACL_MODULE = "acl_module.db"
     DB_AICORE_OP_SUMMARY = "ai_core_op_summary.db"
