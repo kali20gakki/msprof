@@ -3,11 +3,11 @@ import logging
 import os
 import re
 import shutil
-import subprocess
+import subprocess  # nosec B404
 from collections import defaultdict
 from typing import List, Dict, Tuple
 
-from misc.gil_tracer.file_manager import FileManager
+from file_manager import FileManager
 
 CPU_MASK_BIT = 32
 MAIN_PROCESS_RANGE = 6
@@ -17,10 +17,10 @@ ALLOWED_CPUS_PATH = "/proc/self/status"
 
 
 def execute_command(cmd: List[str]) -> Tuple[str, int]:
-    with subprocess.Popen(cmd, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as p:
+    with subprocess.Popen(cmd, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as p:  # nosec B603
         out, err = p.communicate(timeout=1000)
         if err:
-            logging.debug(f"Command stderr while running {cmd}: {err.decode()}")
+            logging.debug("Command stderr while running %s: %s", cmd, err.decode())
     return out.decode(), p.returncode
 
 
@@ -58,18 +58,18 @@ class DeviceInfo:
             npu_id, chip_id, chip_logic_id = parts[:3]
             if chip_logic_id.isdigit():
                 npu_map_info.setdefault(npu_id, {})[chip_id] = chip_logic_id
-        logging.debug(f"build npu_map_info: {npu_map_info}")
+        logging.debug("build npu_map_info: %s", npu_map_info)
         return npu_map_info
 
     @staticmethod
     def parse_allowed_cpus() -> List[int]:
         if not os.path.exists(ALLOWED_CPUS_PATH):
             return []
-        with open(ALLOWED_CPUS_PATH) as f:
+        with open(ALLOWED_CPUS_PATH, encoding="utf-8") as f:
             for line in f:
                 if line.startswith("Cpus_allowed_list"):
                     allowed_cpu_list = expand_cpu_list(line.split()[1])
-                    logging.debug(f"Cpus_allowed_list: {allowed_cpu_list}")
+                    logging.debug("Cpus_allowed_list: %s", allowed_cpu_list)
                     return allowed_cpu_list
         return []
 
@@ -84,7 +84,7 @@ class DeviceInfo:
                 if last_part != "Affinity":
                     affinity[chip_logic_id] = expand_cpu_list(last_part)
                 chip_logic_id += 1
-        logging.debug(f"build affinity map: {affinity}")
+        logging.debug("build affinity map: %s", affinity)
         return affinity
 
     def get_running_npus(self) -> List[int]:
@@ -121,7 +121,7 @@ class DeviceInfo:
             if pid_mem_list:
                 max_pid = max(pid_mem_list, key=lambda x: x[1])[0]
                 self.main_pid_list.append([max_pid])
-        logging.debug(f"identifying the running NPU card: {running_npu_set}")
+        logging.debug("identifying the running NPU card: %s", running_npu_set)
         return running_npu_list
 
 
@@ -183,7 +183,7 @@ class CpuAlloc:
         irq_id_list: List[int] = []
         irq_cpu_list: List[str] = []
         try:
-            with open("/proc/interrupts") as f:
+            with open("/proc/interrupts", encoding="utf-8") as f:
                 for line in f:
                     if "sq_send_trigger_irq" in line:
                         irq = line.split(":")[0].strip()
@@ -209,10 +209,7 @@ class CpuAlloc:
             if not os.path.exists(msi_irq_dir):
                 raise RuntimeError(f"Can't find MSI interrupt directory of NPU{npu} .")
 
-            npu_irq_list = sorted(
-                os.listdir(f"/sys/bus/pci/devices/{pci_addr}/msi_irqs/"),
-                key=lambda x: int(x)
-            )
+            npu_irq_list = sorted(os.listdir(f"/sys/bus/pci/devices/{pci_addr}/msi_irqs/"), key=int)
             for irq in sq_irqs:
                 if irq in npu_irq_list:
                     irq_id_list.extend([int(irq), int(irq) + 1])
@@ -295,7 +292,7 @@ class CpuAlloc:
                 final_pool[npu_list[0]] = raw_pool[npu_list[0]]
             else:
                 final_pool.update(self.average_distribute({key: npu_list}, raw_pool))
-        logging.debug(f"npu_cpu_pool_all: {final_pool}")
+        logging.debug("npu_cpu_pool_all: %s", final_pool)
         self.npu_cpu_pool_all = final_pool
 
     def build_cpu_pools_running(self) -> None:
@@ -323,7 +320,7 @@ class CpuAlloc:
                 final_pool[npu_list[0]] = raw_pool[npu_list[0]]
             else:
                 final_pool.update(self.average_distribute({key: npu_list}, raw_pool))
-        logging.debug(f"npu_cpu_pool: {final_pool}")
+        logging.debug("npu_cpu_pool: %s", final_pool)
         self.npu_cpu_pool = final_pool
 
     def allocate(self, main_range: int, acl_range: int, rel_range: int) -> None:
@@ -331,17 +328,27 @@ class CpuAlloc:
             usable_pool = pool[3:]
             need = main_range + acl_range + rel_range
             if len(usable_pool) < need:
-                raise RuntimeError(f"The numaber of CPUs on NPU{npu} is insufficient. "
-                                   f"The default solution requires at least {need} CPUs.")
+                raise RuntimeError(
+                    f"The numaber of CPUs on NPU{npu} is insufficient. "
+                    f"The default solution requires at least {need} CPUs."
+                )
             self.assign_main[npu] = usable_pool[:main_range]
-            self.assign_acl[npu] = usable_pool[main_range:main_range + acl_range]
-            self.assign_rel[npu] = usable_pool[main_range + acl_range:main_range + acl_range + rel_range]
+            self.assign_acl[npu] = usable_pool[main_range : main_range + acl_range]
+            self.assign_rel[npu] = usable_pool[main_range + acl_range : main_range + acl_range + rel_range]
 
 
 class CustomBind:
-    def __init__(self, process_name: str = "", cpu_list: List[str] = None,
-                 bind_sub_process: bool = False, is_thread: bool = False, is_irq: bool = False,
-                 mem_bind: bool = False, pid: List[int] = None, irq_id: List[int] = None):
+    def __init__(
+        self,
+        process_name: str = "",
+        cpu_list: List[str] = None,
+        bind_sub_process: bool = False,
+        is_thread: bool = False,
+        is_irq: bool = False,
+        mem_bind: bool = False,
+        pid: List[int] = None,
+        irq_id: List[int] = None,
+    ):
         self.process_name = process_name
         self.bind_sub_process = bind_sub_process
         self.is_thread = is_thread
@@ -357,7 +364,7 @@ class CustomBind:
         for cpu in cpus:
             group = cpu // CPU_MASK_BIT
             bit = cpu % CPU_MASK_BIT
-            groups[group] |= (1 << bit)
+            groups[group] |= 1 << bit
 
         max_group = max(groups.keys())
         mask_parts = []
@@ -379,8 +386,9 @@ class CustomBind:
         else:
             return 0
 
-    def get_real_main_pid_list(self, pid_list: List[Tuple[int, int]],
-                               main_pid_list: List[List[int]]) -> List[List[int]]:
+    def get_real_main_pid_list(
+        self, pid_list: List[Tuple[int, int]], main_pid_list: List[List[int]]
+    ) -> List[List[int]]:
         real_main_pid_list: List[List[int]] = []
         for pid, ppid in pid_list:
             per_real_pid_list: List[int] = []
@@ -388,7 +396,7 @@ class CustomBind:
                 if pid in pids:
                     per_real_pid_list.append(pid)
                     continue
-                elif ppid in pids:
+                if ppid in pids:
                     per_real_pid_list.append(ppid)
                     continue
                 real_pid = self.get_main_pid_from_docker(pid)
@@ -408,7 +416,7 @@ class CustomBind:
             pid_list = []
             for p in self.pid:
                 try:
-                    ppid = int(subprocess.check_output(["ps", "-o", "ppid=", "-p", str(p)], text=True).strip())
+                    ppid = int(subprocess.check_output(["/usr/bin/ps", "-o", "ppid=", "-p", str(p)], text=True).strip())  # nosec B603
                 except subprocess.CalledProcessError:
                     ppid = -1
                 except ValueError:
@@ -417,7 +425,11 @@ class CustomBind:
             return pid_list
 
         select_idx = 1 if self.is_thread else 0
-        out, _ = execute_command(["ps", "-Te"]) if self.is_thread else execute_command(["ps", "-eo", "pid,ppid,cmd"])
+        out, _ = (
+            execute_command(["/usr/bin/ps", "-Te"])
+            if self.is_thread
+            else execute_command(["/usr/bin/ps", "-eo", "pid,ppid,cmd"])
+        )
         pid_list = []
         for line in out.splitlines():
             if self.process_name in line:
@@ -432,9 +444,11 @@ class CustomBind:
 
     def irq_bind(self) -> None:
         if not shutil.which("systemctl"):
-            logging.warning("The systemctl command cannot be used in the current environment.If the irqbalance "
-                            "service is enabled, manually disable the irqbalance service.Otherwise, the "
-                            "interrupt-core binding cannot take effect.")
+            logging.warning(
+                "The systemctl command cannot be used in the current environment.If the irqbalance "
+                "service is enabled, manually disable the irqbalance service.Otherwise, the "
+                "interrupt-core binding cannot take effect."
+            )
         else:
             out, return_code = execute_command(["systemctl", "list-unit-files"])
             if return_code == 0 and "irqbalance.service" in out:
@@ -443,20 +457,23 @@ class CustomBind:
                     logging.info("The irqbalance service is running and has been stopped.")
                     _, return_code = execute_command(["systemctl", "stop", "irqbalance"])
                     if return_code != 0:
-                        logging.warning("The irqbalance service cannot be stopped.You need to manually stop it."
-                                        "Otherwise, the interrupt-core binding cannot take effect.")
+                        logging.warning(
+                            "The irqbalance service cannot be stopped.You need to manually stop it."
+                            "Otherwise, the interrupt-core binding cannot take effect."
+                        )
 
         for irq_id, target_cpu_list in zip(self.irq_id, self.cpu_list):
             affinity_file_path = f"/proc/irq/{irq_id}/smp_affinity"
             FileManager.check_directory_path_writeable(affinity_file_path)
-            with open(affinity_file_path, "w") as f:
+            with open(affinity_file_path, "w", encoding="utf-8") as f:
                 f.write(self.cpu_to_mask(target_cpu_list))
-                logging.info(f"Bind the interrupt of IRQ-{irq_id} to CPU{target_cpu_list}")
+                logging.info("Bind the interrupt of IRQ-%d to CPU%s", irq_id, target_cpu_list)
 
-    def execute_bind(self, pid: int, cpu_list_str: str, process_type:str,
-                     source_numa: str, cpu_node: Dict[int, int]) -> None:
+    def execute_bind(
+        self, pid: int, cpu_list_str: str, process_type: str, source_numa: str, cpu_node: Dict[int, int]
+    ) -> None:
         cmd = ["taskset", "-acp" if self.bind_sub_process else "-cp", cpu_list_str, str(pid)]
-        logging.info(f"Bind the {self.process_name or 'target'} ({process_type}={pid}) to CPU{cpu_list_str}")
+        logging.info("Bind the %s (%s=%d) to CPU%s", self.process_name or 'target', process_type, pid, cpu_list_str)
         _, return_code = execute_command(cmd)
         if return_code != 0:
             raise RuntimeError(f"Failed to execute the command: {' '.join(cmd)}")
@@ -465,7 +482,7 @@ class CustomBind:
             cmd = ["migratepages", str(pid), source_numa, str(target_numa)]
             _, return_code = execute_command(cmd)
             if return_code != 0:
-                logging.warning(f"Failed to execute the command: {' '.join(cmd)}")
+                logging.warning("Failed to execute the command: %s", ' '.join(cmd))
 
     def bind(self, source_numa: str, cpu_allocer: CpuAlloc) -> None:
         process_type = "pid" if not self.is_thread else "tid"
@@ -487,10 +504,15 @@ class CustomBind:
                 if pid in pids or ppid in pids:
                     cpu_list_str = ",".join(map(str, self.cpu_list[real_main_pid_list.index(pids)]))
             if not cpu_list_str:
-                logging.warning(f"Failed to bind process (pid: {pid}, ppid: {ppid}) to CPU {self.cpu_list}. Please "
-                                f"ensure that the number of processes to be bound is the same as the number of "
-                                f"cpu_list you have entered, or ensure that the Ngid field in the /proc/<pid>/status "
-                                f"file is not 0. It is recommended that the script be executed on the host machine.")
+                logging.warning(
+                    "Failed to bind process (pid: %d, ppid: %d) to CPU %s. Please "
+                    "ensure that the number of processes to be bound is the same as the number of "
+                    "cpu_list you have entered, or ensure that the Ngid field in the /proc/<pid>/status "
+                    "file is not 0. It is recommended that the script be executed on the host machine.",
+                    pid,
+                    ppid,
+                    self.cpu_list,
+                )
                 continue
             self.execute_bind(pid, cpu_list_str, process_type, source_numa, cpu_allocer.cpu_node)
 
@@ -511,30 +533,11 @@ def export_bind_config(cpu_alloc: CpuAlloc) -> Dict:
         acl_cpu_list.append(",".join(map(str, cpu_alloc.assign_acl[npu])))
         rel_cpu_list.append(",".join(map(str, cpu_alloc.assign_rel[npu])))
 
-    config["custom_bind"].append({
-        "pid": main_pid_list,
-        "cpu_list": main_cpu_list,
-        "bind_sub_process": True
-    })
-    config["custom_bind"].append({
-        "process_name": "acl_thread",
-        "cpu_list": acl_cpu_list,
-        "is_thread": True
-    })
-    config["custom_bind"].append({
-        "process_name": "release_thread",
-        "cpu_list": rel_cpu_list,
-        "is_thread": True
-    })
-    config["custom_bind"].append({
-        "pid": dev_pid_list,
-        "cpu_list": dev_cpu_list
-    })
-    config["custom_bind"].append({
-        "irq_id": irq_id_list,
-        "cpu_list": irq_cpu_list,
-        "is_irq": True
-    })
+    config["custom_bind"].append({"pid": main_pid_list, "cpu_list": main_cpu_list, "bind_sub_process": True})
+    config["custom_bind"].append({"process_name": "acl_thread", "cpu_list": acl_cpu_list, "is_thread": True})
+    config["custom_bind"].append({"process_name": "release_thread", "cpu_list": rel_cpu_list, "is_thread": True})
+    config["custom_bind"].append({"pid": dev_pid_list, "cpu_list": dev_cpu_list})
+    config["custom_bind"].append({"irq_id": irq_id_list, "cpu_list": irq_cpu_list, "is_irq": True})
 
     return config
 
@@ -542,16 +545,18 @@ def export_bind_config(cpu_alloc: CpuAlloc) -> Dict:
 def load_custom_bind(data: Dict) -> List[CustomBind]:
     binders = []
     for item in data.get("custom_bind", []):
-        binders.append(CustomBind(
-            process_name=item.get("process_name", ""),
-            cpu_list=item["cpu_list"],
-            bind_sub_process=item.get("bind_sub_process", False),
-            is_thread=item.get("is_thread", False),
-            is_irq=item.get("is_irq", False),
-            mem_bind=item.get("mem_bind", False),
-            pid=item.get("pid", []),
-            irq_id=item.get("irq_id", [])
-        ))
+        binders.append(
+            CustomBind(
+                process_name=item.get("process_name", ""),
+                cpu_list=item["cpu_list"],
+                bind_sub_process=item.get("bind_sub_process", False),
+                is_thread=item.get("is_thread", False),
+                is_irq=item.get("is_irq", False),
+                mem_bind=item.get("mem_bind", False),
+                pid=item.get("pid", []),
+                irq_id=item.get("irq_id", []),
+            )
+        )
     return binders
 
 
@@ -562,26 +567,27 @@ def run(args: argparse.Namespace) -> None:
     all_numa_nodes = ",".join(map(str, cpu_allocer.numa_to_cpu_map.keys()))
     if not args.config:
         default_json = export_bind_config(cpu_allocer)
-        logging.info(f"No configuration file is detected."
-                     f"The default configuration is used for core binding: {default_json}")
+        logging.info(
+            "No configuration file is detected.The default configuration is used for core binding: %s", default_json
+        )
         binder_list = load_custom_bind(default_json)
     else:
         if not os.path.exists(args.config):
-            logging.error(f"The {args.config} file does not exist.Please check and try again.")
+            logging.error("The %s file does not exist.Please check and try again.", args.config)
             return
         input_data = FileManager.read_json_file(args.config)
         binder_list = load_custom_bind(input_data)
     for bind in binder_list:
         loop_count += 1
-        logging.info(f"Start binding core round {loop_count}: {bind.__dict__}")
+        logging.info("Start binding core round %d: %s", loop_count, bind.__dict__)
         try:
             if bind.is_irq:
                 bind.irq_bind()
             else:
                 if not bind.pid and not bind.process_name:
-                    logging.error(f"No input bound object. One of 'pid, process_name, irq_id' are required.")
+                    logging.error("No input bound object. One of 'pid, process_name, irq_id' are required.")
                     continue
                 bind.bind(all_numa_nodes, cpu_allocer)
         except RuntimeError as e:
-            logging.error(f"Error occurred while binding: {e}")
-        logging.info(f"===== Round {loop_count} of core binding has ended =====")
+            logging.error("Error occurred while binding: %s", e)
+        logging.info("===== Round %d of core binding has ended =====", loop_count)

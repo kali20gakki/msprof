@@ -1,14 +1,9 @@
 import argparse
 import logging
 
-from misc.host_analyzer.cpu_binder import cpu_binder
+import cpu_binder
 
-LOG_MAP = {
-    0: logging.DEBUG,
-    1: logging.INFO,
-    2: logging.WARNING,
-    3: logging.ERROR
-}
+LOG_MAP = {0: logging.DEBUG, 1: logging.INFO, 2: logging.WARNING, 3: logging.ERROR}
 
 
 def main():
@@ -17,8 +12,7 @@ def main():
 
     bind_parser = subparsers.add_parser("bind", help="执行绑核逻辑")
     bind_parser.add_argument("-c", "--config", type=str, help="绑定进线程配置文件路径，自定义绑定推理进线程时使用")
-    bind_parser.add_argument("-l", "--log-level", type=int,
-                             default=1, choices=[0, 1, 2, 3], help="日志级别")
+    bind_parser.add_argument("-l", "--log-level", type=int, default=1, choices=[0, 1, 2, 3], help="日志级别")
 
     args = parser.parse_args()
 
