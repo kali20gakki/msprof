@@ -231,6 +231,10 @@ const TableColumns QOS = {{"deviceId", SQL_INTEGER_TYPE},
                           {"eventName", SQL_NUMERIC_TYPE},
                           {"bandwidth", SQL_NUMERIC_TYPE},
                           {"timestampNs", SQL_NUMERIC_TYPE}};
+
+const TableColumns CCU = {{"deviceId", SQL_NUMERIC_TYPE}, {"globalTaskId", SQL_NUMERIC_TYPE},
+                          {"name", SQL_NUMERIC_TYPE},     {"startNs", SQL_NUMERIC_TYPE},
+                          {"endNs", SQL_NUMERIC_TYPE},    {"args", SQL_NUMERIC_TYPE}};
 }  // namespace
 
 MsprofDB::MsprofDB()
@@ -273,6 +277,7 @@ MsprofDB::MsprofDB()
                       {TABLE_NAME_HOST_NETWORK_USAGE, HOST_NETWORK_USAGE},
                       {TABLE_NAME_OSRT_API, OSRT_API},
                       {TABLE_NAME_QOS, QOS},
+                      {TABLE_NAME_CCU, CCU},
                       // ENUM
                       {TABLE_NAME_ENUM_API_TYPE, ENUM_TABLE},
                       {TABLE_NAME_ENUM_MODULE, ENUM_TABLE},

@@ -23,6 +23,7 @@
 #include "analysis/csrc/application/database/db_constant.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/api_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/ascend_task_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/ai_task/include/ccu_mission_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/communication_info_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/kfc_turn_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/mc2_comm_info_data.h"
@@ -47,6 +48,7 @@
 #include "analysis/csrc/domain/entities/viewer_data/system/include/sys_io_data.h"
 #include "analysis/csrc/domain/services/environment/context.h"
 #include "analysis/csrc/infrastructure/dfx/error_code.h"
+#include "analysis/csrc/infrastructure/dump_tools/json_tool/include/json_writer.h"
 #include "analysis/csrc/infrastructure/utils/thread_pool.h"
 
 namespace Analysis
@@ -1221,6 +1223,88 @@ bool SaveQosData(DataInventory& dataInventory, DBInfo& msprofDB, const std::stri
     return SaveData(res, TABLE_NAME_QOS, msprofDB);
 }
 
+bool SaveCCUData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
+{
+    auto ccuData = dataInventory.GetPtr<std::vector<CCUMissionTimelineData>>();
+    if (ccuData == nullptr || ccuData->empty())
+    {
+        WARN("CCU mission data not exist.");
+        return true;
+    }
+
+    using CcuDataFormat = std::vector<std::tuple<uint16_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t>>;
+
+    CcuDataFormat res;
+    if (!Reserve(res, ccuData->size()))
+    {
+        ERROR("Reserved for CCU data failed.");
+        return false;
+    }
+
+    for (const auto& data : *ccuData)
+    {
+        uint64_t globalTaskId = IdPool::GetInstance().GetId(
+            std::make_tuple(data.deviceId, data.streamId, data.taskId, UINT32_MAX, UINT32_MAX));
+        uint64_t nameId = IdPool::GetInstance().GetUint64Id(data.timeType);
+        uint64_t startNs = data.timestamp;
+        uint64_t endNs = data.timestamp + static_cast<uint64_t>(data.duration);
+
+        Infra::JsonWriter jsonWriter;
+        jsonWriter.StartArray();
+        jsonWriter["Physic Stream Id"] << data.streamId;
+        jsonWriter["Task Id"] << data.taskId;
+        if (data.timeType == CCU_TIME_TYPE_WAIT)
+        {
+            jsonWriter["Notify Instruction ID"] << data.instructionId;
+            jsonWriter["Notify Rank ID"] << data.notifyRankId;
+        }
+        else
+        {
+            jsonWriter["Instruction ID"] << data.instructionId;
+        }
+
+        if (data.hasDieId)
+        {
+            jsonWriter["Die Id"] << data.dieId;
+        }
+
+        if (data.hasDataSize)
+        {
+            jsonWriter["Data Size"] << data.dataSize;
+        }
+
+        if (data.hasBandwidth)
+        {
+            jsonWriter["Bandwidth (B/s)"] << data.bandwidth * BYTE_SIZE * BYTE_SIZE;  // MB/s -> B/s
+        }
+
+        if (data.hasReduceInfo)
+        {
+            jsonWriter["Reduce Op Type"] << data.reduceOpType;
+            jsonWriter["Input Data Type"] << data.inputDataType;
+            jsonWriter["Output Data Type"] << data.outputDataType;
+        }
+
+        if (data.hasMask)
+        {
+            jsonWriter["Mask"] << data.mask;
+        }
+
+        if (data.hasDelayChannel)
+        {
+            jsonWriter["Maximum Delay Channel"] << data.maxDelayChannel;
+            jsonWriter["Maximum Channel Delay"] << data.maxChannelDelay;
+        }
+        jsonWriter.EndArray();
+
+        std::string args = jsonWriter.GetString();
+        uint64_t argsId = IdPool::GetInstance().GetUint64Id(args);
+
+        res.emplace_back(data.deviceId, globalTaskId, nameId, startNs, endNs, argsId);
+    }
+
+    return SaveData(res, TABLE_NAME_CCU, msprofDB);
+}
 // 创建 SaveData 的函数类型
 using SaveDataFunc = std::function<bool(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)>;
 const std::unordered_map<std::string, SaveDataFunc> DATA_SAVER = {
@@ -1258,6 +1342,7 @@ const std::unordered_map<std::string, SaveDataFunc> DATA_SAVER = {
     {Viewer::Database::PROCESSOR_NAME_NETWORK_USAGE, SaveHostNetworkUsageData},
     {Viewer::Database::PROCESSOR_NAME_OSRT_API, SaveOSRuntimeApiData},
     {Viewer::Database::PROCESSOR_NAME_QOS, SaveQosData},
+    {Viewer::Database::PROCESSOR_NAME_CCU_MISSION, SaveCCUData},
 };
 
 bool CheckMsprofDb(const std::string& outputPath)
@@ -1322,38 +1407,17 @@ std::string GetDBPath(const std::string& outputDir)
 }
 
 const std::set<std::string> DB_DATA_PROCESS_LIST{
-    PROCESSOR_NAME_API,
-    PROCESSOR_NAME_COMMUNICATION,
-    PROCESSOR_NAME_COMPUTE_TASK_INFO,
-    PROCESSOR_NAME_KFC_TASK,
-    PROCESSOR_NAME_KFC_COMM,
-    PROCESSOR_NAME_DEVICE_TX,
-    PROCESSOR_NAME_MSTX,
-    PROCESSOR_NAME_STEP_TRACE,
-    PROCESSOR_NAME_TASK,
-    PROCESSOR_NAME_ACC_PMU,
-    PROCESSOR_NAME_AICORE_FREQ,
-    PROCESSOR_NAME_DDR,
-    PROCESSOR_NAME_HBM,
-    PROCESSOR_NAME_HCCS,
-    PROCESSOR_NAME_NETDEV_STATS,
-    PROCESSOR_NAME_CPU_USAGE,
-    PROCESSOR_NAME_MEM_USAGE,
-    PROCESSOR_NAME_DISK_USAGE,
-    PROCESSOR_NAME_NETWORK_USAGE,
-    PROCESSOR_NAME_OSRT_API,
-    PROCESSOR_NAME_LLC,
-    PROCESSOR_NAME_NPU_MEM,
-    PROCESSOR_NAME_PCIE,
-    PROCESSOR_NAME_SIO,
-    PROCESSOR_NAME_SOC,
-    PROCESSOR_NAME_NIC,
-    PROCESSOR_NAME_ROCE,
-    PROCESSOR_NAME_QOS,
-    PROCESSOR_MC2_COMM_INFO,
-    PROCESSOR_NAME_MEMCPY_INFO,
-    PROCESSOR_NAME_NPU_OP_MEM,
-    PROCESSOR_NAME_NPU_MODULE_MEM,
+    PROCESSOR_NAME_API,           PROCESSOR_NAME_COMMUNICATION, PROCESSOR_NAME_COMPUTE_TASK_INFO,
+    PROCESSOR_NAME_KFC_TASK,      PROCESSOR_NAME_KFC_COMM,      PROCESSOR_NAME_DEVICE_TX,
+    PROCESSOR_NAME_MSTX,          PROCESSOR_NAME_STEP_TRACE,    PROCESSOR_NAME_TASK,
+    PROCESSOR_NAME_ACC_PMU,       PROCESSOR_NAME_AICORE_FREQ,   PROCESSOR_NAME_DDR,
+    PROCESSOR_NAME_HBM,           PROCESSOR_NAME_HCCS,          PROCESSOR_NAME_NETDEV_STATS,
+    PROCESSOR_NAME_CPU_USAGE,     PROCESSOR_NAME_MEM_USAGE,     PROCESSOR_NAME_DISK_USAGE,
+    PROCESSOR_NAME_NETWORK_USAGE, PROCESSOR_NAME_OSRT_API,      PROCESSOR_NAME_LLC,
+    PROCESSOR_NAME_NPU_MEM,       PROCESSOR_NAME_PCIE,          PROCESSOR_NAME_SIO,
+    PROCESSOR_NAME_SOC,           PROCESSOR_NAME_NIC,           PROCESSOR_NAME_ROCE,
+    PROCESSOR_NAME_QOS,           PROCESSOR_NAME_CCU_MISSION,   PROCESSOR_MC2_COMM_INFO,
+    PROCESSOR_NAME_MEMCPY_INFO,   PROCESSOR_NAME_NPU_OP_MEM,    PROCESSOR_NAME_NPU_MODULE_MEM,
     PROCESSOR_NAME_UNIFIED_PMU,
 };
 }  // namespace

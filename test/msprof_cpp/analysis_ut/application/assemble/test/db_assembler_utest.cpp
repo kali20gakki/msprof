@@ -29,6 +29,7 @@
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/task_info_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/kfc_turn_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/mc2_comm_info_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/ai_task/include/ccu_mission_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/unified_pmu_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/acc_pmu_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/aicore_freq_data.h"
@@ -699,6 +700,47 @@ static std::vector<QosData> GenerateQosData()
 
     data.deviceId = 1; // deviceId 1 data的deviceId和路径不匹配
     res.push_back(data);
+    return res;
+}
+
+static std::vector<CCUMissionTimelineData> GenerateCCUData()
+{
+    std::vector<CCUMissionTimelineData> res;
+    CCUMissionTimelineData loopData;
+    loopData.deviceId = 0; // deviceId 0
+    loopData.streamId = 7; // streamId 7
+    loopData.taskId = 23; // taskId 23
+    loopData.instructionId = 11; // instructionId 11
+    loopData.timestamp = 1717575960208020750; // start 1717575960208020750
+    loopData.duration = 1000.0; // duration 1000 ns
+    loopData.timeType = CCU_TIME_TYPE_LOOP_GROUP;
+    loopData.hasDieId = true;
+    loopData.dieId = 1; // dieId 1
+    loopData.hasDataSize = true;
+    loopData.dataSize = 4096; // dataSize 4096
+    loopData.hasBandwidth = true;
+    loopData.bandwidth = 2.5; // bandwidth 2.5
+    loopData.hasReduceInfo = true;
+    loopData.reduceOpType = "sum";
+    loopData.inputDataType = "fp16";
+    loopData.outputDataType = "fp32";
+    loopData.hasMask = true;
+    loopData.mask = 3; // mask 3
+    loopData.hasDelayChannel = true;
+    loopData.maxDelayChannel = 4; // maxDelayChannel 4
+    loopData.maxChannelDelay = 500; // maxChannelDelay 500
+    res.push_back(loopData);
+
+    CCUMissionTimelineData waitData;
+    waitData.deviceId = 1; // deviceId 1
+    waitData.streamId = 8; // streamId 8
+    waitData.taskId = 24; // taskId 24
+    waitData.instructionId = 12; // notify instructionId 12
+    waitData.notifyRankId = 2; // notifyRankId 2
+    waitData.timestamp = 1717575960209020750; // start 1717575960209020750
+    waitData.duration = 2000.0; // duration 2000 ns
+    waitData.timeType = CCU_TIME_TYPE_WAIT;
+    res.push_back(waitData);
     return res;
 }
 
@@ -1826,4 +1868,88 @@ TEST_F(DBAssemblerUTest, TestRunSaveQosDataShouldReturnTrueWhenDataNotExistOrRun
     MAKE_SHARED0_NO_OPERATION(dataS, std::vector<QosData>, data);
     dataInventory.Inject<std::vector<QosData>>(dataS);
     EXPECT_TRUE(assembler.Run(dataInventory));
+}
+
+TEST_F(DBAssemblerUTest, TestRunSaveCCUDataShouldReturnTrueWhenRunSuccess)
+{
+    auto assembler = DBAssembler(PROF, OUTPUT_PATH);
+    auto dataInventory = DataInventory();
+    auto data = GenerateCCUData();
+    std::shared_ptr<std::vector<CCUMissionTimelineData>> dataS;
+    MAKE_SHARED0_NO_OPERATION(dataS, std::vector<CCUMissionTimelineData>, data);
+    dataInventory.Inject<std::vector<CCUMissionTimelineData>>(dataS);
+    EXPECT_TRUE(assembler.Run(dataInventory));
+
+    // deviceId, globalTaskId, name, startNs, endNs, args
+    using CCUDataFormat = std::vector<std::tuple<uint16_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t>>;
+    CCUDataFormat ccuResult;
+    std::shared_ptr<DBRunner> msprofDBRunner;
+    MAKE_SHARED0_NO_OPERATION(msprofDBRunner, DBRunner, GetMsprofDbPath());
+    ASSERT_NE(msprofDBRunner, nullptr);
+    std::string sql = "SELECT deviceId, globalTaskId, name, startNs, endNs, args FROM " + TABLE_NAME_CCU +
+        " ORDER BY startNs";
+    EXPECT_TRUE(msprofDBRunner->QueryData(sql, ccuResult));
+    ASSERT_EQ(2, ccuResult.size());
+    EXPECT_EQ(0, std::get<0>(ccuResult[0]));
+    EXPECT_EQ(1717575960208020750, std::get<3>(ccuResult[0]));
+    EXPECT_EQ(1717575960208021750, std::get<4>(ccuResult[0]));
+    EXPECT_EQ(1, std::get<0>(ccuResult[1]));
+    EXPECT_EQ(1717575960209020750, std::get<3>(ccuResult[1]));
+    EXPECT_EQ(1717575960209022750, std::get<4>(ccuResult[1]));
+
+    using StringIdFormat = std::vector<std::tuple<uint64_t, std::string>>;
+    StringIdFormat stringIds;
+    sql = "SELECT id, value FROM " + TABLE_NAME_STRING_IDS;
+    EXPECT_TRUE(msprofDBRunner->QueryData(sql, stringIds));
+    std::unordered_map<uint64_t, std::string> stringIdMap;
+    for (const auto& item : stringIds) {
+        stringIdMap[std::get<0>(item)] = std::get<1>(item);
+    }
+
+    EXPECT_EQ(CCU_TIME_TYPE_LOOP_GROUP, stringIdMap[std::get<2>(ccuResult[0])]);
+    EXPECT_EQ(CCU_TIME_TYPE_WAIT, stringIdMap[std::get<2>(ccuResult[1])]);
+    const auto& loopArgs = stringIdMap[std::get<5>(ccuResult[0])];
+    EXPECT_NE(std::string::npos, loopArgs.find("Instruction ID"));
+    EXPECT_NE(std::string::npos, loopArgs.find("Die Id"));
+    EXPECT_NE(std::string::npos, loopArgs.find("Data Size"));
+    EXPECT_NE(std::string::npos, loopArgs.find("Bandwidth (B/s)"));
+    EXPECT_NE(std::string::npos, loopArgs.find("Reduce Op Type"));
+    EXPECT_NE(std::string::npos, loopArgs.find("Mask"));
+    EXPECT_NE(std::string::npos, loopArgs.find("Maximum Delay Channel"));
+
+    const auto& waitArgs = stringIdMap[std::get<5>(ccuResult[1])];
+    EXPECT_NE(std::string::npos, waitArgs.find("Notify Instruction ID"));
+    EXPECT_NE(std::string::npos, waitArgs.find("Notify Rank ID"));
+    EXPECT_EQ(std::string::npos, waitArgs.find("Data Size"));
+}
+
+TEST_F(DBAssemblerUTest, TestRunSaveCCUDataShouldReturnTrueWhenDataNotExistOrEmpty)
+{
+    auto assembler = DBAssembler(PROF, OUTPUT_PATH);
+    auto dataInventory = DataInventory();
+    EXPECT_TRUE(assembler.Run(dataInventory));
+    EXPECT_TRUE(File::RemoveDir(OUTPUT_PATH, DEPTH));
+    EXPECT_TRUE(File::CreateDir(OUTPUT_PATH));
+
+    std::vector<CCUMissionTimelineData> data;
+    std::shared_ptr<std::vector<CCUMissionTimelineData>> dataS;
+    MAKE_SHARED0_NO_OPERATION(dataS, std::vector<CCUMissionTimelineData>, data);
+    dataInventory.Inject<std::vector<CCUMissionTimelineData>>(dataS);
+    EXPECT_TRUE(assembler.Run(dataInventory));
+}
+
+TEST_F(DBAssemblerUTest, TestRunSaveCCUDataShouldReturnFalseWhenReserveFailed)
+{
+    // deviceId, globalTaskId, name, startNs, endNs, args
+    using CCUDataFormat = std::vector<std::tuple<uint16_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t>>;
+    auto assembler = DBAssembler(PROF, OUTPUT_PATH);
+    auto dataInventory = DataInventory();
+    auto data = GenerateCCUData();
+    std::shared_ptr<std::vector<CCUMissionTimelineData>> dataS;
+    MAKE_SHARED0_NO_OPERATION(dataS, std::vector<CCUMissionTimelineData>, data);
+    dataInventory.Inject<std::vector<CCUMissionTimelineData>>(dataS);
+
+    StubReserveFailureForVector<CCUDataFormat>();
+    EXPECT_FALSE(assembler.Run(dataInventory));
+    ResetReserveFailureForVector<CCUDataFormat>();
 }
