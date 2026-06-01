@@ -180,6 +180,43 @@ static std::vector<MemcpyInfoData> GenerateMemcpyInfoData()
     return res;
 }
 
+static std::vector<AscendTaskData> GenerateSimtTaskData()
+{
+    std::vector<AscendTaskData> res;
+    AscendTaskData data;
+    data.deviceId = 0; // deviceId 0
+    data.indexId = -1; // index_id -1
+    data.streamId = 1; // streamId 1
+    data.taskId = 10; // taskId 10
+    data.contextId = 1; // contextId 1
+    data.batchId = 1; // batchId 1
+    data.connectionId = 2345; // connectionId 2345
+    data.timestamp = 1717575960208020758; // start 1717575960208020758
+    data.duration = 450.78; // dur 450.78
+    data.hostType = "KERNEL_SIMT";
+    data.deviceType = "AI_CORE";
+    data.taskType = "KERNEL_SIMT";
+    res.push_back(data);
+    return res;
+}
+
+static std::vector<TaskInfoData> GenerateSimtTaskInfoData()
+{
+    std::vector<TaskInfoData> res;
+    TaskInfoData data;
+    data.deviceId = 0; // deviceId 0
+    data.streamId = 1; // streamId 1
+    data.taskId = 10; // taskId 10
+    data.contextId = 1; // contextId 1
+    data.batchId = 1; // batchId 1
+    data.opName = "MatMulV3";
+    data.taskType = "KERNEL_SIMT";
+    data.gridDim = "2,3,4";
+    data.blockDim = "5,6,7";
+    res.push_back(data);
+    return res;
+}
+
 TEST_F(AscendHardwareAssemblerUTest, ShouldReturnTrueWhenDataNotExists)
 {
     AscendHardwareAssembler assembler;
@@ -430,4 +467,37 @@ TEST_F(AscendHardwareAssemblerUTest, ShouldReturnTrueWhenDataAssembleWithLogicSt
                         ":\"thread_sort_index\",\"pid\":10328512,\"tid\":1337,\"ph\":\"M\",\"args\""
                         ":{\"sort_index\":1337}},";
     EXPECT_EQ(expStr, res.back());
+}
+
+TEST_F(AscendHardwareAssemblerUTest, ShouldReturnTrueWhenDataAssembleWithSimtTaskType)
+{
+    AscendHardwareAssembler assembler;
+    std::shared_ptr<std::vector<AscendTaskData>> taskS;
+    std::shared_ptr<std::vector<TaskInfoData>> infoS;
+    auto task = GenerateSimtTaskData();
+    auto info = GenerateSimtTaskInfoData();
+    MAKE_SHARED_NO_OPERATION(taskS, std::vector<AscendTaskData>, task);
+    MAKE_SHARED_NO_OPERATION(infoS, std::vector<TaskInfoData>, info);
+    dataInventory_.Inject(taskS);
+    dataInventory_.Inject(infoS);
+    MOCKER_CPP(&Context::GetPidFromInfoJson).stubs().will(returnValue(10086)); // pid 10086
+    EXPECT_TRUE(assembler.Run(dataInventory_, PROF_PATH));
+    auto files = File::GetOriginData(RESULT_PATH, {"msprof"}, {});
+    EXPECT_EQ(1ul, files.size());
+    FileReader reader(files.back());
+    std::vector<std::string> res;
+    EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
+    std::string expectStr = "{\"name\":\"MatMulV3\",\"pid\":10328512,\"tid\":1,\"ts\":\"1717575960208020.758\",\"dur\""
+                        ":0.45077999999999996,\"ph\":\"X\",\"args\":{\"Model Id\":4294967295,\"Task Type\":\""
+                        "KERNEL_SIMT\",\"Physic Stream Id\":1,\"Task Id\":10,\"Batch Id\":1,\"Subtask Id\":1,\""
+                        "connection_id\":2345,\"Grid Dim\":\"2,3,4\",\"Block Dim\":\"5,6,7\"}},{\"name\":\""
+                        "HostToDevice10071698309120\",\"pid\":10328512,\"tid\":1,\"ph\":\"f\",\"cat\":\""
+                        "HostToDevice\",\"id\":\"10071698309120\",\"ts\":\"1717575960208020.758\",\"bp\":\""
+                        "e\"},{\"name\":\"process_name\",\"pid\":10328512,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\""
+                        ":\"Ascend Hardware\"}},{\"name\":\"process_labels\",\"pid\":10328512,\"tid\":0,\"ph\":\"M\""
+                        ",\"args\":{\"labels\":\"NPU 0\"}},{\"name\":\"process_sort_index\",\"pid\":10328512,\"tid\""
+                        ":0,\"ph\":\"M\",\"args\":{\"sort_index\":14}},{\"name\":\"thread_name\",\"pid\":10328512,\""
+                        "tid\":1,\"ph\":\"M\",\"args\":{\"name\":\"Stream 1\"}},{\"name\":\"thread_sort_index\",\""
+                        "pid\":10328512,\"tid\":1,\"ph\":\"M\",\"args\":{\"sort_index\":1}},";
+    EXPECT_EQ(expectStr, res.back());
 }

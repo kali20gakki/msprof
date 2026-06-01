@@ -1555,7 +1555,7 @@ TEST_F(DBAssemblerUTest, TestSaveComputeTaskInfoShouldReturnFalseWhenReserveFail
     using ComputeTaskInfoFormat = std::vector<std::tuple<uint64_t, uint64_t, uint32_t, uint32_t,
                                                          uint64_t, uint64_t, uint64_t, uint64_t,
                                                          uint64_t, uint64_t, uint64_t, uint64_t,
-                                                         uint64_t, uint64_t, uint64_t>>;
+                                                         uint64_t, uint64_t, uint64_t, uint64_t, uint64_t>>;
     std::vector<TaskInfoData> res;
     TaskInfoData data;
     res.push_back(data);

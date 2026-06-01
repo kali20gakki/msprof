@@ -71,7 +71,7 @@ const std::vector<std::string> COMM_TASK_INDEX_COLS = {"globalTaskId"};
 using CommScheduleDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint64_t>>;
 using ComputeTaskInfoFormat =
     std::vector<std::tuple<uint64_t, uint64_t, uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t,
-                           uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t>>;
+                           uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t>>;
 // 大算子数据
 // opName, start, end, connectionId, group_name, opId, relay, retry, data_type, alg_type, count, op_type, deviceId,
 // rank_size
@@ -100,6 +100,8 @@ struct ComputeTaskInfoData
     uint64_t hashId;  // 对应attrInfo
     uint64_t opState;
     uint64_t hf32Eligible;  // opFlag
+    uint64_t gridDim;
+    uint64_t blockDim;
 };
 
 std::string ReplaceQuotes(const std::string& input)
@@ -826,11 +828,13 @@ bool SaveComputeTaskInfo(DataInventory& dataInventory, DBInfo& msprofDB, const s
         taskInfoData.hashId = IdPool::GetInstance().GetUint64Id(item.hashId);
         taskInfoData.opState = IdPool::GetInstance().GetUint64Id(item.opState);
         taskInfoData.hf32Eligible = IdPool::GetInstance().GetUint64Id(item.opFlag);
+        taskInfoData.gridDim = IdPool::GetInstance().GetUint64Id(item.gridDim);
+        taskInfoData.blockDim = IdPool::GetInstance().GetUint64Id(item.blockDim);
         res.emplace_back(taskInfoData.opName, taskInfoData.globalTaskId, item.blockNum, item.mixBlockNum,
                          taskInfoData.taskType, taskInfoData.opType, taskInfoData.inputFormats,
                          taskInfoData.inputDataTypes, taskInfoData.inputShapes, taskInfoData.outputFormats,
                          taskInfoData.outputDataTypes, taskInfoData.outputShapes, taskInfoData.hashId,
-                         taskInfoData.opState, taskInfoData.hf32Eligible);
+                         taskInfoData.opState, taskInfoData.hf32Eligible, taskInfoData.gridDim, taskInfoData.blockDim);
     }
     bool flag = true;
     if (!res.empty())

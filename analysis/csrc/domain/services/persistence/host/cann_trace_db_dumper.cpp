@@ -56,9 +56,13 @@ const int32_t INVALID_VALUE = -1;
 const std::string NA = "N/A";
 const uint32_t INPUT_FORMAT_INDEX = 0;
 const uint32_t OUTPUT_FORMAT_INDEX = 1;
+const std::string KERNEL_MIX_AIC_TASK_TYPE = "KERNEL_MIX_AIC";
+const std::string KERNEL_MIX_AIV_TASK_TYPE = "KERNEL_MIX_AIV";
+const std::string KERNEL_SIMT_TASK_TYPE = "KERNEL_SIMT";
 const std::unordered_map<std::string, uint32_t> RtsTaskTypeMap = {
-    {"KERNEL_AICORE", 0}, {"KERNEL_AICPU", 1}, {"KERNEL_AIVEC", 2}, {"KERNEL_MIX_AIC", 4}, {"KERNEL_MIX_AIV", 5},
-};
+    {"KERNEL_AICORE", 0},  {"KERNEL_AICPU", 1},   {"KERNEL_AIVEC", 2},
+    {"KERNEL_MIX_AIC", 4}, {"KERNEL_MIX_AIV", 5}, {"KERNEL_SIMT", 2},
+};  // KERNEL_SIMT类型算子是aiv类型的
 
 std::string TransTaskTypeFromRtsToGe(uint64_t rtsTaskType)
 {
@@ -310,6 +314,10 @@ void CANNTraceDBDumper::AddTensorShapeInfo(const std::shared_ptr<ConcatTensorInf
     auto mixBlockNum = blockNum * (nodeBasicInfo.blockNum >> 16);
     auto opFlag = nodeBasicInfo.opFlag ? "YES" : "NO";
     auto opState = std::to_string(nodeBasicInfo.opState);
+    auto runtimeTrackDesc = desc->runtimeTrackDesc;
+    std::string gridDim = NA;
+    std::string blockDim = NA;
+    ProcessRuntimeTrackInfo(runtimeTrackDesc, blockNum, mixBlockNum, gridDim, blockDim);
     auto inputFormatStr = inputFormat.empty() ? NA : Utils::Join(inputFormat, ";");
     auto inputDataTypeStr = inputDataType.empty() ? NA : Utils::Join(inputDataType, ";");
     auto inputShapeStr = inputShape.empty() ? NA : Utils::AddQuotation(Utils::Join(inputShape, ";"));
@@ -321,7 +329,7 @@ void CANNTraceDBDumper::AddTensorShapeInfo(const std::shared_ptr<ConcatTensorInf
         mixBlockNum, opState, NumberMapping::Get(MappingType::GE_TASK_TYPE, nodeBasicInfo.taskType),
         HashData::GetInstance().Get(nodeBasicInfo.opType), task->requestId, task->thread_id, task->timeStamp,
         task->batchId, tensorNum, inputFormatStr, inputDataTypeStr, inputShapeStr, outputFormatStr, outputDataTypeStr,
-        outputShapeStr, task->deviceId, task->contextId, opFlag, hashId);
+        outputShapeStr, task->deviceId, task->contextId, opFlag, hashId, gridDim, blockDim);
 }
 
 std::string CANNTraceDBDumper::GetFormat(uint32_t oriFormat)
@@ -369,36 +377,83 @@ void CANNTraceDBDumper::AddTaskInfoForOnlyTaskTrack(const std::shared_ptr<HostTa
         opType = isLevel0 ? NA : kernelName;
         opName = kernelName;
     }
+    std::string gridDim = NA;
+    std::string blockDim = NA;
+    auto runtimeTrackDesc = task->op->opDesc->runtimeTrackDesc;
     if (isLevel0)
     {
-        data.emplace_back(info.modelId, opName, task->streamId, task->taskId, 0, 0, NA, taskType, opType,
-                          task->requestId, task->thread_id, task->timeStamp, task->batchId, 0, NA, NA, NA, NA, NA, NA,
-                          task->deviceId, task->contextId, opFlag, info.hashId);
+        uint32_t blockNum = 0;
+        uint32_t mixBlockNum = 0;
+        ProcessRuntimeTrackInfo(runtimeTrackDesc, blockNum, mixBlockNum, gridDim, blockDim);
+        data.emplace_back(info.modelId, opName, task->streamId, task->taskId, blockNum, mixBlockNum, NA, taskType,
+                          opType, task->requestId, task->thread_id, task->timeStamp, task->batchId, 0, NA, NA, NA, NA,
+                          NA, NA, task->deviceId, task->contextId, opFlag, info.hashId, NA, NA);
     }
     else
     {
-        data.emplace_back(info.modelId, opName, task->streamId, task->taskId, info.blockNum, info.mixBlockNum,
-                          info.isDynamic, taskType, opType, task->requestId, task->thread_id, task->timeStamp,
-                          task->batchId, info.tensorNum, info.inputFormats, info.inputDataTypes, info.inputShapes,
-                          info.outputFormats, info.outputDataTypes, info.outputShapes, task->deviceId, task->contextId,
-                          opFlag, info.hashId);
+        uint32_t blockNum = info.blockNum;
+        uint32_t mixBlockNum = info.mixBlockNum;
+        ProcessRuntimeTrackInfo(runtimeTrackDesc, blockNum, mixBlockNum, gridDim, blockDim);
+        data.emplace_back(info.modelId, opName, task->streamId, task->taskId, blockNum, mixBlockNum, info.isDynamic,
+                          taskType, opType, task->requestId, task->thread_id, task->timeStamp, task->batchId,
+                          info.tensorNum, info.inputFormats, info.inputDataTypes, info.inputShapes, info.outputFormats,
+                          info.outputDataTypes, info.outputShapes, task->deviceId, task->contextId, opFlag, info.hashId,
+                          gridDim, blockDim);
+    }
+}
+
+void CANNTraceDBDumper::ProcessRuntimeTrackInfo(const std::shared_ptr<MsprofCompactInfo> &runtimeTrack,
+                                                uint32_t &blockNum, uint32_t &mixBlockNum, std::string &gridDim,
+                                                std::string &blockDim)
+{
+    if (!runtimeTrack || runtimeTrack->dataLen != MSPROF_COMPACT_INFO_DATA_LENGTH)
+    {
+        return;
+    }
+    auto taskType = TypeData::GetInstance().Get(MSPROF_REPORT_RUNTIME_LEVEL, runtimeTrack->data.runtimeTrack.taskType);
+    if (taskType == KERNEL_SIMT_TASK_TYPE)
+    {
+        auto &simtInfo = runtimeTrack->data.runtimeTrack.extInfo.simtKernelInfo;
+        gridDim =
+            Utils::Join(std::vector<std::string>{std::to_string(simtInfo.gridDim.x), std::to_string(simtInfo.gridDim.y),
+                                                 std::to_string(simtInfo.gridDim.z)},
+                        ",");
+        blockDim = Utils::Join(
+            std::vector<std::string>{std::to_string(simtInfo.blockDim.x), std::to_string(simtInfo.blockDim.y),
+                                     std::to_string(simtInfo.blockDim.z)},
+            ",");
+    }
+    else
+    {
+        auto ratio = runtimeTrack->data.runtimeTrack.extInfo.kernelInfo.ratio;
+        auto numBlocks = runtimeTrack->data.runtimeTrack.extInfo.kernelInfo.numBlocks;
+        blockNum = numBlocks;
+        mixBlockNum = numBlocks * ratio;
     }
 }
 
 void CANNTraceDBDumper::AddTaskInfo(const std::shared_ptr<HostTask> &task, TaskInfoData &data, bool isLevel0)
 {
-    if (!task->op)
+    if (!task->op || !task->op->opDesc)
+    {
+        return;
+    }
+    if (task->op->type == OpType::OPTYPE_RESERVED)
     {
         AddTaskInfoForOnlyTaskTrack(task, data, isLevel0);
         return;
     }
-
     if (isLevel0)
     {
+        uint32_t blockNum = 0;
+        uint32_t mixBlockNum = 0;
+        std::string gridDim = NA;
+        std::string blockDim = NA;
         auto name = HashData::GetInstance().Get(task->op->name);
-        data.emplace_back(task->modelId, name, task->streamId, task->taskId, 0, 0, NA, NA, NA, task->requestId,
-                          task->thread_id, task->timeStamp, task->batchId, 0, NA, NA, NA, NA, NA, NA, task->deviceId,
-                          task->contextId, NA, NA);
+        ProcessRuntimeTrackInfo(task->op->opDesc->runtimeTrackDesc, blockNum, mixBlockNum, gridDim, blockDim);
+        data.emplace_back(task->modelId, name, task->streamId, task->taskId, blockNum, mixBlockNum, NA, NA, NA,
+                          task->requestId, task->thread_id, task->timeStamp, task->batchId, 0, NA, NA, NA, NA, NA, NA,
+                          task->deviceId, task->contextId, NA, NA, gridDim, blockDim);
         return;
     }
 
@@ -411,19 +466,24 @@ void CANNTraceDBDumper::AddTaskInfo(const std::shared_ptr<HostTask> &task, TaskI
     auto node = desc->nodeDesc;
     auto attr = desc->nodeAttr;
     auto nodeBasicInfo = node->data.nodeBasicInfo;
-    auto hashId = attr ? std::to_string(attr->data.nodeAttrInfo.hashId) : NA;
-    auto blockNum = nodeBasicInfo.blockNum & 0xffff;
-    auto mixBlockNum = blockNum * (nodeBasicInfo.blockNum >> 16);
     auto tensorDesc = desc->tensorDesc;
-    auto opFlag = nodeBasicInfo.opFlag ? "YES" : "NO";
-    auto opState = std::to_string(nodeBasicInfo.opState);
     if (!tensorDesc)
     {
-        data.emplace_back(
-            task->modelId, HashData::GetInstance().Get(nodeBasicInfo.opName), task->streamId, task->taskId, blockNum,
-            mixBlockNum, opState, NumberMapping::Get(MappingType::GE_TASK_TYPE, nodeBasicInfo.taskType),
-            HashData::GetInstance().Get(nodeBasicInfo.opType), task->requestId, task->thread_id, task->timeStamp,
-            task->batchId, 0, NA, NA, NA, NA, NA, NA, task->deviceId, task->contextId, opFlag, hashId);
+        auto hashId = attr ? std::to_string(attr->data.nodeAttrInfo.hashId) : NA;
+        auto blockNum = nodeBasicInfo.blockNum & 0xffff;
+        auto mixBlockNum = blockNum * (nodeBasicInfo.blockNum >> 16);
+        auto opFlag = nodeBasicInfo.opFlag ? "YES" : "NO";
+        auto opState = std::to_string(nodeBasicInfo.opState);
+        auto runtimeTrackDesc = desc->runtimeTrackDesc;
+        std::string gridDim = NA;
+        std::string blockDim = NA;
+        ProcessRuntimeTrackInfo(runtimeTrackDesc, blockNum, mixBlockNum, gridDim, blockDim);
+        data.emplace_back(task->modelId, HashData::GetInstance().Get(nodeBasicInfo.opName), task->streamId,
+                          task->taskId, blockNum, mixBlockNum, opState,
+                          NumberMapping::Get(MappingType::GE_TASK_TYPE, nodeBasicInfo.taskType),
+                          HashData::GetInstance().Get(nodeBasicInfo.opType), task->requestId, task->thread_id,
+                          task->timeStamp, task->batchId, 0, NA, NA, NA, NA, NA, NA, task->deviceId, task->contextId,
+                          opFlag, hashId, gridDim, blockDim);
         return;
     }
     AddTensorShapeInfo(tensorDesc, nodeBasicInfo, data, task);

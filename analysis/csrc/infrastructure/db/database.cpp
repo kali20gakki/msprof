@@ -43,7 +43,8 @@ const TableColumns TaskInfo = {
     {"batch_id", SQL_INTEGER_TYPE},       {"tensor_num", SQL_INTEGER_TYPE}, {"input_formats", SQL_TEXT_TYPE},
     {"input_data_types", SQL_TEXT_TYPE},  {"input_shapes", SQL_TEXT_TYPE},  {"output_formats", SQL_TEXT_TYPE},
     {"output_data_types", SQL_TEXT_TYPE}, {"output_shapes", SQL_TEXT_TYPE}, {"device_id", SQL_INTEGER_TYPE},
-    {"context_id", SQL_INTEGER_TYPE},     {"op_flag", SQL_TEXT_TYPE},       {"hashid", SQL_TEXT_TYPE}};
+    {"context_id", SQL_INTEGER_TYPE},     {"op_flag", SQL_TEXT_TYPE},       {"hashid", SQL_TEXT_TYPE},
+    {"grid_dim", SQL_TEXT_TYPE},          {"block_dim", SQL_TEXT_TYPE}};
 
 const TableColumns StepInfo = {{"model_id", SQL_INTEGER_TYPE},
                                {"thread_id", SQL_INTEGER_TYPE},

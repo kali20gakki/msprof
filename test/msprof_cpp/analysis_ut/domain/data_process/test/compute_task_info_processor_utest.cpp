@@ -42,14 +42,14 @@ const std::string TABLE_NAME = "TaskInfo";
 using GeInfoFormat = std::vector<std::tuple<uint32_t, std::string, int32_t, int32_t, uint32_t, uint32_t, std::string,
         std::string, std::string, int32_t, uint32_t, double, uint32_t, uint32_t,
         std::string, std::string, std::string, std::string, std::string,
-        std::string, int32_t, uint32_t, std::string, std::string>>;
+        std::string, int32_t, uint32_t, std::string, std::string, std::string, std::string>>;
 
 GeInfoFormat DATA_A{{4294967295, "aclnnMm_MatMulCommon_MatMulV2", 2, 1, 20, 40, "1", "MIX_AIC", "MatMulV2", -1,
                             3391981, 453148218443103, 0, 3, "FORMAT_ND;FORMAT_ND", "FLOAT16;FLOAT16",
-                            "\"10000,10000;10000,10000\"", "FORMAT_ND", "FLOAT16", "\"1000,1000\"", 0, 0, "NO", "N/A"},
+                            "\"10000,10000;10000,10000\"", "FORMAT_ND", "FLOAT16", "\"1000,1000\"", 0, 0, "NO", "N/A", "N/A", "N/A"},
                     {4294967295, "trans_TransData_0", 2, 2, 35, 0, "1", "AI_CORE", "TransData", -1,
                             250512, 569402956566, 0, 2, "FORMAT_ND", "FLOAT",
-                            "\"3072,768\"", "FRACTAL_NZ", "FLOAT", "\"48,192,16,16\"", 0, 4294967295, "NO", "N/A"}};
+                            "\"3072,768\"", "FRACTAL_NZ", "FLOAT", "\"48,192,16,16\"", 0, 4294967295, "NO", "N/A", "N/A", "N/A"}};
 }
 
 class ComputeTaskInfoProcessorUTest : public testing::Test {
