@@ -42,6 +42,7 @@ class AI:
     provides APIs to call methods of parsing data, creating databases
     and insert them into databases
     """
+
     FILE_NAME = os.path.basename(__file__)
     FOLDER_MASK = 0o750
 
@@ -77,8 +78,9 @@ class AI:
     def _create_collection_log(cls: any, project_dir: str) -> None:
         check_dir_writable(PathManager.get_log_dir(project_dir), create_dir=True)
         try:
-            if os.path.exists(PathManager.get_log_dir(project_dir)) and \
-                    not os.path.exists(PathManager.get_collection_log_path(project_dir)):
+            if os.path.exists(PathManager.get_log_dir(project_dir)) and not os.path.exists(
+                PathManager.get_collection_log_path(project_dir)
+            ):
                 file_path = PathManager.get_collection_log_path(project_dir)
                 with FdOpen(file_path):
                     os.chmod(file_path, NumberConstant.FILE_AUTHORITY)
@@ -119,6 +121,13 @@ class AI:
         """
         # init data parsing object
         if InfoConfReader().is_host_profiling():
-            self.formula_list([CpuUsageAnalysis, MemUsageAnalysis,
-                                DiskUsageAnalysis, NetworkUsageAnalysis,
-                                HostSyscallAnalysis, HostPlatformAnalysis])
+            self.formula_list(
+                [
+                    CpuUsageAnalysis,
+                    MemUsageAnalysis,
+                    DiskUsageAnalysis,
+                    NetworkUsageAnalysis,
+                    HostSyscallAnalysis,
+                    HostPlatformAnalysis,
+                ]
+            )

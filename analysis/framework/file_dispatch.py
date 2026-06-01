@@ -218,9 +218,11 @@ class FileDispatch:
         pick up the file list with the data tag
         :return: dict with data tag
         """
+
         def sort_by_suffix_number(s):
             match = re.search(r'_(\d+)$', s)
             return int(match.group(1)) if match else float('inf')
+
         _files = sorted(os.listdir(PathManager.get_data_dir(self._project_path)), key=sort_by_suffix_number)
         for (_data_tag, _data_regs), _file in itertools.product(self.FILES_FILTER_MAP.items(), _files):
             if get_file_name_pattern_match(_file, *_data_regs):
