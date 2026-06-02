@@ -388,10 +388,7 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_NETDEV_STATS_ORIGIN = 'NetDevStatsOriginalData'
 
     # fusion task
-    TABLE_FUSION_CCU = "FusionCcu"
-    TABLE_FUSION_AI_CORE = "FusionAICore"
-    TABLE_FUSION_AI_CPU = "FusionAICPU"
-    TABLE_FUSION_COMMON_CPU = "FusionCommonCpu"
+    TABLE_FUSION_TASK = "FusionTask"
 
     @abstractmethod
     def get_db_name(self: any) -> str:

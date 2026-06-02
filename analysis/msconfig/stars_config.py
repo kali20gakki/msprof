@@ -60,16 +60,7 @@ class StarsConfig(MetaConfig):
         'FusionTaskParser': [
             ('fmt', '010111,010110'),
             ('db', DBNameConstant.DB_FUSION_TASK),
-            (
-                'table',
-                DBNameConstant.TABLE_FUSION_CCU
-                + ','
-                + DBNameConstant.TABLE_FUSION_AI_CPU
-                + ','
-                + DBNameConstant.TABLE_FUSION_AI_CORE
-                + ','
-                + DBNameConstant.TABLE_FUSION_COMMON_CPU,
-            ),
+            ('table', DBNameConstant.TABLE_FUSION_TASK),
         ],
     }
 

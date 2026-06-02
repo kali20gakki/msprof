@@ -605,6 +605,16 @@ class TablesConfig(MetaConfig):
             ('end_time', 'INTEGER,null'),
             ('task_time', 'INTEGER,null'),
         ],
+        'FusionTaskMap': [
+            ('stream_id', 'INTEGER,null'),
+            ('task_id', 'INTEGER,null'),
+            ('acc_id', 'INTEGER,null'),
+            ('task_type', 'TEXT,null'),
+            ('start_time', 'INTEGER,null'),
+            ('end_time', 'INTEGER,null'),
+            ('task_time', 'INTEGER,null'),
+            ('fusion_task_type', 'TEXT,null'),
+        ],
         'AcsqTaskTimeMap': [
             ('task_id', 'INTEGER,null'),
             ('stream_id', 'INTEGER,null'),
