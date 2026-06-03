@@ -84,7 +84,7 @@ TEST_F(UbProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSuccess)
 {
     auto processor = UbProcessor(PROF_PATH_A);
     DataInventory dataInventory;
-    EXPECT_TRUE(processor.Run(dataInventory, PROCESSOR_NAME_NPU_MEM));
+    EXPECT_TRUE(processor.Run(dataInventory, PROCESSOR_NAME_UB));
     auto res = dataInventory.GetPtr<ProcessedFormat>();
     EXPECT_EQ(DATA_A.size(), res->size());
 }
@@ -94,7 +94,7 @@ TEST_F(UbProcessorUTest, TestRunShouldReturnFalseWhenGetClockMonotonicRawFailed)
     auto processor = UbProcessor(PROF_PATH_A);
     DataInventory dataInventory;
     MOCKER_CPP(&Context::GetClockMonotonicRaw).stubs().will(returnValue(false));
-    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_NPU_MEM));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_UB));
     MOCKER_CPP(&Context::GetClockMonotonicRaw).reset();
 }
 
@@ -103,7 +103,7 @@ TEST_F(UbProcessorUTest, TestRunShouldReturnFalseWhenGetProfTimeRecordInfoFailed
     auto processor = UbProcessor(PROF_PATH_A);
     DataInventory dataInventory;
     MOCKER_CPP(&Context::GetProfTimeRecordInfo).stubs().will(returnValue(false));
-    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_NPU_MEM));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_UB));
     MOCKER_CPP(&Context::GetProfTimeRecordInfo).reset();
 }
 
@@ -112,7 +112,7 @@ TEST_F(UbProcessorUTest, TestRunShouldReturnFalseWhenConstructDBRunnerFailed)
     auto processor = UbProcessor(PROF_PATH_A);
     DataInventory dataInventory;
     MOCKER_CPP(&DBInfo::ConstructDBRunner).stubs().will(returnValue(false));
-    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_NPU_MEM));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_UB));
     MOCKER_CPP(&DBInfo::ConstructDBRunner).reset();
 }
 
@@ -121,7 +121,7 @@ TEST_F(UbProcessorUTest, TestRunShouldReturnTrueWhenDbFileNotExist)
     auto processor = UbProcessor(PROF_PATH_A);
     DataInventory dataInventory;
     MOCKER_CPP(&Utils::File::Exist).stubs().will(returnValue(false));
-    EXPECT_TRUE(processor.Run(dataInventory, PROCESSOR_NAME_NPU_MEM));
+    EXPECT_TRUE(processor.Run(dataInventory, PROCESSOR_NAME_UB));
     MOCKER_CPP(&Utils::File::Exist).reset();
 }
 
@@ -130,7 +130,7 @@ TEST_F(UbProcessorUTest, TestRunShouldReturnFalseWhenFileReaderCheckFailed)
     auto processor = UbProcessor(PROF_PATH_A);
     DataInventory dataInventory;
     MOCKER_CPP(&Utils::FileReader::Check).stubs().will(returnValue(false));
-    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_NPU_MEM));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_UB));
     MOCKER_CPP(&Utils::FileReader::Check).reset();
 }
 
@@ -139,7 +139,7 @@ TEST_F(UbProcessorUTest, TestRunShouldReturnFalseWhenSaveToDataInventoryFailed)
     auto processor = UbProcessor(PROF_PATH_A);
     DataInventory dataInventory;
     MOCKER_CPP(&DataProcessor::SaveToDataInventory<UbData>).stubs().will(returnValue(false));
-    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_NPU_MEM));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_UB));
     MOCKER_CPP(&DataProcessor::SaveToDataInventory<UbData>).reset();
 }
 
@@ -148,7 +148,7 @@ TEST_F(UbProcessorUTest, TestRunShouldReturnFalseWhenReserveFailed)
     StubReserveFailureForVector<ProcessedFormat>();
     auto processor = UbProcessor(PROF_PATH_A);
     DataInventory dataInventory;
-    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_NPU_MEM));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_UB));
     ResetReserveFailureForVector<ProcessedFormat>();
 }
 
@@ -158,7 +158,7 @@ TEST_F(UbProcessorUTest, TestRunShouldReturnTrueWhenNoDeviceFound)
     MOCKER_CPP(&Utils::File::GetFilesWithPrefix).stubs().will(returnValue(emptyList));
     auto processor = UbProcessor(PROF_PATH_A);
     DataInventory dataInventory;
-    EXPECT_TRUE(processor.Run(dataInventory, PROCESSOR_NAME_NPU_MEM));
+    EXPECT_TRUE(processor.Run(dataInventory, PROCESSOR_NAME_UB));
     MOCKER_CPP(&Utils::File::GetFilesWithPrefix).reset();
 }
 
@@ -175,5 +175,5 @@ TEST_F(UbProcessorUTest, TestRunShouldReturnFalseWhenLoadUbDataReturnsEmpty)
     File::CreateDir(File::PathJoin({PROF_PATH_A, DEVICE_SUFFIX}));
     File::CreateDir(File::PathJoin({PROF_PATH_A, DEVICE_SUFFIX, SQLITE_SUFFIX}));
     CreateUbData(File::PathJoin({PROF_PATH_A, DEVICE_SUFFIX, SQLITE_SUFFIX, DB_NAME}), OriUbFormat{});
-    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_NPU_MEM));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_UB));
 }

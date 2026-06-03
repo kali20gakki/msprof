@@ -14,11 +14,9 @@
 # See the Mulan PSL v2 for more details.
 # -------------------------------------------------------------------------
 
-import logging
 
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
-from common_func.ms_constant.str_constant import StrConstant
 from msmodel.interface.parser_model import ParserModel
 from msmodel.interface.view_model import ViewModel
 from profiling_bean.db_dto.dpu_track_dto import DPUTrackDto
@@ -30,8 +28,11 @@ class DPUTaskModel(ParserModel):
     """
 
     def __init__(self: any, result_dir: str) -> None:
-        super(DPUTaskModel, self).__init__(result_dir, DBNameConstant.DB_DPU,
-                                           [DBNameConstant.TABLE_DPU_TASK_TRACK, DBNameConstant.TABLE_DPU_HCCL_TRACK])
+        super().__init__(
+            result_dir,
+            DBNameConstant.DB_DPU,
+            [DBNameConstant.TABLE_DPU_TASK_TRACK, DBNameConstant.TABLE_DPU_HCCL_TRACK],
+        )
 
     def flush(self: any, data_list: list, table_name: str = DBNameConstant.TABLE_DPU_TASK_TRACK) -> None:
         """
@@ -48,27 +49,24 @@ class DPUTaskViewModel(ViewModel):
     class for dpu task viewer
     """
 
-    def __init__(self: any, result_dir: str, db_name: str, table_list: list) -> None:
-        super().__init__(result_dir, db_name, table_list)
-
     def get_timeline_data(self: any) -> tuple:
         task_track = []
         hccl_track = []
         if DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_DPU_TASK_TRACK):
-            sql = "select dpu_device_id, thread_id, start_time, end_time, task_type, stream_id, task_id, " \
-                  "kernel_name AS op_name " \
-                  "from {} ".format(DBNameConstant.TABLE_DPU_TASK_TRACK)
+            sql = (
+                "select dpu_device_id, thread_id, start_time, end_time, task_type, stream_id, task_id, "
+                "kernel_name AS op_name "
+                "from {} ".format(DBNameConstant.TABLE_DPU_TASK_TRACK)  # nosec B608
+            )
             task_track = DBManager.fetch_all_data(self.cur, sql, dto_class=DPUTrackDto)
 
         if DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_DPU_HCCL_TRACK):
-            sql = "select npu_device_id, dpu_device_id, thread_id, start_time, end_time, op_name, group_name, " \
-                  "local_rank, remote_rank, rank_size, duration_estimated, src_addr, dst_addr, data_size, " \
-                  "stream_id, task_id, aicpu_task_id, plane_id, op_type, data_type, link_type, transport_type, " \
-                  "rdma_type, role, ccl_tag, notify_id, work_flow_mode, stage " \
-                  "from {} ".format(DBNameConstant.TABLE_DPU_HCCL_TRACK)
+            sql = (
+                "select npu_device_id, dpu_device_id, thread_id, start_time, end_time, op_name, group_name, "
+                "group_name_id, local_rank, remote_rank, rank_size, duration_estimated, src_addr, dst_addr, "
+                "data_size,  stream_id, task_id, aicpu_task_id, plane_id, op_type, data_type, link_type, "
+                "transport_type, rdma_type, role, ccl_tag, notify_id, work_flow_mode, stage "
+                "from {} ".format(DBNameConstant.TABLE_DPU_HCCL_TRACK)  # nosec B608
+            )
             hccl_track = DBManager.fetch_all_data(self.cur, sql, dto_class=DPUTrackDto)
         return task_track, hccl_track
-
-
-
-

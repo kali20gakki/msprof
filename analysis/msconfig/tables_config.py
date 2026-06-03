@@ -1349,6 +1349,7 @@ class TablesConfig(MetaConfig):
             ('end_time', 'NUMERIC,null'),
             ('op_name', 'TEXT,null'),
             ('group_name', 'TEXT,null'),
+            ('group_name_id', 'TEXT,null'),
             ('local_rank', 'INTEGER,null'),
             ('remote_rank', 'INTEGER,null'),
             ('rank_size', 'INTEGER,null'),

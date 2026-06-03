@@ -167,7 +167,9 @@ const std::string TABLE_NAME_PCIE_INFO_V6 = "ENUM_PCIE_INFO_V6";
 const std::string PROCESSOR_NAME_KFC_TASK = "KFC_TASK";
 const std::string PROCESSOR_NAME_KFC_COMM = "KFC_COMM";
 const std::string PROCESSOR_NAME_DEVICE_TX = "DEVICE_MSTX";
+
 const std::string PROCESSOR_NAME_SIO = "SIO";
+const std::string TABLE_NAME_SIO = "SIO";
 
 const std::string PROCESSOR_NAME_CPU_USAGE = "CPU_USAGE";
 const std::string TABLE_NAME_CPU_USAGE = "CPU_USAGE";
@@ -205,10 +207,12 @@ const std::string PROCESSOR_HOST_TASK = "HOST_TASK";
 
 const std::string PROCESSOR_NAME_BIU_PERF = "BIU_PERF";
 const std::string PROCESSOR_NAME_UB = "UB";
+const std::string TABLE_NAME_UB = "UB";
 
 const std::string PROCESSOR_NAME_BLOCK_DETAIL = "BLOCK_DETAIL";
 
 const std::string PROCESSOR_NAME_DPU = "DPU";
+const std::string TABLE_NAME_DPU_TASK = "DPU_TASK";
 // mstx event type
 const std::unordered_map<std::string, uint16_t> MSTX_EVENT_TYPE_TABLE = {
     {"marker", 0}, {"push/pop", 1}, {"start/end", 2}, {"marker_ex", 3}};

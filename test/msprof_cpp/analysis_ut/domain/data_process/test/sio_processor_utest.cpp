@@ -36,12 +36,12 @@ const std::string TABLE_NAME = "Sio";
 using SioDataFormat = std::vector<std::tuple<uint32_t, uint32_t, uint32_t, uint32_t, uint32_t,
     uint32_t, uint32_t, uint32_t, uint32_t, double>>;;
 const SioDataFormat SIO_DATA = {
-    {0, 70781, 69062, 0, 68889, 1776, 4069, 775, 2784, 5626510749920.817},
-    {1, 1355, 5017, 407, 2800, 37082, 136926, 0, 34704, 5626510749920.817},
-    {0, 70622, 69165, 1, 68980, 1658, 3517, 1177, 2629, 5626551718192.833},
-    {1, 1197, 5147, 436, 2570, 37010, 136822, 2, 34665, 5626551718192.833},
-    {0, 70860, 69384, 0, 69140, 656, 3053, 1387, 2669, 5626592686344.825},
-    {1, 1197, 3667, 252, 2125, 36176, 136729, 1, 34637, 5626592686344.825}
+    {0, 70781, 69062, 0, 68889, 1776, 4069, 775, 2784, 38626510749920.817},
+    {1, 1355, 5017, 407, 2800, 37082, 136926, 0, 34704, 38626510749920.817},
+    {0, 70622, 69165, 1, 68980, 1658, 3517, 1177, 2629, 38626551718192.833},
+    {1, 1197, 5147, 436, 2570, 37010, 136822, 2, 34665, 38626551718192.833},
+    {0, 70860, 69384, 0, 69140, 656, 3053, 1387, 2669, 38626592686344.825},
+    {1, 1197, 3667, 252, 2125, 36176, 136729, 1, 34637, 38626592686344.825}
 };
 }
 
@@ -61,6 +61,7 @@ protected:
             {"startClockMonotonicRaw", "36470610791630"},
             {"hostMonotonic", "36471130547330"},
             {"devMonotonic", "36471130547330"},
+            {"platform_version", "5"},
             {"CPU", {{{"Frequency", "100.000000"}}}},
         };
         MOCKER_CPP(&Context::GetInfoByDeviceId).stubs().will(returnValue(record));
@@ -123,9 +124,9 @@ TEST_F(SioProcessorUTest, TestRunDataShouldReturnFalseWhenProcessDataFailed)
     auto processor = SioProcessor(PROF_DIR);
     DataInventory dataInventory;
     // LoadData failed
-    MOCKER_CPP(&OriSioData::empty).stubs().will(returnValue(true));
+    MOCKER_CPP(&SioProcessor::OriSioData::empty).stubs().will(returnValue(true));
     EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_SIO));
-    MOCKER_CPP(&OriSioData::empty).reset();
+    MOCKER_CPP(&SioProcessor::OriSioData::empty).reset();
     // Reserve failed
     Analysis::Test::StubReserveFailureForVector<std::vector<SioData>>();
     EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_SIO));
@@ -140,4 +141,69 @@ TEST_F(SioProcessorUTest, TestRunShouldReturnFalseWhenProcessSingleDeviceFailed)
     MOCKER_CPP(&Utils::GetDeviceIdByDevicePath).stubs().will(returnValue(static_cast<uint16_t>(INVALID_DEVICE_ID)));
     EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_SIO));
     MOCKER_CPP(&Utils::GetDeviceIdByDevicePath).reset();
+}
+
+TEST_F(SioProcessorUTest, TestRunShouldSetNameFromSeriesMapForStars)
+{
+    auto processor = SioProcessor(PROF_DIR);
+    DataInventory dataInventory;
+    EXPECT_TRUE(processor.Run(dataInventory, PROCESSOR_NAME_SIO));
+    auto res = dataInventory.GetPtr<std::vector<SioData>>();
+    ASSERT_NE(res, nullptr);
+    ASSERT_GT(res->size(), 0);
+    for (const auto& data : *res) {
+        if (data.dieId == 0) {
+            EXPECT_EQ(data.name, "die 0");
+        }
+    }
+}
+
+TEST_F(SioProcessorUTest, TestRunShouldSetNameFromSeriesMapForV5)
+{
+    // 清理SetUpTestCase里的mock
+    MOCKER_CPP(&Context::GetInfoByDeviceId).reset();
+    nlohmann::json record = {
+        {"startCollectionTimeBegin", "1701069323851824"},
+        {"endCollectionTimeEnd", "1701069338041681"},
+        {"startClockMonotonicRaw", "36470610791630"},
+        {"hostMonotonic", "36471130547330"},
+        {"devMonotonic", "36471130547330"},
+        {"platform_version", "15"},
+        {"CPU", {{{"Frequency", "100.000000"}}}},
+    };
+    MOCKER_CPP(&Context::GetInfoByDeviceId).stubs().will(returnValue(record));
+    auto processor = SioProcessor(PROF_DIR);
+    DataInventory dataInventory;
+    EXPECT_TRUE(processor.Run(dataInventory, PROCESSOR_NAME_SIO));
+    auto res = dataInventory.GetPtr<std::vector<SioData>>();
+    ASSERT_NE(res, nullptr);
+    ASSERT_GT(res->size(), 0);
+    for (const auto& data : *res) {
+        if (data.dieId == 0) {
+            EXPECT_EQ(data.name, "D-DIE0");
+        }
+    }
+    MOCKER_CPP(&Context::GetInfoByDeviceId).reset();
+}
+
+TEST_F(SioProcessorUTest, TestRunShouldSetNameFromSeriesMapForOtherThenGetNullptr)
+{
+    // 清理SetUpTestCase里的mock
+    MOCKER_CPP(&Context::GetInfoByDeviceId).reset();
+    nlohmann::json record = {
+        {"startCollectionTimeBegin", "1701069323851824"},
+        {"endCollectionTimeEnd", "1701069338041681"},
+        {"startClockMonotonicRaw", "36470610791630"},
+        {"hostMonotonic", "36471130547330"},
+        {"devMonotonic", "36471130547330"},
+        {"platform_version", "4"},
+        {"CPU", {{{"Frequency", "100.000000"}}}},
+    };
+    MOCKER_CPP(&Context::GetInfoByDeviceId).stubs().will(returnValue(record));
+    auto processor = SioProcessor(PROF_DIR);
+    DataInventory dataInventory;
+    EXPECT_TRUE(processor.Run(dataInventory, PROCESSOR_NAME_SIO));
+    auto res = dataInventory.GetPtr<std::vector<SioData>>();
+    ASSERT_EQ(res, nullptr);
+    MOCKER_CPP(&Context::GetInfoByDeviceId).reset();
 }

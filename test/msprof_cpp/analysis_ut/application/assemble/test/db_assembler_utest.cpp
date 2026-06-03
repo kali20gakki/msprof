@@ -30,9 +30,10 @@
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/kfc_turn_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/mc2_comm_info_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/ccu_mission_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/ai_task/include/dpu_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/unified_pmu_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/acc_pmu_data.h"
-#include "analysis/csrc/domain/entities/viewer_data/system/include/aicore_freq_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/system/include/low_power_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/ddr_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/hbm_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/hccs_data.h"
@@ -46,6 +47,8 @@
 #include "analysis/csrc/domain/entities/viewer_data/system/include/sys_io_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/netdev_stats_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/qos_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/system/include/sio_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/system/include/ub_data.h"
 
 using namespace Analysis::Application;
 using namespace Analysis::Utils;
@@ -273,13 +276,14 @@ static std::vector<AccPmuData> GenerateAccPmuData()
     return res;
 }
 
-static std::vector<AicoreFreqData> GenerateAicoreFreqData()
+static std::vector<LowPowerData> GenerateAicoreFreqData()
 {
-    std::vector<AicoreFreqData> res;
-    AicoreFreqData data;
+    std::vector<LowPowerData> res;
+    LowPowerData data;
     data.deviceId = 1; // device_1
     data.timestamp = 236368325745670; // timestamp 236368325745670
     data.freq = 50.0; // freq 50.0
+    data.dieId = 1; // dieId 1
     res.push_back(data);
     return res;
 }
@@ -744,6 +748,82 @@ static std::vector<CCUMissionTimelineData> GenerateCCUData()
     return res;
 }
 
+static std::vector<DPUData> GenerateDPUData()
+{
+    std::vector<DPUData> res;
+    DPUData taskData;
+    taskData.dpuDeviceId = 2; // dpuDeviceId 2
+    taskData.threadId = 123; // threadId 123
+    taskData.timestamp = 1717575960208020750; // start 1717575960208020750
+    taskData.endTime = 1717575960208021750; // end 1717575960208021750
+    taskData.taskType = "DPU_TASK";
+    taskData.streamId = 7; // streamId 7
+    taskData.taskId = 23; // taskId 23
+    taskData.opName = "dpu_kernel";
+    taskData.isHccl = false;
+    res.push_back(taskData);
+
+    DPUData hcclData;
+    hcclData.isHccl = true;
+    hcclData.npuDeviceId = 0; // npuDeviceId 0
+    hcclData.dpuDeviceId = 3; // dpuDeviceId 3
+    hcclData.threadId = 124; // threadId 124
+    hcclData.timestamp = 1717575960209020750; // start 1717575960209020750
+    hcclData.endTime = 1717575960210020750; // end 1717575960210020750
+    hcclData.opName = "dpu_hccl";
+    hcclData.groupName = "group";
+    hcclData.groupNameId = "100";
+    hcclData.localRank = 1; // localRank 1
+    hcclData.remoteRank = 2; // remoteRank 2
+    hcclData.rankSize = 8; // rankSize 8
+    hcclData.durationEstimated = 10.5; // durationEstimated 10.5
+    hcclData.dataSize = 1024; // dataSize 1024
+    hcclData.streamId = 8; // streamId 8
+    hcclData.taskId = 24; // taskId 24
+    hcclData.aicpuTaskId = 25; // aicpuTaskId 25
+    hcclData.planeId = 1; // planeId 1
+    hcclData.opType = "all_reduce";
+    hcclData.dataType = "fp16";
+    hcclData.linkType = "HCCS";
+    hcclData.transportType = "RDMA";
+    hcclData.rdmaType = "rdma";
+    hcclData.notifyId = "notify";
+    res.push_back(hcclData);
+    return res;
+}
+
+static std::vector<SioData> GenerateSioData()
+{
+    std::vector<SioData> res;
+    SioData data;
+    data.deviceId = 0; // deviceId 0
+    data.timestamp = 1746706291651036160; // timestamp 1746706291651036160
+    data.name = "die 0";
+    data.reqRxBandwidth = 1.0; // reqRxBandwidth 1 MB/s
+    data.rspRxBandwidth = 2.0; // rspRxBandwidth 2 MB/s
+    data.snpRxBandwidth = 3.0; // snpRxBandwidth 3 MB/s
+    data.datRxBandwidth = 4.0; // datRxBandwidth 4 MB/s
+    data.reqTxBandwidth = 5.0; // reqTxBandwidth 5 MB/s
+    data.rspTxBandwidth = 6.0; // rspTxBandwidth 6 MB/s
+    data.snpTxBandwidth = 7.0; // snpTxBandwidth 7 MB/s
+    data.datTxBandwidth = 8.0; // datTxBandwidth 8 MB/s
+    res.push_back(data);
+    return res;
+}
+
+static std::vector<UbData> GenerateUbData()
+{
+    std::vector<UbData> res;
+    UbData data;
+    data.deviceId = 0; // deviceId 0
+    data.portId = 3; // portId 3
+    data.timestamp = 1746706291651036160; // timestamp 1746706291651036160
+    data.udmaRxBind = 100; // udmaRxBind 100
+    data.udmaTxBind = 200; // udmaTxBind 200
+    res.push_back(data);
+    return res;
+}
+
 static void InjectHcclData(DataInventory& dataInventory)
 {
     std::shared_ptr<std::vector<CommunicationTaskData>> dataTaskS;
@@ -926,27 +1006,39 @@ TEST_F(DBAssemblerUTest, TestRunAccPmuDataShouldReturnFalseWhenReserveFailed)
 
 TEST_F(DBAssemblerUTest, TestRunAicoreFreqDataShouldReturnTrueWhenRunSuccess)
 {
-    // deviceId, timestampNs, freq
-    using AicoreFreqDataFormat = std::vector<std::tuple<uint16_t, uint64_t, double>>;
     auto assembler = DBAssembler(PROF, OUTPUT_PATH);
     auto dataInventory = DataInventory();
     auto data = GenerateAicoreFreqData();
-    std::shared_ptr<std::vector<AicoreFreqData>> dataS;
-    MAKE_SHARED0_NO_OPERATION(dataS, std::vector<AicoreFreqData>, data);
-    dataInventory.Inject<std::vector<AicoreFreqData>>(dataS);
+    std::shared_ptr<std::vector<LowPowerData>> dataS;
+    MAKE_SHARED0_NO_OPERATION(dataS, std::vector<LowPowerData>, data);
+    dataInventory.Inject<std::vector<LowPowerData>>(dataS);
     EXPECT_TRUE(assembler.Run(dataInventory));
+
+    // deviceId, timestampNs, freq, dieId
+    using AicoreFreqDataFormat = std::vector<std::tuple<uint16_t, uint64_t, double, int32_t>>;
+    AicoreFreqDataFormat checkData;
+    std::shared_ptr<DBRunner> msprofDBRunner;
+    MAKE_SHARED0_NO_OPERATION(msprofDBRunner, DBRunner, GetMsprofDbPath());
+    ASSERT_NE(msprofDBRunner, nullptr);
+    std::string sql = "SELECT deviceId, timestampNs, freq, dieId FROM " + TABLE_NAME_AICORE_FREQ;
+    EXPECT_TRUE(msprofDBRunner->QueryData(sql, checkData));
+    ASSERT_EQ(1, checkData.size());
+    EXPECT_EQ(1, std::get<0>(checkData[0]));
+    EXPECT_EQ(236368325745670, std::get<1>(checkData[0]));
+    EXPECT_DOUBLE_EQ(50.0, std::get<2>(checkData[0]));
+    EXPECT_EQ(1, std::get<3>(checkData[0]));
 }
 
 TEST_F(DBAssemblerUTest, TestRunAicoreFreqDataShouldReturnFalseWhenReserveFailed)
 {
-    // deviceId, timestampNs, freq
-    using SaveDataFormat = std::vector<std::tuple<uint16_t, uint64_t, double>>;
+    // deviceId, timestampNs, freq, dieId
+    using SaveDataFormat = std::vector<std::tuple<uint16_t, uint64_t, double, int32_t>>;
     auto assembler = DBAssembler(PROF, OUTPUT_PATH);
     auto dataInventory = DataInventory();
     auto data = GenerateAicoreFreqData();
-    std::shared_ptr<std::vector<AicoreFreqData>> dataS;
-    MAKE_SHARED0_NO_OPERATION(dataS, std::vector<AicoreFreqData>, data);
-    dataInventory.Inject<std::vector<AicoreFreqData>>(dataS);
+    std::shared_ptr<std::vector<LowPowerData>> dataS;
+    MAKE_SHARED0_NO_OPERATION(dataS, std::vector<LowPowerData>, data);
+    dataInventory.Inject<std::vector<LowPowerData>>(dataS);
     // Reserve failed
     StubReserveFailureForVector<SaveDataFormat>();
     EXPECT_FALSE(assembler.Run(dataInventory));
@@ -1868,6 +1960,169 @@ TEST_F(DBAssemblerUTest, TestRunSaveQosDataShouldReturnTrueWhenDataNotExistOrRun
     MAKE_SHARED0_NO_OPERATION(dataS, std::vector<QosData>, data);
     dataInventory.Inject<std::vector<QosData>>(dataS);
     EXPECT_TRUE(assembler.Run(dataInventory));
+}
+
+TEST_F(DBAssemblerUTest, TestRunSaveDPUDataShouldReturnTrueWhenRunSuccess)
+{
+    auto assembler = DBAssembler(PROF, OUTPUT_PATH);
+    auto dataInventory = DataInventory();
+    auto data = GenerateDPUData();
+    std::shared_ptr<std::vector<DPUData>> dataS;
+    MAKE_SHARED0_NO_OPERATION(dataS, std::vector<DPUData>, data);
+    dataInventory.Inject<std::vector<DPUData>>(dataS);
+    EXPECT_TRUE(assembler.Run(dataInventory));
+
+    // dpuDeviceId, globalTid, startNs, endNs, globalTaskId, streamId, taskId, opName, args
+    using DPUDataFormat = std::vector<std::tuple<uint16_t, uint32_t, uint64_t, uint64_t,
+        uint64_t, uint16_t, uint32_t, uint64_t, uint64_t>>;
+    DPUDataFormat dpuResult;
+    std::shared_ptr<DBRunner> msprofDBRunner;
+    MAKE_SHARED0_NO_OPERATION(msprofDBRunner, DBRunner, GetMsprofDbPath());
+    ASSERT_NE(msprofDBRunner, nullptr);
+    std::string sql = "SELECT dpuDeviceId, globalTid, startNs, endNs, globalTaskId, streamId, taskId, opName, args FROM "
+        + TABLE_NAME_DPU_TASK + " ORDER BY startNs";
+    EXPECT_TRUE(msprofDBRunner->QueryData(sql, dpuResult));
+    ASSERT_EQ(2, dpuResult.size());
+    EXPECT_EQ(2, std::get<0>(dpuResult[0]));
+    EXPECT_EQ(123, std::get<1>(dpuResult[0]));
+    EXPECT_EQ(1717575960208020750, std::get<2>(dpuResult[0]));
+    EXPECT_EQ(1717575960208021750, std::get<3>(dpuResult[0]));
+    EXPECT_EQ(7, std::get<5>(dpuResult[0]));
+    EXPECT_EQ(23, std::get<6>(dpuResult[0]));
+    EXPECT_EQ(3, std::get<0>(dpuResult[1]));
+    EXPECT_EQ(124, std::get<1>(dpuResult[1]));
+    EXPECT_EQ(8, std::get<5>(dpuResult[1]));
+    EXPECT_EQ(24, std::get<6>(dpuResult[1]));
+
+    using StringIdFormat = std::vector<std::tuple<uint64_t, std::string>>;
+    StringIdFormat stringIds;
+    sql = "SELECT id, value FROM " + TABLE_NAME_STRING_IDS;
+    EXPECT_TRUE(msprofDBRunner->QueryData(sql, stringIds));
+    std::unordered_map<uint64_t, std::string> stringIdMap;
+    for (const auto& item : stringIds) {
+        stringIdMap[std::get<0>(item)] = std::get<1>(item);
+    }
+
+    EXPECT_EQ("dpu_kernel", stringIdMap[std::get<7>(dpuResult[0])]);
+    EXPECT_EQ("dpu_hccl", stringIdMap[std::get<7>(dpuResult[1])]);
+    const auto& taskArgs = stringIdMap[std::get<8>(dpuResult[0])];
+    EXPECT_NE(std::string::npos, taskArgs.find("Thread Id"));
+    EXPECT_NE(std::string::npos, taskArgs.find("Task Type"));
+    const auto& hcclArgs = stringIdMap[std::get<8>(dpuResult[1])];
+    EXPECT_NE(std::string::npos, hcclArgs.find("OP Type"));
+    EXPECT_NE(std::string::npos, hcclArgs.find("AI CPU Device Id"));
+    EXPECT_NE(std::string::npos, hcclArgs.find("Group Name"));
+    EXPECT_NE(std::string::npos, hcclArgs.find("Bandwidth(B/s)"));
+    EXPECT_NE(std::string::npos, hcclArgs.find("1024000"));
+}
+
+TEST_F(DBAssemblerUTest, TestRunSaveDPUDataShouldReturnFalseWhenReserveFailed)
+{
+    using DPUDataFormat = std::vector<std::tuple<uint16_t, uint32_t, uint64_t, uint64_t,
+        uint64_t, uint16_t, uint32_t, uint64_t, uint64_t>>;
+    auto assembler = DBAssembler(PROF, OUTPUT_PATH);
+    auto dataInventory = DataInventory();
+    auto data = GenerateDPUData();
+    std::shared_ptr<std::vector<DPUData>> dataS;
+    MAKE_SHARED0_NO_OPERATION(dataS, std::vector<DPUData>, data);
+    dataInventory.Inject<std::vector<DPUData>>(dataS);
+
+    StubReserveFailureForVector<DPUDataFormat>();
+    EXPECT_FALSE(assembler.Run(dataInventory));
+    ResetReserveFailureForVector<DPUDataFormat>();
+}
+
+TEST_F(DBAssemblerUTest, TestRunSaveSIODataShouldReturnTrueWhenRunSuccess)
+{
+    auto assembler = DBAssembler(PROF, OUTPUT_PATH);
+    auto dataInventory = DataInventory();
+    auto data = GenerateSioData();
+    std::shared_ptr<std::vector<SioData>> dataS;
+    MAKE_SHARED0_NO_OPERATION(dataS, std::vector<SioData>, data);
+    dataInventory.Inject<std::vector<SioData>>(dataS);
+    EXPECT_TRUE(assembler.Run(dataInventory));
+
+    using SioDataFormat = std::vector<std::tuple<uint16_t, uint64_t, uint64_t,
+        double, double, double, double, double, double, double, double>>;
+    SioDataFormat sioResult;
+    std::shared_ptr<DBRunner> msprofDBRunner;
+    MAKE_SHARED0_NO_OPERATION(msprofDBRunner, DBRunner, GetMsprofDbPath());
+    ASSERT_NE(msprofDBRunner, nullptr);
+    std::string sql = "SELECT deviceId, name, timestampNs, rxReq, rxRsp, rxSnp, rxDat, txReq, txRsp, txSnp, txDat FROM "
+        + TABLE_NAME_SIO;
+    EXPECT_TRUE(msprofDBRunner->QueryData(sql, sioResult));
+    ASSERT_EQ(1, sioResult.size());
+    EXPECT_EQ(0, std::get<0>(sioResult[0]));
+    EXPECT_EQ(1746706291651036160, std::get<2>(sioResult[0]));
+    EXPECT_DOUBLE_EQ(1.0 * BYTE_SIZE * BYTE_SIZE, std::get<3>(sioResult[0]));
+    EXPECT_DOUBLE_EQ(2.0 * BYTE_SIZE * BYTE_SIZE, std::get<4>(sioResult[0]));
+    EXPECT_DOUBLE_EQ(8.0 * BYTE_SIZE * BYTE_SIZE, std::get<10>(sioResult[0]));
+
+    using StringIdFormat = std::vector<std::tuple<uint64_t, std::string>>;
+    StringIdFormat stringIds;
+    sql = "SELECT id, value FROM " + TABLE_NAME_STRING_IDS;
+    EXPECT_TRUE(msprofDBRunner->QueryData(sql, stringIds));
+    std::unordered_map<uint64_t, std::string> stringIdMap;
+    for (const auto& item : stringIds) {
+        stringIdMap[std::get<0>(item)] = std::get<1>(item);
+    }
+    EXPECT_EQ("die 0", stringIdMap[std::get<1>(sioResult[0])]);
+}
+
+TEST_F(DBAssemblerUTest, TestRunSaveSIODataShouldReturnFalseWhenReserveFailed)
+{
+    using SioDataFormat = std::vector<std::tuple<uint16_t, uint64_t, uint64_t,
+        double, double, double, double, double, double, double, double>>;
+    auto assembler = DBAssembler(PROF, OUTPUT_PATH);
+    auto dataInventory = DataInventory();
+    auto data = GenerateSioData();
+    std::shared_ptr<std::vector<SioData>> dataS;
+    MAKE_SHARED0_NO_OPERATION(dataS, std::vector<SioData>, data);
+    dataInventory.Inject<std::vector<SioData>>(dataS);
+
+    StubReserveFailureForVector<SioDataFormat>();
+    EXPECT_FALSE(assembler.Run(dataInventory));
+    ResetReserveFailureForVector<SioDataFormat>();
+}
+
+TEST_F(DBAssemblerUTest, TestRunSaveUBDataShouldReturnTrueWhenRunSuccess)
+{
+    auto assembler = DBAssembler(PROF, OUTPUT_PATH);
+    auto dataInventory = DataInventory();
+    auto data = GenerateUbData();
+    std::shared_ptr<std::vector<UbData>> dataS;
+    MAKE_SHARED0_NO_OPERATION(dataS, std::vector<UbData>, data);
+    dataInventory.Inject<std::vector<UbData>>(dataS);
+    EXPECT_TRUE(assembler.Run(dataInventory));
+
+    using UbDataFormat = std::vector<std::tuple<uint16_t, uint16_t, uint64_t, uint64_t, uint64_t>>;
+    UbDataFormat ubResult;
+    std::shared_ptr<DBRunner> msprofDBRunner;
+    MAKE_SHARED0_NO_OPERATION(msprofDBRunner, DBRunner, GetMsprofDbPath());
+    ASSERT_NE(msprofDBRunner, nullptr);
+    std::string sql = "SELECT deviceId, portId, timestampNs, rxUdmaBind, txUdmaBind FROM " + TABLE_NAME_UB;
+    EXPECT_TRUE(msprofDBRunner->QueryData(sql, ubResult));
+    ASSERT_EQ(1, ubResult.size());
+    EXPECT_EQ(0, std::get<0>(ubResult[0]));
+    EXPECT_EQ(3, std::get<1>(ubResult[0]));
+    EXPECT_EQ(1746706291651036160, std::get<2>(ubResult[0]));
+    EXPECT_EQ(100, std::get<3>(ubResult[0]));
+    EXPECT_EQ(200, std::get<4>(ubResult[0]));
+}
+
+TEST_F(DBAssemblerUTest, TestRunSaveUBDataShouldReturnFalseWhenReserveFailed)
+{
+    using UbDataFormat = std::vector<std::tuple<uint16_t, uint16_t, uint64_t, uint64_t, uint64_t>>;
+    auto assembler = DBAssembler(PROF, OUTPUT_PATH);
+    auto dataInventory = DataInventory();
+    auto data = GenerateUbData();
+    std::shared_ptr<std::vector<UbData>> dataS;
+    MAKE_SHARED0_NO_OPERATION(dataS, std::vector<UbData>, data);
+    dataInventory.Inject<std::vector<UbData>>(dataS);
+
+    StubReserveFailureForVector<UbDataFormat>();
+    EXPECT_FALSE(assembler.Run(dataInventory));
+    ResetReserveFailureForVector<UbDataFormat>();
 }
 
 TEST_F(DBAssemblerUTest, TestRunSaveCCUDataShouldReturnTrueWhenRunSuccess)

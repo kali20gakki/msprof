@@ -17,7 +17,7 @@
 
 class TableFields:
     ACC_PMU = ["accId", "readBwLevel", "writeBwLevel", "readOstLevel", "writeOstLevel", "timestampNs", "deviceId"]
-    AICORE_FREQ = ["deviceId", "timestampNs", "freq"]
+    AICORE_FREQ = ["deviceId", "timestampNs", "freq", "dieId"]
     CANN_API = ["startNs", "endNs", "type", "globalTid", "connectionId", "name"]
     COMMUNICATION_OP = [
         "opName",

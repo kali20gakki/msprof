@@ -79,25 +79,25 @@ static std::vector<LowPowerData> GenerateFreqData()
     data.deviceId = 0; // device 0
     data.dieId = 0;
     data.timestamp = 1719621074669030430; // timestamp 1719621074669030430
-    data.aicFreq = 800; // freq 800 MHz
+    data.freq = 800; // freq 800 MHz
     res.push_back(data);
 
     data.deviceId = 0; // device 0
     data.dieId = 0;
     data.timestamp = 1719621074688865380; // timestamp 1719621074688865380
-    data.aicFreq = 1850; // freq 1850 MHz
+    data.freq = 1850; // freq 1850 MHz
     res.push_back(data);
 
     data.deviceId = 0; // device 0
     data.dieId = 0;
     data.timestamp = 1719621074688867780; // timestamp 1719621074688867780
-    data.aicFreq = 1800; // freq 1800 MHz
+    data.freq = 1800; // freq 1800 MHz
     res.push_back(data);
 
     data.deviceId = 0; // device 0
     data.dieId = 0;
     data.timestamp = 1719621074688868780; // timestamp 1719621074688868780
-    data.aicFreq = 1800; // freq 1800 MHz
+    data.freq = 1800; // freq 1800 MHz
     res.push_back(data);
     return res;
 }

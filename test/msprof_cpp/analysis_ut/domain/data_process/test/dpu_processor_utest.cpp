@@ -39,23 +39,36 @@ const std::string TRACK_TABLE_NAME = "DPUTaskTrack";
 const std::string HCCL_TRACK_TABLE_NAME = "DPUHcclTrack";
 const std::set<std::string> PROF_PATHS = {PROF0, PROF1, PROF2, PROF3};
 
-const DPUProcessor::TrackFormat TRACK_DATA = {
+// dpu_device_id, thread_id, start_time, end_time, task_type, stream_id, task_id, kernel_name(op_name)
+using Track = std::vector<std::tuple<uint16_t, uint32_t, uint64_t, uint64_t, std::string,
+        uint16_t, uint32_t, std::string>>;
+// npu_device_id, dpu_device_id, thread_id, start_time, end_time, op_name, group_name, group_name_id
+// local_rank, remote_rank, rank_size, duration_estimated, src_addr, dst_addr, data_size
+// stream_id, task_id, aicpu_task_id, plane_id, op_type, data_type, link_type, transport_type
+// rdma_type, role, ccl_tag, notify_id, work_flow_mode, stage
+using HcclTrack = std::vector<std::tuple<uint16_t, uint16_t, uint32_t, uint64_t, uint64_t,
+        std::string, std::string, std::string, uint16_t, uint16_t, uint32_t, double, std::string, std::string, uint64_t,
+        uint16_t, uint32_t, uint32_t, uint16_t, std::string, std::string, std::string, std::string,
+        std::string, std::string, std::string, std::string, std::string, std::string>>;
+
+const Track TRACK_DATA = {
         {0, 116, 65177262396323, 65177262397323, "KERNEL_AICORE", 1, 100, "Conv2D"},
         {0, 117, 65177262398000, 65177262399500, "KERNEL_AICORE", 2, 101, "MatMul"},
         {1, 118, 65177262400000, 65177262401200, "KERNEL_AICORE", 3, 102, "Relu"},
 };
 
-const DPUProcessor::HcclTrackFormat HCCL_TRACK_DATA = {
-        {0, 0, 116, 65177264896891, 65177264928192, "Dpu_Inline_Write", "123456789", 0, 2, 4, 0.0, "1111", "2222",
+const HcclTrack HCCL_TRACK_DATA = {
+        {0, 0, 116, 65177264896891, 65177264928192, "Dpu_Inline_Write", "hccl_group", "123456789", 0, 2, 4, 0.0, "1111", "2222",
          1024, 1, 200, 300, 0, "MAX", "FP32", "ROCE", "UB", "RESERVED", "DST", "123456", "0", "1", "0"},
-        {0, 1, 117, 65177264940493, 65177264975485, "Dpu_Notify_Wait", "123456789", 0, 2, 4, 0.0, "1111", "2222",
-         2048, 1, 201, 300, 0, "MAX", "FP32", "ON_CHIP", "UB", "RESERVED", "DST", "123456", "0", "1", "0"},
+        {0, 1, 117, 65177264940493, 65177264975485, "Dpu_Notify_Wait", "hccl_group", "123456789", 0, 2, 4, 0.0,
+         "1111", "2222", 2048, 1, 201, 300, 0, "MAX", "FP32", "ON_CHIP", "UB", "RESERVED", "DST", "123456", "0", "1", "0"},
 };
 
 class DPUProcessorUTest : public testing::Test {
 protected:
     static void SetUpTestCase()
     {
+        GlobalMockObject::verify();
         if (File::Check(DPU_DIR)) {
             File::RemoveDir(DPU_DIR, 0);
         }
@@ -91,6 +104,7 @@ protected:
     {
         Context::GetInstance().Clear();
         EXPECT_TRUE(File::RemoveDir(DPU_DIR, 0));
+        GlobalMockObject::verify();
     }
 
     virtual void SetUp()
@@ -109,7 +123,7 @@ protected:
 
     virtual void TearDown()
     {
-        MOCKER_CPP(&Context::GetInfoByDeviceId).reset();
+        GlobalMockObject::verify();
     }
 };
 
@@ -133,24 +147,21 @@ void CheckDPUDataValid(const std::vector<DPUData> &checkData)
             EXPECT_EQ(data.threadId, std::get<2>(HCCL_TRACK_DATA[hcclIndex]));
             EXPECT_EQ(data.opName, std::get<5>(HCCL_TRACK_DATA[hcclIndex]));
             EXPECT_EQ(data.groupName, std::get<6>(HCCL_TRACK_DATA[hcclIndex]));
-            EXPECT_EQ(data.localRank, std::get<7>(HCCL_TRACK_DATA[hcclIndex]));
-            EXPECT_EQ(data.remoteRank, std::get<8>(HCCL_TRACK_DATA[hcclIndex]));
-            EXPECT_EQ(data.rankSize, std::get<9>(HCCL_TRACK_DATA[hcclIndex]));
-            EXPECT_EQ(data.dataSize, std::get<13>(HCCL_TRACK_DATA[hcclIndex]));
-            EXPECT_EQ(data.streamId, std::get<14>(HCCL_TRACK_DATA[hcclIndex]));
-            EXPECT_EQ(data.taskId, std::get<15>(HCCL_TRACK_DATA[hcclIndex]));
-            EXPECT_EQ(data.aicpuTaskId, std::get<16>(HCCL_TRACK_DATA[hcclIndex]));
-            EXPECT_EQ(data.planeId, std::get<17>(HCCL_TRACK_DATA[hcclIndex]));
-            EXPECT_EQ(data.opType, std::get<18>(HCCL_TRACK_DATA[hcclIndex]));
-            EXPECT_EQ(data.dataType, std::get<19>(HCCL_TRACK_DATA[hcclIndex]));
-            EXPECT_EQ(data.linkType, std::get<20>(HCCL_TRACK_DATA[hcclIndex]));
-            EXPECT_EQ(data.transportType, std::get<21>(HCCL_TRACK_DATA[hcclIndex]));
-            EXPECT_EQ(data.rdmaType, std::get<22>(HCCL_TRACK_DATA[hcclIndex]));
-            EXPECT_EQ(data.role, std::get<23>(HCCL_TRACK_DATA[hcclIndex]));
-            EXPECT_EQ(data.cclTag, std::get<24>(HCCL_TRACK_DATA[hcclIndex]));
-            EXPECT_EQ(data.notifyId, std::get<25>(HCCL_TRACK_DATA[hcclIndex]));
-            EXPECT_EQ(data.workFlowMode, std::get<26>(HCCL_TRACK_DATA[hcclIndex]));
-            EXPECT_EQ(data.stage, std::get<27>(HCCL_TRACK_DATA[hcclIndex]));
+            EXPECT_EQ(data.groupNameId, std::get<7>(HCCL_TRACK_DATA[hcclIndex]));
+            EXPECT_EQ(data.localRank, std::get<8>(HCCL_TRACK_DATA[hcclIndex]));
+            EXPECT_EQ(data.remoteRank, std::get<9>(HCCL_TRACK_DATA[hcclIndex]));
+            EXPECT_EQ(data.rankSize, std::get<10>(HCCL_TRACK_DATA[hcclIndex]));
+            EXPECT_EQ(data.dataSize, std::get<14>(HCCL_TRACK_DATA[hcclIndex]));
+            EXPECT_EQ(data.streamId, std::get<15>(HCCL_TRACK_DATA[hcclIndex]));
+            EXPECT_EQ(data.taskId, std::get<16>(HCCL_TRACK_DATA[hcclIndex]));
+            EXPECT_EQ(data.aicpuTaskId, std::get<17>(HCCL_TRACK_DATA[hcclIndex]));
+            EXPECT_EQ(data.planeId, std::get<18>(HCCL_TRACK_DATA[hcclIndex]));
+            EXPECT_EQ(data.opType, std::get<19>(HCCL_TRACK_DATA[hcclIndex]));
+            EXPECT_EQ(data.dataType, std::get<20>(HCCL_TRACK_DATA[hcclIndex]));
+            EXPECT_EQ(data.linkType, std::get<21>(HCCL_TRACK_DATA[hcclIndex]));
+            EXPECT_EQ(data.transportType, std::get<22>(HCCL_TRACK_DATA[hcclIndex]));
+            EXPECT_EQ(data.rdmaType, std::get<23>(HCCL_TRACK_DATA[hcclIndex]));
+            EXPECT_EQ(data.notifyId, std::get<26>(HCCL_TRACK_DATA[hcclIndex]));
             ++hcclIndex;
         }
     }

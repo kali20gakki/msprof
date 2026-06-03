@@ -18,11 +18,15 @@
 #define ANALYSIS_DOMAIN_DPU_DATA_H
 
 #include <string>
+
 #include "analysis/csrc/domain/entities/viewer_data/basic_data.h"
 
-namespace Analysis {
-namespace Domain {
-struct DPUData : public BasicData {
+namespace Analysis
+{
+namespace Domain
+{
+struct DPUData : public BasicData
+{
     bool isHccl = false;
     uint16_t npuDeviceId = UINT16_MAX;
     uint16_t dpuDeviceId = UINT16_MAX;
@@ -38,22 +42,19 @@ struct DPUData : public BasicData {
     uint64_t endTime = UINT64_MAX;
     double durationEstimated = 0.0;
     std::string taskType;
-    std::string cclTag;
     std::string dataType;
     std::string dstAddr;
     std::string srcAddr;
     std::string groupName;
+    std::string groupNameId;
     std::string linkType;
     std::string notifyId;
     std::string opName;
     std::string opType;
     std::string rdmaType;
-    std::string role;
-    std::string stage;
     std::string transportType;
-    std::string workFlowMode;
 };
-}
-}
+}  // namespace Domain
+}  // namespace Analysis
 
-#endif // ANALYSIS_DOMAIN_DPU_DATA_H
+#endif  // ANALYSIS_DOMAIN_DPU_DATA_H

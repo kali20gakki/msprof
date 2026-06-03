@@ -34,24 +34,25 @@ class DPUViewer(BaseViewer, ABC):
 
     def __init__(self: any, configs: dict, params: dict) -> None:
         super().__init__(configs, params)
-        self.model_list = {
-            "dpu": DPUTaskViewModel
-        }
+        self.model_list = {"dpu": DPUTaskViewModel}
         self.tid = InfoConfReader().get_json_tid_data()
 
     def _build_trace_data(self: any, track: DPUTrackDto, is_hccl: bool = False) -> tuple:
         start_time = InfoConfReader().trans_into_local_time(
             InfoConfReader().time_from_host_syscnt(track.start_time, NumberConstant.MICRO_SECOND),
-            use_us=True, is_host=True)
+            use_us=True,
+            is_host=True,
+        )
         # duration (us)
-        duration = InfoConfReader().get_host_duration((track.end_time - track.start_time),
-                                                      NumberConstant.MICRO_SECOND)
+        duration = InfoConfReader().get_host_duration((track.end_time - track.start_time), NumberConstant.MICRO_SECOND)
 
-        args = OrderedDict([
-            ('Thread Id', track.thread_id),
-            ("Physic Stream Id", track.stream_id),
-            ("Task Id", track.task_id),
-        ])
+        args = OrderedDict(
+            [
+                ('Thread Id', track.thread_id),
+                ("Physic Stream Id", track.stream_id),
+                ("Task Id", track.task_id),
+            ]
+        )
 
         if is_hccl:
             bandwidth = 0
@@ -60,9 +61,11 @@ class DPUViewer(BaseViewer, ABC):
             args.setdefault("OP Type", track.op_type)
             args.setdefault("AI CPU Device Id", track.npu_device_id)
             args.setdefault("AI CPU Task Id", track.aicpu_task_id)
+            args.setdefault("Group Name", f"{track.group_name}({track.group_name_id})")
             args.setdefault("Plane Id", track.plane_id)
             args.setdefault("Notify Id", track.notify_id)
             args.setdefault("Duration Estimated(us)", track.duration_estimated)
+            args.setdefault("Rank Size", track.rank_size)
             args.setdefault("Src Rank", track.local_rank)
             args.setdefault("Dst Rank", track.remote_rank)
             args.setdefault("Transport Type", track.transport_type)
@@ -116,6 +119,7 @@ class DPUViewer(BaseViewer, ABC):
             return []
         column_trace_data = self.get_column_trace_data(*dpu_data)
         result = TraceViewManager.metadata_event(self.get_time_timeline_header(*dpu_data))
-        result.extend(TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD,
-                                                        column_trace_data))
+        result.extend(
+            TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD, column_trace_data)
+        )
         return result

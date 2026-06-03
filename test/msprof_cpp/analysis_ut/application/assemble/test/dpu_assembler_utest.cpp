@@ -92,6 +92,7 @@ static std::vector<DPUData> GenerateDPUHcclTrackData()
     data.opType = "MAX";
     data.opName = "allreduce_op";
     data.groupName = "hccl_world_group";
+    data.groupNameId = "1";
     data.localRank = 0;
     data.remoteRank = 1;
     data.rankSize = 8;
@@ -104,10 +105,6 @@ static std::vector<DPUData> GenerateDPUHcclTrackData()
     data.linkType = "RoCE";
     data.transportType = "RDMA";
     data.rdmaType = "RDMA";
-    data.role = "server";
-    data.cclTag = "3333333";
-    data.workFlowMode = "1";
-    data.stage = "1";
     data.timestamp = 1717575960208020750;
     data.endTime = 1717575960209010750;
     res.push_back(data);
@@ -142,6 +139,7 @@ static std::vector<DPUData> GenerateMixedDPUData()
     hcclData.opType = "MAX";
     hcclData.opName = "allreduce_op";
     hcclData.groupName = "hccl_world_group";
+    hcclData.groupNameId = "1";
     hcclData.localRank = 0;
     hcclData.remoteRank = 1;
     hcclData.rankSize = 8;
@@ -154,10 +152,6 @@ static std::vector<DPUData> GenerateMixedDPUData()
     hcclData.linkType = "RoCE";
     hcclData.transportType = "RDMA";
     hcclData.rdmaType = "RDMA";
-    hcclData.role = "server";
-    hcclData.cclTag = "3333333";
-    hcclData.workFlowMode = "1";
-    hcclData.stage = "1";
     hcclData.timestamp = 1717575960210000000;
     hcclData.endTime = 1717575960211000000;
     res.push_back(hcclData);
@@ -222,11 +216,11 @@ TEST_F(DPUAssemblerUTest, ShouldReturnTrueWhenDPUHcclTrackDataAssembleSuccess)
         "\"allreduce_op\",\"pid\":1024256,\"tid\":2,\"ts\":\"1717575960208020.750\",\"dur\":"
         "990.0,\"ph\":\"X\",\"args\":{\"Thread Id\":12345,\"Physic Stream Id\":2,\"Task Id\":"
         "200,\"OP Type\":\"MAX\",\"AI CPU Device Id\":0,\"AI CPU Task Id\":300,"
-        "\"Plane Id\":1,\"Notify Id\":\"5555555\",\"Duration Estimated(us)\":100.5,"
+        "\"Group Name\":\"hccl_world_group(1)\",\"Plane Id\":1,\"Notify Id\":\"5555555\","
+        "\"Duration Estimated(us)\":100.5,\"Rank Size\":8,"
         "\"Src Rank\":0,\"Dst Rank\":1,\"Transport Type\":\"RDMA\",\"Size(Byte)\":1048576,"
         "\"Bandwidth(GB/s)\":1.0591676767676768,\"Data Type\":\"FP32\",\"Link Type\":\"RoCE\","
-        "\"Rdma Type\":\"RDMA\",\"Role\":\"server\",\"Ccl Tag\":\"3333333\","
-        "\"Work Flow Mode\":\"1\",\"Stage\":\"1\"}},";
+        "\"Rdma Type\":\"RDMA\"}},";
     EXPECT_EQ(expectStr, res.back());
 }
 

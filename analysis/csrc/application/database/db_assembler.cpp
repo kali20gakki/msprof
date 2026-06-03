@@ -25,6 +25,7 @@
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/ascend_task_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/ccu_mission_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/communication_info_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/ai_task/include/dpu_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/kfc_turn_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/mc2_comm_info_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/memcpy_info_data.h"
@@ -32,20 +33,22 @@
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/task_info_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/unified_pmu_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/acc_pmu_data.h"
-#include "analysis/csrc/domain/entities/viewer_data/system/include/aicore_freq_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/ddr_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/hbm_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/hccs_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/host_usage_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/llc_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/system/include/low_power_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/netdev_stats_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/npu_mem_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/npu_module_mem_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/npu_op_mem_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/pcie_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/qos_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/system/include/sio_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/soc_bandwidth_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/sys_io_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/system/include/ub_data.h"
 #include "analysis/csrc/domain/services/environment/context.h"
 #include "analysis/csrc/infrastructure/dfx/error_code.h"
 #include "analysis/csrc/infrastructure/dump_tools/json_tool/include/json_writer.h"
@@ -84,6 +87,13 @@ using CommunicationOpDataFormat =
 using CommunicationTaskDataFormat =
     std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint32_t, uint64_t, uint64_t, uint64_t, uint32_t, uint32_t,
                            uint64_t, uint64_t, uint64_t, uint64_t, uint32_t, uint16_t, double>>;
+
+enum class DevType
+{
+    NPU,
+    CPU,
+    DPU,
+};
 
 struct ComputeTaskInfoData
 {
@@ -190,9 +200,9 @@ bool SaveMemcpyInfoData(DataInventory& dataInventory, DBInfo& msprofDB, const st
     }
     for (const auto& item : *memcpyInfoData)
     {
-        uint64_t globalTaskId =
-            IdPool::GetInstance().GetId(std::make_tuple(item.taskId.deviceId, item.taskId.streamId, item.taskId.taskId,
-                                                        item.taskId.contextId, item.taskId.batchId));
+        uint64_t globalTaskId = IdPool::GetInstance().GetId(
+            std::make_tuple(item.taskId.deviceId, item.taskId.streamId, item.taskId.taskId, item.taskId.contextId,
+                            item.taskId.batchId, static_cast<uint32_t>(DevType::NPU)));
         res.emplace_back(globalTaskId, item.dataSize, item.memcpyOperation);
     }
     return SaveData(res, TABLE_NAME_MEMCPY_INFO, msprofDB);
@@ -250,8 +260,9 @@ void ConvertTaskData(CommunicationTaskDataFormat& processedTaskData, const std::
         uint64_t groupName = IdPool::GetInstance().GetUint64Id(item.groupName);
         uint64_t opName = IdPool::GetInstance().GetUint64Id(item.opName);
         uint64_t taskType = IdPool::GetInstance().GetUint64Id(item.taskType);
-        uint64_t globalTaskId = IdPool::GetInstance().GetId(
-            std::make_tuple(item.deviceId, item.streamId, item.taskId, item.contextId, item.batchId));
+        uint64_t globalTaskId =
+            IdPool::GetInstance().GetId(std::make_tuple(item.deviceId, item.streamId, item.taskId, item.contextId,
+                                                        item.batchId, static_cast<uint32_t>(DevType::NPU)));
         uint32_t opId = IdPool::GetInstance().GetUint32Id(item.opKey);
         if (!IsNumber(item.notifyId) || StrToU64(notifyId, item.notifyId) != ANALYSIS_OK)
         {
@@ -327,22 +338,26 @@ bool SaveAccPmuData(DataInventory& dataInventory, DBInfo& msprofDB, const std::s
 bool SaveAicoreFreqData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
 {
     // deviceId, timestampNs, freq
-    using AicoreFreqDataFormat = std::vector<std::tuple<uint16_t, uint64_t, double>>;
-    auto aicoreFreqData = dataInventory.GetPtr<std::vector<AicoreFreqData>>();
+    using AicoreFreqDataFormat = std::vector<std::tuple<uint16_t, uint64_t, double, int32_t>>;
+    auto aicoreFreqData = dataInventory.GetPtr<std::vector<LowPowerData>>();
     if (aicoreFreqData == nullptr)
     {
-        WARN("AIcore freq data not exist.");
+        WARN("Aicore freq data not exist.");
         return true;
     }
     AicoreFreqDataFormat res;
     if (!Reserve(res, aicoreFreqData->size()))
     {
-        ERROR("Reserved for AIcore freq data failed.");
+        ERROR("Reserved for aicore freq data failed.");
         return false;
     }
+    const static std::set<int32_t> dDieId{-1, 0, 1};
     for (const auto& item : *aicoreFreqData)
     {
-        res.emplace_back(item.deviceId, item.timestamp, item.freq);
+        if (dDieId.find(item.dieId) != dDieId.end())
+        {
+            res.emplace_back(item.deviceId, item.timestamp, item.freq, item.dieId);
+        }
     }
     return SaveData(res, TABLE_NAME_AICORE_FREQ, msprofDB);
 }
@@ -812,8 +827,9 @@ bool SaveComputeTaskInfo(DataInventory& dataInventory, DBInfo& msprofDB, const s
     for (const auto& item : *computeTaskInfo)
     {
         taskInfoData.opName = IdPool::GetInstance().GetUint64Id(item.opName);
-        taskInfoData.globalTaskId = IdPool::GetInstance().GetId(
-            std::make_tuple(item.deviceId, item.streamId, item.taskId, item.contextId, item.batchId));
+        taskInfoData.globalTaskId =
+            IdPool::GetInstance().GetId(std::make_tuple(item.deviceId, item.streamId, item.taskId, item.contextId,
+                                                        item.batchId, static_cast<uint32_t>(DevType::NPU)));
         taskInfoData.taskType = IdPool::GetInstance().GetUint64Id(item.taskType);
         taskInfoData.opType = IdPool::GetInstance().GetUint64Id(item.opType);
         if ((kfcStream && std::find_if(kfcStream->begin(), kfcStream->end(), [item](const MC2CommInfoData& mc)
@@ -875,8 +891,9 @@ bool SaveAscendTaskData(DataInventory& dataInventory, DBInfo& msprofDB, const st
     {
         for (const auto& item : *ascendTaskData)
         {
-            globalTaskId = IdPool::GetInstance().GetId(
-                std::make_tuple(item.deviceId, item.streamId, item.taskId, item.contextId, item.batchId));
+            globalTaskId =
+                IdPool::GetInstance().GetId(std::make_tuple(item.deviceId, item.streamId, item.taskId, item.contextId,
+                                                            item.batchId, static_cast<uint32_t>(DevType::NPU)));
             taskType = IdPool::GetInstance().GetUint64Id(item.taskType);
             res.emplace_back(item.timestamp, item.end, item.deviceId, item.connectionId, globalTaskId, globalPid,
                              taskType, item.contextId, item.streamId, item.taskId, item.modelId);
@@ -886,8 +903,9 @@ bool SaveAscendTaskData(DataInventory& dataInventory, DBInfo& msprofDB, const st
     {
         for (const auto& txData : *deviceTxData)
         {
-            globalTaskId = IdPool ::GetInstance().GetId(
-                std::make_tuple(txData.deviceId, txData.streamId, txData.taskId, UINT32_MAX, txData.connectionId));
+            globalTaskId = IdPool ::GetInstance().GetId(std::make_tuple(txData.deviceId, txData.streamId, txData.taskId,
+                                                                        UINT32_MAX, txData.connectionId,
+                                                                        static_cast<uint32_t>(DevType::NPU)));
             taskType = IdPool::GetInstance().GetUint64Id(txData.taskType);
             res.emplace_back(txData.timestamp, txData.timestamp + static_cast<uint64_t>(txData.duration),
                              txData.deviceId, txData.connectionId, globalTaskId, globalPid, taskType, UINT32_MAX,
@@ -989,8 +1007,9 @@ bool SaveTaskPmuData(DataInventory& dataInventory, DBInfo& msprofDB, const std::
     }
     for (const auto& item : *unifiedTaskPmuData)
     {
-        uint64_t globalTaskId = IdPool::GetInstance().GetId(std::make_tuple(
-            static_cast<uint16_t>(item.deviceId), item.streamId, item.taskId, item.subtaskId, item.batchId));
+        uint64_t globalTaskId = IdPool::GetInstance().GetId(
+            std::make_tuple(static_cast<uint16_t>(item.deviceId), item.streamId, item.taskId, item.subtaskId,
+                            item.batchId, static_cast<uint32_t>(DevType::NPU)));
         res.emplace_back(globalTaskId, IdPool::GetInstance().GetUint64Id(item.header), item.value);
     }
     return SaveData(res, TABLE_NAME_TASK_PMU_INFO, msprofDB);
@@ -1227,6 +1246,138 @@ bool SaveQosData(DataInventory& dataInventory, DBInfo& msprofDB, const std::stri
     return SaveData(res, TABLE_NAME_QOS, msprofDB);
 }
 
+bool SaveDPUData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
+{
+    auto dpuData = dataInventory.GetPtr<std::vector<DPUData>>();
+    if (dpuData == nullptr || dpuData->empty())
+    {
+        WARN("Can't get dpuData from dataInventory");
+        return true;
+    }
+
+    using DPUTaskFormat = std::vector<
+        std::tuple<uint16_t, uint32_t, uint64_t, uint64_t, uint64_t, uint16_t, uint32_t, uint64_t, uint64_t>>;
+
+    DPUTaskFormat res;
+    if (!Reserve(res, dpuData->size()))
+    {
+        ERROR("Reserved for DPU task data failed.");
+        return false;
+    }
+
+    for (const auto& data : *dpuData)
+    {
+        uint64_t globalTaskId = IdPool::GetInstance().GetId(std::make_tuple(
+            data.dpuDeviceId, data.streamId, data.taskId, UINT32_MAX, UINT32_MAX, static_cast<uint32_t>(DevType::DPU)));
+
+        uint64_t opNameId = IdPool::GetInstance().GetUint64Id(data.opName);
+
+        Infra::JsonWriter jsonWriter;
+        jsonWriter.StartArray();
+        jsonWriter["Thread Id"] << data.threadId;
+        jsonWriter["Physic Stream Id"] << data.streamId;
+        jsonWriter["Task Id"] << data.taskId;
+
+        if (!data.isHccl)
+        {
+            jsonWriter["Task Type"] << data.taskType;
+        }
+        else
+        {
+            double bandwidth = 0;
+            double dur = static_cast<double>(data.endTime - data.timestamp) / 1000.0;
+            if (dur > 0 && data.dataSize <= INT64_MAX)
+            {
+                constexpr double MICRO_SECOND = 1000000.0;
+                bandwidth = data.dataSize / (dur / MICRO_SECOND);
+            }
+
+            jsonWriter["OP Type"] << data.opType;
+            jsonWriter["AI CPU Device Id"] << data.npuDeviceId;
+            jsonWriter["AI CPU Task Id"] << data.aicpuTaskId;
+            jsonWriter["Group Name"] << (data.groupName + "(" + data.groupNameId + ")");
+            jsonWriter["Plane Id"] << data.planeId;
+            jsonWriter["Notify Id"] << data.notifyId;
+            jsonWriter["Duration Estimated(us)"] << data.durationEstimated;
+            jsonWriter["Rank Size"] << data.rankSize;
+            jsonWriter["Src Rank"] << data.localRank;
+            jsonWriter["Dst Rank"] << data.remoteRank;
+            jsonWriter["Transport Type"] << data.transportType;
+            jsonWriter["Size(Byte)"] << data.dataSize;
+            jsonWriter["Bandwidth(B/s)"] << bandwidth;
+            jsonWriter["Data Type"] << data.dataType;
+            jsonWriter["Link Type"] << data.linkType;
+            jsonWriter["Rdma Type"] << data.rdmaType;
+        }
+
+        jsonWriter.EndArray();
+        std::string args = jsonWriter.GetString();
+        uint64_t argsId = IdPool::GetInstance().GetUint64Id(args);
+        res.emplace_back(data.dpuDeviceId, data.threadId, data.timestamp, data.endTime, globalTaskId, data.streamId,
+                         data.taskId, opNameId, argsId);
+    }
+
+    return SaveData(res, TABLE_NAME_DPU_TASK, msprofDB);
+}
+
+bool SaveSIOData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
+{
+    auto sioData = dataInventory.GetPtr<std::vector<SioData>>();
+    if (sioData == nullptr || sioData->empty())
+    {
+        WARN("SIO data not exist.");
+        return true;
+    }
+
+    using SioDataFormat = std::vector<
+        std::tuple<uint16_t, uint64_t, uint64_t, double, double, double, double, double, double, double, double>>;
+
+    SioDataFormat res;
+    if (!Reserve(res, sioData->size()))
+    {
+        ERROR("Reserved for SIO data failed.");
+        return false;
+    }
+
+    for (const auto& data : *sioData)
+    {
+        uint64_t nameId = IdPool::GetInstance().GetUint64Id(data.name);
+        res.emplace_back(data.deviceId, nameId, data.timestamp, data.reqRxBandwidth * BYTE_SIZE * BYTE_SIZE,
+                         data.rspRxBandwidth * BYTE_SIZE * BYTE_SIZE, data.snpRxBandwidth * BYTE_SIZE * BYTE_SIZE,
+                         data.datRxBandwidth * BYTE_SIZE * BYTE_SIZE, data.reqTxBandwidth * BYTE_SIZE * BYTE_SIZE,
+                         data.rspTxBandwidth * BYTE_SIZE * BYTE_SIZE, data.snpTxBandwidth * BYTE_SIZE * BYTE_SIZE,
+                         data.datTxBandwidth * BYTE_SIZE * BYTE_SIZE);
+    }
+
+    return SaveData(res, TABLE_NAME_SIO, msprofDB);
+}
+
+bool SaveUBData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
+{
+    auto ubData = dataInventory.GetPtr<std::vector<UbData>>();
+    if (ubData == nullptr || ubData->empty())
+    {
+        WARN("UB data not exist.");
+        return true;
+    }
+
+    using UbDataFormat = std::vector<std::tuple<uint16_t, uint16_t, uint64_t, uint64_t, uint64_t>>;
+
+    UbDataFormat res;
+    if (!Reserve(res, ubData->size()))
+    {
+        ERROR("Reserved for UB data failed.");
+        return false;
+    }
+
+    for (const auto& data : *ubData)
+    {
+        res.emplace_back(data.deviceId, data.portId, data.timestamp, data.udmaRxBind, data.udmaTxBind);
+    }
+
+    return SaveData(res, TABLE_NAME_UB, msprofDB);
+}
+
 bool SaveCCUData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
 {
     auto ccuData = dataInventory.GetPtr<std::vector<CCUMissionTimelineData>>();
@@ -1247,8 +1398,9 @@ bool SaveCCUData(DataInventory& dataInventory, DBInfo& msprofDB, const std::stri
 
     for (const auto& data : *ccuData)
     {
-        uint64_t globalTaskId = IdPool::GetInstance().GetId(
-            std::make_tuple(data.deviceId, data.streamId, data.taskId, UINT32_MAX, UINT32_MAX));
+        uint64_t globalTaskId = IdPool::GetInstance().GetId(std::make_tuple(
+            data.deviceId, data.streamId, data.taskId, UINT32_MAX, UINT32_MAX, static_cast<uint32_t>(DevType::NPU)));
+
         uint64_t nameId = IdPool::GetInstance().GetUint64Id(data.timeType);
         uint64_t startNs = data.timestamp;
         uint64_t endNs = data.timestamp + static_cast<uint64_t>(data.duration);
@@ -1334,6 +1486,9 @@ const std::unordered_map<std::string, SaveDataFunc> DATA_SAVER = {
     {Viewer::Database::PROCESSOR_NAME_SOC, SaveSocData},
     {Viewer::Database::PROCESSOR_NAME_NIC, SaveNicData},
     {Viewer::Database::PROCESSOR_NAME_ROCE, SaveRoCEData},
+    {Viewer::Database::PROCESSOR_NAME_DPU, SaveDPUData},
+    {Viewer::Database::PROCESSOR_NAME_SIO, SaveSIOData},
+    {Viewer::Database::PROCESSOR_NAME_UB, SaveUBData},
     {Viewer::Database::PROCESSOR_NAME_TASK, SaveAscendTaskData},
     {Viewer::Database::PROCESSOR_NAME_COMPUTE_TASK_INFO, SaveComputeTaskInfo},
     {Viewer::Database::PROCESSOR_NAME_MEMCPY_INFO, SaveMemcpyInfoData},
@@ -1411,17 +1566,18 @@ std::string GetDBPath(const std::string& outputDir)
 }
 
 const std::set<std::string> DB_DATA_PROCESS_LIST{
-    PROCESSOR_NAME_API,           PROCESSOR_NAME_COMMUNICATION, PROCESSOR_NAME_COMPUTE_TASK_INFO,
-    PROCESSOR_NAME_KFC_TASK,      PROCESSOR_NAME_KFC_COMM,      PROCESSOR_NAME_DEVICE_TX,
-    PROCESSOR_NAME_MSTX,          PROCESSOR_NAME_STEP_TRACE,    PROCESSOR_NAME_TASK,
-    PROCESSOR_NAME_ACC_PMU,       PROCESSOR_NAME_AICORE_FREQ,   PROCESSOR_NAME_DDR,
-    PROCESSOR_NAME_HBM,           PROCESSOR_NAME_HCCS,          PROCESSOR_NAME_NETDEV_STATS,
-    PROCESSOR_NAME_CPU_USAGE,     PROCESSOR_NAME_MEM_USAGE,     PROCESSOR_NAME_DISK_USAGE,
-    PROCESSOR_NAME_NETWORK_USAGE, PROCESSOR_NAME_OSRT_API,      PROCESSOR_NAME_LLC,
-    PROCESSOR_NAME_NPU_MEM,       PROCESSOR_NAME_PCIE,          PROCESSOR_NAME_SIO,
-    PROCESSOR_NAME_SOC,           PROCESSOR_NAME_NIC,           PROCESSOR_NAME_ROCE,
-    PROCESSOR_NAME_QOS,           PROCESSOR_NAME_CCU_MISSION,   PROCESSOR_MC2_COMM_INFO,
-    PROCESSOR_NAME_MEMCPY_INFO,   PROCESSOR_NAME_NPU_OP_MEM,    PROCESSOR_NAME_NPU_MODULE_MEM,
+    PROCESSOR_NAME_API,          PROCESSOR_NAME_COMMUNICATION, PROCESSOR_NAME_COMPUTE_TASK_INFO,
+    PROCESSOR_NAME_KFC_TASK,     PROCESSOR_NAME_KFC_COMM,      PROCESSOR_NAME_DEVICE_TX,
+    PROCESSOR_NAME_MSTX,         PROCESSOR_NAME_STEP_TRACE,    PROCESSOR_NAME_TASK,
+    PROCESSOR_NAME_ACC_PMU,      PROCESSOR_NAME_AICORE_FREQ,   PROCESSOR_NAME_LOW_POWER,
+    PROCESSOR_NAME_DDR,          PROCESSOR_NAME_HBM,           PROCESSOR_NAME_HCCS,
+    PROCESSOR_NAME_NETDEV_STATS, PROCESSOR_NAME_CPU_USAGE,     PROCESSOR_NAME_MEM_USAGE,
+    PROCESSOR_NAME_DISK_USAGE,   PROCESSOR_NAME_NETWORK_USAGE, PROCESSOR_NAME_OSRT_API,
+    PROCESSOR_NAME_LLC,          PROCESSOR_NAME_NPU_MEM,       PROCESSOR_NAME_PCIE,
+    PROCESSOR_NAME_DPU,          PROCESSOR_NAME_SIO,           PROCESSOR_NAME_UB,
+    PROCESSOR_NAME_SOC,          PROCESSOR_NAME_NIC,           PROCESSOR_NAME_ROCE,
+    PROCESSOR_NAME_QOS,          PROCESSOR_NAME_CCU_MISSION,   PROCESSOR_MC2_COMM_INFO,
+    PROCESSOR_NAME_MEMCPY_INFO,  PROCESSOR_NAME_NPU_OP_MEM,    PROCESSOR_NAME_NPU_MODULE_MEM,
     PROCESSOR_NAME_UNIFIED_PMU,
 };
 }  // namespace

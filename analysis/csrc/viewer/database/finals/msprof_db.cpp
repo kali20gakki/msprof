@@ -199,8 +199,10 @@ const TableColumns SOC_BANDWIDTH_LEVEL = {{"l2BufferBwLevel", SQL_INTEGER_TYPE},
 
 const TableColumns META_DATA = {{"name", SQL_TEXT_TYPE}, {"value", SQL_TEXT_TYPE}};
 
-const TableColumns AICORE_FREQ = {
-    {"deviceId", SQL_INTEGER_TYPE}, {"timestampNs", SQL_NUMERIC_TYPE}, {"freq", SQL_INTEGER_TYPE}};
+const TableColumns AICORE_FREQ = {{"deviceId", SQL_INTEGER_TYPE},
+                                  {"timestampNs", SQL_NUMERIC_TYPE},
+                                  {"freq", SQL_INTEGER_TYPE},
+                                  {"dieId", SQL_NUMERIC_TYPE}};
 
 const TableColumns MSTX = {{"startNs", SQL_INTEGER_TYPE},   {"endNs", SQL_INTEGER_TYPE},
                            {"eventType", SQL_INTEGER_TYPE}, {"rangeId", SQL_INTEGER_TYPE},
@@ -233,6 +235,23 @@ const TableColumns QOS = {{"deviceId", SQL_INTEGER_TYPE},
                           {"eventName", SQL_NUMERIC_TYPE},
                           {"bandwidth", SQL_NUMERIC_TYPE},
                           {"timestampNs", SQL_NUMERIC_TYPE}};
+
+const TableColumns DPU_TASK = {
+    {"dpuDeviceId", SQL_INTEGER_TYPE}, {"globalTid", SQL_NUMERIC_TYPE},    {"startNs", SQL_NUMERIC_TYPE},
+    {"endNs", SQL_NUMERIC_TYPE},       {"globalTaskId", SQL_NUMERIC_TYPE}, {"streamId", SQL_NUMERIC_TYPE},
+    {"taskId", SQL_NUMERIC_TYPE},      {"opName", SQL_NUMERIC_TYPE},       {"args", SQL_NUMERIC_TYPE}};
+
+const TableColumns UB = {{"deviceId", SQL_NUMERIC_TYPE},
+                         {"portId", SQL_NUMERIC_TYPE},
+                         {"timestampNs", SQL_NUMERIC_TYPE},
+                         {"rxUdmaBind", SQL_NUMERIC_TYPE},
+                         {"txUdmaBind", SQL_NUMERIC_TYPE}};
+
+const TableColumns SIO = {
+    {"deviceId", SQL_NUMERIC_TYPE}, {"name", SQL_NUMERIC_TYPE},  {"timestampNs", SQL_NUMERIC_TYPE},
+    {"rxReq", SQL_NUMERIC_TYPE},    {"rxRsp", SQL_NUMERIC_TYPE}, {"rxSnp", SQL_NUMERIC_TYPE},
+    {"rxDat", SQL_NUMERIC_TYPE},    {"txReq", SQL_NUMERIC_TYPE}, {"txRsp", SQL_NUMERIC_TYPE},
+    {"txSnp", SQL_NUMERIC_TYPE},    {"txDat", SQL_NUMERIC_TYPE}};
 
 const TableColumns CCU = {{"deviceId", SQL_NUMERIC_TYPE}, {"globalTaskId", SQL_NUMERIC_TYPE},
                           {"name", SQL_NUMERIC_TYPE},     {"startNs", SQL_NUMERIC_TYPE},
@@ -279,6 +298,9 @@ MsprofDB::MsprofDB()
                       {TABLE_NAME_HOST_NETWORK_USAGE, HOST_NETWORK_USAGE},
                       {TABLE_NAME_OSRT_API, OSRT_API},
                       {TABLE_NAME_QOS, QOS},
+                      {TABLE_NAME_DPU_TASK, DPU_TASK},
+                      {TABLE_NAME_UB, UB},
+                      {TABLE_NAME_SIO, SIO},
                       {TABLE_NAME_CCU, CCU},
                       // ENUM
                       {TABLE_NAME_ENUM_API_TYPE, ENUM_TABLE},

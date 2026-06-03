@@ -15,14 +15,18 @@
  * -------------------------------------------------------------------------*/
 
 #include "analysis/csrc/application/timeline/dpu_assembler.h"
+
 #include <algorithm>
 #include <set>
 #include <unordered_map>
+
 #include "analysis/csrc/domain/services/environment/context.h"
 #include "analysis/csrc/infrastructure/utils/utils.h"
 
-namespace Analysis {
-namespace Application {
+namespace Analysis
+{
+namespace Application
+{
 using namespace Analysis::Domain::Environment;
 using namespace Analysis::Viewer::Database;
 using namespace Analysis::Infra;
@@ -46,9 +50,11 @@ void DPUHcclTraceEvent::ProcessArgs(JsonWriter &ostream)
     ostream["OP Type"] << opType_;
     ostream["AI CPU Device Id"] << npuDeviceId_;
     ostream["AI CPU Task Id"] << aicpuTaskId_;
+    ostream["Group Name"] << groupName_ + "(" + groupNameId_ + ")";
     ostream["Plane Id"] << planeId_;
     ostream["Notify Id"] << notifyId_;
     ostream["Duration Estimated(us)"] << durationEstimated_;
+    ostream["Rank Size"] << rankSize_;
     ostream["Src Rank"] << localRank_;
     ostream["Dst Rank"] << remoteRank_;
     ostream["Transport Type"] << transportType_;
@@ -57,40 +63,39 @@ void DPUHcclTraceEvent::ProcessArgs(JsonWriter &ostream)
     ostream["Data Type"] << dataType_;
     ostream["Link Type"] << linkType_;
     ostream["Rdma Type"] << rdmaType_;
-    ostream["Role"] << role_;
-    ostream["Ccl Tag"] << cclTag_;
-    ostream["Work Flow Mode"] << workFlowMode_;
-    ostream["Stage"] << stage_;
 }
 
 void DPUAssembler::GenerateMetaData(const std::vector<DPUData> &dpuData, uint32_t pid)
 {
     std::map<uint16_t, std::set<uint16_t>> deviceStreamMap;
-    for (const auto &data : dpuData) {
+    for (const auto &data : dpuData)
+    {
         deviceStreamMap[data.dpuDeviceId].insert(data.streamId);
     }
 
     auto layer = GetLayerInfo(PROCESS_DPU);
 
-    for (const auto &devicePair : deviceStreamMap) {
+    for (const auto &devicePair : deviceStreamMap)
+    {
         auto formatPid = JsonAssembler::GetFormatPid(pid, layer.sortIndex, devicePair.first);
 
         std::shared_ptr<MetaDataNameEvent> processName;
-        MAKE_SHARED_RETURN_VOID(processName, MetaDataNameEvent, formatPid, DEFAULT_TID,
-                                META_DATA_PROCESS_NAME, layer.component);
+        MAKE_SHARED_RETURN_VOID(processName, MetaDataNameEvent, formatPid, DEFAULT_TID, META_DATA_PROCESS_NAME,
+                                layer.component);
         res_.push_back(processName);
 
         std::shared_ptr<MetaDataLabelEvent> processLabel;
-        MAKE_SHARED_RETURN_VOID(processLabel, MetaDataLabelEvent, formatPid, DEFAULT_TID,
-                                META_DATA_PROCESS_LABEL, layer.label + " " + std::to_string(devicePair.first));
+        MAKE_SHARED_RETURN_VOID(processLabel, MetaDataLabelEvent, formatPid, DEFAULT_TID, META_DATA_PROCESS_LABEL,
+                                layer.label + " " + std::to_string(devicePair.first));
         res_.push_back(processLabel);
 
         std::shared_ptr<MetaDataIndexEvent> processIndex;
-        MAKE_SHARED_RETURN_VOID(processIndex, MetaDataIndexEvent, formatPid, DEFAULT_TID,
-                                META_DATA_PROCESS_INDEX, layer.sortIndex);
+        MAKE_SHARED_RETURN_VOID(processIndex, MetaDataIndexEvent, formatPid, DEFAULT_TID, META_DATA_PROCESS_INDEX,
+                                layer.sortIndex);
         res_.push_back(processIndex);
 
-        for (const auto &streamId : devicePair.second) {
+        for (const auto &streamId : devicePair.second)
+        {
             std::string streamName = "Stream " + std::to_string(streamId);
             std::shared_ptr<MetaDataNameEvent> threadName;
             MAKE_SHARED_RETURN_VOID(threadName, MetaDataNameEvent, formatPid, static_cast<int>(streamId),
@@ -108,32 +113,35 @@ void DPUAssembler::GenerateMetaData(const std::vector<DPUData> &dpuData, uint32_
 void DPUAssembler::GenerateDPUTrace(const std::vector<DPUData> &dpuData, uint32_t pid)
 {
     auto layer = GetLayerInfo(PROCESS_DPU);
-    for (const auto &data : dpuData) {
+    for (const auto &data : dpuData)
+    {
         auto formatPid = JsonAssembler::GetFormatPid(pid, layer.sortIndex, data.dpuDeviceId);
         double dur = static_cast<double>(data.endTime - data.timestamp) / NS_TO_US;
         std::string ts = DivideByPowersOfTenWithPrecision(data.timestamp);
         int tid = static_cast<int>(data.streamId);
 
-        if (!data.isHccl) {
+        if (!data.isHccl)
+        {
             std::shared_ptr<DPUTrackTraceEvent> event;
-            MAKE_SHARED_RETURN_VOID(event, DPUTrackTraceEvent, formatPid, tid, dur, ts, data.opName,
-                                    data.threadId, data.streamId, data.taskId, data.taskType);
+            MAKE_SHARED_RETURN_VOID(event, DPUTrackTraceEvent, formatPid, tid, dur, ts, data.opName, data.threadId,
+                                    data.streamId, data.taskId, data.taskType);
             res_.push_back(event);
-        } else {
+        }
+        else
+        {
             double bandwidth = 0;
-            if (!Utils::IsDoubleEqual(dur, 0.0) && data.dataSize <= INT64_MAX) {
+            if (!Utils::IsDoubleEqual(dur, 0.0) && data.dataSize <= INT64_MAX)
+            {
                 constexpr double COMMUNICATION_B_TO_GB = 1.0 / (1000 * 1000 * 1000);
                 bandwidth = data.dataSize * COMMUNICATION_B_TO_GB / (dur / MICRO_SECOND);
             }
 
             std::shared_ptr<DPUHcclTraceEvent> event;
-            MAKE_SHARED_RETURN_VOID(event, DPUHcclTraceEvent, formatPid, tid, dur, ts, data.opName,
-                                    data.threadId, data.streamId, data.taskId, data.opType,
-                                    data.npuDeviceId, data.aicpuTaskId, data.planeId, data.notifyId,
-                                    data.durationEstimated, data.localRank, data.remoteRank,
-                                    data.transportType, data.dataSize, bandwidth,
-                                    data.dataType, data.linkType, data.rdmaType,
-                                    data.role, data.cclTag, data.workFlowMode, data.stage);
+            MAKE_SHARED_RETURN_VOID(event, DPUHcclTraceEvent, formatPid, tid, dur, ts, data.opName, data.threadId,
+                                    data.streamId, data.taskId, data.opType, data.npuDeviceId, data.aicpuTaskId,
+                                    data.groupName, data.groupNameId, data.planeId, data.notifyId, data.rankSize,
+                                    data.durationEstimated, data.localRank, data.remoteRank, data.transportType,
+                                    data.dataSize, bandwidth, data.dataType, data.linkType, data.rdmaType);
             res_.push_back(event);
         }
     }
@@ -143,7 +151,8 @@ uint8_t DPUAssembler::AssembleData(DataInventory &dataInventory, JsonWriter &ost
 {
     INFO("Start DPU Assembler");
     auto dpuData = dataInventory.GetPtr<std::vector<DPUData>>();
-    if (dpuData == nullptr) {
+    if (dpuData == nullptr)
+    {
         WARN("Can't get dpuData from dataInventory");
         return DATA_NOT_EXIST;
     }
@@ -152,17 +161,19 @@ uint8_t DPUAssembler::AssembleData(DataInventory &dataInventory, JsonWriter &ost
     GenerateMetaData(*dpuData, pid);
     GenerateDPUTrace(*dpuData, pid);
 
-    if (res_.empty()) {
+    if (res_.empty())
+    {
         ERROR("Can't Generate any DPU process data");
         return ASSEMBLE_FAILED;
     }
 
-    for (const auto &node : res_) {
+    for (const auto &node : res_)
+    {
         node->DumpJson(ostream);
     }
     ostream << ",";
     INFO("End DPU Assembler");
     return ASSEMBLE_SUCCESS;
 }
-}
-}
+}  // namespace Application
+}  // namespace Analysis

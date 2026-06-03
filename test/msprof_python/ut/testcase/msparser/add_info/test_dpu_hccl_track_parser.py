@@ -117,9 +117,9 @@ class TestDPUHcclInfoParser(unittest.TestCase):
         check._hccl_info_data = [bean]
 
         result = check.reformat_data()
-        expect_data = [[0, 0, 270722, 75838889643892, 75838889645892, "hccl_dpu", "123456", 0, 15, 16, 0.0,
-                       "444555", "777888", 1000, 1, 10, 5000, 1, "SUM", "INT8", "ON_CHIP", "SDMA",
-                       'RDMA_SEND_NOTIFY', 'DST', "777777", "111111", '0', '0']]
+        expect_data = [[0, 0, 270722, 75838889643892, 75838889645892, "hccl_dpu", 'N/A', "123456", 0, 15, 16, 0.0,
+                        "444555", "777888", 1000, 1, 10, 5000, 1, "SUM", "INT8", "ON_CHIP", "SDMA",
+                        'RDMA_SEND_NOTIFY', 'DST', "777777", "111111", '0', '0']]
         self.assertEqual(len(result), 1)
         self.assertEqual(result, expect_data)
 
