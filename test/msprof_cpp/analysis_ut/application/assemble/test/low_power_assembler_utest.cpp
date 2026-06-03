@@ -56,6 +56,15 @@ protected:
     }
     virtual void SetUp()
     {
+        if (File::Check(RESULT_PATH)) {
+            EXPECT_TRUE(File::RemoveDir(RESULT_PATH, DEPTH));
+        }
+        EXPECT_TRUE(File::CreateDir(RESULT_PATH));
+        GlobalMockObject::verify();
+    }
+    virtual void TearDown()
+    {
+        dataInventory_.RemoveRestData({});
         GlobalMockObject::verify();
     }
 protected:
@@ -90,6 +99,60 @@ static std::vector<LowPowerData> GenerateFreqData()
     data.timestamp = 1719621074688868780; // timestamp 1719621074688868780
     data.aicFreq = 1800; // freq 1800 MHz
     res.push_back(data);
+    return res;
+}
+
+static std::vector<LowPowerData> GenerateFreqDataWithDifferentDies()
+{
+    std::vector<LowPowerData> res;
+    LowPowerData data;
+    data.deviceId = 0;
+    data.dieId = 0;
+    data.timestamp = 1719621074669030430;
+    data.aicFreq = 800;
+    res.push_back(data);
+
+    data.deviceId = 1;
+    data.dieId = 1;
+    data.timestamp = 1719621074669031430;
+    data.aicFreq = 900;
+    res.push_back(data);
+
+    data.deviceId = 2;
+    data.dieId = 2;
+    data.timestamp = 1719621074669032430;
+    data.aicFreq = 1000;
+    res.push_back(data);
+    return res;
+}
+
+static std::vector<LowPowerData> GenerateFreqDataWithUnsupportedDie()
+{
+    std::vector<LowPowerData> res;
+    LowPowerData data;
+    data.deviceId = 0;
+    data.dieId = 2;
+    data.timestamp = 1719621074669030430;
+    data.aicFreq = 800;
+    res.push_back(data);
+    return res;
+}
+
+static std::vector<LowPowerData> GenerateFreqDataWithSupportedDiesOnSameDevice()
+{
+    std::vector<LowPowerData> res;
+    LowPowerData dieZero;
+    dieZero.deviceId = 0;
+    dieZero.dieId = 0;
+    dieZero.timestamp = 1719621074669030430;
+    dieZero.aicFreq = 800;
+    res.push_back(dieZero);
+
+    LowPowerData dieOne = dieZero;
+    dieOne.dieId = 1;
+    dieOne.timestamp = 1719621074669031430;
+    dieOne.aicFreq = 900;
+    res.push_back(dieOne);
     return res;
 }
 
@@ -134,4 +197,82 @@ TEST_F(LowPowerAssemblerUTest, ShouldReturnFalseWhenDataAssembleFail)
     MOCKER_CPP(&Context::GetPidFromInfoJson).stubs().will(returnValue(2328086)); // pid 2328086
     MOCKER_CPP(&std::vector<std::shared_ptr<TraceEvent>>::empty).stubs().will(returnValue(true));
     EXPECT_FALSE(assembler.Run(dataInventory_, PROF_PATH));
+}
+
+TEST_F(LowPowerAssemblerUTest, ShouldIgnoreUnsupportedDieAndKeepSupportedDies)
+{
+    LowPowerAssembler assembler;
+    std::shared_ptr<std::vector<LowPowerData>> dataS;
+    auto data = GenerateFreqDataWithDifferentDies();
+    MAKE_SHARED_NO_OPERATION(dataS, std::vector<LowPowerData>, data);
+    dataInventory_.Inject(dataS);
+    MOCKER_CPP(&Context::GetPidFromInfoJson).stubs().will(returnValue(2328086));
+
+    EXPECT_TRUE(assembler.Run(dataInventory_, PROF_PATH));
+
+    auto files = File::GetOriginData(RESULT_PATH, {"msprof"}, {});
+    EXPECT_EQ(1ul, files.size());
+    FileReader reader(files.back());
+    std::vector<std::string> res;
+    EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
+    ASSERT_FALSE(res.empty());
+    std::string expectStr1 = "{\"name\":\"AI Core Freq Die 0\",\"pid\":2383960544,\"tid\":0,\"ts\":\"1719621074669030.430\","
+                             "\"ph\":\"C\",\"args\":{\"MHz\":800}},{\"name\":\"AI Core Freq Die 1\",\"pid\":2383960545,"
+                             "\"tid\":0,\"ts\":\"1719621074669031.430\",\"ph\":\"C\",\"args\":{\"MHz\":900}},{\"name\":"
+                             "\"process_name\",\"pid\":2383960545,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"AI Core Freq\"}},"
+                             "{\"name\":\"process_labels\",\"pid\":2383960545,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU 1\"}},"
+                             "{\"name\":\"process_sort_index\",\"pid\":2383960545,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":15}},"
+                             "{\"name\":\"process_name\",\"pid\":2383960544,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"AI Core Freq\"}},"
+                             "{\"name\":\"process_labels\",\"pid\":2383960544,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU 0\"}},"
+                             "{\"name\":\"process_sort_index\",\"pid\":2383960544,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":15}},";
+    std::string expectStr2 = "{\"name\":\"AI Core Freq Die 0\",\"pid\":2383960544,\"tid\":0,\"ts\":\"1719621074669030.430\","
+                             "\"ph\":\"C\",\"args\":{\"MHz\":800}},{\"name\":\"AI Core Freq Die 1\",\"pid\":2383960545,"
+                             "\"tid\":0,\"ts\":\"1719621074669031.430\",\"ph\":\"C\",\"args\":{\"MHz\":900}},{\"name\":"
+                             "\"process_name\",\"pid\":2383960544,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"AI Core Freq\"}},"
+                             "{\"name\":\"process_labels\",\"pid\":2383960544,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU 0\"}},"
+                             "{\"name\":\"process_sort_index\",\"pid\":2383960544,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":15}},"
+                             "{\"name\":\"process_name\",\"pid\":2383960545,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"AI Core Freq\"}},"
+                             "{\"name\":\"process_labels\",\"pid\":2383960545,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU 1\"}},"
+                             "{\"name\":\"process_sort_index\",\"pid\":2383960545,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":15}},";
+    // json_assembler.cpp 里的 pidMap 是 std::unordered_map<uint16_t, uint32_t>，遍历它生成 metadata 时，device 0 和 device 1 的先后次序没有保证
+    EXPECT_TRUE(res.back() == expectStr1 || res.back() == expectStr2);
+}
+
+TEST_F(LowPowerAssemblerUTest, ShouldReturnFalseWhenAllDiesAreUnsupported)
+{
+    LowPowerAssembler assembler;
+    std::shared_ptr<std::vector<LowPowerData>> dataS;
+    auto data = GenerateFreqDataWithUnsupportedDie();
+    MAKE_SHARED_NO_OPERATION(dataS, std::vector<LowPowerData>, data);
+    dataInventory_.Inject(dataS);
+    MOCKER_CPP(&Context::GetPidFromInfoJson).stubs().will(returnValue(2328086));
+
+    EXPECT_FALSE(assembler.Run(dataInventory_, PROF_PATH));
+}
+
+TEST_F(LowPowerAssemblerUTest, ShouldReuseSameProcessMetadataWhenSupportedDiesBelongToSameDevice)
+{
+    LowPowerAssembler assembler;
+    std::shared_ptr<std::vector<LowPowerData>> dataS;
+    auto data = GenerateFreqDataWithSupportedDiesOnSameDevice();
+    MAKE_SHARED_NO_OPERATION(dataS, std::vector<LowPowerData>, data);
+    dataInventory_.Inject(dataS);
+    MOCKER_CPP(&Context::GetPidFromInfoJson).stubs().will(returnValue(2328086));
+
+    EXPECT_TRUE(assembler.Run(dataInventory_, PROF_PATH));
+
+    auto files = File::GetOriginData(RESULT_PATH, {"msprof"}, {});
+    EXPECT_EQ(1ul, files.size());
+    FileReader reader(files.back());
+    std::vector<std::string> res;
+    EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
+    ASSERT_FALSE(res.empty());
+    std::string expectStr = "{\"name\":\"AI Core Freq Die 0\",\"pid\":2383960544,\"tid\":0,\"ts\":\"1719621074669030.430\","
+                            "\"ph\":\"C\",\"args\":{\"MHz\":800}},{\"name\":\"AI Core Freq Die 1\",\"pid\":2383960544,"
+                            "\"tid\":0,\"ts\":\"1719621074669031.430\",\"ph\":\"C\",\"args\":{\"MHz\":900}},"
+                            "{\"name\":\"process_name\",\"pid\":2383960544,\"tid\":0,\"ph\":\"M\",\"args\":"
+                            "{\"name\":\"AI Core Freq\"}},{\"name\":\"process_labels\",\"pid\":2383960544,\"tid\":0,"
+                            "\"ph\":\"M\",\"args\":{\"labels\":\"NPU 0\"}},{\"name\":\"process_sort_index\","
+                            "\"pid\":2383960544,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":15}},";
+    EXPECT_EQ(expectStr, res.back());
 }

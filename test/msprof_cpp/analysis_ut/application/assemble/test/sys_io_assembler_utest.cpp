@@ -59,6 +59,37 @@ protected:
     DataInventory dataInventory_;
 };
 
+static std::string ReadTraceContent()
+{
+    auto files = File::GetOriginData(RESULT_PATH, {MSPROF_JSON_FILE}, {});
+    EXPECT_EQ(1ul, files.size());
+    FileReader reader(files.back());
+    std::vector<std::string> res;
+    EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
+    EXPECT_FALSE(res.empty());
+    return res.empty() ? "" : res.back();
+}
+
+static void InjectNicData(DataInventory &dataInventory, const std::vector<SysIOReceiveSendData> &traceData)
+{
+    NicReceiveSendData nicData;
+    nicData.sysIOReceiveSendData = traceData;
+    std::vector<NicReceiveSendData> nicDataVec {nicData};
+    std::shared_ptr<std::vector<NicReceiveSendData>> dataS;
+    MAKE_SHARED_NO_OPERATION(dataS, std::vector<NicReceiveSendData>, nicDataVec);
+    dataInventory.Inject(dataS);
+}
+
+static void InjectRoceData(DataInventory &dataInventory, const std::vector<SysIOReceiveSendData> &traceData)
+{
+    RoceReceiveSendData roceData;
+    roceData.sysIOReceiveSendData = traceData;
+    std::vector<RoceReceiveSendData> roceDataVec {roceData};
+    std::shared_ptr<std::vector<RoceReceiveSendData>> dataS;
+    MAKE_SHARED_NO_OPERATION(dataS, std::vector<RoceReceiveSendData>, roceDataVec);
+    dataInventory.Inject(dataS);
+}
+
 static std::vector<NicReceiveSendData> GenerateNicReceiveSendData()
 {
     std::vector<NicReceiveSendData> res;
@@ -198,5 +229,32 @@ TEST_F(SysIOAssemblerUTest, RoCEAssemblerShouldReturnTrueWhenDataAssembleSuccess
                             "0/Tx\",\"pid\":2383960768,\"tid\":0,\"ts\":\"1724405892226699.429\",\"ph\":\"C\",\""
                             "args\":{\"Tx Bandwidth Efficiency\":2.2,\"Tx Packets\":60.0,\"Tx Error Rate\":2.3,\"Tx "
                             "Dropped Rate\":3.8}},";
+    EXPECT_EQ(expectStr, res.back());
+}
+
+TEST_F(SysIOAssemblerUTest, RoCEAssemblerShouldReturnTrueWhenDataNotExists)
+{
+    RoCEAssembler assembler;
+    EXPECT_TRUE(assembler.Run(dataInventory_, PROF_PATH));
+}
+
+TEST_F(SysIOAssemblerUTest, NicAssemblerShouldGenerateMetadataOnlyWhenInnerTraceVectorEmpty)
+{
+    NicAssembler assembler;
+    InjectNicData(dataInventory_, {});
+    MOCKER_CPP(&Context::GetPidFromInfoJson).stubs().will(returnValue(2328086));
+
+    EXPECT_TRUE(assembler.Run(dataInventory_, PROF_PATH));
+
+    auto files = File::GetOriginData(RESULT_PATH, {MSPROF_JSON_FILE}, {});
+    EXPECT_EQ(1ul, files.size());
+    FileReader reader(files.back());
+    std::vector<std::string> res;
+    EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
+    ASSERT_FALSE(res.empty());
+    std::string expectStr = "{\"name\":\"process_name\",\"pid\":2383960736,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":"
+                            "\"NIC\"}},{\"name\":\"process_labels\",\"pid\":2383960736,\"tid\":0,\"ph\":\"M\",\"args\""
+                            ":{\"labels\":\"NPU 0\"}},{\"name\":\"process_sort_index\",\"pid\":2383960736,\"tid\":0,"
+                            "\"ph\":\"M\",\"args\":{\"sort_index\":21}},";
     EXPECT_EQ(expectStr, res.back());
 }
