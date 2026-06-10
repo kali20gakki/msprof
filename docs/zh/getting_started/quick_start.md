@@ -32,13 +32,14 @@
    ```bash
    msprof --application="python train.py" --output=/home/prof_output
    ```
-   
+
     > [!NOTE]
+    >
     > - 上述train.py脚本依赖torch和torch_npu，建议安装Python3.9及以上版本，并配套安装torch2.7.1及以上版本。
-    > - --output：收集到的性能数据的存放路径；
-    > - --application：待采集性能数据的用户程序；
-    > - 以上为最基本的采集命令，如有其他采集需求，请参见[性能数据采集和自动解析](https://www.hiascend.com/document/detail/zh/mindstudio/830/T&ITools/Profiling/atlasprofiling_16_0007.html#ZH-CN_TOPIC_0000002536038281)。
-   
+    > - --output：收集到的性能数据的存放路径。
+    > - --application：待采集性能数据的用户程序。
+    > - 以上为最基本的采集命令，如有其他采集需求，请参见[msProf性能数据采集](https://gitcode.com/Ascend/docs/blob/master/MindStudio/26.0.0/menu/msprof_collecting_instruct.md)。
+
    打印如下信息，则表示运行成功：
 
     ```bash
@@ -82,7 +83,7 @@
 * 定位耗时较长的 API、算子及任务流
 * 通过 HostToDevice 连线分析下发关系
 
-MindStudio Insight工具详细介绍请参见《[MindStudio Insight工具用户指南](https://gitcode.com/Ascend/msinsight/blob/26.0.0/docs/zh/user_guide/overview.md)》。
+MindStudio Insight工具详细介绍请参见《[MindStudio Insight工具用户指南](https://gitcode.com/Ascend/msinsight/blob/master/docs/zh/user_guide/overview.md)》。
 
 ![img](../figures/zh-cn_image_0000002502558722.png)
 <div style="text-align: center;">
