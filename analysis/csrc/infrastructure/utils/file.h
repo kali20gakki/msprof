@@ -41,7 +41,7 @@ class File
     File() = default;
     virtual ~File() = default;
     // 文件的打开默认大小设置为64MB，允许使用时设置自己需要的大小
-    static bool Check(const std::string &path, uint64_t maxReadFileBytes = 64 * 1024 * 1024);
+    static bool Check(const std::string &path, uint64_t maxReadFileBytes = UINT64_MAX);
     static bool CreateDir(const std::string &path, const mode_t &mode = 0750);
     static bool RemoveDir(const std::string &path, int depth);
     static bool CheckDir(const std::string &path);
@@ -91,7 +91,7 @@ class FileReader
     int ReadBinary(std::stringstream &ss);
     int ReadText(std::vector<std::string> &text);
     int ReadJson(nlohmann::json &content);
-    static bool Check(const std::string &path, uint64_t maxReadFileBytes = 64 * 1024 * 1024);
+    static bool Check(const std::string &path, uint64_t maxReadFileBytes = UINT64_MAX);
 
    private:
     std::string path_;
@@ -120,7 +120,7 @@ class FileWriter
     void WriteText(const std::string &content);
     void WriteText(const char *content, std::size_t len);
     void WriteTextBack(const std::string &content, int back);
-    static bool Check(const std::string &path, uint64_t maxReadFileBytes = 64 * 1024 * 1024);
+    static bool Check(const std::string &path, uint64_t maxReadFileBytes = UINT64_MAX);
 
    private:
     std::string path_;

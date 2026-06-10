@@ -96,7 +96,7 @@ class TestFileManager(unittest.TestCase):
 
     def test_check_path_valid_should_return_error_when_dir_path_is_too_long(self):
         def custom_len(obj):
-            return 2048
+            return 5000
         path = '/path/prof_0'
         is_file = False
         with mock.patch('os.path.exists', return_value=True), \
@@ -105,7 +105,7 @@ class TestFileManager(unittest.TestCase):
                 check_path_valid(path, is_file)
         self.assertEqual(context.exception.code, ProfException.PROF_INVALID_PATH_ERROR)
         self.assertEqual(str(context.exception),
-                         "Please ensure the length of input path \"/path/prof_0\" less than 1024")
+                         "Please ensure the length of input path \"/path/prof_0\" less than 4096")
 
     def test_check_path_valid_should_return_error_when_file_path_is_empty(self):
         path = ''
@@ -128,16 +128,17 @@ class TestFileManager(unittest.TestCase):
         self.assertEqual(str(context.exception), "The path \"/path/host/test.so\" is not a file. "
                                                  "Please check the path.")
 
-    def test_check_path_valid_should_return_error_when_is_file_and_path_is_link(self):
+    def test_check_path_valid_should_return_warning_when_is_file_and_path_is_link(self):
         path = '/path/a.so'
         is_file = True
         with mock.patch('os.path.exists', return_value=True), \
              mock.patch('os.path.isfile', return_value=True), \
-             mock.patch('os.path.islink', return_value=True):
-            with self.assertRaises(ProfException) as context:
+             mock.patch('os.path.islink', return_value=True), \
+             mock.patch('os.path.getsize', return_value=0), \
+             mock.patch(NAMESPACE + '.is_root_user', return_value=True), \
+             self.assertLogs(level='WARNING') as context:
                 check_path_valid(path, is_file)
-        self.assertEqual(context.exception.code, ProfException.PROF_INVALID_PATH_ERROR)
-        self.assertEqual(str(context.exception), "The path \"/path/a.so\" is link. Please check the path.")
+        self.assertIn("The path /path/a.so is link. Please check the path.", context.output[0])
 
     def test_check_path_valid_should_return_error_when_not_is_file_and_path_is_not_directory(self):
         path = '/path/host'
@@ -149,16 +150,16 @@ class TestFileManager(unittest.TestCase):
         self.assertEqual(context.exception.code, ProfException.PROF_INVALID_PATH_ERROR)
         self.assertEqual(str(context.exception), "The path \"/path/host\" is not a directory. Please check the path.")
 
-    def test_check_path_valid_should_return_error_when_is_not_file_and_path_is_link(self):
+    def test_check_path_valid_should_return_warning_when_is_not_file_and_path_is_link(self):
         path = '/path/host/host'
         is_file = False
         with mock.patch('os.path.exists', return_value=True), \
              mock.patch('os.path.isdir', return_value=True), \
-             mock.patch('os.path.islink', return_value=True):
-            with self.assertRaises(ProfException) as context:
+             mock.patch('os.path.islink', return_value=True), \
+             mock.patch(NAMESPACE + '.is_root_user', return_value=True), \
+             self.assertLogs(level='WARNING') as context:
                 check_path_valid(path, is_file)
-        self.assertEqual(context.exception.code, ProfException.PROF_INVALID_PATH_ERROR)
-        self.assertEqual(str(context.exception), "The path \"/path/host/host\" is link. Please check the path.")
+        self.assertIn("The path /path/host/host is link. Please check the path.", context.output[0])
 
     def test_check_path_valid_should_return_none_when_is_root_user(self):
         path = '/path/host/host'
@@ -184,7 +185,7 @@ class TestFileManager(unittest.TestCase):
                          "The path \"/path/host/host\" does not have "
                          "permission to read. Please check that the path is readable.")
 
-    def test_check_path_valid_should_return_error_when_others_writable(self):
+    def test_check_path_valid_should_return_warning_when_others_writable(self):
         path = '/path/host/host'
         is_file = False
         with mock.patch('os.path.exists', return_value=True), \
@@ -192,14 +193,12 @@ class TestFileManager(unittest.TestCase):
              mock.patch('os.path.islink', return_value=False), \
              mock.patch(NAMESPACE + '.is_root_user', return_value=False), \
              mock.patch('os.access', return_value=True), \
-             mock.patch('os.stat', return_value=Mock(st_mode=0o002, st_uid=1000)):
-            with self.assertRaises(ProfException) as context:
+             mock.patch('os.stat', return_value=Mock(st_mode=0o002, st_uid=1000)), \
+             self.assertLogs(level='WARNING') as context:
                 check_path_valid(path, is_file)
-        self.assertEqual(context.exception.code, ProfException.PROF_INVALID_PATH_ERROR)
-        self.assertEqual(str(context.exception),
-                         "The path \"/path/host/host\" is writable by any other users.")
+        self.assertIn("The path /path/host/host is writable by any other users.", context.output[0])
 
-    def test_check_path_valid_should_return_error_when_is_not_root_and_not_current_user(self):
+    def test_check_path_valid_should_return_warning_when_is_not_root_and_not_current_user(self):
         path = '/path/host/host'
         is_file = False
         # win平台无校验必要
@@ -210,12 +209,10 @@ class TestFileManager(unittest.TestCase):
              mock.patch('os.path.islink', return_value=False), \
              mock.patch(NAMESPACE + '.is_root_user', return_value=False), \
              mock.patch('os.access', return_value=True), \
-             mock.patch('os.stat', return_value=Mock(st_mode=0o000, st_uid=9999)):
-            with self.assertRaises(ProfException) as context:
+             mock.patch('os.stat', return_value=Mock(st_mode=0o000, st_uid=9999)), \
+             self.assertLogs(level='WARNING') as context:
                 check_path_valid(path, is_file)
-        self.assertEqual(context.exception.code, ProfException.PROF_INVALID_PATH_ERROR)
-        self.assertEqual(str(context.exception),
-                         "The path \"/path/host/host\" owner is not root or current user.")
+        self.assertIn("The path /path/host/host owner is not root or current user.", context.output[0])
 
     def test_check_file_readable_should_not_return_error(self):
         path = '/path/host/host/test.so'
@@ -226,14 +223,14 @@ class TestFileManager(unittest.TestCase):
     def test_check_file_readable_should_return_error_when_file_is_too_large(self):
         path = '/path/host/host/test.so'
         with mock.patch('os.path.exists', return_value=True), \
-             mock.patch('os.path.isdir', return_value=False), \
-             mock.patch('os.path.islink', return_value=True), \
-             mock.patch("os.path.getsize", return_value=65 * 1024 * 1024):
+             mock.patch('os.path.isfile', return_value=True), \
+             mock.patch('os.path.islink', return_value=False), \
+             mock.patch("os.path.getsize", return_value=Constant.MAX_READ_FILE_BYTES + 1):
             with self.assertRaises(ProfException) as context:
                 check_file_readable(path)
         self.assertEqual(context.exception.code, ProfException.PROF_INVALID_PATH_ERROR)
         self.assertEqual(str(context.exception),
-                         "The path \"/path/host/host/test.so\" is link. Please check the path.")
+                         "The path \"/path/host/host/test.so\" is too large to read. Please check the path.")
 
     def test_check_file_writable_should_not_return_error(self):
         path = '/path/host/host/test.so'
@@ -302,14 +299,14 @@ class TestFileManager(unittest.TestCase):
              mock.patch('os.access', return_value=False):
             self.assertFalse(check_so_valid(path))
 
-    def test_check_so_valid_should_return_false_when_others_has_permission_to_write(self):
+    def test_check_so_valid_should_return_true_when_others_has_permission_to_write(self):
         path = "/path/host/msprof_analysis.so"
         StatInfo = namedtuple("StatInfo", ["st_mode"])
         with mock.patch('os.path.isfile', return_value=True), \
              mock.patch('os.path.islink', return_value=False), \
              mock.patch('os.access', return_value=True), \
              mock.patch('os.stat', return_value=StatInfo(0o022)):
-            self.assertFalse(check_so_valid(path))
+            self.assertTrue(check_so_valid(path))
 
     def test_check_so_valid_should_return_true_when_not_linux(self):
         path = "/path/host/msprof_analysis.so"

@@ -35,10 +35,10 @@ namespace Utils
 
 namespace
 {
-const uint16_t MAX_PATH_SIZE = 1024;
+const uint16_t MAX_PATH_SIZE = 4096;
 const uint32_t MAX_SUB_FILES_SIZE = 100000;
-const uint64_t MAX_JSON_FILE_READ_SIZE = 21474836480;  // 20GB
-constexpr int DIR_CHECK_MODE = R_OK | W_OK | X_OK;     // rwx
+const uint64_t MAX_JSON_FILE_READ_SIZE = UINT64_MAX;  // 18.45 EB
+constexpr int DIR_CHECK_MODE = R_OK | W_OK | X_OK;    // rwx
 const int MAX_DEPTH = 20;
 const std::unordered_map<std::string, std::string> INVALID_CHAR = {
     {"\n", "\\n"},         {"\f", "\\f"},  {"\r", "\\r"}, {"\b", "\\b"},  {"\t", "\\t"}, {"\v", "\\v"},
@@ -154,8 +154,7 @@ bool File::CheckDir(const std::string &path)
     }
     if (IsSoftLink(path))
     {
-        ERROR("The path '%' is soft link.", path);
-        return false;
+        WARN("The path '%' is soft link.", path);
     }
     if (!File::Access(path, DIR_CHECK_MODE))
     {
@@ -176,8 +175,7 @@ bool File::CreateDir(const std::string &path, const mode_t &mode)
     {
         if (IsSoftLink(path))
         {
-            ERROR("The path '%' is soft link.", path);
-            return false;
+            WARN("The path '%' is soft link.", path);
         }
         if (!File::Access(path, DIR_CHECK_MODE))
         {
@@ -341,8 +339,7 @@ bool File::Check(const std::string &path, uint64_t maxReadFileBytes)
     }
     if (IsSoftLink(path))
     {
-        ERROR("The path '%' is soft link.", path);
-        return false;
+        WARN("The path '%' is soft link.", path);
     }
     if (File::Size(path) > maxReadFileBytes)
     {

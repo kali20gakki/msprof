@@ -227,9 +227,7 @@ def check_path_valid(path: str, is_file: bool, max_size: int = Constant.MAX_READ
             f"The path \"{path}\" does not exist. Please check that the path exists.",
         )
     if is_link(path):
-        raise ProfException(
-            ProfException.PROF_INVALID_PATH_ERROR, f"The path \"{path}\" is link. Please check the path."
-        )
+        logging.warning("The path %s is link. Please check the path.", path)
     if len(path) > NumberConstant.PROF_PATH_MAX_LEN:
         raise ProfException(
             ProfException.PROF_INVALID_PATH_ERROR,
@@ -258,22 +256,14 @@ def check_path_valid(path: str, is_file: bool, max_size: int = Constant.MAX_READ
             f"The path \"{path}\" does not have permission to read. Please check that the path is readable.",
         )
     if is_other_writable(path):
-        raise ProfException(
-            ProfException.PROF_INVALID_PATH_ERROR, f"The path \"{path}\" is writable by any other users."
-        )
+        logging.warning("The path %s is writable by any other users.", path)
     if not check_path_owner(path):
-        raise ProfException(
-            ProfException.PROF_INVALID_PATH_ERROR, f"The path \"{path}\" owner is not root or current user."
-        )
+        logging.warning("The path %s owner is not root or current user.", path)
 
 
 def check_db_path_valid(path: str, is_create: bool = False, max_size: int = Constant.MAX_READ_DB_FILE_BYTES) -> None:
     if is_link(path):
-        ReturnCodeCheck.print_and_return_status(
-            json.dumps(
-                {'status': NumberConstant.ERROR, 'info': "The db file '%s' is link. Please check the path." % path}
-            )
-        )
+        logging.warning("The db file '%s' is link. Please check the path.", path)
 
     if not is_create and os.path.exists(path) and os.path.getsize(path) > max_size:
         ReturnCodeCheck.print_and_return_status(
@@ -367,12 +357,6 @@ def check_so_valid(path: str) -> bool:
         return False
     elif not os.access(path, os.R_OK):
         logging.warning("The path %s does not have permission to open. Please check that the path is readable.", path)
-        return False
-    elif is_other_writable(path):
-        logging.warning("The path %s is writable by others", path)
-        return False
-    elif not check_path_owner(path):
-        logging.warning("The path %s owner is not the current user.", path)
         return False
     else:
         return True

@@ -34,7 +34,7 @@ class MsprofInfoConstruct:
     BASIC_INFO_CLASS_NAME = "MsProfBasicInfo"
     CLUSTER_INFO_MODEL_PATH = "profiling_bean.basic_info.msprof_cluster_info"
     CLUSTER_INFO_CLASS_NAME = "MsProfClusterInfo"
-    PROF_PATH_MAX_LEN = 1024
+    PROF_PATH_MAX_LEN = 4096
 
     @staticmethod
     def construct_argument_parser() -> argparse.ArgumentParser:

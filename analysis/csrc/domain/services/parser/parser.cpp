@@ -29,7 +29,7 @@ using namespace Infra;
 namespace
 {
 const long INVALID_FILE_SIZE = -1;
-const uint64_t MAX_FILE_SIZE = 10737418240;  // 10 * 1024 *1024 *1024, means 10GB
+const uint64_t MAX_FILE_SIZE = UINT64_MAX;  // Maximum value of uint64_t, approximately 18.45 EB (exabytes)
 }  // namespace
 
 uint32_t Parser::GetFileSize(const char *filePath) const

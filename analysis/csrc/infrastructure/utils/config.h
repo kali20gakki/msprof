@@ -51,7 +51,7 @@ const char* const CLOCK_CNTVCT_KEY_DIFF = "cntvct_diff";
 
 const std::string HOST_APP_DIR = "~/profiler-app";
 
-const int MAX_PATH_LENGTH = 1024;
+const int MAX_PATH_LENGTH = 4096;
 
 const int PROFILING_PACKET_MAX_LEN = (3 * 1024 * 1024);  // 3 * 1024 *1024 means 3mb
 

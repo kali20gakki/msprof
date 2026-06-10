@@ -80,7 +80,7 @@ TEST_F(FileUTest, TestCheckDir)
     // 测试空路径
     EXPECT_FALSE(File::CheckDir(""));
     // 测试路径过长
-    const int pathDepth = 350;
+    const int pathDepth = 900;
     std::vector<std::string> paths(pathDepth, "test");
     std::string path = File::PathJoin(paths);
     EXPECT_FALSE(File::CheckDir(path));
@@ -91,7 +91,7 @@ TEST_F(FileUTest, TestCheckDir)
     // 测试软链接
     EXPECT_TRUE(File::CreateDir("test_dir"));
     EXPECT_EQ(0, symlink("test_dir", "test_dir_soft_link"));
-    EXPECT_FALSE(File::CheckDir("test_dir_soft_link"));
+    EXPECT_TRUE(File::CheckDir("test_dir_soft_link"));
     // 测试正常情况
     EXPECT_TRUE(File::CheckDir("test_dir"));
     EXPECT_TRUE(File::RemoveDir("test_dir", 0));
@@ -165,12 +165,12 @@ TEST_F(FileUTest, TestFilterFileWithSuffixShouldReturn2FilesWhenFilterSuffix)
 TEST_F(FileUTest, TestFileCheck)
 {
     EXPECT_FALSE(File::Check(""));
-    const int pathDepth = 350;
+    const int pathDepth = 900;
     std::vector<std::string> paths(pathDepth, "test");
     std::string path = File::PathJoin(paths);
     EXPECT_FALSE(File::Check(path));
     EXPECT_EQ(0, symlink("test_file", "test_file_soft_link"));  // 创建软连接
-    EXPECT_FALSE(File::Check("test_file_soft_link"));
+    EXPECT_TRUE(File::Check("test_file_soft_link"));
     EXPECT_TRUE(File::Check("test_file"));
     EXPECT_TRUE(File::DeleteFile("test_file_soft_link"));  // 删除test_file_soft_link软连接
 }
@@ -180,7 +180,7 @@ TEST_F(FileUTest, TestFileCheckShouldReturnFalseWhenFileSizeTooLarge)
     const uint32_t maxReadBytes = 64 * 1024 * 1024;
     MOCKER_CPP(&File::Size).stubs()
         .will(returnValue(maxReadBytes + 1));
-    EXPECT_FALSE(File::Check("test_file"));
+    EXPECT_FALSE(File::Check("test_file", maxReadBytes));
 }
 
 TEST_F(FileUTest, TestFileReaderCheckShouldReturnFalseWhenNotFile)

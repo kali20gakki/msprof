@@ -265,14 +265,14 @@ TEST_F(TsTrackParserUtest, ShouldReturnBlockNumDataWhenParser)
     }
 }
 
-TEST_F(TsTrackParserUtest, ShouldAnalyzeErrorWhenFilesSizeMoreThan10GB)
+TEST_F(TsTrackParserUtest, ShouldAnalyzeErrorWhenReadDataFailed)
 {
     TsTrackParser tsTrackParser;
     DeviceContext context;
     context.deviceContextInfo.deviceFilePath = TS_TRACK_PATH;
     std::vector<StepTrace> taskFlip1{CreateStepTrace(0x0A, 1, 1, 10, 1), CreateStepTrace(0x0A, 1, 1, 20, 2)};
     WriteBin(taskFlip1, File::PathJoin({TS_TRACK_PATH, "data"}), "ts_track.data.0.slice_0");
-    MOCKER_CPP(&Parser::GetFilesSize).stubs().will(returnValue(10737418241)); // 超过10GB, 10737418241
+    MOCKER_CPP(&fread).stubs().will(returnValue(static_cast<size_t>(0)));
     ASSERT_EQ(Analysis::PARSER_READ_DATA_ERROR, tsTrackParser.Run(dataInventory_, context));
 }
 }
