@@ -41,6 +41,25 @@ function install_whl_package() {
     return 0
 }
 
+function chmod_dir_with_backup() {
+  local _dir=${1}
+  local _right_var=${2}
+  if [ ! -d "${_dir}" ]; then
+      return
+  fi
+  local _origin_right=$(stat -c '%a' "${_dir}")
+  eval "${_right_var}=${_origin_right}"
+  chmod 755 "${_dir}"
+}
+
+function restore_dir_right() {
+  local _dir=${1}
+  local _origin_right=${2}
+  if [ -n "${_origin_right}" ] && [ -d "${_dir}" ]; then
+      chmod "${_origin_right}" "${_dir}"
+  fi
+}
+
 function implement_install() {
   create_directory ${install_path}/${MSPROF_PATH} ${right}
   create_directory ${install_path}/${arch_name}/lib64 ${right}
@@ -87,12 +106,20 @@ function implement_install() {
   fi
   # 6. install plat_form.run
   if [[ -s "${PLATFORM_PROFILER_RUN}" ]]; then
+    local lib64_dir="${install_path}/${arch_name}/lib64"
+    local msprof_path_dir="${install_path}/${MSPROF_PATH}"
+    local lib64_origin_right=""
+    local msprof_path_origin_right=""
+    chmod_dir_with_backup "${lib64_dir}" lib64_origin_right
+    chmod_dir_with_backup "${msprof_path_dir}" msprof_path_origin_right
     chmod u+x "${PLATFORM_PROFILER_RUN}"
     if ./"${PLATFORM_PROFILER_RUN}" --install --install-path="${install_path}"; then
         echo "INFO: ${PLATFORM_PROFILER_RUN} installed successfully to ${install_path}"
     else
         echo "ERROR: ${PLATFORM_PROFILER_RUN} installation failed" >&2
     fi
+    restore_dir_right "${lib64_dir}" "${lib64_origin_right}"
+    restore_dir_right "${msprof_path_dir}" "${msprof_path_origin_right}"
   fi
 }
 
