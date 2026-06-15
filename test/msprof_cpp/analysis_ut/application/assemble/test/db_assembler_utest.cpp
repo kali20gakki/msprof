@@ -49,6 +49,7 @@
 #include "analysis/csrc/domain/entities/viewer_data/system/include/qos_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/sio_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/ub_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/system/include/overlap_analysis_data.h"
 
 using namespace Analysis::Application;
 using namespace Analysis::Utils;
@@ -56,6 +57,7 @@ using namespace Analysis::Domain;
 using namespace Analysis::Viewer::Database;
 using namespace Analysis::Domain::Environment;
 using IdPool = Analysis::Application::Credential::IdPool;
+using namespace Analysis::Infra;
 
 namespace {
 const int DEPTH = 0;
@@ -157,6 +159,27 @@ static std::vector<ApiData> GenerateApiData()
     data.end = 1717575960209010750; // end 1717575960209010750
     data.structType = "launch";
     res.push_back(data);
+    return res;
+}
+
+static OverlapAnalysisData MakeOverlapAnalysisData(uint16_t deviceId, uint64_t timestamp, uint64_t duration,
+                                                   OverlapAnalysisType type)
+{
+    OverlapAnalysisData data;
+    data.deviceId = deviceId;
+    data.timestamp = timestamp;
+    data.duration = duration;
+    data.type = type;
+    return data;
+}
+
+static std::vector<OverlapAnalysisData> GenerateOverlapAnalysisData()
+{
+    std::vector<OverlapAnalysisData> res;
+    res.push_back(MakeOverlapAnalysisData(0, 1000, 2000, OverlapAnalysisType::COMPUTE));
+    res.push_back(MakeOverlapAnalysisData(0, 4000, 3000, OverlapAnalysisType::COMMUNICATION));
+    res.push_back(MakeOverlapAnalysisData(1, 9000, 1000, OverlapAnalysisType::COMM_NOT_OVERLAP_COMP));
+    res.push_back(MakeOverlapAnalysisData(1, 12000, 4000, OverlapAnalysisType::FREE));
     return res;
 }
 
@@ -2123,6 +2146,47 @@ TEST_F(DBAssemblerUTest, TestRunSaveUBDataShouldReturnFalseWhenReserveFailed)
     StubReserveFailureForVector<UbDataFormat>();
     EXPECT_FALSE(assembler.Run(dataInventory));
     ResetReserveFailureForVector<UbDataFormat>();
+}
+
+TEST_F(DBAssemblerUTest, TestRunSaveOverlapAnalysisDataShouldReturnTrueWhenRunSuccess)
+{
+    using OverlapAnalysisDataFormat = std::vector<std::tuple<uint64_t, uint16_t, uint64_t, uint64_t, uint16_t>>;
+    auto assembler = DBAssembler(PROF, OUTPUT_PATH);
+    auto dataInventory = DataInventory();
+    auto data = GenerateOverlapAnalysisData();
+    std::shared_ptr<std::vector<OverlapAnalysisData>> dataS;
+    MAKE_SHARED0_NO_OPERATION(dataS, std::vector<OverlapAnalysisData>, data);
+    dataInventory.Inject<std::vector<OverlapAnalysisData>>(dataS);
+    EXPECT_TRUE(assembler.Run(dataInventory));
+
+    OverlapAnalysisDataFormat overlapResult;
+    const OverlapAnalysisDataFormat expectResult = {
+        std::make_tuple(0, 0, 1000, 3000, static_cast<uint16_t>(OverlapAnalysisType::COMPUTE)),
+        std::make_tuple(1, 0, 4000, 7000, static_cast<uint16_t>(OverlapAnalysisType::COMMUNICATION)),
+        std::make_tuple(2, 1, 9000, 10000, static_cast<uint16_t>(OverlapAnalysisType::COMM_NOT_OVERLAP_COMP)),
+        std::make_tuple(3, 1, 12000, 16000, static_cast<uint16_t>(OverlapAnalysisType::FREE))};
+    std::shared_ptr<DBRunner> msprofDBRunner;
+    MAKE_SHARED0_NO_OPERATION(msprofDBRunner, DBRunner, GetMsprofDbPath());
+    ASSERT_NE(msprofDBRunner, nullptr);
+    std::string sql = "SELECT id, deviceId, startNs, endNs, type FROM " + TABLE_NAME_OVERLAP_ANALYSIS +
+        " ORDER BY id";
+    EXPECT_TRUE(msprofDBRunner->QueryData(sql, overlapResult));
+    EXPECT_EQ(expectResult, overlapResult);
+}
+
+TEST_F(DBAssemblerUTest, TestRunSaveOverlapAnalysisDataShouldReturnFalseWhenReserveFailed)
+{
+    using OverlapAnalysisDataFormat = std::vector<std::tuple<uint64_t, uint16_t, uint64_t, uint64_t, uint16_t>>;
+    auto assembler = DBAssembler(PROF, OUTPUT_PATH);
+    auto dataInventory = DataInventory();
+    auto data = GenerateOverlapAnalysisData();
+    std::shared_ptr<std::vector<OverlapAnalysisData>> dataS;
+    MAKE_SHARED0_NO_OPERATION(dataS, std::vector<OverlapAnalysisData>, data);
+    dataInventory.Inject<std::vector<OverlapAnalysisData>>(dataS);
+
+    StubReserveFailureForVector<OverlapAnalysisDataFormat>();
+    EXPECT_FALSE(assembler.Run(dataInventory));
+    ResetReserveFailureForVector<OverlapAnalysisDataFormat>();
 }
 
 TEST_F(DBAssemblerUTest, TestRunSaveCCUDataShouldReturnTrueWhenRunSuccess)

@@ -187,6 +187,8 @@ const std::string PROCESSOR_NAME_OSRT_API = "OSRT_API";
 const std::string TABLE_NAME_OSRT_API = "OSRT_API";
 
 const std::string PROCESSOR_NAME_HASH = "HASH_INIT";
+const std::string PROCESSOR_NAME_OVERLAP_ANALYSIS = "OVERLAP_ANALYSIS";
+const std::string TABLE_NAME_OVERLAP_ANALYSIS = "OVERLAP_ANALYSIS";
 const std::string PROCESSOR_NAME_QOS = "QOS";
 const std::string TABLE_NAME_QOS = "QOS";
 const std::string PROCESSOR_MC2_COMM_INFO = "MC2_COMM_INFO";

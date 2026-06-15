@@ -21,6 +21,7 @@
 
 #include "analysis/csrc/application/credential/id_pool.h"
 #include "analysis/csrc/application/database/db_constant.h"
+#include "analysis/csrc/domain/data_process/ai_task/overlap_analysis_processor.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/api_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/ascend_task_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/ccu_mission_data.h"
@@ -43,6 +44,7 @@
 #include "analysis/csrc/domain/entities/viewer_data/system/include/npu_mem_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/npu_module_mem_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/npu_op_mem_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/system/include/overlap_analysis_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/pcie_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/qos_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/sio_data.h"
@@ -1199,6 +1201,39 @@ bool SaveOSRuntimeApiData(DataInventory& dataInventory, DBInfo& msprofDB, const 
     return SaveData(res, TABLE_NAME_OSRT_API, msprofDB);
 }
 
+bool SaveOverlapAnalysisData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
+{
+    auto overlapData = dataInventory.GetPtr<std::vector<OverlapAnalysisData>>();
+    if (overlapData == nullptr)
+    {
+        OverlapAnalysisProcessor processor(profPath);
+        if (!processor.Run(dataInventory, PROCESSOR_NAME_OVERLAP_ANALYSIS))
+        {
+            ERROR("Process overlap analysis data failed.");
+            return false;
+        }
+        overlapData = dataInventory.GetPtr<std::vector<OverlapAnalysisData>>();
+    }
+    if (overlapData == nullptr || overlapData->empty())
+    {
+        WARN("Overlap analysis data not exist.");
+        return true;
+    }
+    std::vector<std::tuple<uint64_t, uint16_t, uint64_t, uint64_t, uint16_t>> res;
+    if (!Reserve(res, overlapData->size()))
+    {
+        ERROR("Reserved for overlap analysis data failed.");
+        return false;
+    }
+    uint64_t id = 0;
+    for (const auto& item : *overlapData)
+    {
+        res.emplace_back(id++, item.deviceId, item.timestamp, item.timestamp + item.duration,
+                         static_cast<uint16_t>(item.type));
+    }
+    return SaveData(res, TABLE_NAME_OVERLAP_ANALYSIS, msprofDB);
+}
+
 bool SaveQosData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
 {
     const std::string QOS = "QoS ";
@@ -1500,6 +1535,7 @@ const std::unordered_map<std::string, SaveDataFunc> DATA_SAVER = {
     {Viewer::Database::PROCESSOR_NAME_DISK_USAGE, SaveHostDiskUsageData},
     {Viewer::Database::PROCESSOR_NAME_NETWORK_USAGE, SaveHostNetworkUsageData},
     {Viewer::Database::PROCESSOR_NAME_OSRT_API, SaveOSRuntimeApiData},
+    {Viewer::Database::PROCESSOR_NAME_OVERLAP_ANALYSIS, SaveOverlapAnalysisData},
     {Viewer::Database::PROCESSOR_NAME_QOS, SaveQosData},
     {Viewer::Database::PROCESSOR_NAME_CCU_MISSION, SaveCCUData},
 };

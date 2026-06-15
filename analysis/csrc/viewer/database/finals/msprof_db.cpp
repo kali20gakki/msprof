@@ -231,6 +231,12 @@ const TableColumns OSRT_API = {{"name", SQL_NUMERIC_TYPE},
                                {"startNs", SQL_NUMERIC_TYPE},
                                {"endNs", SQL_NUMERIC_TYPE}};
 
+const TableColumns OVERLAP_ANALYSIS = {{"id", SQL_INTEGER_TYPE, true},
+                                       {"deviceId", SQL_INTEGER_TYPE},
+                                       {"startNs", SQL_NUMERIC_TYPE},
+                                       {"endNs", SQL_NUMERIC_TYPE},
+                                       {"type", SQL_INTEGER_TYPE}};
+
 const TableColumns QOS = {{"deviceId", SQL_INTEGER_TYPE},
                           {"eventName", SQL_NUMERIC_TYPE},
                           {"bandwidth", SQL_NUMERIC_TYPE},
@@ -297,6 +303,7 @@ MsprofDB::MsprofDB()
                       {TABLE_NAME_HOST_DISK_USAGE, HOST_DISK_USAGE},
                       {TABLE_NAME_HOST_NETWORK_USAGE, HOST_NETWORK_USAGE},
                       {TABLE_NAME_OSRT_API, OSRT_API},
+                      {TABLE_NAME_OVERLAP_ANALYSIS, OVERLAP_ANALYSIS},
                       {TABLE_NAME_QOS, QOS},
                       {TABLE_NAME_DPU_TASK, DPU_TASK},
                       {TABLE_NAME_UB, UB},
