@@ -20,6 +20,7 @@ import os
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.file_manager import FileOpen
+from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.path_manager import PathManager
@@ -42,10 +43,7 @@ class StarsLogCalCulator(ICalculator, MsMultiProcess):
     DEFAULT_FMT_SIZE = 64
     HALF_FMT_SIZE = 32
 
-    STRUCT_SIZE_MAP = {
-        '101000': 128,
-        '101001': 128
-    }
+    STRUCT_SIZE_MAP = {'101000': 128, '101001': 128}
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
         super().__init__(sample_config)
@@ -56,6 +54,7 @@ class StarsLogCalCulator(ICalculator, MsMultiProcess):
         self._file_list = file_list.get(DataTag.STARS_LOG, [])
         self._file_list.sort(key=lambda x: int(x.split("_")[-1]))
         self._fmt_size = self.HALF_FMT_SIZE if ChipManager().is_chip_v6() else self.DEFAULT_FMT_SIZE
+        self.invalid_count = 0
 
     def ms_run(self: any) -> None:
         """
@@ -83,10 +82,17 @@ class StarsLogCalCulator(ICalculator, MsMultiProcess):
         else:
             db_path = PathManager.get_db_path(self._project_path, DBNameConstant.DB_SOC_LOG)
             if DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_ACSQ_TASK):
-                logging.info("The Table %s already exists in the %s, and won't be calculate again.",
-                             DBNameConstant.TABLE_ACSQ_TASK, DBNameConstant.DB_SOC_LOG)
+                logging.info(
+                    "The Table %s already exists in the %s, and won't be calculate again.",
+                    DBNameConstant.TABLE_ACSQ_TASK,
+                    DBNameConstant.DB_SOC_LOG,
+                )
                 return
             self._parse_all_file()
+        if self.invalid_count > 0:
+            logging.error(
+                "%d chunks have invalid magic number, expected %d", self.invalid_count, NumberConstant.STARS_MAGIC_NUM
+            )
 
     def save(self: any) -> None:
         """
@@ -116,12 +122,21 @@ class StarsLogCalCulator(ICalculator, MsMultiProcess):
             offset_count, total_count = iter_model.get_task_offset_and_sum(self._iter_range, HwtsIterModel.TASK_TYPE)
             if not total_count:
                 return
-            _file_calculator = FileCalculator(self._file_list, self._fmt_size, self._project_path,
-                                              offset_count, total_count)
+            _file_calculator = FileCalculator(
+                self._file_list, self._fmt_size, self._project_path, offset_count, total_count
+            )
             self._parse_data(_file_calculator.prepare_process())
+
+    def _validate_chunk(self: any, chunk: bytes) -> bool:
+        """Check magic number at bytes [2:4] of the chunk."""
+        magic = int.from_bytes(chunk[2:4], byteorder='little', signed=False)
+        return magic == NumberConstant.STARS_MAGIC_NUM
 
     def _parse_data(self: any, all_log_bytes: bytes) -> None:
         for chunk in Utils.chunks(all_log_bytes, self._fmt_size):
+            if not self._validate_chunk(chunk):
+                self.invalid_count += 1
+                continue
             header = int.from_bytes(chunk[0:1], byteorder='little', signed=False)
             func_type = Utils.get_func_type(header)
             self._parser_dispatcher.dispatch(func_type, chunk)

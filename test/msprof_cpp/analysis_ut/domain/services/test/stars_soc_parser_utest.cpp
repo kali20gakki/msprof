@@ -57,6 +57,7 @@ protected:
         log.taskId = taskId;
         log.streamId = streamId;
         log.timestamp = timestamp;
+        log.resv2 = 0x6bd3;
         return log;
     }
 
@@ -68,6 +69,7 @@ protected:
         log.taskId = taskId;
         log.streamId = streamId;
         log.timestamp = timestamp;
+        log.resv2 = 0x6bd3;
         return log;
     }
 
@@ -78,6 +80,7 @@ protected:
         accPmu.accId = accId;
         accPmu.funcType = funcType;
         accPmu.timestamp = timestamp;
+        accPmu.resv2 = 0x6bd3;
         for (int i = 0; i < ACC_PMU_SIZE; ++i) {
             accPmu.bandwidth[i] = i * ost;
             accPmu.ost[i] = i * ost;
@@ -200,6 +203,62 @@ TEST_F(StarsSocParserUtest, ShouldParseErrorWhenResizeException)
     MOCKER_CPP(&Resize<HalLogData>).stubs().will(returnValue(false));
     ASSERT_EQ(Analysis::PARSER_PARSE_DATA_ERROR, starsSocParser.Run(dataInventory_, context));
     MOCKER_CPP(&Resize<HalLogData>).reset();
+}
+
+TEST_F(StarsSocParserUtest, ShouldSkipSingleInvalidMagicChunk)
+{
+    StarsSocParser starsSocParser;
+    DeviceContext context;
+    context.deviceContextInfo.deviceFilePath = SOC_LOG_PATH;
+    AcsqLog invalid = CreateAcsqLog(0b000000, 1, 1, 1, 999);
+    invalid.resv2 = 0x0000;  // corrupt magic
+    std::vector<AcsqLog> log{invalid};
+    EXPECT_TRUE(WriteBin(log, File::PathJoin({SOC_LOG_PATH, "data"}), "stars_soc.data.0.slice_0"));
+    ASSERT_EQ(Analysis::PARSER_PARSE_DATA_ERROR, starsSocParser.Run(dataInventory_, context));
+    auto logData = dataInventory_.GetPtr<std::vector<HalLogData>>();
+    ASSERT_EQ(1ul, logData->size());
+    ASSERT_EQ(0, logData->data()[0].hd.timestamp);  // skipped, stays zero
+}
+
+TEST_F(StarsSocParserUtest, ShouldSkipInvalidMagicAndKeepValid)
+{
+    StarsSocParser starsSocParser;
+    DeviceContext context;
+    context.deviceContextInfo.deviceFilePath = SOC_LOG_PATH;
+    // invalid, valid, invalid, valid
+    AcsqLog invalid1 = CreateAcsqLog(0b000000, 1, 1, 1, 777);
+    invalid1.resv2 = 0x0000;
+    AcsqLog valid1 = CreateAcsqLog(0b000000, 2, 1, 1, 100);
+    AcsqLog invalid2 = CreateAcsqLog(0b000001, 3, 1, 1, 888);
+    invalid2.resv2 = 0xFFFF;
+    AcsqLog valid2 = CreateAcsqLog(0b000001, 4, 1, 1, 120);
+    std::vector<AcsqLog> log{invalid1, valid1, invalid2, valid2};
+    EXPECT_TRUE(WriteBin(log, File::PathJoin({SOC_LOG_PATH, "data"}), "stars_soc.data.0.slice_0"));
+    ASSERT_EQ(Analysis::PARSER_PARSE_DATA_ERROR, starsSocParser.Run(dataInventory_, context));
+    auto logData = dataInventory_.GetPtr<std::vector<HalLogData>>();
+    ASSERT_EQ(4ul, logData->size());
+    ASSERT_EQ(0, logData->data()[0].hd.timestamp);    // invalid skipped
+    ASSERT_EQ(100, logData->data()[1].hd.timestamp);  // valid parsed
+    ASSERT_EQ(0, logData->data()[2].hd.timestamp);    // invalid skipped
+    ASSERT_EQ(120, logData->data()[3].hd.timestamp);  // valid parsed
+}
+
+TEST_F(StarsSocParserUtest, ShouldReturnErrorWhenAllMagicInvalid)
+{
+    StarsSocParser starsSocParser;
+    DeviceContext context;
+    context.deviceContextInfo.deviceFilePath = SOC_LOG_PATH;
+    AcsqLog a = CreateAcsqLog(0b000000, 1, 1, 1, 111);
+    a.resv2 = 0xAAAA;
+    AcsqLog b = CreateAcsqLog(0b000001, 2, 1, 1, 222);
+    b.resv2 = 0xBBBB;
+    std::vector<AcsqLog> log{a, b};
+    EXPECT_TRUE(WriteBin(log, File::PathJoin({SOC_LOG_PATH, "data"}), "stars_soc.data.0.slice_0"));
+    ASSERT_EQ(Analysis::PARSER_PARSE_DATA_ERROR, starsSocParser.Run(dataInventory_, context));
+    auto logData = dataInventory_.GetPtr<std::vector<HalLogData>>();
+    ASSERT_EQ(2ul, logData->size());
+    ASSERT_EQ(0, logData->data()[0].hd.timestamp);  // all skipped
+    ASSERT_EQ(0, logData->data()[1].hd.timestamp);
 }
 
 }

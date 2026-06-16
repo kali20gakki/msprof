@@ -18,36 +18,37 @@
 #define ANALYSIS_DOMAIN_SERVICES_PARSER_LOG_STARS_SOC_PARSER_H
 
 #include <vector>
+
 #include "analysis/csrc/domain/entities/hal/include/hal_log.h"
 #include "analysis/csrc/domain/services/parser/parser.h"
 #include "analysis/csrc/domain/services/parser/parser_item_factory.h"
 
-namespace Analysis {
-namespace Domain {
-class StarsSocParser : public Parser {
-private:
+namespace Analysis
+{
+namespace Domain
+{
+class StarsSocParser : public Parser
+{
+   private:
     uint32_t ParseDataItem(uint8_t* binaryData, uint32_t binaryDataSize, uint8_t* data, uint16_t expandStatus);
     std::vector<std::string> GetFilePattern() override;
     uint32_t GetTrunkSize() override;
-    uint32_t ParseData(Infra::DataInventory &dataInventory, const Infra::Context &context) override;
-    virtual ParserType GetParserType() const
-    {
-        return LOG_PARSER;
-    }
-private:
+    uint32_t ParseData(Infra::DataInventory& dataInventory, const Infra::Context& context) override;
+    virtual ParserType GetParserType() const { return LOG_PARSER; }
+
+   private:
     std::vector<HalLogData> halUniData_;
     std::vector<std::string> filePrefix_{"stars_soc."};
     int cnt_{-1};
+    uint32_t invalidCnt_{0};
 };
-class StarsSocParserV6 : public StarsSocParser {
-private:
+class StarsSocParserV6 : public StarsSocParser
+{
+   private:
     uint32_t GetTrunkSize() override;
-    ParserType GetParserType() const override
-    {
-        return LOG_PARSER_V6;
-    }
+    ParserType GetParserType() const override { return LOG_PARSER_V6; }
 };
-}
-}
+}  // namespace Domain
+}  // namespace Analysis
 
-#endif // ANALYSIS_DOMAIN_SERVICES_PARSER_LOG_STARS_SOC_PARSER_H
+#endif  // ANALYSIS_DOMAIN_SERVICES_PARSER_LOG_STARS_SOC_PARSER_H

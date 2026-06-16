@@ -18,6 +18,7 @@ import unittest
 from unittest import mock
 
 from common_func.file_manager import FileOpen
+from common_func.ms_constant.number_constant import NumberConstant
 from common_func.profiling_scene import ProfilingScene
 from common_func.profiling_scene import ExportMode
 from msparser.stars.parser_dispatcher import ParserDispatcher
@@ -27,6 +28,15 @@ from profiling_bean.prof_enum.data_tag import DataTag
 NAMESPACE = 'msparser.stars.stars_log_parser'
 sample_config = {"model_id": 1, 'iter_id': 'dasfsd', 'result_dir': 'jasdfjfjs',
                  "ai_core_profiling_mode": "task-based", "aiv_profiling_mode": "sample-based"}
+
+def _make_chunk(magic: int = NumberConstant.STARS_MAGIC_NUM,
+                header_byte: int = 0x03) -> bytes:
+    """Build a fmt_size-length chunk with given magic at [2:4]."""
+    chunk = bytearray(StarsLogCalCulator.DEFAULT_FMT_SIZE)
+    chunk[0] = header_byte & 0xFF
+    chunk[2] = magic & 0xFF
+    chunk[3] = (magic >> 8) & 0xFF
+    return bytes(chunk)
 
 
 class TestStarsLogCalCulator(unittest.TestCase):
@@ -108,6 +118,70 @@ class TestStarsLogCalCulator(unittest.TestCase):
             key = StarsLogCalCulator(file_list={DataTag.STARS_LOG: ['a_2', 'b_1']},
                                      sample_config={'1': 'ada', 'result_dir': '11'})
             key.calculate()
+        ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
+
+    def test_validate_chunk_valid_magic(self):
+        key = StarsLogCalCulator({}, sample_config)
+        self.assertTrue(key._validate_chunk(
+            _make_chunk(NumberConstant.STARS_MAGIC_NUM)))
+
+    def test_validate_chunk_invalid_magic(self):
+        key = StarsLogCalCulator({}, sample_config)
+        self.assertFalse(key._validate_chunk(_make_chunk(0x0000)))
+        self.assertFalse(key._validate_chunk(_make_chunk(0xFFFF)))
+
+    def test_parse_data_invalid_chunk_not_dispatched(self):
+        key = StarsLogCalCulator({}, sample_config)
+        key._parser_dispatcher = mock.Mock()
+        key._fmt_size = StarsLogCalCulator.DEFAULT_FMT_SIZE
+        data = _make_chunk(0x0000)
+        key._parse_data(data)
+        self.assertEqual(key.invalid_count, 1)
+        key._parser_dispatcher.dispatch.assert_not_called()
+
+    def test_parse_data_valid_chunk_dispatched(self):
+        key = StarsLogCalCulator({}, sample_config)
+        key._parser_dispatcher = mock.Mock()
+        key._fmt_size = StarsLogCalCulator.DEFAULT_FMT_SIZE
+        data = _make_chunk(NumberConstant.STARS_MAGIC_NUM, header_byte=0x03)
+        key._parse_data(data)
+        self.assertEqual(key.invalid_count, 0)
+        key._parser_dispatcher.dispatch.assert_called_once()
+
+    def test_parse_data_mixed_chunks(self):
+        key = StarsLogCalCulator({}, sample_config)
+        key._parser_dispatcher = mock.Mock()
+        key._fmt_size = StarsLogCalCulator.DEFAULT_FMT_SIZE
+        data = (_make_chunk(0x0000) +
+                _make_chunk(NumberConstant.STARS_MAGIC_NUM) +
+                _make_chunk(0xFFFF))
+        key._parse_data(data)
+        self.assertEqual(key.invalid_count, 2)
+        self.assertEqual(key._parser_dispatcher.dispatch.call_count, 1)
+
+    def test_parse_data_all_invalid(self):
+        key = StarsLogCalCulator({}, sample_config)
+        key._parser_dispatcher = mock.Mock()
+        key._fmt_size = StarsLogCalCulator.DEFAULT_FMT_SIZE
+        data = _make_chunk(0x0000) + _make_chunk(0xAAAA)
+        key._parse_data(data)
+        self.assertEqual(key.invalid_count, 2)
+        key._parser_dispatcher.dispatch.assert_not_called()
+
+    def test_calculate_logs_error_when_invalid_chunks(self):
+        ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
+        with mock.patch(NAMESPACE + '.StarsLogCalCulator.init_dispatcher'), \
+                mock.patch('common_func.db_manager.DBManager.check_tables_in_db', return_value=False), \
+                mock.patch(NAMESPACE + '.StarsLogCalCulator._parse_all_file') as mock_parse, \
+                mock.patch('logging.error') as mock_log_error, \
+                mock.patch('common_func.utils.Utils.get_scene', return_value='single_op'):
+            key = StarsLogCalCulator(file_list={DataTag.STARS_LOG: ['a_2']},
+                                     sample_config={'1': 'ada'})
+            key.invalid_count = 5
+            key.calculate()
+            mock_log_error.assert_called_once()
+            args, _ = mock_log_error.call_args
+            self.assertIn('5', str(args))
         ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
 
 

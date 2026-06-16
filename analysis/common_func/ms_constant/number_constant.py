@@ -164,6 +164,9 @@ class NumberConstant:
     # magic number: 5A5A
     MAGIC_NUM = 23130
 
+    # magic number: 0x6BD3
+    STARS_MAGIC_NUM = 0x6BD3
+
     HOST_ID = 64
 
     STATIC_GRAPH_INDEX = 0

@@ -110,7 +110,7 @@ class TestBlockLogParser(unittest.TestCase):
         self.assertEqual(len(ret[1]), 1)
         self.assertEqual(ret[1][0].task_id, 1000)
 
-    def test_get_task_time_should_return_2_matched_task_and_0_remaining_when_2_start_task_mismatched(self):
+    def test_get_task_time_should_return_2_matched_task_and_1_remaining_when_2_start_task_mismatched(self):
         result_dir = ''
         db = ''
         table_list = ['']
@@ -127,16 +127,15 @@ class TestBlockLogParser(unittest.TestCase):
             BlockLogBean(args_end_2), BlockLogBean(args_begin_3), BlockLogBean(args_begin_4)
         ]
         ret = key.get_task_time()
-        expect_ret = (
-            [
-                [4, 4, 12, 'AI_CORE', 56, 58, 40.0, 1, 9],
-                [7, 7, 22, 'AI_CORE', 89, 91, 40.0, 1, 9]
-            ],
-            []
-        )
-        self.assertEqual(expect_ret, ret)
+        expect_ret = [
+            [4, 4, 12, 'AI_CORE', 56, 58, 40.0, 1, 9],
+            [7, 7, 22, 'AI_CORE', 89, 91, 40.0, 1, 9]
+        ]
+        self.assertEqual(ret[0], expect_ret)
+        self.assertEqual(len(ret[1]), 1)
+        self.assertEqual(ret[1][0].task_id, 1000)
 
-    def test_get_task_time_should_return_2_matched_task_and_0_remaining_when_end_less_than_start(self):
+    def test_get_task_time_should_return_2_matched_task_and_1_remaining_when_end_less_than_start(self):
         result_dir = ''
         db = ''
         table_list = ['']
@@ -155,14 +154,13 @@ class TestBlockLogParser(unittest.TestCase):
             BlockLogBean(args_end_2), BlockLogBean(args_begin_3), BlockLogBean(args_begin_4)
         ]
         ret = key.get_task_time()
-        expect_ret = (
-            [
-                [4, 4, 12, 'AI_CORE', 56, 58, 40.0, 1, 9],
-                [7, 7, 22, 'AI_CORE', 89, 91, 40.0, 1, 9]
-            ],
-            []
-        )
-        self.assertEqual(expect_ret, ret)
+        expect_ret = [
+            [4, 4, 12, 'AI_CORE', 56, 58, 40.0, 1, 9],
+            [7, 7, 22, 'AI_CORE', 89, 91, 40.0, 1, 9]
+        ]
+        self.assertEqual(ret[0], expect_ret)
+        self.assertEqual(len(ret[1]), 1)
+        self.assertEqual(ret[1][0].task_id, 1000)
 
     def test_get_task_time_and_set_stream_id_should_return_2_matched_task_and_no_remaining_when_no_task_mismatched(self):
         result_dir = ''

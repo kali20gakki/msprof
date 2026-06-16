@@ -55,7 +55,6 @@ class LogBaseParser(IStarsParser):
         """
         task_map = {}
         self._data_list.sort(key=lambda x: x.sys_cnt)
-        # task id stream id func type
         for data in self._data_list:
             task_key = "{0},{1}".format(str(data.task_id), str(data.stream_id))
             task_map.setdefault(task_key, {}).setdefault(data.func_type, deque([])).append(data)
@@ -64,46 +63,66 @@ class LogBaseParser(IStarsParser):
         remaining_data = []
         mismatch_count = 0
         for data_key, data_dict in task_map.items():
-            start_que = data_dict.get(self._start_functype, [])
-            end_que = data_dict.get(self._end_functype, [])
+            start_que = data_dict.get(self._start_functype, deque())
+            end_que = data_dict.get(self._end_functype, deque())
+            group_mismatch = 0
+
+            # Greedy + lookahead: match end e with start s only when
+            #   e.timestamp >= s.timestamp  AND
+            #   (s is the last start  OR  e.timestamp < next_start.timestamp)
+            # If e falls after next_start, s is an orphan (its end was lost).
             while start_que and end_que:
                 start_task = start_que[0]
                 end_task = end_que[0]
-                if start_task.sys_cnt > end_task.sys_cnt:
-                    mismatch_count += 1
+                if end_task.sys_cnt < start_task.sys_cnt:
                     _ = end_que.popleft()
+                    group_mismatch += 1
                     continue
-                start_task = start_que.popleft()
-                end_task = end_que.popleft()
-                if isinstance(start_task, BlockLogBean):
-                    block_time = InfoConfReader().time_from_syscnt(end_task.sys_cnt) - \
-                                 InfoConfReader().time_from_syscnt(start_task.sys_cnt)
-                    res = [
-                        start_task.stream_id, start_task.task_id, start_task.block_id, \
-                        SqeType().instance(start_task.task_type).name,
-                        # start timestamp end timestamp duration
-                        start_task.sys_cnt, end_task.sys_cnt, block_time,
-                        start_task.core_type, start_task.core_id
-                    ]
-
+                # end >= start
+                last_start = len(start_que) == 1
+                if last_start or end_task.sys_cnt < start_que[1].sys_cnt:
+                    # end belongs to current start
+                    start_que.popleft()
+                    end_que.popleft()
+                    if isinstance(start_task, BlockLogBean):
+                        block_time = InfoConfReader().time_from_syscnt(
+                            end_task.sys_cnt
+                        ) - InfoConfReader().time_from_syscnt(start_task.sys_cnt)
+                        res = [
+                            start_task.stream_id,
+                            start_task.task_id,
+                            start_task.block_id,
+                            SqeType().instance(start_task.task_type).name,
+                            start_task.sys_cnt,
+                            end_task.sys_cnt,
+                            block_time,
+                            start_task.core_type,
+                            start_task.core_id,
+                        ]
+                    else:
+                        res = [
+                            start_task.stream_id,
+                            start_task.task_id,
+                            start_task.acc_id,
+                            SqeType().instance(start_task.task_type).name,
+                            start_task.sys_cnt,
+                            end_task.sys_cnt,
+                            end_task.sys_cnt - start_task.sys_cnt,
+                        ]
+                    matched_result.append(res)
                 else:
-                    res = [
-                        start_task.stream_id, start_task.task_id, start_task.acc_id, \
-                        SqeType().instance(start_task.task_type).name,
-                        # start timestamp end timestamp duration
-                        start_task.sys_cnt, end_task.sys_cnt, end_task.sys_cnt - start_task.sys_cnt
-                    ]
-                matched_result.append(res)
-            if len(start_que) > 1 or end_que:
-                logging.debug("Task or block mismatch happen in %s, start_que size: %d, end_que size: %d",
-                              data_key, len(start_que), len(end_que))
-                mismatch_count += len(start_que)
-                mismatch_count += len(end_que)
-                # when mismatched, discards illegal task
-                continue
-            while start_que:
-                start_task = start_que.popleft()
-                remaining_data.append(start_task)
+                    # end >= next_start: current start's end is lost
+                    _ = start_que.popleft()
+                    group_mismatch += 1
+
+            group_mismatch += max(0, len(start_que) - 1)
+            if start_que:
+                remaining_data.append(start_que.pop())
+
+            if group_mismatch:
+                logging.debug("Mismatch in %s, count: %d", data_key, group_mismatch)
+            mismatch_count += group_mismatch
+
         if mismatch_count > 0:
             logging.error("There are %d tasks or block mismatching.", mismatch_count)
 
@@ -137,7 +156,6 @@ class LogBaseParser(IStarsParser):
                 failed_count += 1
                 data.stream_id = Constant.UINT16_MAX
                 continue
-            # 优先从host task中获取stream id，aicpu小算子信息在host task中不存在，从hccl task中获取
             data.stream_id = host_task_dict.get(data.task_id, hccl_data_dict.get(data.task_id))
         if failed_count > 0:
-            logging.warning(f"{failed_count} task items not found in host task")
+            logging.warning("%d task items not found in host task", failed_count)
