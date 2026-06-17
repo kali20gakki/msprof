@@ -18,8 +18,10 @@
 import unittest
 from unittest import mock
 
+from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader
-from mscalculate.ascend_task.ascend_task import DeviceTask
+from common_func.platform.chip_manager import ChipManager
+from mscalculate.ascend_task.ascend_task import DeviceTask, TaskTypeDto
 from mscalculate.ascend_task.ascend_task import HostTask
 from mscalculate.ascend_task.ascend_task import TopDownTask
 from mscalculate.ascend_task.ascend_task_generator import AscendTaskGenerator
@@ -330,6 +332,64 @@ class TestAscendTaskGenerator(unittest.TestCase):
         generator = AscendTaskGenerator("")
         top_down_tasks = generator._generate_top_down_tasks_by_batch_id(host_tasks, device_tasks)
         self.assertEqual(len(top_down_tasks), 12)
+
+    def test__generate_top_down_tasks_by_batch_id_should_return_host_tasks_when_devices_task_is_empty(self):
+        InfoConfReader()._info_json = {Constant.PLATFORM_VERSION: "4", "hwts": 1560, "DeviceInfo": [{'hwts_frequency': 100}]}
+        ChipManager().load_chip_info()
+        host_tasks = [
+            # host task with static mode
+            HostTask(1, 0, 1, 2, 4294967295, 0, "AI_CORE", 'aclnn', 0, 1000, 0),
+        ]
+        device_tasks = []
+        generator = AscendTaskGenerator("")
+        with mock.patch("msmodel.step_trace.ts_track_model.TsTrackModel.get_all_data",
+                        return_value=[TaskTypeDto(4294967295, 1, 2, '13', 0), TaskTypeDto(4294967296, 1, 2, '13', 2)]):
+            top_down_tasks = generator._generate_top_down_tasks_by_batch_id(host_tasks, device_tasks)
+            self.assertEqual(len(top_down_tasks), 1)
+            self.assertEqual(top_down_tasks[0].duration, 10)
+
+    def test__generate_top_down_tasks_by_batch_id_should_return_host_tasks_when_step_trace_has_no_end(self):
+        InfoConfReader()._info_json = {Constant.PLATFORM_VERSION: "4", "hwts": 1560, "DeviceInfo": [{'hwts_frequency': 100}]}
+        ChipManager().load_chip_info()
+        host_tasks = [
+            # host task with static mode
+            HostTask(1, 0, 1, 2, 4294967295, 0, "AI_CORE", 'aclnn', 0, 1000, 0),
+        ]
+        device_tasks = []
+        generator = AscendTaskGenerator("")
+        with mock.patch("msmodel.step_trace.ts_track_model.TsTrackModel.get_all_data",
+                        return_value=[TaskTypeDto(4294967295, 1, 2, '13', 0)]):
+            top_down_tasks = generator._generate_top_down_tasks_by_batch_id(host_tasks, device_tasks)
+            self.assertEqual(len(top_down_tasks), 1)
+            self.assertEqual(top_down_tasks[0].duration, -1)
+
+    def test__generate_top_down_tasks_by_batch_id_should_return_host_tasks_when_step_trace_has_no_start(self):
+        InfoConfReader()._info_json = {Constant.PLATFORM_VERSION: "4", "hwts": 1560, "DeviceInfo": [{'hwts_frequency': 100}]}
+        ChipManager().load_chip_info()
+        host_tasks = [
+            # host task with static mode
+            HostTask(1, 0, 1, 2, 4294967295, 0, "AI_CORE", 'aclnn', 0, 1000, 0),
+        ]
+        device_tasks = []
+        generator = AscendTaskGenerator("")
+        with mock.patch("msmodel.step_trace.ts_track_model.TsTrackModel.get_all_data",
+                        return_value=[TaskTypeDto(4294967295, 1, 2, '13', 2)]):
+            top_down_tasks = generator._generate_top_down_tasks_by_batch_id(host_tasks, device_tasks)
+            self.assertEqual(len(top_down_tasks), 1)
+            self.assertEqual(top_down_tasks[0].duration, -1)
+
+    def test__generate_top_down_tasks_by_batch_id_should_return_host_tasks_when_no_step_trace(self):
+        InfoConfReader()._info_json = {Constant.PLATFORM_VERSION: "4", "hwts": 1560, "DeviceInfo": [{'hwts_frequency': 100}]}
+        ChipManager().load_chip_info()
+        host_tasks = [
+            # host task with static mode
+            HostTask(1, 0, 1, 2, 4294967295, 0, "AI_CORE", 'aclnn', 0, 1000, 0),
+        ]
+        device_tasks = []
+        generator = AscendTaskGenerator("")
+        top_down_tasks = generator._generate_top_down_tasks_by_batch_id(host_tasks, device_tasks)
+        self.assertEqual(len(top_down_tasks), 1)
+        self.assertEqual(top_down_tasks[0].duration, -1)
 
     def test__get_all_ascend_tasks_should_return_11_tasks_when_all_export_version(self):
         host_tasks = [

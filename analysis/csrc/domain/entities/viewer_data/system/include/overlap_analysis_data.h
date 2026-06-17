@@ -31,7 +31,7 @@ enum class OverlapAnalysisType
     COMMUNICATION,
     COMM_NOT_OVERLAP_COMP,
     FREE,
-    RESERVE
+    RESERVE = UINT16_MAX
 };
 
 struct OverlapAnalysisData : BasicData

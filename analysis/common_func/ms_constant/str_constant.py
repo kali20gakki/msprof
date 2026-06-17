@@ -24,6 +24,7 @@ class StrConstant:
     """
     Constant for String
     """
+
     # msvp data types
     GE_BASIC_DATA = "ge_basic"
     AIC = "aic"
@@ -116,7 +117,7 @@ class StrConstant:
     AIC_TASK_BASED_MODE = "task-based"
     AIC_SAMPLE_BASED_MODE = "sample-based"
 
-    #timeline flow cat
+    # timeline flow cat
     ASYNC_ACL_NPU = "async_acl_npu"
     ASYNC_NPU = "async_npu"
 
@@ -165,13 +166,8 @@ class StrConstant:
 
     EXPORT_MODE = "export_mode"
 
-    #prefix for api and event
-    LEVEL_MAP = {
-        "acl": "AscendCL",
-        "runtime": "Runtime",
-        "model": "Model",
-        "node": "Node"
-    }
+    # prefix for api and event
+    LEVEL_MAP = {"acl": "AscendCL", "runtime": "Runtime", "model": "Model", "node": "Node"}
 
     # parallel mode
     STAND_ALONE = "stand_alone"
@@ -181,7 +177,7 @@ class StrConstant:
     PARALLEL_TABLE_NAME_MAPPING = {
         DATA_PARALLEL: DBNameConstant.TABLE_CLUSTER_DATA_PARALLEL,
         MODEL_PARALLEL: DBNameConstant.TABLE_CLUSTER_MODEL_PARALLEL,
-        PIPELINE_PARALLEL: DBNameConstant.TABLE_CLUSTER_PIPELINE_PARALLEL
+        PIPELINE_PARALLEL: DBNameConstant.TABLE_CLUSTER_PIPELINE_PARALLEL,
     }
 
     TASK_TYPE_MAPPING = {
@@ -238,18 +234,12 @@ class StrConstant:
         "85": "stream overflow debug unregister task",
         "86": "timeout set task",
         "87": "get device message task",
-        "": ""
+        "101": "model-task update task",
+        "116": "task update task",
+        "": "",
     }
 
-    DVPP_ENGINE_TYPE = {
-        "0": "VDEC",
-        "1": "JPEGD",
-        "2": "PNGD",
-        "3": "JPEGE",
-        "4": "VPC",
-        "5": "VENC",
-        "6": "SCD"
-    }
+    DVPP_ENGINE_TYPE = {"0": "VDEC", "1": "JPEGD", "2": "PNGD", "3": "JPEGE", "4": "VPC", "5": "VENC", "6": "SCD"}
 
     OPERATOR_PLUS = '+'
     OPERATOR_MINUS = '-'
@@ -399,7 +389,7 @@ class StrConstant:
         re.compile("waitpid"),
         re.compile("write"),
         re.compile("writev"),
-        re.compile("_sysctl")
+        re.compile("_sysctl"),
     ]
 
     # hccl str constant

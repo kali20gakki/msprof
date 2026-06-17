@@ -23,6 +23,7 @@ class HostTask:
     """
     This class represents a runtime host task that adapts to all chips.
     """
+
     model_id: int
     index_id: int
     stream_id: int
@@ -41,6 +42,7 @@ class DeviceTask:
     """
     This class represents a device task that adapts to all chips.
     """
+
     stream_id: int
     task_id: int
     context_id: int
@@ -58,6 +60,7 @@ class TopDownTask:
     The instance of this class represents the smallest
     schedulable unit running on a device.
     """
+
     model_id: int
     index_id: int
     stream_id: int
@@ -69,3 +72,17 @@ class TopDownTask:
     host_task_type: str
     device_task_type: str
     connection_id: int
+
+
+@dataclass
+class TaskTypeDto:
+    """
+    this class represents step trace task type task
+    """
+
+    timestamp: int
+    stream_id: int
+    task_id: int
+    task_type: str
+    task_state: int
+    batch_id: int = 0

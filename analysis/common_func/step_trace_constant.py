@@ -54,6 +54,13 @@ class StepTraceConstant:
     FORWARD_TO_BACK = "fp_bp"
     ITERATION_REFRESH = "iteration_refresh"
     DATA_AUGMENTATION = "data_aug"
+    SCHEDULE_TASK_TYPE = [
+        'model maintaince task',
+        'model execute task',
+        'Host func Callback task',
+        'model-task update task',
+        'task update task',
+    ]
 
     @staticmethod
     def class_name() -> str:
