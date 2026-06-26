@@ -43,8 +43,8 @@ After parsing, msProf generates two types of profile data files:
 
 **Supported Products<a name="en-us_topic_0000001751419248_section5889102116569"></a>**
 
->[!NOTE]NOTE
->For details about Ascend product models, see [Ascend Product Models](https://www.hiascend.com/document/detail/zh/AscendFAQ/ProduTech/productform/hardwaredesc_0001.html).
+>[!NOTE]
+>For details about Ascend product models, see [Ascend Product Models](https://www.hiascend.com/document/detail/en/AscendFAQ/ProduTech/productform/hardwaredesc_0001.html).
 
 |Product|Supported|
 |--|:-:|
@@ -69,7 +69,7 @@ As shown in [Figure 1](#en-us_topic_0000001751419248_fig10608132131617), the tim
 - Area 3: displays underlying NPU data, including the execution duration and iteration trace data for task streams under **Ascend Hardware**, **Communication** and **Overlap Analysis** data, and other Ascend AI Processor system data.
 - Area 4: displays details about each operator and API in the timeline (displayed when you click the timeline).
 
->[!NOTE]NOTE
+>[!NOTE]
 >
 >- For details about data in the timeline report, see [Profile Data File Reference](profile_data_file_references.md).
 >- Data in each area of the preceding figure depends on the collection environment. For example, Area 1 is generated only during collection in msproftx or other framework-based environments. **Communication** and **Overlap Analysis** data is available only in scenarios involving communication, such as the multi-rank, multi-node, and cluster scenarios. The display of actual data may vary.
@@ -88,7 +88,7 @@ The mappings include:
 - `HostToDevice`: delivery and execution mappings from CANN-layer nodes (operators) to communication operators on Ascend Hardware (`host to device`).
 - `fwdbwd`: mappings from forward APIs to backward APIs.
 
->[!NOTE]NOTE
+>[!NOTE]
 >
 >- Due to the deviation between the Ascend AI Processor frequency measured by software and the actual frequency, as well as the time synchronization error between the host and device, lower-layer operators may fail to be connected by lines due to misplacement.
 >- Whether mappings between layers are displayed depends on whether the data is collected in a specific scenario.
@@ -185,7 +185,7 @@ In the MC<sup>2</sup> implementation, two operators are loaded onto the computat
 
 The communication operator executes in multiple rounds according to the tiles partitioned by the fused operator. In each round, the communication operator performs collective communication algorithms based on parameters provided by the compute operator, orchestrates specific tasks, and delivers the tasks to the hardware. Then, it waits for the execution to complete and notifies the computation side of the results.
 
->[!NOTE]NOTE
+>[!NOTE]
 >
 >- MC<sup>2</sup> fusion is currently not supported for communication API scenarios. These include the low-bit communication operator `MatmulAllReduce` and custom MC<sup>2</sup> operators that utilize communication APIs.
 >- The communication part of the timeline displays only level-0 data.
@@ -255,7 +255,7 @@ The following example shows the content format of `op_summary_*.csv`.
 
 The **Task Duration** field specifies the operator duration. You can sort operators by **Task Duration** to identify time-consuming operators, or sort them by **Task Type** to view the time-consuming operators executed on the AI Core or AICPU.
 
->[!NOTE]NOTE
+>[!NOTE]
 >
 >- Supported fields may vary by product. Please refer to the actual result file for the final list of fields.
 >- When `task_time` is set to `l0` or `off`, `op_summary_*.csv` does not display PMU data for the AI Core or AI Vector Core.
@@ -326,7 +326,7 @@ The following fields are generated when `--task-time` is set to `l1` and `--aic-
 |memory_bound|Used to identify memory bottlenecks during AI Core operator execution. It is calculated as: `mte2_ratio/max(mac_ratio, vec_ratio)`. A value less than 1 indicates no memory bottleneck. A value greater than 1 indicates that the AI Core spends most of its task execution time on memory transfers rather than computation. Higher values signify more severe memory bottlenecks.|
 |cube_utilization(%)|Cube operator utilization. Check whether the number of operations of the Cube operator in a unit time reaches the theoretical upper limit. A value closer to 100% indicates a value closer to the theoretical upper limit. Formula: `cube_utilization = total_cycles/(freq * core_num * task_duration)`|
 
-Note: For some products, specific fields in this table use an asterisk (`*`) prefix to represent `aic` or `aiv`, indicating that the data reflects execution results on the Cube Core or Vector Core, respectively.
+Note: For some products, specific fields in this table use an asterisk (`*`) prefix to represent `aic` or `aiv`, indicating that the data reflects execution results on the AI Cube Core or Vector Core, respectively.
 
 **Table 3** Field description (ArithmeticUtilization)
 
@@ -341,7 +341,7 @@ Note: For some products, specific fields in this table use an asterisk (`*`) pre
 | *_cube_fops       | Floating-point operations of the Cube type, indicating the computation volume. This field can be used to measure the complexity of an algorithm or model. The Atlas 350 accelerator card supports only `aic_cube_fops`.|
 | *_vector_fops     | Floating-point operations of the Vector type, indicating the computation volume. This field can be used to measure the complexity of an algorithm or model. The Atlas 350 accelerator card does not support this field.|
 
-Note: For some products, specific fields in this table use an asterisk (`*`) prefix to represent `aic` or `aiv`, indicating that the data reflects execution results on the Cube Core or Vector Core, respectively.
+Note: For some products, specific fields in this table use an asterisk (`*`) prefix to represent `aic` or `aiv`, indicating that the data reflects execution results on the AI Cube Core or Vector Core, respectively.
 
 **Table 4** Field description (Memory)
 
@@ -356,7 +356,7 @@ Note: For some products, specific fields in this table use an asterisk (`*`) pre
 |*_main_mem_read_bw(GB/s)|Main memory read bandwidth (GB/s).|
 |*_main_mem_write_bw(GB/s)|Main memory write bandwidth (GB/s). Atlas 200I/500 A2 inference products do not support this field. Default value: `N/A`.|
 
-Note: For some products, specific fields in this table use an asterisk (`*`) prefix to represent `aic` or `aiv`, indicating that the data reflects execution results on the Cube Core or Vector Core, respectively.
+Note: For some products, specific fields in this table use an asterisk (`*`) prefix to represent `aic` or `aiv`, indicating that the data reflects execution results on the AI Cube Core or Vector Core, respectively.
 
 **Table 5** Field description (MemoryL0)
 
@@ -371,7 +371,7 @@ Note: For some products, specific fields in this table use an asterisk (`*`) pre
 |*_l0c_read_bw_cube(GB/s)|Bandwidth for Cube to read data from L0C (GB/s).|
 |*_l0c_write_bw_cube(GB/s)|Bandwidth for Cube to write data to L0C (GB/s).|
 
-Note: During the collection of `MemoryL0` performance metrics for the AI Vector Core, the collected data will always be `0`. Note: For some products, specific fields in this table use an asterisk (`*`) prefix to represent `aic` or `aiv`, indicating that the data reflects execution results on the Cube Core or Vector Core, respectively.
+Note: During the collection of `MemoryL0` performance metrics for the AI Vector Core, the collected data will always be `0`. Note: For some products, specific fields in this table use an asterisk (`*`) prefix to represent `aic` or `aiv`, indicating that the data reflects execution results on the AI Cube Core or Vector Core, respectively.
 
 **Table 6** Field description (MemoryUB)
 
@@ -383,7 +383,7 @@ Note: During the collection of `MemoryL0` performance metrics for the AI Vector 
 |*_ub_write_bw_scalar(GB/s)|Bandwidth for Scalar to write data to UB (GB/s).|
 |*_ub_fixp2ub_write_bw(GB/s)|Bandwidth for Vector FixPipe to write data to UB (excluding UB backpressure) (GB/s). Only the Atlas 350 accelerator card supports this field.|
 
-Note: For some products, specific fields in this table use an asterisk (`*`) prefix to represent `aic` or `aiv`, indicating that the data reflects execution results on the Cube Core or Vector Core, respectively.
+Note: For some products, specific fields in this table use an asterisk (`*`) prefix to represent `aic` or `aiv`, indicating that the data reflects execution results on the AI Cube Core or Vector Core, respectively.
 
 **Table 7** Field description (ResourceConflictRatio)
 
@@ -393,7 +393,7 @@ Note: For some products, specific fields in this table use an asterisk (`*`) pre
 |*_vec_bank_cflt_ratio|Ratio of cycles taken to execute `vec_bank_stall_cycles` instructions to the total cycles. Improper read/write pointer addresses for Vector instruction operands can lead to bank conflicts. Atlas 200I/500 A2 inference products do not support this field. Default value: `N/A`.|
 |*_vec_resc_cflt_ratio|Ratio of cycles taken to execute `vec_resc_cflt_ratio` instructions to the total cycles. If an operator involves multiple compute units, ensure that they are concurrently scheduled. If the operator logic keeps delivering instructions to a compute unit that is already busy, the overall computing power is not fully utilized. Atlas 200I/500 A2 inference products do not support this field. Default value: `N/A`.|
 
-Note: For some products, specific fields in this table use an asterisk (`*`) prefix to represent `aic` or `aiv`, indicating that the data reflects execution results on the Cube Core or Vector Core, respectively.
+Note: For some products, specific fields in this table use an asterisk (`*`) prefix to represent `aic` or `aiv`, indicating that the data reflects execution results on the AI Cube Core or Vector Core, respectively.
 
 **Table 8** Field description (MemoryAccess)
 
@@ -407,7 +407,7 @@ Note: For some products, specific fields in this table use an asterisk (`*`) pre
 |*_GM_to_UB_datas(KB)|Amount of data transferred from GM to UB (KB)|
 |*_UB_to_GM_datas(KB)|Amount of data transferred from UB to GM (KB)|
 
-Note: The asterisk (`*`) prefix in the preceding table represents `aic` or `aiv`, indicating that the data reflects execution results on the Cube Core or Vector Core, respectively.
+Note: The asterisk (`*`) prefix in the preceding table represents `aic` or `aiv`, indicating that the data reflects execution results on the AI Cube Core or Vector Core, respectively.
 
 Supported products:
 
@@ -432,7 +432,7 @@ Supported products:
 > [!note] Note
 >
 > - The L2 cache hit rate is calculated as follows: Hits/(Hits + Misses). For example: `*_write_cache_hit / (*_write_cache_hit + *_write_cache_miss_allocate)`. Other hit rates in this table are calculated using the same logic.
-> - For some products, specific fields in this table use an asterisk (`*`) prefix to represent `aic` or `aiv`, indicating that the data reflects execution results on the Cube Core or Vector Core, respectively.
+> - For some products, specific fields in this table use an asterisk (`*`) prefix to represent `aic` or `aiv`, indicating that the data reflects execution results on the AI Cube Core or Vector Core, respectively.
 
 Supported products:
 
@@ -1137,7 +1137,7 @@ The following example shows the content format of `ai_core_utilization_*.csv`.
 
 File results vary depending on the `--aic-metrics` option value. The complete fields are as follows.
 
->[!NOTE]NOTE
+>[!NOTE]
 >
 >- Supported fields may vary by product. Please refer to the actual result file for the final list of fields.
 >- The following fields are generated when `--task-time` is set to `l1` and `--aic-mode` is set to `sample-based`. When `--task-time` is set to `l0`, these fields are not collected and `N/A` is displayed. The content of the generated data is controlled by the value of the `--aic-metrics` option.
@@ -2695,7 +2695,7 @@ The following example shows the content format of `process_mem_*.csv`.
 | TLB Hit Rate  | TLB hit rate  |
 | Op Name       | Operator name               |
 
-> [!NOTE]NOTE
+> [!NOTE]
 >
 > When a large number of operator tasks are delivered, the execution duration of each operator is 2 to 3 μs. In this case, the sum of `TLB Miss Rate` and `TLB Hit Rate` may not be 1.
 

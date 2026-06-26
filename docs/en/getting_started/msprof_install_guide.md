@@ -9,7 +9,7 @@ MindStudio Profiler (msProf) can be installed using the following methods:
 
 To install the msProf runfile, you must first obtain the standalone msProf release package. You can visit the [msProf Release](https://gitcode.com/Ascend/msprof/releases) page, select the target version, and download the `mindstudio-profiler_<version>_<arch>.run` installation package that matches the current system architecture. If the SHA256 checksum file is provided on the release page for the corresponding version, download it as well to perform an integrity verification before installation.
 
-> [!note]NOTE
+> [!NOTE]
 >
 > The downloaded runfile of msProf must be installed as an overwrite in an environment where CANN is already installed.
 
@@ -50,7 +50,7 @@ To install the msProf runfile, you must first obtain the standalone msProf relea
 
 To use the latest features, you can download the source code from this repository to build, package, and install the tool.
 
-> [!note]NOTE
+> [!NOTE]
 > 
 > The built runfile of msProf must be installed as an overwrite in an environment where CANN is already installed.
 

@@ -3,7 +3,7 @@
 <div align="center">
   <p>🚀 <b>Ascend Profile Data Collection Tool</b></p>
 
-[📖 Documentation](https://www.hiascend.com/document/detail/zh/CANNCommunityEdition/850alpha002/devaids/Profiling/atlasprofiling_16_0010.html) |
+[📖 Documentation](https://www.hiascend.com/document/detail/en/canncommercial/850/devaids/profiling/atlasprofiling_16_0010.html) |
 [🔥 Ascend Community](https://www.hiascend.com/developer/software/mindstudio)|
 [🌐Release](https://gitcode.com/Ascend/msprof/releases)
 
@@ -23,12 +23,12 @@ msProf is a profile data analysis tool for AI training and inference scenarios. 
 
 | Function     | Description|                                                                Document                                                               |  Source Code Repository|
 |------------| --- |:----------------------------------------------------------------------------------------------------------------------------------:|-----------|
-| **Profile data collection**| Collects software and hardware profile data from the CANN platform and Ascend AI Processors by using `msprof` commands.| [Profile Data Collection](https://www.hiascend.com/document/detail/en/canncommercial/850/devaids/profiling/atlasprofiling_16_0010.html) | [msprof](https://gitcode.com/cann/runtime/tree/master/src/dfx/msprof) |
+| **Profile data collection**| Collects software and hardware profile data from the CANN platform and Ascend AI Processors by using `msprof` commands.| [Profile Data Collection](https://www.hiascend.com/document/detail/en/canncommercial/850/devaids/profiling/atlasprofiling_16_0010.html)| [msprof](https://gitcode.com/cann/runtime/tree/master/src/dfx/msprof) |
 | **Profile data parsing**| Parses the collected profile data to generate human-readable analysis results by using the msProf tool.|                                       [Profile Data Parsing](docs/en/user_guide/msprof_parsing_instruct.md)                             | [analysis](https://gitcode.com/Ascend/msprof/tree/master/analysis) |
 
 ### 🛠️ Tool Installation
 
-msProf is included in the CANN Toolkit. You are advised to download and install the CANN package directly. For details, see [CANN Software Installation Guide](https://www.hiascend.com/document/detail/zh/canncommercial/850/softwareinst/instg/instg_0000.html?Mode=PmIns&InstallType=netconda&OS=openEuler).
+msProf is included in the CANN Toolkit. You are advised to download and install the CANN package directly. For details, see [CANN Software Installation Guide](https://www.hiascend.com/document/detail/en/canncommercial/850/softwareinst/instg/instg_0000.html?Mode=PmIns&InstallType=netyum&OS=openEuler).
 
 After installing the CANN package, run the following command to set the environment variables: 
 
@@ -50,7 +50,7 @@ To build and install the tool from the source code, see [MindStudio Profiler Ins
 You can use the msProf tool through the command line, and the general syntax for data collection is as follows:
 
 ```bash
-msprof --output=< output directory> --application="<application> <argument>"
+msprof --output=<output directory> --application="<application> <argument>"
 ```
 
 Examples:
@@ -119,7 +119,7 @@ The Huawei MindStudio full-pipeline development toolchain team is dedicated to p
         <img src="https://camo.githubusercontent.com/dd0b7ef70793ab93ce46688c049386e0755a18faab780e519df5d7f61153655e/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f576562736974652d2532333165333766663f7374796c653d666f722d7468652d6261646765266c6f676f3d6279746564616e6365266c6f676f436f6c6f723d7768697465" data-canonical-src="https://img.shields.io/badge/Website-%231e37ff?style=for-the-badge&amp;logo=bytedance&amp;logoColor=white" style="max-width: 100%;">
     </a>
     <span style="margin-left: 20px;">Ascend open-source assistant:</span>
-    <a href="https://gitcode.com/Ascend/msinsight/blob/master/docs/zh/user_guide/figures/readme/xiaozhushou.png">
+    <a href="https://gitcode.com/Ascend/msinsight/blob/master/docs/en/user_guide/figures/readme/xiaozhushou.png">
         <img src="https://camo.githubusercontent.com/22bbaa8aaa1bd0d664b5374d133c565213636ae50831af284ef901724e420f8f/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f5765436861742d3037433136303f7374796c653d666f722d7468652d6261646765266c6f676f3d776563686174266c6f676f436f6c6f723d7768697465" data-canonical-src="./docs/en/user_guide/figures/readme/xiaozhushou.png" style="max-width: 100%;">
     </a>
 </div>

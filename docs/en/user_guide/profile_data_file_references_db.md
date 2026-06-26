@@ -2,14 +2,14 @@
 
 Once the `msprof` command execution is complete, a `msprof_{Timestamp}.db` database file is generated to summarize all profile data. You are advised to use MindStudio Insight or a database development tool such as Navicat Premium to open the file. The profile data summarized by the .db file is as follows:
 
->[!NOTE]NOTE
+>[!NOTE]
 >Profile data is displayed in tables in a .db file, and all data is mapped in numbers (for example, the operator name in the `opName` field is displayed as `194`). The mapping table between numbers and names is [STRING_IDS](#en-us_topic_0000002076410600_section116561584178).
 
 **Units<a name="en-us_topic_0000002076410600_section1053014715533"></a>**
 
 1. Time: local Unix time, in nanoseconds (ns)
 2. Memory: Bytes
-3. Bandwidth: Bytes/s
+3. Bandwidth: Byte/s
 4. Frequency: MHz
 
 **ENUM\_API\_TYPE<a name="en-us_topic_0000002076410600_section8466235152619"></a>**
@@ -406,7 +406,7 @@ The `--task-time`, `--hccl`, and `--ascendcl` options control the collection of 
 |linkType|INTEGER| Link type. Valid values: `HCCS`, `PCIe`, and `RoCE`. The value maps to `ENUM_HCCL_LINK_TYPE(linkType)`.                  |
 |opId|INTEGER| ID of the corresponding large operator. This field is used to associate with the `COMMUNICATION_OP` table.                                        |
 |isMaster|INTEGER| Indicates whether the operator is a primary or secondary stream communication operator. The primary stream operator is used for analysis. Valid values:<br>`0`: secondary stream<br>`1`: primary stream                                    |
-|bandwidth|NUMERIC| Bandwidth data of the small communication operator (bytes/s).                                                |
+|bandwidth|NUMERIC| Bandwidth data of the small communication operator (Byte/s).                                                |
 
 **COMMUNICATION\_OP<a name="en-us_topic_0000002076410600_section1238183491611"></a>**
 
@@ -461,7 +461,7 @@ This table is controlled by `--sys-hardware-mem` and `--sys-hardware-mem-freq`.
 |--|--|--|
 |deviceId|INTEGER|Device ID|
 |eventName|NUMERIC|QoS event name, which maps to `STRING_IDS(eventName)`|
-|bandwidth|NUMERIC|Bandwidth at the time of the QoS event (bytes/s)|
+|bandwidth|NUMERIC|Bandwidth at the time of the QoS event (Byte/s)|
 |timestampNs|NUMERIC|Local time (ns)|
 
 **AICORE\_FREQ<a name="en-us_topic_0000002076410600_section12814131518375"></a>**
@@ -526,15 +526,15 @@ Control options:
 |--|--|--|
 |deviceId|INTEGER|Device ID|
 |timestampNs|INTEGER|Local time (ns)|
-|bandwidth|INTEGER|Bandwidth (bytes/s)|
+|bandwidth|INTEGER|Bandwidth (Byte/s)|
 |rxPacketRate|NUMERIC|Packet receiving rate (packets/s)|
-|rxByteRate|NUMERIC|Byte receiving rate (bytes/s)|
+|rxByteRate|NUMERIC|Byte receiving rate (Byte/s)|
 |rxPackets|INTEGER|Total number of received packets|
 |rxBytes|INTEGER|Total number of received bytes|
 |rxErrors|INTEGER|Total number of received error packets|
 |rxDropped|INTEGER|Total number of received dropped packets|
 |txPacketRate|NUMERIC|Packet transmission rate (packets/s)|
-|txByteRate|NUMERIC|Byte transmission rate (bytes/s)|
+|txByteRate|NUMERIC|Byte transmission rate (Byte/s)|
 |txPackets|INTEGER|Total number of transmitted packets|
 |txBytes|INTEGER|Total number of transmitted bytes|
 |txErrors|INTEGER|Total number of transmitted error packets|
@@ -556,15 +556,15 @@ Control options:
 |--|--|--|
 |deviceId|INTEGER|Device ID|
 |timestampNs|INTEGER|Local time (ns)|
-|bandwidth|INTEGER|Bandwidth (bytes/s)|
+|bandwidth|INTEGER|Bandwidth (Byte/s)|
 |rxPacketRate|NUMERIC|Packet receiving rate (packets/s)|
-|rxByteRate|NUMERIC|Byte receiving rate (bytes/s)|
+|rxByteRate|NUMERIC|Byte receiving rate (Byte/s)|
 |rxPackets|INTEGER|Total number of received packets|
 |rxBytes|INTEGER|Total number of received bytes|
 |rxErrors|INTEGER|Total number of received error packets|
 |rxDropped|INTEGER|Total number of received dropped packets|
 |txPacketRate|NUMERIC|Packet transmission rate (packets/s)|
-|txByteRate|NUMERIC|Byte transmission rate (bytes/s)|
+|txByteRate|NUMERIC|Byte transmission rate (Byte/s)|
 |txPackets|INTEGER|Total number of transmitted packets|
 |txBytes|INTEGER|Total number of transmitted bytes|
 |txErrors|INTEGER|Total number of transmitted error packets|
@@ -585,7 +585,7 @@ This table is controlled by `--sys-hardware-mem` and `--sys-hardware-mem-freq`.
 |llcId|INTEGER|L3 cache ID.|
 |timestampNs|INTEGER|Local time (ns).|
 |hitRate|NUMERIC|L3 cache hit rate (100%).|
-|throughput|NUMERIC|L3 cache throughput (bytes/s).|
+|throughput|NUMERIC|L3 cache throughput (Byte/s).|
 |mode|INTEGER|Mode, which is used to distinguish reads and writes. The value maps to `STRING_IDS(mode)`.|
 
 **TASK\_PMU\_INFO<a name="en-us_topic_0000002076410600_section72694413158"></a>**
@@ -714,7 +714,7 @@ This table is controlled by `--sys-hardware-mem` and `--sys-hardware-mem-freq`.
 |--|--|--|
 |deviceId|INTEGER|Device ID.|
 |timestampNs|INTEGER|Local time (ns).|
-|bandwidth|NUMERIC|Bandwidth (bytes/s).|
+|bandwidth|NUMERIC|Bandwidth (Byte/s).|
 |hbmId|INTEGER|ID of the on-chip memory access unit.|
 |type|INTEGER|Type used to distinguish reads and writes. The value maps to `STRING_IDS(type)`.|
 
@@ -730,8 +730,8 @@ This table is controlled by `--sys-hardware-mem` and `--sys-hardware-mem-freq`.
 |--|--|--|
 |deviceId|INTEGER|Device ID|
 |timestampNs|INTEGER|Local time (ns)|
-|read|NUMERIC|Memory read bandwidth (bytes/s)|
-|write|NUMERIC|Memory write bandwidth (bytes/s)|
+|read|NUMERIC|Memory read bandwidth (Byte/s)|
+|write|NUMERIC|Memory write bandwidth (Byte/s)|
 
 **HCCS<a name="en-us_topic_0000002076410600_section81241447141420"></a>**
 
@@ -748,8 +748,8 @@ Control options:
 |--|--|--|
 |deviceId|INTEGER|Device ID|
 |timestampNs|INTEGER|Local time (ns)|
-|txThroughput|NUMERIC|Transmit bandwidth (bytes/s)|
-|rxThroughput|NUMERIC|Receive bandwidth (bytes/s)|
+|txThroughput|NUMERIC|Transmit bandwidth (Byte/s)|
+|rxThroughput|NUMERIC|Receive bandwidth (Byte/s)|
 
 **PCIE<a name="en-us_topic_0000002076410600_section760424014146"></a>**
 
@@ -766,27 +766,27 @@ Control options:
 |--|--|--|
 |deviceId|INTEGER|Device ID|
 |timestampNs|INTEGER|Local time (ns)|
-|txPostMin|NUMERIC|Minimum bandwidth for transmitting PCIe posted data at the TX side (bytes/s)|
-|txPostMax|NUMERIC|Maximum bandwidth for transmitting PCIe posted data at the TX side (bytes/s)|
-|txPostAvg|NUMERIC|Average bandwidth for transmitting PCIe posted data at the TX side (bytes/s)|
-|txNonpostMin|NUMERIC|Minimum bandwidth for transmitting PCIe non-posted data at the TX side (bytes/s)|
-|txNonpostMax|NUMERIC|Maximum bandwidth for transmitting PCIe non-posted data at the TX side (bytes/s)|
-|txNonpostAvg|NUMERIC|Average bandwidth for transmitting PCIe non-posted data at the TX side (bytes/s)|
-|txCplMin|NUMERIC|Minimum throughput of completion packets received at the TX side for write requests (bytes/s)|
-|txCplMax|NUMERIC|Maximum throughput of completion packets received at the TX side for write requests (bytes/s)|
-|txCplAvg|NUMERIC|Average throughput of completion packets received at the TX side for write requests (bytes/s)|
+|txPostMin|NUMERIC|Minimum bandwidth for transmitting PCIe posted data at the TX side (Byte/s)|
+|txPostMax|NUMERIC|Maximum bandwidth for transmitting PCIe posted data at the TX side (Byte/s)|
+|txPostAvg|NUMERIC|Average bandwidth for transmitting PCIe posted data at the TX side (Byte/s)|
+|txNonpostMin|NUMERIC|Minimum bandwidth for transmitting PCIe non-posted data at the TX side (Byte/s)|
+|txNonpostMax|NUMERIC|Maximum bandwidth for transmitting PCIe non-posted data at the TX side (Byte/s)|
+|txNonpostAvg|NUMERIC|Average bandwidth for transmitting PCIe non-posted data at the TX side (Byte/s)|
+|txCplMin|NUMERIC|Minimum throughput of completion packets received at the TX side for write requests (Byte/s)|
+|txCplMax|NUMERIC|Maximum throughput of completion packets received at the TX side for write requests (Byte/s)|
+|txCplAvg|NUMERIC|Average throughput of completion packets received at the TX side for write requests (Byte/s)|
 |txNonpostLatencyMin|NUMERIC|Minimum transmission latency in PCIe Non-Post mode at the TX side (ns)|
 |txNonpostLatencyMax|NUMERIC|Maximum transmission latency in PCIe Non-Post mode at the TX side (ns)|
 |txNonpostLatencyAvg|NUMERIC|Average transmission latency in PCIe Non-Post mode at the TX side (ns)|
-|rxPostMin|NUMERIC|Minimum bandwidth for receiving PCIe posted data at the RX side (bytes/s)|
-|rxPostMax|NUMERIC|Maximum bandwidth for receiving PCIe posted data at the RX side (bytes/s)|
-|rxPostAvg|NUMERIC|Average bandwidth for receiving PCIe posted data at the RX side (bytes/s)|
-|rxNonpostMin|NUMERIC|Minimum bandwidth for receiving PCIe non-posted data at the RX side (bytes/s)|
-|rxNonpostMax|NUMERIC|Maximum bandwidth for receiving PCIe non-posted data at the RX side (bytes/s)|
-|rxNonpostAvg|NUMERIC|Average bandwidth for receiving PCIe non-posted data at the RX side (bytes/s)|
-|rxCplMin|NUMERIC|Minimum throughput of completion packets received at the RX side for write requests (bytes/s)|
-|rxCplMax|NUMERIC|Maximum throughput of completion packets received at the RX side for write requests (bytes/s)|
-|rxCplAvg|NUMERIC|Average throughput of completion packets received at the RX side for write requests (bytes/s)|
+|rxPostMin|NUMERIC|Minimum bandwidth for receiving PCIe posted data at the RX side (Byte/s)|
+|rxPostMax|NUMERIC|Maximum bandwidth for receiving PCIe posted data at the RX side (Byte/s)|
+|rxPostAvg|NUMERIC|Average bandwidth for receiving PCIe posted data at the RX side (Byte/s)|
+|rxNonpostMin|NUMERIC|Minimum bandwidth for receiving PCIe non-posted data at the RX side (Byte/s)|
+|rxNonpostMax|NUMERIC|Maximum bandwidth for receiving PCIe non-posted data at the RX side (Byte/s)|
+|rxNonpostAvg|NUMERIC|Average bandwidth for receiving PCIe non-posted data at the RX side (Byte/s)|
+|rxCplMin|NUMERIC|Minimum throughput of completion packets received at the RX side for write requests (Byte/s)|
+|rxCplMax|NUMERIC|Maximum throughput of completion packets received at the RX side for write requests (Byte/s)|
+|rxCplAvg|NUMERIC|Average throughput of completion packets received at the RX side for write requests (Byte/s)|
 
 **META\_DATA<a name="en-us_topic_0000002076410600_section13792933201413"></a>**
 
@@ -898,8 +898,8 @@ This table is controlled by `--host-sys=disk`.
 |Field|Type|Description|
 |--|--|--|
 |timestampNs|NUMERIC|Local sampling time (ns)|
-|readRate|NUMERIC|Drive read rate (bytes/s)|
-|writeRate|NUMERIC|Drive write rate (bytes/s)|
+|readRate|NUMERIC|Drive read rate (Byte/s)|
+|writeRate|NUMERIC|Drive write rate (Byte/s)|
 |usage|NUMERIC|Drive usage (%)|
 
 **HOST\_NETWORK\_USAGE<a name="en-us_topic_0000002076410600_section223093643915"></a>**
@@ -914,7 +914,7 @@ This table is controlled by `--host-sys=network`.
 |--|--|--|
 |timestampNs|NUMERIC|Local sampling time (ns)|
 |usage|NUMERIC|Network I/O usage (%)|
-|speed|NUMERIC|Network usage rate (bytes/s)|
+|speed|NUMERIC|Network usage rate (Byte/s)|
 
 **OSRT\_API<a name="en-us_topic_0000002076410600_section7238121863614"></a>**
 
@@ -950,9 +950,9 @@ Control options:
 |macTxPfcPkt|INTEGER|Number of PFC frames transmitted by the Media Access Control (MAC) layer|
 |macRxPfcPkt|INTEGER|Number of PFC frames received by the MAC layer|
 |macTxByte|INTEGER|Number of bytes transmitted by the MAC layer|
-|macTxBandwidth|NUMERIC|TX bandwidth at the MAC layer (bytes/s)|
+|macTxBandwidth|NUMERIC|TX bandwidth at the MAC layer (Byte/s)|
 |macRxByte|INTEGER|Number of bytes received by the MAC layer|
-|macRxBandwidth|NUMERIC|RX bandwidth at the MAC layer (bytes/s)|
+|macRxBandwidth|NUMERIC|RX bandwidth at the MAC layer (Byte/s)|
 |macTxBadByte|INTEGER|Total bytes of bad packets transmitted by the MAC layer|
 |macRxBadByte|INTEGER|Total bytes of bad packets received by the MAC layer|
 |roceTxPkt|INTEGER|Number of packets transmitted by the RoCEE|
@@ -963,9 +963,9 @@ Control options:
 |roceRxCnpPkt|INTEGER|Number of CNP packets received by the RoCEE|
 |roceNewPktRty|INTEGER|Number of packets retransmitted by the RoCEE due to timeout|
 |nicTxByte|INTEGER|Number of bytes transmitted by the NIC|
-|nicTxBandwidth|NUMERIC|TX bandwidth of the NIC (bytes/s)|
+|nicTxBandwidth|NUMERIC|TX bandwidth of the NIC (Byte/s)|
 |nicRxByte|INTEGER|Number of bytes received by the NIC|
-|nicRxBandwidth|NUMERIC|RX bandwidth of the NIC (bytes/s)|
+|nicRxBandwidth|NUMERIC|RX bandwidth of the NIC (Byte/s)|
 
 **RANK\_DEVICE\_MAP<a name="en-us_topic_0000002076410600_section75444171535"></a>**
 

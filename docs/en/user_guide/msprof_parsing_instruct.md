@@ -33,7 +33,7 @@ The MindStudio Profiler (msProf) command-line tool is encapsulated using `msprof
     export LD_LIBRARY_PATH=/usr/local/python3.7.5/lib:$LD_LIBRARY_PATH
     ```
 
->[!NOTE]NOTE
+>[!NOTE]
 >The preceding environment variables take effect only in the current window. You can write the preceding commands to the `~/.bashrc` file to make them take effect permanently. The operations are as follows:
 >
 >1. Run the `vi ~/.bashrc` command in any directory as the installation user and append the preceding commands to the file.
@@ -109,11 +109,11 @@ msprof --export=on --output=<dir> [--type=<type>] [--reports=<reports_sample_con
 |--reports|No|Specifies a custom `reports_sample_config.json` configuration file to export the corresponding profile data based on the scope specified in the file. For details, see [Example (`--reports` Option)](#en-us_topic_0000001265229686_section1128153151819).<br>Currently, the Atlas 350 accelerator card does not support this option.|
 |--model-id|No|Specifies the model ID. The value must be a positive integer. This option must be specified in combination with `--iteration-id` to export the profile data of a specified compute iteration in the model. If neither `--model-id` nor `--iteration-id` is specified, all profile data is exported by default.<br>&#8226; For Atlas A2 training products/Atlas A2 inference products as well as Atlas A3 training products/Atlas A3 inference products, `--model-id` can be set to `4294967295`, which specifies the step mode. That is, the value of `--iteration-id` specifies parsing by step. Only profile data of the MindSpore framework (version 2.3 or later) can be parsed.<br>&#8226; If `--model-id` is set to other values, this option specifies the iteration ID for graph-based statistics collection. The iteration ID is incremented by 1 each time a graph is executed. When a script is compiled into multiple graphs, the iteration ID is different from the step ID at the script layer.|
 |--iteration-id|No|Specifies the iteration ID. The value must be a positive integer. This option must be specified in combination with `--model-id` to export the profile data of a specified compute iteration in the model. If neither `--model-id` nor `--iteration-id` is specified, all profile data is exported by default.<br>&#8226; For Atlas A2 training products/Atlas A2 inference products, as well as Atlas A3 training products/Atlas A3 inference products, `--model-id` can be set to `4294967295`, which specifies the iteration ID for step-based statistics collection. The iteration ID is incremented by 1 each time a step is executed. Only profile data of the MindSpore framework (version 2.3 or later) can be parsed.<br>&#8226; If `--model-id` is set to other values, this option specifies the iteration ID for graph-based statistics collection. The iteration ID is incremented by 1 each time a graph is executed. When a script is compiled into multiple graphs, the iteration ID is different from the step ID at the script layer.|
-|--summary-format|No|Specifies the summary data file export format. Valid values:<br>&#8226; `json`: exports the summary data file is in JSON format.<br>&#8226; `csv` (default): exports the summary data file in CSV format.<br>This option is supported only when `--type` is set to `text`.|
+|--summary-format|No|Specifies the summary data file export format. Valid values:<br>&#8226; `json`: exports the summary data file in JSON format.<br>&#8226; `csv` (default): exports the summary data file in CSV format.<br>This option is supported only when `--type` is set to `text`.|
 |--python-path|No|Specifies the path to the Python interpreter used for parsing. The Python version must be 3.7.5 or later.|
 |--clear|No| Sets the data clearance mode. After this option is enabled, the `sqlite` directory in `PROF_XXX/device_{id}` is deleted (after profile data is exported) to save storage space. Valid values: `on` or `off` (default).|
 
->[!NOTE]NOTE
+>[!NOTE]
 >
 >- By default, all profile data is exported.
 >- In single-operator scenarios or scenarios where only Ascend AI Processor system data is collected (that is, the `--application` option is not specified in the `msprof` data collection command), the `--iteration-id` and `--model-id` options are not supported.
@@ -136,9 +136,9 @@ msprof --export=on --output=/home/profiler_data/PROF_XXX --reports=${INSTALL_DIR
 
 Replace `${INSTALL_DIR}` with the actual CANN installation directory. If the Toolkit is installed by the `root` user, the default installation directory is `/usr/local/Ascend/cann`.
 
->[!NOTE]NOTE
+>[!NOTE]
 >
->- --The `--reports` option specifies the `reports_sample_config.json` file. This option must be used in combination with `--export` and supports only `--type=text`. It controls only the timeline data in JSON files. Summary data in CSV files is always fully exported.
+>- The `--reports` option specifies the `reports_sample_config.json` file. This option must be used in combination with `--export` and supports only `--type=text`. It controls only the timeline data in JSON files. Summary data in CSV files is always fully exported.
 >- Soft links are not supported. The maximum file size is 64 MB, and the maximum length of the file path plus the file name is 1024 characters.
 
 By default, the `reports_sample_config.json` file is stored in the ${INSTALL_DIR}/tools/profiler/profiler_tool/analysis/msconfig/ directory. The file content is as follows:
@@ -180,7 +180,7 @@ By default, the `reports_sample_config.json` file is stored in the ${INSTALL_DIR
 
 The preceding configuration items are switches for controlling specific profile data. You can set them to `true` (to enable the fields) or `false` (to disable or delete the fields). The controlled profile data includes the timeline tracks (including **CANN**, **Ascend Hardware**, **AI Core Freq**, on-chip memory, **Communication**, **Overlap Analysis**, and **NPU_MEM** tracks) in `msprof_*.json`.
 
->[!NOTE]NOTE
+>[!NOTE]
 >
 >1. Exporting the preceding data requires that the corresponding data already exists in the raw profile data (that is, the data has been collected).
 >2. Ensure the `reports_sample_config.json` file is correctly formatted. Otherwise, incorrect content (such as misspellings) may cause the `--reports` option to become invalid and export all profile data. Furthermore, file read failures caused by missing files or permission issues will terminate the export process and return an error.
@@ -239,7 +239,7 @@ The structure of the generated profile data directory is as follows:
                 └── README.txt
     ```
 
->[!NOTE]NOTE
+>[!NOTE]
 >
 >- `msprof_*.db` is a database file that aggregates all profile data. The JSON files in the `mindstudio_profiler_output` directory are timeline information files. These files collect the duration of operators and tasks for display as color blocks. The CSV files are summary information files that summarize durations in table format. For details about profile data, see [Profile Data File References](profile_data_file_references.md).
 >- In multi-device scenarios, if a single collection process is started, only one `PROF_XXX` directory is generated. If multiple processes are started, multiple `PROF_XXX` directories are generated. The device directories are created within these `PROF_XXX` directories. The specific number of device directories per `PROF_XXX` depends on the actual user operations and does not affect profile data analysis.

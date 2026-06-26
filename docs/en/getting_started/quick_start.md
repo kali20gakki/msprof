@@ -8,7 +8,7 @@ This tutorial consists of three parts to help you quickly learn the basic usage 
 
 ## Environment Setup
 
-- Install the CANN Toolkit and ops operator packages. For details, see [CANN Software Installation Guide](https://www.hiascend.com/document/detail/zh/canncommercial/850/softwareinst/instg/instg_0000.html?Mode=PmIns&InstallType=local&OS=openEuler).
+- Install the CANN Toolkit and ops operator packages. For details, see [CANN Software Installation Guide](https://www.hiascend.com/document/detail/en/canncommercial/850/softwareinst/instg/instg_0000.html?Mode=PmIns&InstallType=netyum&OS=openEuler).
 - Set the environment variables.
 
     ```bash
@@ -33,10 +33,10 @@ This tutorial consists of three parts to help you quickly learn the basic usage 
    msprof --application="python train.py" --output=/home/prof_output
    ```
 
-    > [!NOTE]NOTE
+    > [!NOTE]
     > - --`output`: path for storing the collected profile data.
     > - --`application`: user application whose profile data is to be collected.
-    > - The preceding command is the basic collection command. For other collection requirements, see [Profile Data Collection](https://www.hiascend.com/document/detail/zh/mindstudio/830/T&ITools/Profiling/atlasprofiling_16_0007.html#ZH-CN_TOPIC_0000002536038281).
+    > - The preceding command is the basic collection command. For other collection requirements, see [Profile Data Collection](https://www.hiascend.com/document/detail/en/mindstudio/830/TITools/Profiling/atlasprofiling_16_0010.html).
 
    If the following information is displayed, the execution is successful:
 
