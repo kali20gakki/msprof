@@ -671,15 +671,13 @@ The following table describes the key fields.
 |Title|API name of the selected component.|
 |Start|Start timestamp on the timeline, which is automatically aligned by `chrome://tracing` (ms).|
 |Wall Duration|Duration of the current API call (ms).|
-|Task Time(us)|Task execution duration of the AICPU operator (μs).|
-|Reduce Duration(us)|Collective communication duration of the ALL REDUCE operator (μs).|
 |Model Id|Model ID.|
 |Task Type|Type of the accelerator that executes the task (including `AI_CORE`, `AI_VECTOR_CORE`, and `AI_CPU`).|
-|Stream Id|Stream ID of the task. The stream ID under **Ascend Hardware** is the complete logic stream ID of the task, and the stream ID attribute of each API in the timeline on the right is the physical stream ID of the API.|
+|Stream Id|Stream ID of the task. The stream ID under **Ascend Hardware** is the complete logic stream ID of the task, and the stream ID attribute of each API in the timeline on the right is the Physic Stream ID of the API.|
 |Task Id|Task ID.|
+|Batch Id|Records the number of flips for the Task ID.|
 |Subtask Id|Subtask ID.|
-|Aicore Time(ms)|Theoretical execution duration of the task on the AI Core when all blocks are scheduled simultaneously and each block has an equal execution duration (ms). Typically, the scheduling start time varies slightly across different blocks. Therefore, the value of this field is slightly less than the actual task execution duration on the AI Core. This data is inaccurate and not recommended for reference during manual frequency scaling, dynamic frequency scaling (when power consumption exceeds the default), or when using Atlas 300V or Atlas 300I Pro.|
-|Total Cycle|Total number of execution cycles of the task on the AI Core, which is the sum of the execution cycles of all blocks.|
+| connection_id   | ID of the connection between a CANN API and an NPU operator when the former is delivered to the latter. |
 |Receive Time|Time when the device receives information about the memory copy task (μs). This field is displayed only for the `MemcopyAsync` API.|
 |Start Time|Time when the memory copy task starts (μs). This field is displayed only for the `MemcopyAsync` API.|
 |End Time|Time when the memory copy task ends (μs). This field is displayed only for the `MemcopyAsync` API.|
