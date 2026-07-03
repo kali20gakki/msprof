@@ -31,7 +31,7 @@ namespace
 {
 const std::string QOS = "QoS";
 const std::string SERIES = "value";
-const std::unordered_map<uint16_t, std::string> SERIES_MAP{{0, "die 0"}, {1, "die 1"}};
+const std::unordered_map<int32_t, std::string> SERIES_MAP{{0, "die 0"}, {1, "die 1"}};
 }  // namespace
 
 QosAssembler::QosAssembler() : JsonAssembler(PROCESS_QOS, {{MSPROF_JSON_FILE, FileCategory::MSPROF}}) {}
@@ -90,8 +90,8 @@ void GenerateQosV6Trace(std::vector<QosData> &qosData, const std::unordered_map<
         seriesName = SERIES_MAP.at(data.dieId);
         time = DivideByPowersOfTenWithPrecision(data.timestamp);
         pid = pidMap.at(data.deviceId);
-        std::array<uint32_t, 8> bandwidth{data.bw3, data.bw4, data.bw5, data.bw6,
-                                          data.bw7, data.bw8, data.bw9, data.bw10};
+        std::array<uint32_t, 8> bandwidth{data.bw1, data.bw2, data.bw3, data.bw4,
+                                          data.bw5, data.bw6, data.bw7, data.bw8};
         for (size_t i = 0; i < it->second.size(); i++)
         {
             counter.clear();
