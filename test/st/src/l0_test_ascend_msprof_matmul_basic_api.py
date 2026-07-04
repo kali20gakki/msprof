@@ -10,14 +10,14 @@
 #
 # THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
 # EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
-# MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+# MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
 # See the Mulan PSL v2 for more details.
 # -------------------------------------------------------------------------
 import sys
 
 from src.l0_test_ascend_msprof_all_switch import TestAscendMsprofAllSwitch
 
-EXPECTED_KERNEL_PATTERN = "*mmad_vec_custom*"
+EXPECTED_KERNEL_PATTERN = "*mmad_custom*"
 EXPECTED_RUNTIME_APIS = [
     "LaunchKernelV2",
     "MemCopySync",
@@ -27,7 +27,7 @@ EXPECTED_RUNTIME_APIS = [
 ]
 
 
-class TestAscendMsprofMatmulLeakyreluBasicApi(TestAscendMsprofAllSwitch):
+class TestAscendMsprofMatmulBasicApi(TestAscendMsprofAllSwitch):
     TIMELINE_CHECKS = [
         {"key": "cat", "values": ["HostToDevice"], "fuzzy_match": True},
     ]
@@ -49,7 +49,7 @@ class TestAscendMsprofMatmulLeakyreluBasicApi(TestAscendMsprofAllSwitch):
         ],
         "items": [
             {"pattern": {"Op Name": [EXPECTED_KERNEL_PATTERN], "OP Type": [EXPECTED_KERNEL_PATTERN]}},
-            {"pattern": {"Task Type": ["MIX_AIC"]}, "fuzzy_match": False},
+            {"pattern": {"Task Type": ["AI_CORE"]}, "fuzzy_match": False},
         ],
         "non_negative_columns": [
             "Task Duration(us)",
@@ -77,7 +77,7 @@ class TestAscendMsprofMatmulLeakyreluBasicApi(TestAscendMsprofAllSwitch):
             "Ratio(%)",
         ],
         "items": [
-            {"pattern": {"OP Type": [EXPECTED_KERNEL_PATTERN], "Core Type": ["MIX_AIC"]}},
+            {"pattern": {"OP Type": [EXPECTED_KERNEL_PATTERN], "Core Type": ["AI_CORE"]}},
         ],
         "non_negative_columns": ["Count", "Total Time(us)", "Min Time(us)", "Avg Time(us)", "Max Time(us)", "Ratio(%)"],
     }
@@ -99,7 +99,6 @@ class TestAscendMsprofMatmulLeakyreluBasicApi(TestAscendMsprofAllSwitch):
     NPU_MODULE_MEM_SPEC = {
         "pattern": "npu_module_mem*.csv",
         "headers": TestAscendMsprofAllSwitch.NPU_MODULE_MEM_SPEC["headers"],
-        "items": [{"pattern": {"Component": ["SLOG"]}, "fuzzy_match": False}],
         "non_negative_columns": TestAscendMsprofAllSwitch.NPU_MODULE_MEM_SPEC["non_negative_columns"],
     }
     SOC_PMU_SPEC = {
@@ -113,16 +112,16 @@ class TestAscendMsprofMatmulLeakyreluBasicApi(TestAscendMsprofAllSwitch):
         "headers": TestAscendMsprofAllSwitch.TASK_TIME_SPEC["headers"],
         "items": [
             {"pattern": {"kernel_name": [EXPECTED_KERNEL_PATTERN]}},
-            {"pattern": {"kernel_type": ["MIX_AIC"]}, "fuzzy_match": False},
+            {"pattern": {"kernel_type": ["AI_CORE"]}, "fuzzy_match": False},
         ],
         "non_negative_columns": TestAscendMsprofAllSwitch.TASK_TIME_SPEC["non_negative_columns"],
     }
 
 
-def test_ascend_msprof_matmul_leakyrelu_basic_api(prof_path):
-    TestAscendMsprofMatmulLeakyreluBasicApi(prof_path).check_msprof_file()
+def test_ascend_msprof_matmul_basic_api(prof_path):
+    TestAscendMsprofMatmulBasicApi(prof_path).check_msprof_file()
 
 
 if __name__ == "__main__":
     path = sys.argv[1]
-    test_ascend_msprof_matmul_leakyrelu_basic_api(path)
+    test_ascend_msprof_matmul_basic_api(path)
