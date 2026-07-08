@@ -190,6 +190,42 @@ class DBManager:
             DBManager.destroy_db_connect(conn, curs)
 
     @classmethod
+    def fetch_all_table_names(cls: any, db_path: str) -> list:
+        """
+        fetch all table names in database
+        """
+        conn, curs = DBManager.create_connect_db(db_path)
+        if not (conn and curs):
+            return []
+
+        sql = "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"
+        try:
+            data = DBManager.fetch_all_data(curs, sql)
+            return [info[0] for info in data]
+        except sqlite3.Error as _err:
+            raise RuntimeError(f"Failed to fetch data, ERROR: {_err}")
+        finally:
+            DBManager.destroy_db_connect(conn, curs)
+
+    @classmethod
+    def fetch_table_row_count(cls: any, db_path: str, table_name: str) -> int:
+        """
+        fetch row count of table in database
+        """
+        conn, curs = DBManager.create_connect_db(db_path)
+        if not (conn and curs):
+            return 0
+
+        sql = f'SELECT COUNT(*) FROM "{table_name}"'
+        try:
+            data = DBManager.fetch_all_data(curs, sql)
+            return data[0][0] if data else 0
+        except sqlite3.Error as _err:
+            raise RuntimeError(f"Failed to fetch data, ERROR: {_err}")
+        finally:
+            DBManager.destroy_db_connect(conn, curs)
+
+    @classmethod
     def check_tables_in_db(cls, db_path: any, *tables: any) -> bool:
         if os.path.exists(db_path):
             conn, curs = cls.create_connect_db(db_path)

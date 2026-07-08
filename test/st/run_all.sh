@@ -46,6 +46,7 @@ elif [ "$LEVEL" == "l0,l1" ]; then
 fi
 
 num_of_cases=$(echo "$test_list" | wc -l)
+failed_cases=0
 
 if [ ! -z "$test_list" ]; then
     echo -e "${WHITE}========================================${NC}"
@@ -58,12 +59,16 @@ if [ ! -z "$test_list" ]; then
     do
         echo -e "${WHITE}====================${i%.sh} Test Case ====================${NC}"
         start_time=$(date "+%s")
-        bash "$i" "$output_path"
-        check_exit_code=$?
+        if bash "$i" "$output_path"; then
+            check_exit_code=0
+        else
+            check_exit_code=$?
+        fi
         end_time=$(date "+%s")
         duration_time=$(( ${end_time} - ${start_time} ))
         if [ 0 -ne ${check_exit_code} ]; then
-            echo "$i fail" >> "$result_file"
+            failed_cases=$((failed_cases + 1))
+            echo "$i fail ${duration_time}" >> "$result_file"
             echo -e "--------------------------------------${WHITE}${i%.sh}${NC}------${RED}FAIL${NC}"
         else
             echo "$i pass ${duration_time}" >> "$result_file"
@@ -71,6 +76,9 @@ if [ ! -z "$test_list" ]; then
         fi
     done
     echo -e "${GREEN}[DEBUG] End msprof_smoke_test${NC}"
+    if [ ${failed_cases} -ne 0 ]; then
+        exit 1
+    fi
 else
     echo -e "${RED}[DEBUG] No test cases: $test_list${NC}"
 fi
