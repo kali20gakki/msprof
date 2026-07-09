@@ -81,43 +81,100 @@ struct CCUDelayChannel
     uint16_t channelId = UINT16_MAX;
 };
 
+struct CCUChannelPrefixInfo
+{
+    uint64_t timestamp = UINT64_MAX;
+    uint64_t maxDelay = 0;
+    uint16_t channelId = UINT16_MAX;
+};
+
+using CCUChannelIndex = std::unordered_map<uint16_t, std::vector<CCUChannelPrefixInfo>>;
+
 std::string MakeCCUKey(uint64_t streamId, uint64_t taskId, uint64_t instrId)
 {
     return std::to_string(streamId) + "_" + std::to_string(taskId) + "_" + std::to_string(instrId);
 }
 
 CCUDelayChannel GetMaxDelayChannel(const std::vector<CCUWaitSignalInfo> &hostData, const CCUMissionInfo &missionData,
-                                   const std::vector<CCUChannelInfo> &channelData)
+                                   const CCUChannelIndex &channelIndex)
 {
-    if (channelData.empty())
+    if (channelIndex.empty())
     {
         return {};
     }
     std::unordered_set<uint16_t> hostChannelIds;
-    for (const auto &item : hostData)
-    {
-        hostChannelIds.insert(item.channelId);
-    }
+    hostChannelIds.reserve(hostData.size());
     CCUDelayChannel maxDelay;
     bool found = false;
-    for (const auto &channel : channelData)
+    for (const auto &item : hostData)
     {
-        if (hostChannelIds.find(channel.channelId) == hostChannelIds.end())
+        if (!hostChannelIds.insert(item.channelId).second)
         {
             continue;
         }
-        if (channel.timestamp >= missionData.endTime)
+        auto channelIter = channelIndex.find(item.channelId);
+        if (channelIter == channelIndex.end())
         {
             continue;
         }
-        if (!found || channel.avgDelay > maxDelay.channelDelay)
+        const auto &channelRecords = channelIter->second;
+        auto recordIter = std::lower_bound(channelRecords.begin(), channelRecords.end(), missionData.endTime,
+                                           [](const CCUChannelPrefixInfo &record, uint64_t endTime)
+                                           { return record.timestamp < endTime; });
+        if (recordIter == channelRecords.begin())
         {
-            maxDelay.channelId = channel.channelId;
-            maxDelay.channelDelay = channel.avgDelay;
+            continue;
+        }
+        --recordIter;
+        if (!found || recordIter->maxDelay > maxDelay.channelDelay)
+        {
+            maxDelay.channelId = recordIter->channelId;
+            maxDelay.channelDelay = recordIter->maxDelay;
             found = true;
         }
     }
     return maxDelay;
+}
+
+CCUChannelIndex BuildChannelIndex(const std::vector<CCUChannelInfo> &channelInfo)
+{
+    std::unordered_map<uint16_t, std::vector<CCUChannelInfo>> groupedChannelInfo;
+    groupedChannelInfo.reserve(channelInfo.size());
+    for (const auto &channel : channelInfo)
+    {
+        groupedChannelInfo[channel.channelId].emplace_back(channel);
+    }
+
+    CCUChannelIndex channelIndex;
+    channelIndex.reserve(groupedChannelInfo.size());
+    for (auto &item : groupedChannelInfo)
+    {
+        auto &records = item.second;
+        std::sort(records.begin(), records.end(), [](const CCUChannelInfo &left, const CCUChannelInfo &right)
+                  { return left.timestamp < right.timestamp; });
+        auto &prefixRecords = channelIndex[item.first];
+        if (!Reserve(prefixRecords, records.size()))
+        {
+            ERROR("Reserve ccu channel index failed.");
+            continue;
+        }
+        uint64_t maxDelay = 0;
+        uint16_t maxDelayChannel = UINT16_MAX;
+        for (const auto &record : records)
+        {
+            if (record.avgDelay > maxDelay)
+            {
+                maxDelay = record.avgDelay;
+                maxDelayChannel = record.channelId;
+            }
+            CCUChannelPrefixInfo prefixRecord;
+            prefixRecord.timestamp = record.timestamp;
+            prefixRecord.maxDelay = maxDelay;
+            prefixRecord.channelId = maxDelayChannel;
+            prefixRecords.emplace_back(prefixRecord);
+        }
+    }
+    return channelIndex;
 }
 
 void ConvertMissionData(const OriCCUMissionData &oriData, std::vector<CCUMissionInfo> &missionData)
@@ -258,6 +315,7 @@ void FormatWaitTimelineData(const std::vector<CCUMissionInfo> &waitData,
     }
     std::unordered_map<std::string, std::vector<CCUMissionInfo>> groupedWaitData;
     std::unordered_map<std::string, std::vector<CCUWaitSignalInfo>> groupedWaitSignalData;
+    auto channelIndex = BuildChannelIndex(channelInfo);
     for (const auto &item : waitData)
     {
         auto key = MakeCCUKey(item.streamId, item.taskId, item.setCkeBitInstrId);
@@ -298,7 +356,7 @@ void FormatWaitTimelineData(const std::vector<CCUMissionInfo> &waitData,
             traceData.dieId = hostData.dieId;
             traceData.hasMask = true;
             traceData.mask = hostData.mask;
-            auto maxDelay = GetMaxDelayChannel(hostDataIter->second, data, channelInfo);
+            auto maxDelay = GetMaxDelayChannel(hostDataIter->second, data, channelIndex);
             if (maxDelay.channelId != UINT16_MAX && maxDelay.channelDelay != 0)
             {
                 traceData.hasDelayChannel = true;
